@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>strucmotif-search</artifactId>
+        <groupId>org.rcsb</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>strucmotif-search-core</artifactId>
+
+    <dependencies>
+        <!-- BinaryCIF handling -->
+        <dependency>
+            <groupId>org.rcsb</groupId>
+            <artifactId>ciftools-java</artifactId>
+            <version>0.10.0</version>
+        </dependency>
+
+        <!-- DI -->
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.2.2</version>
+        </dependency>
+
+        <!-- Component DB -->
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongo-java-driver</artifactId>
+            <version>3.12.1</version>
+        </dependency>
+
+        <!-- text parsing (retainFrom/inRange functions) -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>28.2-jre</version>
+        </dependency>
+    </dependencies>
+</project>

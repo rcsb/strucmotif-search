@@ -15,6 +15,29 @@
     <packaging>pom</packaging>
     <description>Real-time search for structural motifs in protein structures</description>
 
+    <name>strucmotif-search</name>
+    <url>http://github.com/rcsb/strucmotif-search</url>
+    <organization>
+        <name>RCSB PDB</name>
+        <url>https://www.rcsb.org/</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Sebastian Bittrich</name>
+            <email>sebastian.bittrich@rcsb.org</email>
+            <organization>RCSB PDB</organization>
+            <organizationUrl>http://www.rcsb.org</organizationUrl>
+        </developer>
+    </developers>
+
     <dependencies>
         <!-- test dependencies -->
         <dependency>
@@ -50,6 +73,13 @@
         <project.build.targetEncoding>UTF-8</project.build.targetEncoding>
     </properties>
 
+    <scm>
+        <connection>scm:git:git://github.com/rcsb/strucmotif-search.git</connection>
+        <developerConnection>scm:git:https://github.com/rcsb/strucmotif-search.git</developerConnection>
+        <url>http://github.com/rcsb/strucmotif-search</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <build>
         <plugins>
             <plugin>
@@ -63,4 +93,92 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- https://central.sonatype.org/pages/apache-maven.html -->
+    <!-- https://github.com/chhh/sonatype-ossrh-parent/blob/master/pom.xml -->
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <!-- handles propagating the build to the staging repository -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+
+                    <!-- signing of content to be published -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                                <configuration>
+                                    <!-- This is necessary for gpg to not try to use the pinentry programs -->
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- create source -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- create javadoc -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <configuration>
+                            <source>11</source>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

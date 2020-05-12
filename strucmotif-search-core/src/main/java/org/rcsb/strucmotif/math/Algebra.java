@@ -275,7 +275,7 @@ public class Algebra {
 
     /**
      * Computes the cartesian product of a collection of lists (i.e. forms all combinations).
-     * (1, 2, 3) x (4, 5) x (6) => (1, 4, 6), (1, 5, 6), (2, 4, 6), (2, 5, 6), (3, 4, 6), (3, 5, 6)
+     * (1, 2, 3) x (4, 5) x (6) =&gt; (1, 4, 6), (1, 5, 6), (2, 4, 6), (2, 5, 6), (3, 4, 6), (3, 5, 6)
      * @param orderedSets all lists to process
      * @return the cartesian product - empty if an list was empty
      */

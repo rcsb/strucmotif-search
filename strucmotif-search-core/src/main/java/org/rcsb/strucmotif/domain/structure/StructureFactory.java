@@ -20,6 +20,7 @@ public class StructureFactory {
      * @param structureIdentifier the PDB-id
      * @param title the title (description) of this structure
      * @param chains all chains present
+     * @return the constructed Structure instance
      */
     public static Structure createStructure(StructureIdentifier structureIdentifier,
                                             String title,
@@ -33,6 +34,7 @@ public class StructureFactory {
      * @param chainIdentifier its identifier
      * @param residues all components present in this chain
      * @param transformation the transformation: neutral to do 'nothing'
+     * @return the constructed Chain instance
      */
     public static Chain createChain(ChainIdentifier chainIdentifier,
                                     List<Residue> residues,
@@ -76,6 +78,7 @@ public class StructureFactory {
      * Construct a new atom.
      * @param atomIdentifier its identifier
      * @param coord its position
+     * @return the constructed Atom instance
      */
     public static Atom createAtom(AtomIdentifier atomIdentifier, double[] coord) {
         return new Atom(atomIdentifier, coord);

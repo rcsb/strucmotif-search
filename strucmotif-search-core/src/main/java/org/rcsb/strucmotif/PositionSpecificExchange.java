@@ -17,6 +17,8 @@ public class PositionSpecificExchange {
 
     /**
      * @see PositionSpecificExchange (AuthorSelection, Set)
+     * @param authorSelection selector of the referenced position
+     * @param residueTypeGrouping grouping of allowed types (must include original type if still allowed)
      */
     public PositionSpecificExchange(AuthorSelection authorSelection, ResidueTypeGrouping residueTypeGrouping) {
         this(authorSelection, residueTypeGrouping.getResidueTypes());
@@ -24,6 +26,8 @@ public class PositionSpecificExchange {
 
     /**
      * @see PositionSpecificExchange (AuthorSelection, Set)
+     * @param authorSelection selector of the referenced position
+     * @param residueTypes all allowed types (must include original type if still allowed)
      */
     public PositionSpecificExchange(AuthorSelection authorSelection, ResidueType... residueTypes) {
         this(authorSelection, Stream.of(residueTypes).collect(Collectors.toSet()));

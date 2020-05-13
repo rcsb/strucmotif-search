@@ -102,12 +102,12 @@
     <distributionManagement>
         <downloadUrl>http://nexus3.rcsb.org/repository/rcsb-super-proxy/</downloadUrl>
         <repository>
-            <id>releases</id>
+            <id>nexus-releases</id>
             <name>RCSB PDB Maven Repository</name>
             <url>http://nexus3.rcsb.org/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>snapshots</id>
+            <id>nexus-snapshots</id>
             <url>http://nexus3.rcsb.org/repository/maven-snapshots/</url>
             <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>

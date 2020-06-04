@@ -58,7 +58,9 @@ public class MotifSearchUpdate {
                     new AddStructuresToArchiveTask(ids, renumberedWriter);
                     break;
                 case RESIDUE:
-                    new AddStructuresToResidueDBTask(ids, residueDB);
+                    if (!MotifSearch.NO_MONGO_DB) {
+                        new AddStructuresToResidueDBTask(ids, residueDB);
+                    }
                     break;
                 case LOOKUP:
                     new AddStructuresToLookupTask(ids, motifLookup, renumberedReader);
@@ -79,7 +81,9 @@ public class MotifSearchUpdate {
                     new RemoveStructuresFromArchiveTask(ids);
                     break;
                 case RESIDUE:
-                    new RemoveStructuresFromResidueDBTask(ids, residueDB);
+                    if (!MotifSearch.NO_MONGO_DB) {
+                        new RemoveStructuresFromResidueDBTask(ids, residueDB);
+                    }
                     break;
                 case LOOKUP:
                     new RemoveStructuresFromLookupTask(ids, motifLookup);

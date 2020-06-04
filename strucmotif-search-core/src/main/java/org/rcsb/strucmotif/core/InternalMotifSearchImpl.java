@@ -84,14 +84,6 @@ public class InternalMotifSearchImpl implements InternalMotifSearch {
     }
 
     private List<Hit> scoreHitsLimited(Parameters parameters, MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-//        return result.getTargetStructures()
-//                .values()
-//                .parallelStream()
-//                .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))
-//                // hits filtered by high RMSD value are reported as null
-//                .filter(Objects::nonNull)
-//                .limit(parameters.getLimit())
-//                .collect(Collectors.toList());
         return MotifSearch.FORK_JOIN_POOL.submit(() -> result.getTargetStructures()
                 .values()
                 .parallelStream()
@@ -104,13 +96,6 @@ public class InternalMotifSearchImpl implements InternalMotifSearch {
     }
 
     private List<Hit> scoreHitsUnlimited(MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-//        return result.getTargetStructures()
-//                .values()
-//                .parallelStream()
-//                .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))
-//                // hits filtered by high RMSD value are reported as null
-//                .filter(Objects::nonNull)
-//                .collect(Collectors.toList());
         return MotifSearch.FORK_JOIN_POOL.submit(() -> result.getTargetStructures()
                 .values()
                 .parallelStream()

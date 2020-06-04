@@ -29,13 +29,13 @@ import java.util.stream.Collectors;
 import static com.google.common.base.CharMatcher.inRange;
 
 @Singleton
-public class SelectionReaderImpl implements SelectionReader {
+public class MongoDBSelectionReaderImpl implements SelectionReader {
     private static final CharMatcher LETTER_MATCHER = inRange('a', 'z').or(inRange('A', 'Z'));
     private static final CharMatcher DIGIT_MATCHER = inRange('0', '9');
     private MongoResidueDB residueDB;
 
     @Inject
-    public SelectionReaderImpl(MongoResidueDB residueDB) {
+    public MongoDBSelectionReaderImpl(MongoResidueDB residueDB) {
         this.residueDB = residueDB;
     }
 

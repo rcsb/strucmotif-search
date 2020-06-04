@@ -44,7 +44,7 @@ public class MotifSearch {
             bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
             bind(AllPurposeReader.class).to(AllPurposeReaderImpl.class);
             bind(RenumberedReader.class).to(RenumberedReaderImpl.class);
-            bind(SelectionReader.class).to(SelectionReaderImpl.class);
+            bind(SelectionReader.class).to(NO_MONGO_DB ? FileSystemSelectionReaderImpl.class : MongoDBSelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
             bind(MongoResidueDB.class).to(MongoResidueDBImpl.class);
@@ -62,7 +62,7 @@ public class MotifSearch {
     public static final Path LOOKUP_LIST;
     public static final Path RESIDUE_LIST;
 
-    public static final boolean NO_MONGO_DB;
+    private static final boolean NO_MONGO_DB;
 
     // leave 1 thread 'idle' so it can take care of front-end and sequence motif search requests
     public static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors() - 1, 1));
@@ -109,6 +109,9 @@ public class MotifSearch {
             RESIDUE_LIST = DATA_ROOT.resolve("component.list");
 
             NO_MONGO_DB = Boolean.parseBoolean(prop.getProperty("no.mongodb"));
+            if (NO_MONGO_DB) {
+                logger.info("Coordinates will be read from bcif - enable MongoDB for improved performance");
+            }
 
             DECIMAL_FORMAT = new DecimalFormat(prop.getProperty("decimal.format"));
         } catch (IOException e) {

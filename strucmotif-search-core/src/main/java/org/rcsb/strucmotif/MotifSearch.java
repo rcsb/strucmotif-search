@@ -62,6 +62,8 @@ public class MotifSearch {
     public static final Path LOOKUP_LIST;
     public static final Path RESIDUE_LIST;
 
+    public static final boolean NO_MONGO_DB;
+
     // leave 1 thread 'idle' so it can take care of front-end and sequence motif search requests
     public static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool(Math.max(Runtime.getRuntime().availableProcessors() - 1, 1));
     private static final DecimalFormat DECIMAL_FORMAT;
@@ -105,6 +107,8 @@ public class MotifSearch {
             LOOKUP_LIST = DATA_ROOT.resolve("lookup.list");
             // all structures currently indexed in the component-DB
             RESIDUE_LIST = DATA_ROOT.resolve("component.list");
+
+            NO_MONGO_DB = Boolean.parseBoolean(prop.getProperty("no.mongodb"));
 
             DECIMAL_FORMAT = new DecimalFormat(prop.getProperty("decimal.format"));
         } catch (IOException e) {

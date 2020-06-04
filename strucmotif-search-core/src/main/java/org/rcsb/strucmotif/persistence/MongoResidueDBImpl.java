@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.eq;
 
-public class MongoResidueDBImpl implements ResidueDB {
+public class MongoResidueDBImpl implements MongoResidueDB {
     private final MongoClient mongoClient;
     private final MongoCollection<DBObject> titles;
     private final MongoCollection<DBObject> residues;

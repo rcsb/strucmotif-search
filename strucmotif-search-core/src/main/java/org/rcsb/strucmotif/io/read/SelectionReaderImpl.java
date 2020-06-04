@@ -16,7 +16,7 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
-import org.rcsb.strucmotif.persistence.ResidueDB;
+import org.rcsb.strucmotif.persistence.MongoResidueDB;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -32,10 +32,10 @@ import static com.google.common.base.CharMatcher.inRange;
 public class SelectionReaderImpl implements SelectionReader {
     private static final CharMatcher LETTER_MATCHER = inRange('a', 'z').or(inRange('A', 'Z'));
     private static final CharMatcher DIGIT_MATCHER = inRange('0', '9');
-    private ResidueDB residueDB;
+    private MongoResidueDB residueDB;
 
     @Inject
-    public SelectionReaderImpl(ResidueDB residueDB) {
+    public SelectionReaderImpl(MongoResidueDB residueDB) {
         this.residueDB = residueDB;
     }
 

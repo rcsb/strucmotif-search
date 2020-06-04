@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.rcsb.strucmotif.persistence.MotifLookup;
-import org.rcsb.strucmotif.persistence.ResidueDB;
+import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class MotifSearchUpdate {
         StructureWriter<CifFile> renumberedWriter = injector.getInstance(StructureWriter.class);
         RenumberedReader renumberedReader = injector.getInstance(RenumberedReader.class);
         MotifLookup motifLookup = injector.getInstance(MotifLookup.class);
-        ResidueDB residueDB = injector.getInstance(ResidueDB.class);
+        MongoResidueDB residueDB = injector.getInstance(MongoResidueDB.class);
 
         // perform all steps that add structures to archive, database, or lookup
         for (Context context : Context.values()) {

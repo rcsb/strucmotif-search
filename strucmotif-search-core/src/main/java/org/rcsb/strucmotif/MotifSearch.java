@@ -15,7 +15,7 @@ import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.rcsb.strucmotif.persistence.MongoResidueDBImpl;
 import org.rcsb.strucmotif.persistence.MotifLookup;
 import org.rcsb.strucmotif.persistence.MotifLookupImpl;
-import org.rcsb.strucmotif.persistence.ResidueDB;
+import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +47,7 @@ public class MotifSearch {
             bind(SelectionReader.class).to(SelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
-            bind(ResidueDB.class).to(MongoResidueDBImpl.class);
+            bind(MongoResidueDB.class).to(MongoResidueDBImpl.class);
             bind(MotifLookup.class).to(MotifLookupImpl.class);
         }
     };

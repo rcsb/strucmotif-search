@@ -25,7 +25,7 @@ import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.rcsb.strucmotif.persistence.MockMongoResidueDBImpl;
 import org.rcsb.strucmotif.persistence.MockMotifLookupImpl;
 import org.rcsb.strucmotif.persistence.MotifLookup;
-import org.rcsb.strucmotif.persistence.ResidueDB;
+import org.rcsb.strucmotif.persistence.MongoResidueDB;
 
 public class MockMotifSearch {
     private static final MockMotifSearch INSTANCE = new MockMotifSearch();
@@ -53,7 +53,7 @@ public class MockMotifSearch {
             bind(SelectionReader.class).to(SelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
-            bind(ResidueDB.class).to(MockMongoResidueDBImpl.class);
+            bind(MongoResidueDB.class).to(MockMongoResidueDBImpl.class);
             bind(MotifLookup.class).to(MockMotifLookupImpl.class);
         }
     }

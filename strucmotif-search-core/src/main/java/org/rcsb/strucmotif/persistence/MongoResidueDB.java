@@ -5,7 +5,7 @@ import com.mongodb.DBObject;
 
 import java.util.List;
 
-public interface ResidueDB {
+public interface MongoResidueDB {
     String selectTitle(String pdbId);
 
     BasicDBList selectResidue(String pdbId, int assemblyId, int index);

@@ -47,7 +47,7 @@ public class MotifSearch {
             bind(SelectionReader.class).to(NO_MONGO_DB ? FileSystemSelectionReaderImpl.class : MongoDBSelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
-            bind(MongoResidueDB.class).to(MongoResidueDBImpl.class);
+            bind(MongoResidueDB.class).to(NO_MONGO_DB ? null : MongoResidueDBImpl.class);
             bind(MotifLookup.class).to(MotifLookupImpl.class);
         }
     };

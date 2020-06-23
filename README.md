@@ -17,7 +17,6 @@ strucmotif-search is distributed by maven. To get started, append your `pom.xml`
 ```java
 class Demo {
     public static void main(String[] args) {
-        strucmotif
         MotifSearchResult simple = MotifSearch.newQuery()
             strucmotif
             .defineByPdbIdAndSelection("4cha",
@@ -50,25 +49,6 @@ Current benchmark times to search in `160,467` structure as of `2/17/20`.
 | Enolase Superfamily (KDEEH, exchanges) | 308 | 0.87 | s/op |
 | RNA G-Quadruplex (GGGG) | 84 | 1.10 | s/op | 
 
-## Concept
-A inverted indexing strategy is employed to find all similar motif occurrences in a search space of >160k structures.
-All occurrences of amino acids & nucleotides pairs are described by a `ResiduePairDescriptor` that captures:
-- label of residue 1: e.g. histidine => `H`
-- label of residue 2: e.g. aspartic acid => `D`
-- distance between backbones (`CA` for amino acids): e.g. 6.456 A => `6`
-- distance between side-chains (`CB` for amino acids): e.g. 8.693 => `9`
-- angle between vectors defined by backbone and side-chain coordinates: e.g. 90.5˚ => `5` 
-
-This allows to compose compact yet informative descriptors such as `HD-6-9-5` for all residue pairs in the search space.
-Sequence positions where certain residue pairs occur can be addressed by a `ResiduePairIdentifier` that summarizes:
-- pdbId
-- assembly generation id
-- combination of sequence indices which correspond to this particular `ResiduePairDescriptor`
-
-A search can be performed by fragmenting it into `ResiduePairDescriptor` instances, looking up all 
-occurrences of these `ResiduePairDescriptor`, and finding combinations which are compatible to the query. Subsequently, 
-this allows to align query and each candidate motif and score by RMSD.
-
 ## Features
 - nucleotide support
 - inter-chain & assembly support
@@ -81,3 +61,22 @@ this allows to align query and each candidate motif and score by RMSD.
 - default tolerance value might not find all relevant matches
 - no support for alpha carbon traces
 - data should be stored on SSD (~6 GB for archive, ~65 GB for lookup table, ~40 GB for residue-DB)
+
+## Implementation
+A inverted indexing strategy is employed to find all similar motif occurrences in a search space of >160k structures.
+All occurrences of amino acids & nucleotides pairs are described by a `ResiduePairDescriptor` that captures:
+- label of residue 1: e.g. histidine => `H`
+- label of residue 2: e.g. aspartic acid => `D`
+- distance between backbones (`CA` for amino acids): e.g. 6.456 Å => `6`
+- distance between side-chains (`CB` for amino acids): e.g. 8.693 Å => `9`
+- angle between vectors defined by backbone and side-chain coordinates: e.g. 90.5˚ => `5` 
+
+This allows to compose compact yet informative descriptors such as `HD-6-9-5` for all residue pairs in the search space.
+Sequence positions where certain residue pairs occur can be addressed by a `ResiduePairIdentifier` that summarizes:
+- pdbId
+- id of assembly generation operation
+- combination of sequence indices which correspond to this particular `ResiduePairDescriptor`
+
+A search can be performed by fragmenting it into `ResiduePairDescriptor` instances, looking up all 
+occurrences of these `ResiduePairDescriptor`, and finding combinations which are compatible to the query. Subsequently, 
+this allows to align query and each candidate motif and score by RMSD.

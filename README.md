@@ -18,12 +18,10 @@ strucmotif-search is distributed by maven. To get started, append your `pom.xml`
 class Demo {
     public static void main(String[] args) {
         MotifSearchResult simple = MotifSearch.newQuery()
-            strucmotif
             .defineByPdbIdAndSelection("4cha",
-            strucmotif
-                Set.of(new AuthorSelection("B", 1, 57), // H
-                       new AuthorSelection("B", 1, 102), // D
-                       new AuthorSelection("C", 1, 195))) // S
+                Set.of(new AuthorSelection("B", 1, 57), // HIS
+                       new AuthorSelection("B", 1, 102), // ASP
+                       new AuthorSelection("C", 1, 195))) // SER
             // parameters are considered mandatory arguments - we use defaults
             .buildParameters()
             // several additional arguments can be provided to customize the query further

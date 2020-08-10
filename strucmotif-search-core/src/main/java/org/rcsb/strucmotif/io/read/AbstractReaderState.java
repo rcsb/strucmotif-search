@@ -65,7 +65,7 @@ abstract class AbstractReaderState<S extends Selection> {
     List<Atom> atomBuffer;
     ChainIdentifier currentChainIdentifier;
     List<Residue> residueBuffer;
-    List<Pair<ChainIdentifier, List<Residue>>> chains;
+    final List<Pair<ChainIdentifier, List<Residue>>> chains;
 
     /**
      * Initialize a new reading operation.
@@ -99,15 +99,14 @@ abstract class AbstractReaderState<S extends Selection> {
             this.selectedAssemblies = null;
             this.atomBuffer = new ArrayList<>(20);
             this.residueBuffer = new ArrayList<>(100);
-            this.chains = new ArrayList<>();
         } else {
             this.selectedAssemblies = selection.stream()
                 .map(Selection::getAssemblyId)
                 .collect(Collectors.toSet());
             this.atomBuffer = new ArrayList<>(20);
             this.residueBuffer = new ArrayList<>(selection.size());
-            this.chains = new ArrayList<>();
         }
+        this.chains = new ArrayList<>();
         this.selectors = selection;
     }
 

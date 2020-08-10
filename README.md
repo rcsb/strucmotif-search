@@ -61,7 +61,7 @@ Current benchmark times to search in `160,467` structure as of `2/17/20`.
 - data should be stored on SSD (~6 GB for archive, ~65 GB for lookup table, ~40 GB for residue-DB)
 
 ## Implementation
-A inverted indexing strategy is employed to find all similar motif occurrences in a search space of >160k structures.
+An inverted indexing strategy is employed to find all similar motif occurrences in a search space of >160k structures.
 All occurrences of amino acids & nucleotides pairs are described by a `ResiduePairDescriptor` that captures:
 - label of residue 1: e.g. histidine => `H`
 - label of residue 2: e.g. aspartic acid => `D`
@@ -69,7 +69,7 @@ All occurrences of amino acids & nucleotides pairs are described by a `ResiduePa
 - distance between side-chains (`CB` for amino acids): e.g. 8.693 Å => `9`
 - angle between vectors defined by backbone and side-chain coordinates: e.g. 90.5˚ => `5` 
 
-This allows to compose compact yet informative descriptors such as `HD-6-9-5` for all residue pairs in the search space.
+This allows composing compact yet informative descriptors such as `HD-6-9-5` for all residue pairs in the search space.
 Sequence positions where certain residue pairs occur can be addressed by a `ResiduePairIdentifier` that summarizes:
 - pdbId
 - id of assembly generation operation
@@ -77,4 +77,4 @@ Sequence positions where certain residue pairs occur can be addressed by a `Resi
 
 A search can be performed by fragmenting it into `ResiduePairDescriptor` instances, looking up all 
 occurrences of these `ResiduePairDescriptor`, and finding combinations which are compatible to the query. Subsequently, 
-this allows to align query and each candidate motif and score by RMSD.
+this allows aligning the query and each candidate motif and score by RMSD.

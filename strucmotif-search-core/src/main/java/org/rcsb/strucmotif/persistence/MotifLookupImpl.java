@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 
 @Singleton
 public class MotifLookupImpl implements MotifLookup {
-    private MessagePackCodec messagePackCodec;
+    private final MessagePackCodec messagePackCodec;
 
     @Inject
     public MotifLookupImpl(MessagePackCodec messagePackCodec) {

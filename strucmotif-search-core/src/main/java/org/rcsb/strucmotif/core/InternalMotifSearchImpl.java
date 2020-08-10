@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class InternalMotifSearchImpl implements InternalMotifSearch {
     private static final Logger logger = LoggerFactory.getLogger(InternalMotifSearchImpl.class);
-    private TargetAssembler targetAssembler;
-    private Alignment alignment;
+    private final TargetAssembler targetAssembler;
+    private final Alignment alignment;
 
     @Inject
     public InternalMotifSearchImpl(TargetAssembler targetAssembler, Alignment alignment) {

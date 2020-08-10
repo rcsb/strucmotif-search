@@ -99,6 +99,7 @@ public class QuaternionAlignment implements Alignment {
                 new RootMeanSquareDeviation(alignment.getSecond()));
     }
 
+    @SuppressWarnings("Duplicates")
     public static Pair<Matrix4DTransformation, Double> align(List<double[]> referencePoints, double[] referenceCentroid, List<double[]> candidatePoints, double[] candidateCentroid) {
         double[][] rot = new double[3][3];
 

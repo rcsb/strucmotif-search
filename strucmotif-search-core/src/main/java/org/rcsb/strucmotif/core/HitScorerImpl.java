@@ -20,7 +20,7 @@ public class HitScorerImpl implements HitScorer {
     private final List<Residue> queryResidues;
     private final double rmsdCutoff;
     private final AtomPairingScheme atomPairingScheme;
-    private Alignment alignment;
+    private final Alignment alignment;
 
     public HitScorerImpl(QueryStructure queryStructure, double rmsdCutoff, AtomPairingScheme atomPairingScheme, Alignment alignment) {
         this.queryResidues = queryStructure.getResidues();
@@ -33,7 +33,7 @@ public class HitScorerImpl implements HitScorer {
     public Hit score(TargetStructure targetStructure, List<Residue> targetResidues) {
         AlignmentResult alignmentResult = alignment.align(queryResidues, targetResidues, atomPairingScheme);
 
-        // filtered hits are reported as null, this feels hacky but should safe some time
+        // filtered hits are reported as null, this feels hacky but should save some time
         if (rmsdCutoff < alignmentResult.getScore().doubleValue()) {
             return null;
         }

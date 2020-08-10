@@ -135,7 +135,7 @@ public class MinimizedMessagePackCodec implements MessagePackCodec {
         if (isArray) {
             length = ((Object[]) input).length;
         } else {
-            length = ((Map) input).size();
+            length = ((Map<?, ?>) input).size();
         }
 
         if (length < 0x10) {
@@ -154,7 +154,7 @@ public class MinimizedMessagePackCodec implements MessagePackCodec {
                 encodeInternal(object, stream);
             }
         } else {
-            Map value = (Map) input;
+            Map<?, ?> value = (Map<?, ?>) input;
             for (Object key : value.keySet()) {
                 encodeInternal(key, stream);
                 encodeInternal(value.get(key), stream);

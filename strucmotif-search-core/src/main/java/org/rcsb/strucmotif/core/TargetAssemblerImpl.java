@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
-    private MotifLookup motifLookup;
-    private SelectionReader selectionReader;
+    private final MotifLookup motifLookup;
+    private final SelectionReader selectionReader;
 
     @Inject
     public TargetAssemblerImpl(MotifLookup motifLookup, SelectionReader selectionReader) {

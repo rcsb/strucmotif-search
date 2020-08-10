@@ -23,9 +23,9 @@ import java.util.Set;
  * The entry point to create {@link MotifSearchQuery} instances.
  */
 public class QueryBuilder {
-    private AllPurposeReader allPurposeReader;
-    private MotifPruner motifPruner;
-    private InternalMotifSearch internalMotifSearch;
+    private final AllPurposeReader allPurposeReader;
+    private final MotifPruner motifPruner;
+    private final InternalMotifSearch internalMotifSearch;
     private static final int MAXIMUM_MOTIF_SIZE = 10;
 
     @Inject

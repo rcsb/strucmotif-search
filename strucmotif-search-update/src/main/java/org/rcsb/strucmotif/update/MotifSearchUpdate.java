@@ -34,10 +34,6 @@ public class MotifSearchUpdate {
     }
 
     public static void main(String[] args) throws IOException {
-        new MotifSearchUpdate();
-    }
-
-    private MotifSearchUpdate() throws IOException {
         Injector injector = Guice.createInjector(MotifSearch.MOTIF_SEARCH_MODULE);
         @SuppressWarnings("unchecked")
         StructureWriter<CifFile> renumberedWriter = injector.getInstance(StructureWriter.class);

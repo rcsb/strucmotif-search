@@ -13,7 +13,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class MinimizedMessagePackCodecTest {
-    private MessagePackCodec messagePackCodec = new MinimizedMessagePackCodec();
+    private final MessagePackCodec messagePackCodec = new MinimizedMessagePackCodec();
 
     @Test
     public void encodeString() {

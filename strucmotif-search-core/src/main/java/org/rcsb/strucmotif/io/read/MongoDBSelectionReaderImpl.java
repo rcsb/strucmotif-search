@@ -32,7 +32,7 @@ import static com.google.common.base.CharMatcher.inRange;
 public class MongoDBSelectionReaderImpl implements SelectionReader {
     private static final CharMatcher LETTER_MATCHER = inRange('a', 'z').or(inRange('A', 'Z'));
     private static final CharMatcher DIGIT_MATCHER = inRange('0', '9');
-    private MongoResidueDB residueDB;
+    private final MongoResidueDB residueDB;
 
     @Inject
     public MongoDBSelectionReaderImpl(MongoResidueDB residueDB) {

@@ -49,7 +49,7 @@ public class TargetStructure {
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
         this.paths = new ArrayList<>(residuePairIdentifiers.length);
         for (ResiduePairIdentifier residuePairIdentifier : residuePairIdentifiers) {
-            paths.add(new ResiduePairIdentifier[] {residuePairIdentifier});
+            paths.add(new ResiduePairIdentifier[] { residuePairIdentifier });
         }
     }
 

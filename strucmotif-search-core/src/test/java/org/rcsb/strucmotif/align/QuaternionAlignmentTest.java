@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -31,7 +31,7 @@ public class QuaternionAlignmentTest {
     private static int atomId = 1;
 
     private static Residue create(String compId, double[] coords) {
-        Residue residue = StructureFactory.createResidue(new ResidueIdentifier(compId, seqId, "", seqId),
+        Residue residue = StructureFactory.createResidue(new ResidueIdentifier(compId, seqId, seqId),
                 List.of(StructureFactory.createAtom(new AtomIdentifier("C", atomId), coords)),
                 IDENTITY_MATRIX_4D);
         seqId++;
@@ -116,16 +116,16 @@ public class QuaternionAlignmentTest {
     @Test
     public void computeRmsdForAminopeptidaseExample() {
         AllPurposeReaderImpl allPurposeReader = new AllPurposeReaderImpl();
-        Structure s1 = allPurposeReader.readById("1lap", List.of(new AuthorSelection("A", 1, 250),
-                new AuthorSelection("A", 1, 255),
-                new AuthorSelection("A", 1, 273),
-                new AuthorSelection("A", 1, 332),
-                new AuthorSelection("A", 1, 334)));
-        Structure s2 = allPurposeReader.readById("3pei", List.of(new AuthorSelection("A", 1, 250),
-                new AuthorSelection("A", 1, 255),
-                new AuthorSelection("A", 1, 273),
-                new AuthorSelection("A", 1, 332),
-                new AuthorSelection("A", 1, 334)));
+        Structure s1 = allPurposeReader.readById("1lap", List.of(new LabelSelection("A", 1, 250),
+                new LabelSelection("A", 1, 255),
+                new LabelSelection("A", 1, 273),
+                new LabelSelection("A", 1, 332),
+                new LabelSelection("A", 1, 334)));
+        Structure s2 = allPurposeReader.readById("3pei", List.of(new LabelSelection("A", 1, 251),
+                new LabelSelection("A", 1, 256),
+                new LabelSelection("A", 1, 274),
+                new LabelSelection("A", 1, 333),
+                new LabelSelection("A", 1, 335)));
         System.out.println(alignment.align(s1.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList()),
                 s2.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList()),
                 AtomPairingScheme.ALL).getScore().doubleValue());

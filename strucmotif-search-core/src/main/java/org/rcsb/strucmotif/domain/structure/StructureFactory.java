@@ -54,8 +54,7 @@ public class StructureFactory {
                                         double[][] transformation) {
         // cannot infer assembly id by residue itself - this method is used to create new assemblies with diverging assembly ids
         ResidueIdentifier updatedResidueIdentifier = new ResidueIdentifier(residueIdentifier.getResidueType(),
-                residueIdentifier.getAuthSeqId(),
-                "",
+                residueIdentifier.getLabelSeqId(),
                 residueIdentifier.getIndex());
 
         // fallback to generic impl if cannot determine type

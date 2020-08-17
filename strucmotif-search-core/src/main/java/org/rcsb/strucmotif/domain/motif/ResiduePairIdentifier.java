@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.domain.motif;
 
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.Objects;
 
@@ -11,18 +11,18 @@ import java.util.Objects;
 public class ResiduePairIdentifier {
     private final IndexSelection indexSelection1;
     private final IndexSelection indexSelection2;
-    private final AuthorSelection authorSelection1;
-    private final AuthorSelection authorSelection2;
+    private final LabelSelection labelSelection1;
+    private final LabelSelection labelSelection2;
 
     public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2) {
         this(indexSelection1, indexSelection2, null, null);
     }
 
-    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, AuthorSelection authorSelection1, AuthorSelection authorSelection2) {
+    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2) {
         this.indexSelection1 = indexSelection1;
         this.indexSelection2 = indexSelection2;
-        this.authorSelection1 = authorSelection1;
-        this.authorSelection2 = authorSelection2;
+        this.labelSelection1 = labelSelection1;
+        this.labelSelection2 = labelSelection2;
     }
 
     public IndexSelection getIndexSelection1() {
@@ -33,16 +33,16 @@ public class ResiduePairIdentifier {
         return indexSelection2;
     }
 
-    public AuthorSelection getAuthorSelection1() {
-        return authorSelection1;
+    public LabelSelection getLabelSelection1() {
+        return labelSelection1;
     }
 
-    public AuthorSelection getAuthorSelection2() {
-        return authorSelection2;
+    public LabelSelection getLabelSelection2() {
+        return labelSelection2;
     }
 
-    public boolean providesAuthorSelection() {
-        return authorSelection1 != null && authorSelection2 != null;
+    public boolean providesLabelSelection() {
+        return labelSelection1 != null && labelSelection2 != null;
     }
 
     @Override

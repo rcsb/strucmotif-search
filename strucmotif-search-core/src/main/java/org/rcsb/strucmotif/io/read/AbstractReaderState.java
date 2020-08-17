@@ -49,12 +49,10 @@ abstract class AbstractReaderState<S extends Selection> {
     final String[] labelAtomId;
     final String[] labelCompId;
     final String[] labelAsymIds;
-    final String[] authAsymIds;
-    final int[] authSeqIds;
+    final int[] labelSeqIds;
     final double[] cartnX;
     final double[] cartnY;
     final double[] cartnZ;
-    final String[] pdbxPDBInsCode;
 
     // used during scoring of hits: obtain specific set of entities
     private final Set<Integer> selectedAssemblies;
@@ -85,12 +83,10 @@ abstract class AbstractReaderState<S extends Selection> {
         this.labelAtomId = atomSite.getLabelAtomId().getArray();
         this.labelCompId = atomSite.getLabelCompId().getArray();
         this.labelAsymIds = atomSite.getLabelAsymId().getArray();
-        this.authAsymIds = atomSite.getAuthAsymId().getArray();
-        this.authSeqIds = atomSite.getAuthSeqId().getArray();
+        this.labelSeqIds = atomSite.getLabelSeqId().getArray();
         this.cartnX = atomSite.getCartnX().getArray();
         this.cartnY = atomSite.getCartnY().getArray();
         this.cartnZ = atomSite.getCartnZ().getArray();
-        this.pdbxPDBInsCode = atomSite.getPdbxPDBInsCode().getArray();
 
         this.currentChainIdentifier = null;
         this.currentResidueIdentifier = null;
@@ -197,10 +193,9 @@ abstract class AbstractReaderState<S extends Selection> {
      */
     ResidueIdentifier createResidueIdentifier(int row, int residueIndex) {
         String labelCompId = this.labelCompId[row];
-        int authSeqId = authSeqIds[row];
-        String insCode = pdbxPDBInsCode[row];
+        int labelSeqId = labelSeqIds[row];
 
-        return new ResidueIdentifier(labelCompId, authSeqId, insCode, residueIndex);
+        return new ResidueIdentifier(labelCompId, labelSeqId, residueIndex);
     }
 
     /**
@@ -268,7 +263,6 @@ abstract class AbstractReaderState<S extends Selection> {
                         Pair<ChainIdentifier, List<Residue>> originalChain = originalChainOptional.get();
 
                         chains.add(StructureFactory.createChain(new ChainIdentifier(originalChain.getFirst().getLabelAsymId(),
-                                        originalChain.getFirst().getAuthAsymId(),
                                         assemblyId),
                                 originalChain.getSecond(),
                                 transformation));

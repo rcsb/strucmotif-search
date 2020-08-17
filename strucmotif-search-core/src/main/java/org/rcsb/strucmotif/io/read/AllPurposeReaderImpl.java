@@ -10,7 +10,7 @@ import org.rcsb.cif.model.text.TextFile;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
@@ -31,7 +31,7 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
     private static final String FETCH_URL = "https://models.rcsb.org/%s.bcif";
 
     @Override
-    public Structure readById(String pdbId, Collection<AuthorSelection> selection) {
+    public Structure readById(String pdbId, Collection<LabelSelection> selection) {
         try {
             InputStream inputStream = new URL(String.format(FETCH_URL, pdbId)).openStream();
             BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream, OPTIONS);
@@ -47,7 +47,7 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
     }
 
     @Override
-    public Structure readFromInputStream(InputStream inputStream, Collection<AuthorSelection> selection) {
+    public Structure readFromInputStream(InputStream inputStream, Collection<LabelSelection> selection) {
         try {
             // user can upload text files, parsing depends on binary files - this is a hacky solution for that
             CifFile file = CifIO.readFromInputStream(inputStream);
@@ -62,8 +62,8 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
         }
     }
 
-    static class GenericReaderState extends AbstractReaderState<AuthorSelection> {
-        GenericReaderState(BinaryFile binaryCifFile, Collection<AuthorSelection> selection) {
+    static class GenericReaderState extends AbstractReaderState<LabelSelection> {
+        GenericReaderState(BinaryFile binaryCifFile, Collection<LabelSelection> selection) {
             super(binaryCifFile, selection);
         }
 
@@ -73,27 +73,22 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
             final int firstModelEnd = determineFirstModelEnd();
             String lastChainId = null;
             int lastSeqId = -1;
-            String lastInsCode = null;
             int residueIndex = -1;
 
             for (int row = 0; row < firstModelEnd; row++) {
                 String labelAsymId = labelAsymIds[row];
-                String authAsymId = authAsymIds[row];
-                int authSeqId = authSeqIds[row];
-                String insCode = pdbxPDBInsCode[row];
-                if (!labelAsymId.equals(lastChainId) || authSeqId != lastSeqId || !insCode.equals(lastInsCode)) {
+                int labelSeqId = labelSeqIds[row];
+                if (!labelAsymId.equals(lastChainId) || labelSeqId != lastSeqId) {
                     residueIndex++;
                     lastChainId = labelAsymId;
-                    lastSeqId = authSeqId;
-                    lastInsCode = insCode;
+                    lastSeqId = labelSeqId;
                 }
 
                 if (selectors != null && selectors.size() > 0) {
                     boolean match = false;
-                    for (AuthorSelection authorSelector : selectors) {
-                        if (authorSelector.getAuthAsymId().equals(authAsymId) &&
-                                authorSelector.getAuthSeqId() == authSeqId &&
-                                authorSelector.getInsCode().equals(insCode)) {
+                    for (LabelSelection authorSelector : selectors) {
+                        if (authorSelector.getLabelAsymId().equals(labelAsymId) &&
+                                authorSelector.getLabelSeqId() == labelSeqId) {
                             match = true;
                             break;
                         }
@@ -104,7 +99,7 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
                     }
                 } else {
                     // skip non-polymer entities
-                    if (authSeqId == 0) {
+                    if (labelSeqId == 0) {
                         continue;
                     }
                 }
@@ -119,7 +114,7 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
                 AtomIdentifier atomIdentifier = createAtomIdentifier(atomSite.getId().get(row), labelAtomId[row], atomSite.getLabelAltId().get(row));
                 Atom atom = StructureFactory.createAtom(atomIdentifier, coord);
 
-                ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, authAsymId, 1);
+                ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, 1);
                 boolean chainChange = !chainIdentifier.equals(currentChainIdentifier);
 
                 // handle entity level

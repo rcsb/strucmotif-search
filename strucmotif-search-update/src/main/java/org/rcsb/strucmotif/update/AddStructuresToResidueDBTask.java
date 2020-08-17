@@ -81,7 +81,7 @@ public class AddStructuresToResidueDBTask {
 
                             for (Chain chain : structure.getChains()) {
                                 ChainIdentifier chainIdentifier = chain.getChainIdentifier();
-                                String chainId = chainIdentifier.getAuthAsymId();
+                                String chainId = chainIdentifier.getLabelAsymId();
                                 int assemblyId = chainIdentifier.getAssemblyId();
 
                                 for (Residue residue : chain.getResidues()) {
@@ -91,7 +91,7 @@ public class AddStructuresToResidueDBTask {
                                     Object[] atomData = new Object[3 + residue.getAtoms().size() * 4];
                                     int pointer = 0;
                                     atomData[pointer++] = chainId;
-                                    atomData[pointer++] = residueIdentifier.getAuthSeqId() + residueIdentifier.getInsCode();
+                                    atomData[pointer++] = residueIdentifier.getLabelSeqId();
                                     atomData[pointer++] = residueIdentifier.getResidueType().getOneLetterCode();
 
                                     for (Atom atom : residue.getAtoms()) {

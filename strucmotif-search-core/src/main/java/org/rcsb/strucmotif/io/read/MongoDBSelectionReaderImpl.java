@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.read;
 
-import com.google.common.base.CharMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
@@ -30,8 +29,6 @@ import static com.google.common.base.CharMatcher.inRange;
 
 @Singleton
 public class MongoDBSelectionReaderImpl implements SelectionReader {
-    private static final CharMatcher LETTER_MATCHER = inRange('a', 'z').or(inRange('A', 'Z'));
-    private static final CharMatcher DIGIT_MATCHER = inRange('0', '9');
     private final MongoResidueDB residueDB;
 
     @Inject
@@ -49,10 +46,10 @@ public class MongoDBSelectionReaderImpl implements SelectionReader {
             int index = indexSelection.getIndex();
             BasicDBList res = residueDB.selectResidue(pdbId, indexSelection.getAssemblyId(), index);
             String chainId = (String) res.get(0);
-            String raw = (String) res.get(1);
-            ChainIdentifier chainIdentifier = new ChainIdentifier("?", chainId, indexSelection.getAssemblyId());
+            int seqId = (int) res.get(1);
+            ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, indexSelection.getAssemblyId());
             ResidueType residueType = ResidueType.ofOneLetterCode((String) res.get(2));
-            ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, Integer.parseInt(DIGIT_MATCHER.retainFrom(raw)), LETTER_MATCHER.retainFrom(raw), index);
+            ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, seqId, index);
             List<Atom> atoms = new ArrayList<>((int) Math.round((res.size() - 3) * 0.25));
             for (int i = 3; i < res.size(); i = i + 4) {
                 String name = (String) res.get(i);

@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif;
 
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.Set;
 
@@ -12,9 +12,9 @@ public class Demo {
                 // several ways can be used to define the query motif - specify a PDB entry id
                 .defineByPdbIdAndSelection("4cha",
                         // and a collection of sequence positions to extract residues to use as motif
-                        Set.of(new AuthorSelection("B", 1, 57), // H
-                               new AuthorSelection("B", 1, 102), // D
-                               new AuthorSelection("C", 1, 195))) // S
+                        Set.of(new LabelSelection("B", 1, 42), // H
+                               new LabelSelection("B", 1, 87), // D
+                               new LabelSelection("C", 1, 47))) // S
                 // parameters are considered mandatory arguments
                 .buildParameters()
                 // retrieve container with complete query

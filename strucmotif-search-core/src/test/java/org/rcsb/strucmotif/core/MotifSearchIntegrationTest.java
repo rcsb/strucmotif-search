@@ -30,7 +30,7 @@ public class MotifSearchIntegrationTest {
 
         // register exchanges (if any)
         for (PositionSpecificExchange positionSpecificExchange : Motifs.KDEEH_EXCHANGES.getPositionSpecificExchanges()) {
-            buildParameters.addPositionSpecificExchange(positionSpecificExchange.getAuthorSelection(), positionSpecificExchange.getResidueTypes());
+            buildParameters.addPositionSpecificExchange(positionSpecificExchange.getLabelSelection(), positionSpecificExchange.getResidueTypes());
         }
 
         MotifSearchResult response = buildParameters.buildQuery().run();

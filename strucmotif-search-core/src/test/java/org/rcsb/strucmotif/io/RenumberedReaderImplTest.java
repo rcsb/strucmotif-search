@@ -33,11 +33,11 @@ public class RenumberedReaderImplTest {
         Chain chainB = structure.getChains().get(1);
         Set<Residue> chainA30 = chainA.getResidues()
                 .stream()
-                .filter(component -> component.getResidueIdentifier().getAuthSeqId() == 30)
+                .filter(component -> component.getResidueIdentifier().getLabelSeqId() == 30)
                 .collect(Collectors.toSet());
         Set<Residue> chainB30 = chainB.getResidues()
                 .stream()
-                .filter(component -> component.getResidueIdentifier().getAuthSeqId() == 30)
+                .filter(component -> component.getResidueIdentifier().getLabelSeqId() == 30)
                 .collect(Collectors.toSet());
         assertEquals("duplicated positions due to microheterogeneity", 1, chainA30.size());
         assertEquals("wrong type due to microheterogeneity", ResidueType.METHIONINE, chainA30.iterator().next().getResidueIdentifier().getResidueType());
@@ -80,7 +80,7 @@ public class RenumberedReaderImplTest {
                 .get(0)
                 .getResidues()
                 .stream()
-                .filter(c -> c.getResidueIdentifier().getAuthSeqId() == 249)
+                .filter(c -> c.getResidueIdentifier().getLabelSeqId() == 249)
                 .findFirst()
                 .orElseThrow();
         // should report all unique atom names

@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.core.InternalMotifSearch;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -41,7 +41,7 @@ public class QueryBuilder {
      * @param selection which components to select to define the motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, Collection<AuthorSelection> selection) {
+    public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, Collection<LabelSelection> selection) {
         Structure structure = allPurposeReader.readById(pdbId, selection);
         return defineByStructure(structure);
     }
@@ -52,7 +52,7 @@ public class QueryBuilder {
      * @param selection which components to select to define the motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, Collection<AuthorSelection> selection) {
+    public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, Collection<LabelSelection> selection) {
         Structure structure = allPurposeReader.readFromInputStream(inputStream, selection);
         return defineByStructure(structure);
     }
@@ -223,7 +223,7 @@ public class QueryBuilder {
     public class OptionalStepBuilder {
         private final Structure structure;
         private final Parameters parameters;
-        private final Map<AuthorSelection, Set<ResidueType>> exchanges;
+        private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<StructureIdentifier> whitelist;
         private final Set<StructureIdentifier> blacklist;
 
@@ -237,12 +237,12 @@ public class QueryBuilder {
 
         /**
          * Register an exchange by specifying a 'range'/collection of component types.
-         * @param authorSelection the position referenced
+         * @param labelSelection the position referenced
          * @param residueTypes all allowed types
          * @return this builder
          */
-        public OptionalStepBuilder addPositionSpecificExchange(AuthorSelection authorSelection, Collection<ResidueType> residueTypes) {
-            Set<ResidueType> exchange = exchanges.computeIfAbsent(authorSelection, k -> new LinkedHashSet<>());
+        public OptionalStepBuilder addPositionSpecificExchange(LabelSelection labelSelection, Collection<ResidueType> residueTypes) {
+            Set<ResidueType> exchange = exchanges.computeIfAbsent(labelSelection, k -> new LinkedHashSet<>());
             exchange.addAll(residueTypes);
             return this;
         }

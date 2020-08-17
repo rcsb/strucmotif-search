@@ -3,11 +3,9 @@ package org.rcsb.strucmotif.domain.result;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
-import org.rcsb.strucmotif.domain.selection.AuthorSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
-import org.rcsb.strucmotif.domain.selection.SelectionResolver;
+import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.SelectionReader;
@@ -40,7 +38,7 @@ public class TargetStructure {
      */
     private List<ResiduePairIdentifier[]> paths;
     private String title;
-    private SelectionResolver<AuthorSelection> authorSelectionResolver;
+    private LabelSelectionResolver labelSelectionResolver;
 
     public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, SelectionReader selectionReader) {
         this.selectionReader = selectionReader;
@@ -77,8 +75,8 @@ public class TargetStructure {
         return structureIdentifier;
     }
 
-    public SelectionResolver<AuthorSelection> getAuthorSelectionResolver() {
-        return authorSelectionResolver;
+    public LabelSelectionResolver getLabelSelectionResolver() {
+        return labelSelectionResolver;
     }
 
     /**
@@ -137,7 +135,7 @@ public class TargetStructure {
             Structure structure = selectionReader.readById(structureIdentifier.getPdbId(), indexSelectors);
             this.title = structure.getTitle();
             IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
-            this.authorSelectionResolver = new AuthorSelectionResolver(structure);
+            this.labelSelectionResolver = new LabelSelectionResolver(structure);
 
             return paths.stream()
                     // map each path to an ordered collection of index selectors

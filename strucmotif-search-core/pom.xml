@@ -30,12 +30,5 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.1</version>
         </dependency>
-
-        <!-- text parsing (retainFrom/inRange functions) -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>28.2-jre</version>
-        </dependency>
     </dependencies>
 </project>

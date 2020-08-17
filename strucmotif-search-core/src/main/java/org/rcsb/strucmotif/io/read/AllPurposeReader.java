@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.io.read;
 
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
-public interface AllPurposeReader extends StructureReader<AuthorSelection> {
+public interface AllPurposeReader extends StructureReader<LabelSelection> {
 
 }

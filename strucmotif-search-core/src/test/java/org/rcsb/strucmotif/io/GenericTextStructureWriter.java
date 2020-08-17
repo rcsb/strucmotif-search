@@ -47,7 +47,7 @@ public class GenericTextStructureWriter {
             String entityId = String.valueOf(structure.getChains().indexOf(chain) + 1);
             for (Residue residue : chain.getResidues()) {
                 String threeLetterCode = residue.getResidueIdentifier().getResidueType().getThreeLetterCode();
-                int seqId = residue.getResidueIdentifier().getAuthSeqId();
+                int seqId = residue.getResidueIdentifier().getLabelSeqId();
                 for (Atom atom : residue.getAtoms()) {
                     groupPDBBuilder.add("ATOM");
                     idBuilder.add(++counter);

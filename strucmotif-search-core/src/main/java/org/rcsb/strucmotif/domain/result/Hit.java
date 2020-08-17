@@ -2,7 +2,7 @@ package org.rcsb.strucmotif.domain.result;
 
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.util.Arrays;
@@ -16,14 +16,14 @@ import java.util.stream.Collectors;
 public class Hit {
     private final StructureIdentifier structureIdentifier;
     private final String title;
-    private final AuthorSelection[] selection;
+    private final LabelSelection[] selection;
     private final ResidueType[] residueTypes;
     private final double rootMeanSquareDeviation;
     private final double[] transformation;
 
     public Hit(StructureIdentifier structureIdentifier,
                String title,
-               AuthorSelection[] selection,
+               LabelSelection[] selection,
                ResidueType[] residueTypes,
                double rootMeanSquareDeviation,
                double[] transformation) {
@@ -43,7 +43,7 @@ public class Hit {
         return title;
     }
 
-    public AuthorSelection[] getSelection() {
+    public LabelSelection[] getSelection() {
         return selection;
     }
 

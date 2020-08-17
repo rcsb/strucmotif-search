@@ -4,7 +4,7 @@ import org.rcsb.strucmotif.core.InternalMotifSearch;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -20,14 +20,14 @@ public class MotifSearchQuery {
     private final InternalMotifSearch internalMotifSearch;
     private final QueryStructure queryStructure;
     private final Parameters parameters;
-    private final Map<AuthorSelection, Set<ResidueType>> exchanges;
+    private final Map<LabelSelection, Set<ResidueType>> exchanges;
     private final Collection<StructureIdentifier> whitelist;
     private final Collection<StructureIdentifier> blacklist;
 
     MotifSearchQuery(InternalMotifSearch internalMotifSearch,
                      Structure structure,
                      Parameters parameters,
-                     Map<AuthorSelection, Set<ResidueType>> exchanges,
+                     Map<LabelSelection, Set<ResidueType>> exchanges,
                      Collection<StructureIdentifier> whitelist,
                      Collection<StructureIdentifier> blacklist) {
         this.internalMotifSearch = internalMotifSearch;
@@ -57,9 +57,9 @@ public class MotifSearchQuery {
 
     /**
      * All specified exchanges.
-     * @return a map (key: author selector, value: all allowed component types)
+     * @return a map (key: label selector, value: all allowed component types)
      */
-    public Map<AuthorSelection, Set<ResidueType>> getExchanges() {
+    public Map<LabelSelection, Set<ResidueType>> getExchanges() {
         return exchanges;
     }
 

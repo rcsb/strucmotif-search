@@ -8,9 +8,9 @@ import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
-import org.rcsb.strucmotif.domain.selection.AuthorSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -35,7 +35,7 @@ public class ResidueGraphTest {
     public void shouldHandle3vvk() {
         Structure structure = renumberedReader.readById("3vvk");
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
-        AuthorSelectionResolver authorSelectionResolver = new AuthorSelectionResolver(structure);
+        LabelSelectionResolver authorSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure);
 
         long c = residueGraph.residuePairOccurrencesSequential()
@@ -45,7 +45,7 @@ public class ResidueGraphTest {
                 .map(indexSelectionResolver::resolve)
                 .map(authorSelectionResolver::resolve)
                 .distinct()
-                .map(AuthorSelection::getAuthAsymId)
+                .map(LabelSelection::getLabelAsymId)
                 .distinct()
                 .peek(System.out::println)
                 .count();
@@ -59,7 +59,7 @@ public class ResidueGraphTest {
     public void shouldHandle1dsd() {
         Structure structure = renumberedReader.readById("1dsd");
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
-        AuthorSelectionResolver authorSelectionResolver = new AuthorSelectionResolver(structure);
+        LabelSelectionResolver authorSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure);
 
         long c = residueGraph.residuePairOccurrencesSequential()
@@ -70,7 +70,7 @@ public class ResidueGraphTest {
                 .map(authorSelectionResolver::resolve)
                 .distinct()
                 // keep only freakish chain
-                .filter(authorSelection -> authorSelection.getAuthAsymId().equals("C"))
+                .filter(authorSelection -> authorSelection.getLabelAsymId().equals("C"))
                 // map back to unique groups
                 .map(authorSelectionResolver::resolve)
                 .map(Residue::getResidueIdentifier)

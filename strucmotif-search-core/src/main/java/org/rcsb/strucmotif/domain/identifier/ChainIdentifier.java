@@ -8,21 +8,15 @@ import java.util.Objects;
  */
 public class ChainIdentifier {
     private final String labelAsymId;
-    private final String authAsymId;
     private final int assemblyId;
 
-    public ChainIdentifier(String labelAsymId, String authAsymId, int assemblyId) {
+    public ChainIdentifier(String labelAsymId, int assemblyId) {
         this.labelAsymId = labelAsymId;
-        this.authAsymId = authAsymId;
         this.assemblyId = assemblyId;
     }
 
     public String getLabelAsymId() {
         return labelAsymId;
-    }
-
-    public String getAuthAsymId() {
-        return authAsymId;
     }
 
     public int getAssemblyId() {
@@ -35,8 +29,8 @@ public class ChainIdentifier {
 
     @Override
     public String toString() {
-        // auth_asym_id are always String, assemblyIds are always int, concat is safe
-        return authAsymId + assemblyId;
+        // label_asym_id are always String, assemblyIds are always int, concat is safe
+        return labelAsymId + assemblyId;
     }
 
     @Override
@@ -45,12 +39,11 @@ public class ChainIdentifier {
         if (o == null || getClass() != o.getClass()) return false;
         ChainIdentifier that = (ChainIdentifier) o;
         return assemblyId == that.assemblyId &&
-                Objects.equals(labelAsymId, that.labelAsymId) &&
-                Objects.equals(authAsymId, that.authAsymId);
+                Objects.equals(labelAsymId, that.labelAsymId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(labelAsymId, authAsymId, assemblyId);
+        return Objects.hash(labelAsymId, assemblyId);
     }
 }

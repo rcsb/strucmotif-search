@@ -6,7 +6,8 @@ import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -39,14 +40,14 @@ public class HitScorerImpl implements HitScorer {
         }
 
         // resolve identifiers
-        SelectionResolver<AuthorSelection> authorSelectionResolver = targetStructure.getAuthorSelectionResolver();
+        LabelSelectionResolver labelSelectionResolver = targetStructure.getLabelSelectionResolver();
         List<Residue> originalCandidate = alignmentResult.getOriginalCandidate();
 
-        AuthorSelection[] selection = new AuthorSelection[originalCandidate.size()];
+        LabelSelection[] selection = new LabelSelection[originalCandidate.size()];
         ResidueType[] residueTypes = new ResidueType[originalCandidate.size()];
         for (int i = 0; i < originalCandidate.size(); i++) {
             Residue originalResidue = originalCandidate.get(i);
-            selection[i] = authorSelectionResolver.resolve(originalResidue);
+            selection[i] = labelSelectionResolver.resolve(originalResidue);
             residueTypes[i] = originalResidue.getResidueIdentifier().getResidueType();
         }
 

@@ -71,20 +71,15 @@ public class RenumberedReaderImpl implements RenumberedReader {
             String lastChainId = null;
             int lastMatchedSeqId = -1;
             int lastSeqId = -1;
-            String lastMatchedInsCode = null;
-            String lastInsCode = null;
             int residueIndex = -1;
 
             for (int row = 0; row < atomSite.getRowCount(); row++) {
-                int authSeqId = authSeqIds[row];
+                int labelSeqId = labelSeqIds[row];
                 String labelAsymId = labelAsymIds[row];
-                String authAsymId = authAsymIds[row];
-                String insCode = pdbxPDBInsCode[row];
-                if (!labelAsymId.equals(lastChainId) || authSeqId != lastSeqId || !insCode.equals(lastInsCode)) {
+                if (!labelAsymId.equals(lastChainId) || labelSeqId != lastSeqId) {
                     residueIndex++;
                     lastChainId = labelAsymId;
-                    lastSeqId = authSeqId;
-                    lastInsCode = insCode;
+                    lastSeqId = labelSeqId;
                 }
 
                 if (target > 0) {
@@ -93,10 +88,9 @@ public class RenumberedReaderImpl implements RenumberedReader {
                         if (selector.getIndex() == residueIndex) {
                             match = true;
 
-                            if (!labelAsymId.equals(lastMatchedChainId) || authSeqId != lastMatchedSeqId || !insCode.equals(lastMatchedInsCode)) {
+                            if (!labelAsymId.equals(lastMatchedChainId) || labelSeqId != lastMatchedSeqId) {
                                 lastMatchedChainId = labelAsymId;
-                                lastMatchedSeqId = authSeqId;
-                                lastMatchedInsCode = insCode;
+                                lastMatchedSeqId = labelSeqId;
                                 fulfilledCount++;
                                 if (fulfilledCount == target) {
                                     fulfilled = true;
@@ -107,7 +101,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
                     }
 
                     // give option to break loop if all components were found
-                    if (fulfilled && (!labelAsymId.equals(lastMatchedChainId) || authSeqId != lastMatchedSeqId || !insCode.equals(lastMatchedInsCode))) {
+                    if (fulfilled && (!labelAsymId.equals(lastMatchedChainId) || labelSeqId != lastMatchedSeqId)) {
                         break;
                     }
 
@@ -126,11 +120,11 @@ public class RenumberedReaderImpl implements RenumberedReader {
                 AtomIdentifier atomIdentifier = new AtomIdentifier(labelAtomId[row], ++atomId);
                 Atom atom = StructureFactory.createAtom(atomIdentifier, coord);
 
-                ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, authAsymId, 1);
+                ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, 1);
                 boolean chainChange = !chainIdentifier.equals(currentChainIdentifier);
 
                 // handle entity level
-                ResidueIdentifier residueIdentifier = new ResidueIdentifier(labelCompId[row], authSeqId, insCode, residueIndex);
+                ResidueIdentifier residueIdentifier = new ResidueIdentifier(labelCompId[row], labelSeqId, residueIndex);
                 // we have to update the entity if the chain changed
                 if (chainChange || !residueIdentifier.equals(currentResidueIdentifier)) {
                     atomBuffer = addResidue();

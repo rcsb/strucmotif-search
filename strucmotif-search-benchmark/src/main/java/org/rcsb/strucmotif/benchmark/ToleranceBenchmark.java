@@ -63,7 +63,7 @@ public class ToleranceBenchmark {
         PositionSpecificExchange[] exchanges = motif.getPositionSpecificExchanges();
         if (exchanges.length > 0) {
             for (PositionSpecificExchange exchange : exchanges) {
-                builder.addPositionSpecificExchange(exchange.getAuthorSelection(), exchange.getResidueTypes());
+                builder.addPositionSpecificExchange(exchange.getLabelSelection(), exchange.getResidueTypes());
             }
         }
 

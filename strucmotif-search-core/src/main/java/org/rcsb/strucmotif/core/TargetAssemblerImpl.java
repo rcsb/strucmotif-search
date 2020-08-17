@@ -14,7 +14,7 @@ import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
-import org.rcsb.strucmotif.domain.selection.AuthorSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.read.SelectionReader;
 import org.rcsb.strucmotif.persistence.MotifLookup;
@@ -49,7 +49,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         MotifSearchQuery query = response.getQuery();
         QueryStructure queryStructure = query.getQueryStructure();
         Parameters parameters = query.getParameters();
-        Map<AuthorSelection, Set<ResidueType>> exchanges = query.getExchanges();
+        Map<LabelSelection, Set<ResidueType>> exchanges = query.getExchanges();
         boolean whitelist = !query.getWhitelist().isEmpty();
         boolean blacklist = !query.getBlacklist().isEmpty();
 

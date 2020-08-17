@@ -10,16 +10,16 @@ import java.util.Objects;
  */
 public class ResidueIdentifier {
     private final ResidueType residueType;
-    private final int authSeqId;
+    private final int labelSeqId;
     private final int index;
 
-    public ResidueIdentifier(String residueType, int authSeqId, int index) {
-        this(ResidueType.ofThreeLetterCode(residueType), authSeqId, index);
+    public ResidueIdentifier(String residueType, int labelSeqId, int index) {
+        this(ResidueType.ofThreeLetterCode(residueType), labelSeqId, index);
     }
 
-    public ResidueIdentifier(ResidueType residueType, int authSeqId, int index) {
+    public ResidueIdentifier(ResidueType residueType, int labelSeqId, int index) {
         this.residueType = residueType;
-        this.authSeqId = authSeqId;
+        this.labelSeqId = labelSeqId;
         this.index = index;
     }
 
@@ -35,8 +35,8 @@ public class ResidueIdentifier {
         return residueType.getPolymerType() == PolymerType.NUCLEOTIDE;
     }
 
-    public int getAuthSeqId() {
-        return authSeqId;
+    public int getLabelSeqId() {
+        return labelSeqId;
     }
 
     public int getIndex() {
@@ -45,7 +45,7 @@ public class ResidueIdentifier {
 
     @Override
     public String toString() {
-        return residueType.getOneLetterCode() + authSeqId;
+        return residueType.getOneLetterCode() + labelSeqId;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ResidueIdentifier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ResidueIdentifier that = (ResidueIdentifier) o;
-        return authSeqId == that.authSeqId &&
+        return labelSeqId == that.labelSeqId &&
                 // ignore type to fix microheterogeneity ('fix' by ignoring 2nd/3rd/... position)
 //                residueType == that.residueType &&
                 index == that.index;
@@ -62,6 +62,6 @@ public class ResidueIdentifier {
     @Override
     public int hashCode() {
         // ignore type to fix microheterogeneity ('fix' by ignoring 2nd/3rd/... position)
-        return Objects.hash(/*residueType,*/ authSeqId, index);
+        return Objects.hash(/*residueType,*/ labelSeqId, index);
     }
 }

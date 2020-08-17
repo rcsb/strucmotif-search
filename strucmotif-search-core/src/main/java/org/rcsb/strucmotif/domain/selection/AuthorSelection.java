@@ -3,7 +3,7 @@ package org.rcsb.strucmotif.domain.selection;
 import java.util.Objects;
 
 /**
- * Identifies a component unambiguously by auth_asym_id, assembly_id, and auth_seq_id. Basically the 'natural' way to
+ * Identifies a component unambiguously by auth_asym_id, assembly_id, and auth_seq_id. Basically the 'legacy' way to
  * reference residues.
  */
 public class AuthorSelection implements Selection {

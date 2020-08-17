@@ -63,16 +63,14 @@ public class RenumberedWriterImpl implements StructureWriter<CifFile> {
         StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelAtomId = atomSiteBuilder.enterLabelAtomId();
         StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelCompId = atomSiteBuilder.enterLabelCompId();
         StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelAsymId = atomSiteBuilder.enterLabelAsymId();
-        StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> authAsymId = atomSiteBuilder.enterAuthAsymId();
-        StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> pdbxPDBInsCode = atomSiteBuilder.enterPdbxPDBInsCode();
-        IntColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> authSeqId = atomSiteBuilder.enterAuthSeqId();
+        IntColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelSeqId = atomSiteBuilder.enterLabelSeqId();
         FloatColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> cartnX = atomSiteBuilder.enterCartnX();
         FloatColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> cartnY = atomSiteBuilder.enterCartnY();
         FloatColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> cartnZ = atomSiteBuilder.enterCartnZ();
 
         // keep track of alt locs
-        String lastAcceptedAuthAsymId = "";
-        int lastAcceptedAuthSeqId = Integer.MIN_VALUE;
+        String lastAcceptedLabelAsymId = "";
+        int lastAcceptedLabelSeqId = Integer.MIN_VALUE;
         String lastAcceptedAtomLabelId = "";
 
         for (int row = 0; row < atomSite.getRowCount(); row++) {
@@ -92,15 +90,15 @@ public class RenumberedWriterImpl implements StructureWriter<CifFile> {
                 continue;
             }
 
-            String currentAuthAsymId = atomSite.getAuthAsymId().get(row);
-            int currentAuthSeqId = atomSite.getAuthSeqId().get(row);
+            String currentLabelAsymId = atomSite.getLabelAsymId().get(row);
+            int currentLabelSeqId = atomSite.getLabelSeqId().get(row);
             String currentLabelAtomId = atomSite.getLabelAtomId().get(row);
             String labelAltId = atomSite.getLabelAltId().get(row);
             // skip non-first alt-locs
             if (!labelAltId.isEmpty() &&
                     // if label atom id matches the last one accepted (and component didnt change) we are in trouble
-                    currentAuthAsymId.equals(lastAcceptedAuthAsymId) &&
-                    currentAuthSeqId == lastAcceptedAuthSeqId &&
+                    currentLabelAsymId.equals(lastAcceptedLabelAsymId) &&
+                    currentLabelSeqId == lastAcceptedLabelSeqId &&
                     currentLabelAtomId.equals(lastAcceptedAtomLabelId)) {
                 // ignore alt locs for now - keep only first alt loc (e.g. in 5chq, chain B, pos 122, alt locs: B/C)
                 continue;
@@ -108,24 +106,17 @@ public class RenumberedWriterImpl implements StructureWriter<CifFile> {
 
             // stuff to skip alt-locs
             lastAcceptedAtomLabelId = currentLabelAtomId;
-            lastAcceptedAuthSeqId = currentAuthSeqId;
-            lastAcceptedAuthAsymId = currentAuthAsymId;
+            lastAcceptedLabelSeqId = currentLabelSeqId;
+            lastAcceptedLabelAsymId = currentLabelAsymId;
 
             labelAtomId.add(currentLabelAtomId);
             labelCompId.add(atomSite.getLabelCompId().get(row));
             labelAsymId.add(atomSite.getLabelAsymId().get(row));
-            authAsymId.add(currentAuthAsymId);
-            authSeqId.add(currentAuthSeqId);
+            labelAsymId.add(currentLabelAsymId);
+            labelSeqId.add(currentLabelSeqId);
             cartnX.add(atomSite.getCartnX().get(row));
             cartnY.add(atomSite.getCartnY().get(row));
             cartnZ.add(atomSite.getCartnZ().get(row));
-
-            // handle insertion codes
-            if (atomSite.getPdbxPDBInsCode().getValueKind(row) != ValueKind.PRESENT) {
-                pdbxPDBInsCode.markNextNotPresent();
-            } else {
-                pdbxPDBInsCode.add(atomSite.getPdbxPDBInsCode().get(row));
-            }
         }
         atomSiteBuilder.leaveCategory();
 

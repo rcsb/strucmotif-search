@@ -40,7 +40,6 @@ public class MockMotifSearch {
         return INSTANCE.queryBuilder;
     }
 
-    @SuppressWarnings("Duplicates")
     static class MockModule extends AbstractModule {
         protected void configure() {
             super.configure();

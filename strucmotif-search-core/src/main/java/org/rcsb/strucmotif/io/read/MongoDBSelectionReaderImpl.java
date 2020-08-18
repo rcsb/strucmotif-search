@@ -25,8 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.CharMatcher.inRange;
-
 @Singleton
 public class MongoDBSelectionReaderImpl implements SelectionReader {
     private final MongoResidueDB residueDB;

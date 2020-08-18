@@ -136,7 +136,6 @@ public class TargetStructure {
         try {
             Structure structure = selectionReader.readById(structureIdentifier.getPdbId(), indexSelectors);
             this.title = structure.getTitle();
-            System.out.println(title + " " + structure.getChains().stream().map(Chain::getResidues).mapToInt(Collection::size).sum());
             IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 

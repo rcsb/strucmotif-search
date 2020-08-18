@@ -25,6 +25,7 @@ import static com.mongodb.client.model.Filters.eq;
  * The uncommented lines can be used to create the mock data.
  */
 public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
+    // TODO recreate mock data
     private static final Logger logger = LoggerFactory.getLogger(MockMotifLookupImpl.class);
     private final Map<String, String> titles;
     private final Map<String, BasicDBList> components;
@@ -60,7 +61,7 @@ public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
         String[] split = raw.split(", ");
         BasicDBList list = new BasicDBList();
         list.add(split[0]);
-        list.add(split[1]);
+        list.add(Integer.parseInt(split[1]));
         list.add(split[2]);
         for (int i = 3; i < split.length; i = i + 4) {
             list.add(split[i]);

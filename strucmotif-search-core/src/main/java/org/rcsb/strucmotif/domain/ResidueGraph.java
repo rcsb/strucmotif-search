@@ -71,7 +71,7 @@ public class ResidueGraph {
                     for (int chainId2 = chainId1; chainId2 < structure.getChains().size(); chainId2++) {
                         Chain chain2 = structure.getChains().get(chainId2);
                         int assemblyId2 = chain2.getChainIdentifier().getAssemblyId();
-                        String authAsymId2 = chain2.getChainIdentifier().getLabelAsymId();
+                        String labelAsymId2 = chain2.getChainIdentifier().getLabelAsymId();
 
                         for (int residueId2 = 0; residueId2 < chain2.getResidues().size(); residueId2++) {
                             if (chain1.equals(chain2) && residueId2 <= residueId1) {
@@ -109,7 +109,7 @@ public class ResidueGraph {
                                     // compute angle between amino acid planes
                                     double[] normalVector2 = normalVectorLookup.computeIfAbsent(residue2, e -> normalVector(backboneCoordinates2, sideChainCoordinates2));
                                     indexSelectionResolver.put(residue2, new IndexSelection(assemblyId2, residue2.getResidueIdentifier().getIndex()));
-                                    labelSelectionResolver.put(residue2, new LabelSelection(authAsymId2, assemblyId2, residue2.getResidueIdentifier().getLabelSeqId()));
+                                    labelSelectionResolver.put(residue2, new LabelSelection(labelAsymId2, assemblyId2, residue2.getResidueIdentifier().getLabelSeqId()));
 
                                     Map<Residue, Double> innerAngleMap = angles.computeIfAbsent(residue1, key -> new HashMap<>());
                                     innerAngleMap.put(residue2, angle(normalVector1, normalVector2));
@@ -266,7 +266,7 @@ public class ResidueGraph {
                 sideChainDistance,
                 angle);
         // IndexSelection is needed to build and match to lookup
-        // AuthorSelection is needed to be able to map position-specific exchanges accurately
+        // LabelSelection is needed to be able to map position-specific exchanges accurately
         ResiduePairIdentifier residuePairIdentifier = new ResiduePairIdentifier(indexSelectionResolver.get(residue1),
                 indexSelectionResolver.get(residue2),
                 labelSelectionResolver.get(residue1),

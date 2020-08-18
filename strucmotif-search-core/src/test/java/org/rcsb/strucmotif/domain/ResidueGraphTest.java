@@ -35,15 +35,15 @@ public class ResidueGraphTest {
     public void shouldHandle3vvk() {
         Structure structure = renumberedReader.readById("3vvk");
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
-        LabelSelectionResolver authorSelectionResolver = new LabelSelectionResolver(structure);
+        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure);
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
                 .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
-                // mapping shenanigans to determine author selection
+                // mapping shenanigans to determine label selection
                 .map(indexSelectionResolver::resolve)
-                .map(authorSelectionResolver::resolve)
+                .map(labelSelectionResolver::resolve)
                 .distinct()
                 .map(LabelSelection::getLabelAsymId)
                 .distinct()
@@ -59,20 +59,20 @@ public class ResidueGraphTest {
     public void shouldHandle1dsd() {
         Structure structure = renumberedReader.readById("1dsd");
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
-        LabelSelectionResolver authorSelectionResolver = new LabelSelectionResolver(structure);
+        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure);
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
                 .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
-                // mapping shenanigans to determine author selection
+                // mapping shenanigans to determine label selection
                 .map(indexSelectionResolver::resolve)
-                .map(authorSelectionResolver::resolve)
+                .map(labelSelectionResolver::resolve)
                 .distinct()
                 // keep only freakish chain
-                .filter(authorSelection -> authorSelection.getLabelAsymId().equals("C"))
+                .filter(labelSelection -> labelSelection.getLabelAsymId().equals("C"))
                 // map back to unique groups
-                .map(authorSelectionResolver::resolve)
+                .map(labelSelectionResolver::resolve)
                 .map(Residue::getResidueIdentifier)
                 .map(componentIdentifier -> componentIdentifier + " " + componentIdentifier.getResidueType())
                 .count();

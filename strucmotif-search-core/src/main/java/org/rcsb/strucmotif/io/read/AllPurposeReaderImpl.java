@@ -86,9 +86,9 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
 
                 if (selectors != null && selectors.size() > 0) {
                     boolean match = false;
-                    for (LabelSelection authorSelector : selectors) {
-                        if (authorSelector.getLabelAsymId().equals(labelAsymId) &&
-                                authorSelector.getLabelSeqId() == labelSeqId) {
+                    for (LabelSelection labelSelection : selectors) {
+                        if (labelSelection.getLabelAsymId().equals(labelAsymId) &&
+                                labelSelection.getLabelSeqId() == labelSeqId) {
                             match = true;
                             break;
                         }

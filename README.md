@@ -19,9 +19,9 @@ class Demo {
     public static void main(String[] args) {
         MotifSearchResult simple = MotifSearch.newQuery()
             .defineByPdbIdAndSelection("4cha",
-                Set.of(new AuthorSelection("B", 1, 57), // HIS
-                       new AuthorSelection("B", 1, 102), // ASP
-                       new AuthorSelection("C", 1, 195))) // SER
+                Set.of(new LabelSelection("B", 1, 42), // HIS
+                       new LabelSelection("B", 1, 87), // ASP
+                       new LabelSelection("C", 1, 47))) // SER
             // parameters are considered mandatory arguments - we use defaults
             .buildParameters()
             // several additional arguments can be provided to customize the query further

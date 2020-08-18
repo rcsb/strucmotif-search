@@ -15,7 +15,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 </dependency>
 ```
 
-Be sure to have a MongoDB server running, e.g.:
+Make sure to have a MongoDB server running, e.g.:
 ```
 mongod --dbpath=/opt/data/mongodb
 ```

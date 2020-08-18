@@ -1,16 +1,23 @@
+[![Changelog](https://img.shields.io/badge/changelog--lightgrey.svg?style=flat)](https://github.com/rcsb/strucmotif-search/blob/master/CHANGELOG.md)
+
 # Structural Motif Search
 Structural motifs are small sets of amino acids in spatial proximity that constitute e.g. active sites or 
 structure-defining patterns. This implementation traverses the whole PDB archive (>160k structures) and aims at 
 returning all highly similar occurrences of the query motif within a second.
 
 ## Getting started
-strucmotif-search is distributed by maven. To get started, append your `pom.xml` by:
+strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
 ```xml
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
   <version>...</version>
 </dependency>
+```
+
+Be sure to have a MongoDB server running, e.g.:
+```
+mongod --dbpath=/opt/data/mongodb
 ```
 
 ## Example

@@ -15,7 +15,7 @@ import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.io.MessagePackCodec;
 import org.rcsb.strucmotif.io.MinimizedMessagePackCodec;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
+import org.rcsb.strucmotif.io.read.MockAllPurposeReaderImpl;
 import org.rcsb.strucmotif.io.read.MockRenumberedReaderImpl;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.io.read.SelectionReader;
@@ -47,7 +47,7 @@ public class MockMotifSearch {
             bind(InternalMotifSearch.class).to(InternalMotifSearchImpl.class);
             bind(MotifPruner.class).to(MotifPrunerImpl.class);
             bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
-            bind(AllPurposeReader.class).to(AllPurposeReaderImpl.class);
+            bind(AllPurposeReader.class).to(MockAllPurposeReaderImpl.class);
             bind(RenumberedReader.class).to(MockRenumberedReaderImpl.class);
             bind(SelectionReader.class).to(MongoDBSelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);

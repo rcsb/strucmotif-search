@@ -111,7 +111,6 @@ public class RenumberedWriterImpl implements StructureWriter<CifFile> {
 
             labelAtomId.add(currentLabelAtomId);
             labelCompId.add(atomSite.getLabelCompId().get(row));
-            labelAsymId.add(atomSite.getLabelAsymId().get(row));
             labelAsymId.add(currentLabelAsymId);
             labelSeqId.add(currentLabelSeqId);
             cartnX.add(atomSite.getCartnX().get(row));

@@ -1,10 +1,8 @@
 package org.rcsb.strucmotif.persistence;
 
+import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
 import org.rcsb.strucmotif.domain.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +16,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.eq;
-
 /**
  * Use locally stored data that we expect to use for tests.
  * The uncommented lines can be used to create the mock data.
  */
+@Singleton
 public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
     // TODO recreate mock data
     private static final Logger logger = LoggerFactory.getLogger(MockMotifLookupImpl.class);

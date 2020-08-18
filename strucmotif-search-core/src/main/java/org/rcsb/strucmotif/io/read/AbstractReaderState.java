@@ -61,7 +61,7 @@ abstract class AbstractReaderState<S extends Selection> {
     // the 'state'
     ResidueIdentifier currentResidueIdentifier;
     List<Atom> atomBuffer;
-    ChainIdentifier currentChainIdentifier;
+    String currentChain;
     List<Residue> residueBuffer;
     final List<Pair<ChainIdentifier, List<Residue>>> chains;
 
@@ -88,7 +88,7 @@ abstract class AbstractReaderState<S extends Selection> {
         this.cartnY = atomSite.getCartnY().getArray();
         this.cartnZ = atomSite.getCartnZ().getArray();
 
-        this.currentChainIdentifier = null;
+        this.currentChain = null;
         this.currentResidueIdentifier = null;
 
         if (selection == null) {
@@ -134,7 +134,7 @@ abstract class AbstractReaderState<S extends Selection> {
      */
     List<Residue> addChain() {
         if (residueBuffer.size() > 0) {
-            chains.add(new Pair<>(currentChainIdentifier, residueBuffer));
+            chains.add(new Pair<>(new ChainIdentifier(currentChain, 1), residueBuffer));
             return new ArrayList<>();
         }
         return residueBuffer;

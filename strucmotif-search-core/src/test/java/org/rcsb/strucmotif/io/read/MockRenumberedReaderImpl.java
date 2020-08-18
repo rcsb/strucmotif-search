@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.io.read;
 
+import com.google.inject.Singleton;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.slf4j.Logger;
@@ -9,11 +10,12 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.Objects;
 
+@Singleton
 public class MockRenumberedReaderImpl extends RenumberedReaderImpl {
     private static final Logger logger = LoggerFactory.getLogger(MockRenumberedReaderImpl.class);
 
     public MockRenumberedReaderImpl() {
-        logger.info("mocking renumbered structure reading");
+        logger.info("Mocking renumbered structure reading");
     }
 
     @Override

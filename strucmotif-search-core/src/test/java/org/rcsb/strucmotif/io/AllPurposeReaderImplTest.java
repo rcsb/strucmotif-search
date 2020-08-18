@@ -11,6 +11,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Set;
@@ -24,9 +25,13 @@ public class AllPurposeReaderImplTest {
     @Inject
     private AllPurposeReader allPurposeReader;
 
+    private static InputStream getInputStream(String pdbId) {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("orig/" + pdbId + ".bcif");
+    }
+
     @Test
     public void shouldHandleMicroheterogeneityAtSequenceLevel() {
-        Structure structure = allPurposeReader.readById("1eta");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("1eta"));
         Chain chainA = structure.getChains().get(0);
         Chain chainB = structure.getChains().get(1);
         Set<Residue> chainA30 = chainA.getResidues()
@@ -46,13 +51,13 @@ public class AllPurposeReaderImplTest {
     @Test
     public void shouldSkipNmrModelsWithNumberUnequalToOne() {
         // multiple NMR models distributed over multiple structures - file will start with model nr 18
-        Structure structure = allPurposeReader.readById("1ezc");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("1ezc"));
         assertEquals(0, chainCount(structure));
     }
 
     @Test
     public void shouldBuildAndWriteAssemblyForVirusParticle() throws IOException {
-        Structure structure = allPurposeReader.readById("2bfu");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("2bfu"));
         assertEquals(2 * 60, chainCount(structure));
 
         new GenericTextStructureWriter().write(structure, Paths.get("target/test_ap.cif"));
@@ -60,25 +65,25 @@ public class AllPurposeReaderImplTest {
 
     @Test
     public void shouldHandle4cha() {
-        Structure structure = allPurposeReader.readById("4cha");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("4cha"));
 
-        assertEquals(11, chainCount(structure));
-        assertEquals(562, entityCount(structure));
-        assertEquals(3591, atomCount(structure));
+        assertEquals(6, chainCount(structure));
+        assertEquals(477, entityCount(structure));
+        assertEquals(3506, atomCount(structure));
     }
 
     @Test
     public void shouldBuildAssembliesForDoubleIdentityOperatorAndDuplicatedChains() {
-        Structure structure = allPurposeReader.readById("3uud");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("3uud"));
 
-        assertEquals(14, chainCount(structure));
-        assertEquals(883, entityCount(structure));
-        assertEquals(4459, atomCount(structure));
+        assertEquals(4, chainCount(structure));
+        assertEquals(499, entityCount(structure));
+        assertEquals(4013, atomCount(structure));
     }
 
     @Test
     public void shouldHandleMicroheterogeneity() {
-        Structure structure = allPurposeReader.readById("2bwx");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("2bwx"));
         // group contains alt locs and microheterogeneity
         Residue residue = structure.getChains()
                 .get(0)
@@ -95,25 +100,25 @@ public class AllPurposeReaderImplTest {
 
     @Test
     public void shouldCreateTrivialStructure() {
-        Structure structure = allPurposeReader.readById("1exr");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("1exr"));
 
-        assertEquals(7, chainCount(structure));
-        assertEquals(329, entityCount(structure));
-        assertEquals(1650, atomCount(structure));
+        assertEquals(1, chainCount(structure));
+        assertEquals(146, entityCount(structure));
+        assertEquals(1467, atomCount(structure));
     }
 
     @Test
     public void shouldCreateStructureWithSymmetry() {
-        Structure structure = allPurposeReader.readById("1acj");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("1acj"));
 
-        assertEquals(2 * 3, chainCount(structure));
-        assertEquals(2 * (528 + 1 + 82), entityCount(structure));
-        assertEquals(2 * 4192, atomCount(structure));
+        assertEquals(2, chainCount(structure));
+        assertEquals(1056, entityCount(structure));
+        assertEquals(8190, atomCount(structure));
     }
 
     @Test
     public void shouldCreateStructureWithBioAssemblies() {
-        Structure structure = allPurposeReader.readById("1m4x");
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("1m4x"));
 
         assertEquals(3 * 1680, chainCount(structure));
         assertEquals(3 * 1680 * 413, entityCount(structure));

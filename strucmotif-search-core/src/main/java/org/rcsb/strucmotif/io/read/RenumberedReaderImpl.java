@@ -6,7 +6,6 @@ import org.rcsb.cif.CifOptions;
 import org.rcsb.cif.model.binary.BinaryFile;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
-import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
@@ -120,8 +119,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
                 AtomIdentifier atomIdentifier = new AtomIdentifier(labelAtomId[row], ++atomId);
                 Atom atom = StructureFactory.createAtom(atomIdentifier, coord);
 
-                ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, 1);
-                boolean chainChange = !chainIdentifier.equals(currentChainIdentifier);
+                boolean chainChange = !labelAsymId.equals(currentChain);
 
                 // handle entity level
                 ResidueIdentifier residueIdentifier = new ResidueIdentifier(labelCompId[row], labelSeqId, residueIndex);
@@ -134,7 +132,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
                 // handle chain level
                 if (chainChange) {
                     residueBuffer = addChain();
-                    currentChainIdentifier = chainIdentifier;
+                    currentChain = labelAsymId;
                 }
 
                 if (atomBuffer.stream().noneMatch(a -> a.getAtomIdentifier().describeSameAtom(atomIdentifier))) {

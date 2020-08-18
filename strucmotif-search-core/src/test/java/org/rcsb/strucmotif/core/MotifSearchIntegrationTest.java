@@ -1,37 +1,56 @@
 package org.rcsb.strucmotif.core;
 
+import com.google.inject.Inject;
 import junit.framework.TestCase;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.rcsb.strucmotif.GuiceJUnit4Runner;
 import org.rcsb.strucmotif.MockMotifSearch;
-import org.rcsb.strucmotif.Motifs;
-import org.rcsb.strucmotif.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
+import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.read.AllPurposeReader;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+@RunWith(GuiceJUnit4Runner.class)
 public class MotifSearchIntegrationTest {
+    @Inject
+    private AllPurposeReader allPurposeReader;
+
+    private static InputStream getInputStream(String pdbId) {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("orig/" + pdbId + ".bcif");
+    }
+
     /**
      * A complex query covering all bases: basal functionality, ambiguity among identifiers and position-specific
      * exchanges.
      */
     @Test
     public void searchForSuperfamilyTemplateWithExchanges() {
+        Structure structure = allPurposeReader.readFromInputStream(getInputStream("2mnr"),
+                Set.of(new LabelSelection("A", 1, 162), // K
+                new LabelSelection("A", 1, 193), // D
+                new LabelSelection("A", 1, 219), // E
+                new LabelSelection("A", 1, 245), // E
+                new LabelSelection("A", 1, 295))); // H
+
         QueryBuilder.OptionalStepBuilder buildParameters = MockMotifSearch.newQuery()
-                .defineByStructure(Motifs.KDEEH_EXCHANGES.getStructure())
+                .defineByStructure(structure)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
-                .buildParameters();
-
-        // register exchanges (if any)
-        for (PositionSpecificExchange positionSpecificExchange : Motifs.KDEEH_EXCHANGES.getPositionSpecificExchanges()) {
-            buildParameters.addPositionSpecificExchange(positionSpecificExchange.getLabelSelection(), positionSpecificExchange.getResidueTypes());
-        }
+                .buildParameters()
+                .addPositionSpecificExchange(new LabelSelection("A", 1, 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
+                .addPositionSpecificExchange(new LabelSelection("A", 1, 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
+                .addPositionSpecificExchange(new LabelSelection("A", 1, 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
 
         MotifSearchResult response = buildParameters.buildQuery().run();
 

@@ -15,6 +15,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
 import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
 
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,15 +114,19 @@ public class QuaternionAlignmentTest {
         assertEquals("Alignment score does not match expectation", 0.0021, rmsd34, 0.001);
     }
 
+    private static InputStream getInputStream(String pdbId) {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream("orig/" + pdbId + ".bcif");
+    }
+
     @Test
     public void computeRmsdForAminopeptidaseExample() {
         AllPurposeReaderImpl allPurposeReader = new AllPurposeReaderImpl();
-        Structure s1 = allPurposeReader.readById("1lap", List.of(new LabelSelection("A", 1, 250),
+        Structure s1 = allPurposeReader.readFromInputStream(getInputStream("1lap"), List.of(new LabelSelection("A", 1, 250),
                 new LabelSelection("A", 1, 255),
                 new LabelSelection("A", 1, 273),
                 new LabelSelection("A", 1, 332),
                 new LabelSelection("A", 1, 334)));
-        Structure s2 = allPurposeReader.readById("3pei", List.of(new LabelSelection("A", 1, 251),
+        Structure s2 = allPurposeReader.readFromInputStream(getInputStream("3pei"), List.of(new LabelSelection("A", 1, 251),
                 new LabelSelection("A", 1, 256),
                 new LabelSelection("A", 1, 274),
                 new LabelSelection("A", 1, 333),

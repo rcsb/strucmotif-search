@@ -55,7 +55,7 @@ public class RenumberedReaderImplTest {
     @Test
     public void shouldBuildAndWriteAssemblyForVirusParticle() throws IOException {
         Structure structure = renumberedReader.readById("2bfu");
-        assertEquals(2 * 60, structure.getChains().size());
+        assertEquals(120, structure.getChains().size());
 
         new GenericTextStructureWriter().write(structure, Paths.get("target/test_renum.cif"));
     }
@@ -133,7 +133,7 @@ public class RenumberedReaderImplTest {
     @Test
     public void shouldCreateStructureWithBioAssemblies() {
         Structure structure = renumberedReader.readById("1m4x");
-        assertEquals(3 * 1680, chainCount(structure));
+        assertEquals(5040, chainCount(structure));
         assertEquals(3 * 1680 * 413, componentCount(structure));
         assertEquals(3 * 1680 * 3231, atomCount(structure));
     }

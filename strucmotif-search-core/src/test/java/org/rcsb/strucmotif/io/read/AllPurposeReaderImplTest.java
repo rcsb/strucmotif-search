@@ -62,18 +62,18 @@ public class AllPurposeReaderImplTest {
     public void shouldHandle4cha() {
         Structure structure = allPurposeReader.readById("4cha");
 
-        assertEquals(11, chainCount(structure));
-        assertEquals(562, entityCount(structure));
-        assertEquals(3591, atomCount(structure));
+        assertEquals(6, chainCount(structure));
+        assertEquals(477, entityCount(structure));
+        assertEquals(3506, atomCount(structure));
     }
 
     @Test
     public void shouldBuildAssembliesForDoubleIdentityOperatorAndDuplicatedChains() {
         Structure structure = allPurposeReader.readById("3uud");
 
-        assertEquals(14, chainCount(structure));
-        assertEquals(883, entityCount(structure));
-        assertEquals(4459, atomCount(structure));
+        assertEquals(4, chainCount(structure));
+        assertEquals(499, entityCount(structure));
+        assertEquals(4013, atomCount(structure));
     }
 
     @Test
@@ -97,18 +97,18 @@ public class AllPurposeReaderImplTest {
     public void shouldCreateTrivialStructure() {
         Structure structure = allPurposeReader.readById("1exr");
 
-        assertEquals(7, chainCount(structure));
-        assertEquals(329, entityCount(structure));
-        assertEquals(1650, atomCount(structure));
+        assertEquals(1, chainCount(structure));
+        assertEquals(146, entityCount(structure));
+        assertEquals(1467, atomCount(structure));
     }
 
     @Test
     public void shouldCreateStructureWithSymmetry() {
         Structure structure = allPurposeReader.readById("1acj");
 
-        assertEquals(2 * 3, chainCount(structure));
-        assertEquals(2 * (528 + 1 + 82), entityCount(structure));
-        assertEquals(2 * 4192, atomCount(structure));
+        assertEquals(2, chainCount(structure));
+        assertEquals(2 * 528, entityCount(structure));
+        assertEquals(8190, atomCount(structure));
     }
 
     @Test

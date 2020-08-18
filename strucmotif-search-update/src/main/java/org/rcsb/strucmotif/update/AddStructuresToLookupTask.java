@@ -53,14 +53,14 @@ import java.util.stream.Collectors;
  *     flushing of all other threads.</li>
  * </ul>
  */
-class AddStructuresToLookupTask {
+public class AddStructuresToLookupTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToLookupTask.class);
     private static final int CHUNK_SIZE = 400;
     private static final String TASK_NAME = AddStructuresToLookupTask.class.getSimpleName();
     private final MotifLookup motifLookup;
     private final RenumberedReader renumberedReader;
 
-    AddStructuresToLookupTask(String[] args, MotifLookup motifLookup, RenumberedReader renumberedReader) throws IOException {
+    public AddStructuresToLookupTask(String[] args, MotifLookup motifLookup, RenumberedReader renumberedReader) throws IOException {
         this.motifLookup = motifLookup;
         this.renumberedReader = renumberedReader;
 

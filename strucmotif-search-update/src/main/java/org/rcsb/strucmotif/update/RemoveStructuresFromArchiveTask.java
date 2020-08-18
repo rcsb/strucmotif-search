@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 /**
  * The routine to remove files from the structural motif search tool (e.g. after superseding an ID).
  */
-class RemoveStructuresFromArchiveTask {
+public class RemoveStructuresFromArchiveTask {
     private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromArchiveTask.class);
     private static final String TASK_NAME = RemoveStructuresFromArchiveTask.class.getSimpleName();
 
-    RemoveStructuresFromArchiveTask(String[] args) throws IOException {
+    public RemoveStructuresFromArchiveTask(String[] args) throws IOException {
         logger.info("[{}] starting remove structures from archive",
                 TASK_NAME);
 

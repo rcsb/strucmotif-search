@@ -16,11 +16,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Creates dedicated, reduced representation of all structure files. Prepares structures to be added to the index.
  */
-class AddStructuresToArchiveTask {
+public class AddStructuresToArchiveTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToArchiveTask.class);
     private static final String TASK_NAME = AddStructuresToArchiveTask.class.getSimpleName();
 
-    AddStructuresToArchiveTask(String[] args, StructureWriter<CifFile> renumberedWriter) throws IOException {
+    public AddStructuresToArchiveTask(String[] args, StructureWriter<CifFile> renumberedWriter) throws IOException {
         logger.info("[{}] starting structural motif search archive update",
                 TASK_NAME);
 
@@ -42,7 +42,7 @@ class AddStructuresToArchiveTask {
                         // ensure directories exist
                         Files.createDirectories(MotifSearch.ARCHIVE_PATH);
 
-                        CifFile cifFile = CifIO.readById(id);
+                        CifFile cifFile = readById(id);
                         renumberedWriter.write(cifFile);
                         // need to concat externally to prevent malformed output (if ever used in parallel)
                         String concat = id + System.lineSeparator();
@@ -60,5 +60,9 @@ class AddStructuresToArchiveTask {
 
         logger.info("[{}] finished archive update",
                 TASK_NAME);
+    }
+
+    protected CifFile readById(String pdbId) throws IOException {
+        return CifIO.readById(pdbId);
     }
 }

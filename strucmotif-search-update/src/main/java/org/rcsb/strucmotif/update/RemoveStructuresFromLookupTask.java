@@ -24,13 +24,13 @@ import java.util.stream.Stream;
 /**
  * Will cleanup the inverted index in a rather time-intensive manner.
  */
-class RemoveStructuresFromLookupTask {
+public class RemoveStructuresFromLookupTask {
     private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromLookupTask.class);
     private static final String TASK_NAME = RemoveStructuresFromLookupTask.class.getSimpleName();
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
 
-    RemoveStructuresFromLookupTask(String[] ids, MotifLookup motifLookup) throws IOException {
+    public RemoveStructuresFromLookupTask(String[] ids, MotifLookup motifLookup) throws IOException {
         logger.info("[{}] starting removal of obsolete structures from index",
                 TASK_NAME);
 

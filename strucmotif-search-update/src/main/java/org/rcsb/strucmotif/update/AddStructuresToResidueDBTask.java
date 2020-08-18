@@ -37,7 +37,7 @@ public class AddStructuresToResidueDBTask {
     private static final String TASK_NAME = AddStructuresToResidueDBTask.class.getSimpleName();
     private static final int CHUNK_SIZE = 400;
 
-    AddStructuresToResidueDBTask(String[] args, MongoResidueDB residueDB) {
+    public AddStructuresToResidueDBTask(String[] args, MongoResidueDB residueDB) {
         List<String> identifiers = Arrays.stream(args).collect(Collectors.toList());
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
         Collections.shuffle(identifiers);

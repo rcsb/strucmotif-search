@@ -17,7 +17,7 @@ public class MockMotifLookupImpl extends MotifLookupImpl {
     @Inject
     public MockMotifLookupImpl(MessagePackCodec messagePackCodec) {
         super(messagePackCodec);
-        logger.info("mocking motif lookup");
+        logger.info("Mocking motif lookup");
     }
 
     @Override

@@ -20,20 +20,24 @@ import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
 
+/**
+ * Use locally stored data that we expect to use for tests.
+ * The uncommented lines can be used to create the mock data.
+ */
 public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
     private static final Logger logger = LoggerFactory.getLogger(MockMotifLookupImpl.class);
     private final Map<String, String> titles;
     private final Map<String, BasicDBList> components;
-    private final MongoCollection<DBObject> titles2;
-    private final MongoCollection<DBObject> components2;
+//    private final MongoCollection<DBObject> titles2;
+//    private final MongoCollection<DBObject> components2;
 
     public MockMongoResidueDBImpl() throws IOException {
-        logger.info("mocking component-DB");
+        logger.info("Mocking residue-DB");
 
-        MongoClient mongoClient = new MongoClient();
-        MongoDatabase database = mongoClient.getDatabase("motif");
-        titles2 = database.getCollection("titles", DBObject.class);
-        components2 = database.getCollection("components", DBObject.class);
+//        MongoClient mongoClient = new MongoClient();
+//        MongoDatabase database = mongoClient.getDatabase("motif");
+//        titles2 = database.getCollection("titles", DBObject.class);
+//        components2 = database.getCollection("components", DBObject.class);
 
         try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mongo/titles.csv")) {
             this.titles = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream)))
@@ -69,15 +73,15 @@ public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
 
     @Override
     public String selectTitle(String pdbId) {
-        System.out.println(pdbId + titles2.find(eq("_id", pdbId)).first().get("v"));
+//        System.out.println(pdbId + titles2.find(eq("_id", pdbId)).first().get("v"));
         return titles.get(pdbId);
     }
 
     @Override
     public BasicDBList selectResidue(String pdbId, int assemblyId, int index) {
-        if(components.get(pdbId + ":" + assemblyId + ":" + index) == null) {
-            System.out.println(pdbId + ":" + assemblyId + ":" + index + components2.find(eq("_id", pdbId + ":" + assemblyId + ":" + index)).first().get("v"));
-        }
+//        if(components.get(pdbId + ":" + assemblyId + ":" + index) == null) {
+//            System.out.println(pdbId + ":" + assemblyId + ":" + index + components2.find(eq("_id", pdbId + ":" + assemblyId + ":" + index)).first().get("v"));
+//        }
         return components.get(pdbId + ":" + assemblyId + ":" + index);
     }
 

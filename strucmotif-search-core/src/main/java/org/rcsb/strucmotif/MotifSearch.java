@@ -64,7 +64,7 @@ public class MotifSearch {
 
     public static final boolean NO_MONGO_DB;
 
-    public static final ForkJoinPool FORK_JOIN_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
+    public static final ForkJoinPool FORK_JOIN_POOL;
     private static final DecimalFormat DECIMAL_FORMAT;
     private static final MotifSearch INSTANCE = new MotifSearch();
 
@@ -86,9 +86,13 @@ public class MotifSearch {
     static {
         logger.info("Setting motif search constants");
         try (InputStream input = MotifSearch.class.getClassLoader().getResourceAsStream("config.properties")) {
-            Objects.requireNonNull(input, "did not find property file: 'config.properties' on classpath");
+            Objects.requireNonNull(input, "Did not find property file: 'config.properties' on classpath");
             Properties prop = new Properties();
             prop.load(input);
+
+            int threads = Runtime.getRuntime().availableProcessors();
+            logger.debug("Will use {} threads", threads);
+            FORK_JOIN_POOL = new ForkJoinPool(threads);
 
             // the cutoff up to which words are detected
             DISTANCE_CUTOFF = Double.parseDouble(prop.getProperty("distance.cutoff"));

@@ -14,6 +14,8 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,13 +29,16 @@ import java.util.Collection;
  */
 @Singleton
 public class AllPurposeReaderImpl implements AllPurposeReader {
+    private static final Logger logger = LoggerFactory.getLogger(AllPurposeReaderImpl.class);
     private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_PLAIN).build();
     private static final String FETCH_URL = "https://models.rcsb.org/%s.bcif";
 
     @Override
     public Structure readById(String pdbId, Collection<LabelSelection> selection) {
         try {
-            InputStream inputStream = new URL(String.format(FETCH_URL, pdbId)).openStream();
+            URL url = new URL(String.format(FETCH_URL, pdbId));
+            logger.debug("Loading structure from {} - selection: {}", url, selection);
+            InputStream inputStream = url.openStream();
             BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream, OPTIONS);
             return new GenericReaderState(cifFile, selection).build();
         } catch (IOException e) {

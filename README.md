@@ -24,7 +24,7 @@ mongod --dbpath=/opt/data/mongodb
 ```java
 class Demo {
     public static void main(String[] args) {
-        MotifSearchResult simple = MotifSearch.newQuery()
+        MotifSearch.newQuery()
             .defineByPdbIdAndSelection("4cha",
                 Set.of(new LabelSelection("B", 1, 42), // HIS
                        new LabelSelection("B", 1, 87), // ASP

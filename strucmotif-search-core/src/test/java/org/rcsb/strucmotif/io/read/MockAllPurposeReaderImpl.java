@@ -15,7 +15,7 @@ public class MockAllPurposeReaderImpl extends AllPurposeReaderImpl {
     private static final Logger logger = LoggerFactory.getLogger(MockAllPurposeReaderImpl.class);
 
     public MockAllPurposeReaderImpl() {
-        logger.info("Mocking original structure reading");
+        logger.debug("Mocking original structure reading");
     }
 
     @Override

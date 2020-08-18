@@ -13,7 +13,7 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
+import org.rcsb.strucmotif.io.read.AllPurposeReader;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -28,6 +28,8 @@ import static org.rcsb.strucmotif.domain.Matrix4DTransformation.IDENTITY_MATRIX_
 public class QuaternionAlignmentTest {
     @Inject
     private Alignment alignment;
+    @Inject
+    private AllPurposeReader allPurposeReader;
     private static int seqId = 1;
     private static int atomId = 1;
 
@@ -120,7 +122,6 @@ public class QuaternionAlignmentTest {
 
     @Test
     public void computeRmsdForAminopeptidaseExample() {
-        AllPurposeReaderImpl allPurposeReader = new AllPurposeReaderImpl();
         Structure s1 = allPurposeReader.readFromInputStream(getInputStream("1lap"), List.of(new LabelSelection("A", 1, 250),
                 new LabelSelection("A", 1, 255),
                 new LabelSelection("A", 1, 273),

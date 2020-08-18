@@ -8,7 +8,7 @@ import java.util.Set;
 public class Demo {
     public static void main(String[] args) {
         // the entry point for all things motif search - #newQuery() starts building a new query
-        MotifSearchResult simple = MotifSearch.newQuery()
+        MotifSearch.newQuery()
                 // several ways can be used to define the query motif - specify a PDB entry id
                 .defineByPdbIdAndSelection("4cha",
                         // and a collection of sequence positions to extract residues to use as motif

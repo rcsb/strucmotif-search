@@ -30,7 +30,7 @@ public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
 //    private final MongoCollection<DBObject> components2;
 
     public MockMongoResidueDBImpl() throws IOException {
-        logger.info("Mocking residue-DB");
+        logger.debug("Mocking residue-DB");
 
 //        MongoClient mongoClient = new MongoClient();
 //        MongoDatabase database = mongoClient.getDatabase("motif");

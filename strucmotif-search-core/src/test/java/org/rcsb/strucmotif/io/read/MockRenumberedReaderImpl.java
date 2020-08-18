@@ -15,7 +15,7 @@ public class MockRenumberedReaderImpl extends RenumberedReaderImpl {
     private static final Logger logger = LoggerFactory.getLogger(MockRenumberedReaderImpl.class);
 
     public MockRenumberedReaderImpl() {
-        logger.info("Mocking renumbered structure reading");
+        logger.debug("Mocking renumbered structure reading");
     }
 
     @Override

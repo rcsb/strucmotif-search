@@ -14,6 +14,7 @@ import org.rcsb.cif.schema.mm.AtomSite;
 import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifBlockBuilder;
 import org.rcsb.cif.schema.mm.MmCifCategoryBuilder;
+import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
@@ -24,7 +25,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 @Singleton
-public class RenumberedWriterImpl implements StructureWriter<CifFile> {
+public class RenumberedWriterImpl implements StructureWriter {
     private static final CifOptions OPTIONS = CifOptions.builder()
             .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
             .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)
@@ -32,8 +33,8 @@ public class RenumberedWriterImpl implements StructureWriter<CifFile> {
             .build();
 
     @Override
-    public void write(CifFile inputFile) {
-        MmCifBlock block = inputFile.as(StandardSchemata.MMCIF).getFirstBlock();
+    public void write(MmCifFile inputFile) {
+        MmCifBlock block = inputFile.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         Struct struct = block.getStruct();

@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReaderImpl;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
+import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public class AddStructuresToResidueDBTask {
     private static final String TASK_NAME = AddStructuresToResidueDBTask.class.getSimpleName();
     private static final int CHUNK_SIZE = 400;
 
-    public AddStructuresToResidueDBTask(String[] args, MongoResidueDB residueDB) {
+    public AddStructuresToResidueDBTask(String[] args, MongoResidueDB residueDB, MongoTitleDB titleDB) {
         List<String> identifiers = Arrays.stream(args).collect(Collectors.toList());
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
         Collections.shuffle(identifiers);
@@ -136,7 +137,7 @@ public class AddStructuresToResidueDBTask {
 
             logger.info("[{}] writing to MongoDB",
                     partitionContext);
-            residueDB.insertTitles(titleObjects);
+            titleDB.insertTitles(titleObjects);
             // hack to ensure unique keys - not needed but we cannot afford DB-writing to fail here
             residueDB.insertResidues(residueObjects.stream()
                     .filter(distinctByKey(dbObject -> dbObject.get("_id")))

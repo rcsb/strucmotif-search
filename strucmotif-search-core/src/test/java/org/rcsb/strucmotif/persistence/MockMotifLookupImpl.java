@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Singleton
-public class MockMotifLookupImpl extends MotifLookupImpl {
+public class MockMotifLookupImpl extends FileSystemInvertedIndexImpl {
     private static final Logger logger = LoggerFactory.getLogger(MockMotifLookupImpl.class);
 
     @Inject

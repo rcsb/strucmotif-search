@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.update;
 
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
+import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +16,7 @@ public class RemoveStructuresFromResidueDBTask {
     private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromResidueDBTask.class);
     private static final String TASK_NAME = RemoveStructuresFromResidueDBTask.class.getSimpleName();
 
-    public RemoveStructuresFromResidueDBTask(String[] ids, MongoResidueDB residueDB) throws IOException {
+    public RemoveStructuresFromResidueDBTask(String[] ids, MongoResidueDB residueDB, MongoTitleDB titleDB) throws IOException {
         logger.info("[{}] starting removal of obsolete structures from component-DB",
                 TASK_NAME);
 
@@ -29,8 +30,8 @@ public class RemoveStructuresFromResidueDBTask {
         }
 
         for (String id : ids) {
-            residueDB.deleteTitle(id);
             residueDB.deleteResidues(id);
+            titleDB.deleteTitle(id);
         }
 
         List<String> identifiers = List.of(ids);

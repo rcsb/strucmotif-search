@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  * The specification on how to insert and select residue pair occurrences. Update operate is not directly supported (rather
  * invalid/obsolete identifiers have to be removed manually and subsequently the new data can be inserted).
  */
-public interface MotifLookup {
+public interface InvertedIndex {
     /**
      * Insert operation for new data.
      * @param residuePairDescriptor the bin for which new data should be written

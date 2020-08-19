@@ -12,9 +12,12 @@ import org.rcsb.strucmotif.io.MinimizedMessagePackCodec;
 import org.rcsb.strucmotif.io.read.*;
 import org.rcsb.strucmotif.io.write.RenumberedWriterImpl;
 import org.rcsb.strucmotif.io.write.StructureWriter;
+import org.rcsb.strucmotif.persistence.MongoInvertedIndexImpl;
 import org.rcsb.strucmotif.persistence.MongoResidueDBImpl;
-import org.rcsb.strucmotif.persistence.MotifLookup;
-import org.rcsb.strucmotif.persistence.MotifLookupImpl;
+import org.rcsb.strucmotif.persistence.MongoTitleDB;
+import org.rcsb.strucmotif.persistence.MongoTitleDBImpl;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.FileSystemInvertedIndexImpl;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +47,12 @@ public class MotifSearch {
             bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
             bind(AllPurposeReader.class).to(AllPurposeReaderImpl.class);
             bind(RenumberedReader.class).to(RenumberedReaderImpl.class);
-            bind(SelectionReader.class).to(NO_MONGO_DB ? FileSystemSelectionReaderImpl.class : MongoDBSelectionReaderImpl.class);
+            bind(SelectionReader.class).to(NO_MONGO_DB ? FileSystemSelectionReaderImpl.class : MongoSelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
             bind(MongoResidueDB.class).to(NO_MONGO_DB ? null : MongoResidueDBImpl.class);
-            bind(MotifLookup.class).to(MotifLookupImpl.class);
+            bind(MongoTitleDB.class).to(NO_MONGO_DB ? null : MongoTitleDBImpl.class);
+            bind(InvertedIndex.class).to(NO_MONGO_DB ? FileSystemInvertedIndexImpl.class : MongoInvertedIndexImpl.class);
         }
     };
 

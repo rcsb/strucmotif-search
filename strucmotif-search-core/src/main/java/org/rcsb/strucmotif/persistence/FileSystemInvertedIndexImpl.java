@@ -23,12 +23,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * The naive file-system-based implementation of the inverted index.
+ */
 @Singleton
-public class MotifLookupImpl implements MotifLookup {
+public class FileSystemInvertedIndexImpl implements InvertedIndex {
     private final MessagePackCodec messagePackCodec;
 
     @Inject
-    public MotifLookupImpl(MessagePackCodec messagePackCodec) {
+    public FileSystemInvertedIndexImpl(MessagePackCodec messagePackCodec) {
         this.messagePackCodec = messagePackCodec;
     }
 

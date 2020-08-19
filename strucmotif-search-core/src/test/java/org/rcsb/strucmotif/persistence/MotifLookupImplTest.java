@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(GuiceJUnit4Runner.class)
 public class MotifLookupImplTest {
     @Inject
-    private MotifLookup motifLookup;
+    private InvertedIndex motifLookup;
     private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
             ResidueType.ARGININE,
             DistanceType.D15,

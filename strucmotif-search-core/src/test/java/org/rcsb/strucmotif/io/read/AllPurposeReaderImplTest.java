@@ -24,6 +24,8 @@ public class AllPurposeReaderImplTest {
     @Inject
     private AllPurposeReader allPurposeReader;
 
+    // TODO 4udf seems slow
+
     @Test
     public void shouldHandleMicroheterogeneityAtSequenceLevel() {
         Structure structure = allPurposeReader.readById("1eta");

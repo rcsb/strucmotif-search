@@ -2,6 +2,8 @@ package org.rcsb.strucmotif.update;
 
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.model.CifFile;
+import org.rcsb.cif.schema.StandardSchemata;
+import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.slf4j.Logger;
@@ -20,7 +22,7 @@ public class AddStructuresToArchiveTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToArchiveTask.class);
     private static final String TASK_NAME = AddStructuresToArchiveTask.class.getSimpleName();
 
-    public AddStructuresToArchiveTask(String[] args, StructureWriter<CifFile> renumberedWriter) throws IOException {
+    public AddStructuresToArchiveTask(String[] args, StructureWriter renumberedWriter) throws IOException {
         logger.info("[{}] starting structural motif search archive update",
                 TASK_NAME);
 
@@ -42,7 +44,7 @@ public class AddStructuresToArchiveTask {
                         // ensure directories exist
                         Files.createDirectories(MotifSearch.ARCHIVE_PATH);
 
-                        CifFile cifFile = readById(id);
+                        MmCifFile cifFile = readById(id).as(StandardSchemata.MMCIF);
                         renumberedWriter.write(cifFile);
                         // need to concat externally to prevent malformed output (if ever used in parallel)
                         String concat = id + System.lineSeparator();

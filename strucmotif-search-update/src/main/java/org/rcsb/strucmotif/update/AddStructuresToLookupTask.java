@@ -6,7 +6,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
-import org.rcsb.strucmotif.persistence.MotifLookup;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,10 +57,10 @@ public class AddStructuresToLookupTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToLookupTask.class);
     private static final int CHUNK_SIZE = 400;
     private static final String TASK_NAME = AddStructuresToLookupTask.class.getSimpleName();
-    private final MotifLookup motifLookup;
+    private final InvertedIndex motifLookup;
     private final RenumberedReader renumberedReader;
 
-    public AddStructuresToLookupTask(String[] args, MotifLookup motifLookup, RenumberedReader renumberedReader) throws IOException {
+    public AddStructuresToLookupTask(String[] args, InvertedIndex motifLookup, RenumberedReader renumberedReader) throws IOException {
         this.motifLookup = motifLookup;
         this.renumberedReader = renumberedReader;
 

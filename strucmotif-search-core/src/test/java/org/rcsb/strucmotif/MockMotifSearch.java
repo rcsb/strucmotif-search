@@ -19,13 +19,15 @@ import org.rcsb.strucmotif.io.read.MockAllPurposeReaderImpl;
 import org.rcsb.strucmotif.io.read.MockRenumberedReaderImpl;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.io.read.SelectionReader;
-import org.rcsb.strucmotif.io.read.MongoDBSelectionReaderImpl;
+import org.rcsb.strucmotif.io.read.MongoSelectionReaderImpl;
 import org.rcsb.strucmotif.io.write.RenumberedWriterImpl;
 import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.rcsb.strucmotif.persistence.MockMongoResidueDBImpl;
+import org.rcsb.strucmotif.persistence.MockMongoTitleDBImpl;
 import org.rcsb.strucmotif.persistence.MockMotifLookupImpl;
-import org.rcsb.strucmotif.persistence.MotifLookup;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
+import org.rcsb.strucmotif.persistence.MongoTitleDB;
 
 public class MockMotifSearch {
     private static final MockMotifSearch INSTANCE = new MockMotifSearch();
@@ -49,11 +51,12 @@ public class MockMotifSearch {
             bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
             bind(AllPurposeReader.class).to(MockAllPurposeReaderImpl.class);
             bind(RenumberedReader.class).to(MockRenumberedReaderImpl.class);
-            bind(SelectionReader.class).to(MongoDBSelectionReaderImpl.class);
+            bind(SelectionReader.class).to(MongoSelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
             bind(MongoResidueDB.class).to(MockMongoResidueDBImpl.class);
-            bind(MotifLookup.class).to(MockMotifLookupImpl.class);
+            bind(MongoTitleDB.class).to(MockMongoTitleDBImpl.class);
+            bind(InvertedIndex.class).to(MockMotifLookupImpl.class);
         }
     }
 }

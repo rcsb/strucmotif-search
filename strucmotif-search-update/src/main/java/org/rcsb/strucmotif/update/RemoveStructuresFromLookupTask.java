@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.rcsb.strucmotif.persistence.MotifLookup;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +30,7 @@ public class RemoveStructuresFromLookupTask {
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
 
-    public RemoveStructuresFromLookupTask(String[] ids, MotifLookup motifLookup) throws IOException {
+    public RemoveStructuresFromLookupTask(String[] ids, InvertedIndex motifLookup) throws IOException {
         logger.info("[{}] starting removal of obsolete structures from index",
                 TASK_NAME);
 

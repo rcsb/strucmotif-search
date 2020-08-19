@@ -17,7 +17,7 @@ import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.read.SelectionReader;
-import org.rcsb.strucmotif.persistence.MotifLookup;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,11 +35,11 @@ import java.util.stream.Collectors;
 @Singleton
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
-    private final MotifLookup motifLookup;
+    private final InvertedIndex motifLookup;
     private final SelectionReader selectionReader;
 
     @Inject
-    public TargetAssemblerImpl(MotifLookup motifLookup, SelectionReader selectionReader) {
+    public TargetAssemblerImpl(InvertedIndex motifLookup, SelectionReader selectionReader) {
         this.motifLookup = motifLookup;
         this.selectionReader = selectionReader;
     }

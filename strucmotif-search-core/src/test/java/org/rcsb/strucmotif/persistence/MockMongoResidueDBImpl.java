@@ -21,12 +21,10 @@ import java.util.stream.Collectors;
  * The uncommented lines can be used to create the mock data.
  */
 @Singleton
-public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
+public class MockMongoResidueDBImpl implements MongoResidueDB {
     // TODO recreate mock data
-    private static final Logger logger = LoggerFactory.getLogger(MockMotifLookupImpl.class);
-    private final Map<String, String> titles;
+    private static final Logger logger = LoggerFactory.getLogger(MockMongoResidueDBImpl.class);
     private final Map<String, BasicDBList> components;
-//    private final MongoCollection<DBObject> titles2;
 //    private final MongoCollection<DBObject> components2;
 
     public MockMongoResidueDBImpl() throws IOException {
@@ -34,15 +32,7 @@ public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
 
 //        MongoClient mongoClient = new MongoClient();
 //        MongoDatabase database = mongoClient.getDatabase("motif");
-//        titles2 = database.getCollection("titles", DBObject.class);
 //        components2 = database.getCollection("components", DBObject.class);
-
-        try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mongo/titles.csv")) {
-            this.titles = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream)))
-                    .lines()
-                    .map(line -> new Pair<>(line.substring(0, 4), line.substring(4)))
-                    .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-        }
 
         try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("mongo/components.csv")) {
             this.components = new BufferedReader(new InputStreamReader(Objects.requireNonNull(inputStream)))
@@ -70,12 +60,6 @@ public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
     }
 
     @Override
-    public String selectTitle(String pdbId) {
-//        System.out.println(pdbId + titles2.find(eq("_id", pdbId)).first().get("v"));
-        return titles.get(pdbId);
-    }
-
-    @Override
     public BasicDBList selectResidue(String pdbId, int assemblyId, int index) {
 //        if(components.get(pdbId + ":" + assemblyId + ":" + index) == null) {
 //            System.out.println(pdbId + ":" + assemblyId + ":" + index + components2.find(eq("_id", pdbId + ":" + assemblyId + ":" + index)).first().get("v"));
@@ -84,27 +68,12 @@ public class MockMongoResidueDBImpl extends MongoResidueDBImpl {
     }
 
     @Override
-    public void insertTitles(List<DBObject> titles) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void insertResidues(List<DBObject> components) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void deleteTitle(String pdbId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public void deleteResidues(String pdbId) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void close() {
-        // not needed
     }
 }

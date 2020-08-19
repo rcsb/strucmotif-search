@@ -3,12 +3,12 @@ package org.rcsb.strucmotif.update;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.rcsb.cif.model.CifFile;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.io.write.StructureWriter;
-import org.rcsb.strucmotif.persistence.MotifLookup;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
+import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +35,16 @@ public class MotifSearchUpdate {
 
     public static void main(String[] args) throws IOException {
         Injector injector = Guice.createInjector(MotifSearch.MOTIF_SEARCH_MODULE);
-        @SuppressWarnings("unchecked")
-        StructureWriter<CifFile> renumberedWriter = injector.getInstance(StructureWriter.class);
+        StructureWriter renumberedWriter = injector.getInstance(StructureWriter.class);
         RenumberedReader renumberedReader = injector.getInstance(RenumberedReader.class);
-        MotifLookup motifLookup = injector.getInstance(MotifLookup.class);
+        InvertedIndex motifLookup = injector.getInstance(InvertedIndex.class);
         MongoResidueDB residueDB = injector.getInstance(MongoResidueDB.class);
+        MongoTitleDB titleDB = injector.getInstance(MongoTitleDB.class);
 
         // perform all steps that add structures to archive, database, or lookup
         for (Context context : Context.values()) {
             String[] ids = getDeltaPlusIdentifierList(getFullIdentifierList(), context);
-                logger.info("[{}] incremental mode - {} entries ({})",
+                logger.info("[{}] Incremental mode - {} entries ({})",
                         TASK_NAME,
                         ids.length,
                         Arrays.toString(ids));
@@ -55,7 +55,7 @@ public class MotifSearchUpdate {
                     break;
                 case RESIDUE:
                     if (!MotifSearch.NO_MONGO_DB) {
-                        new AddStructuresToResidueDBTask(ids, residueDB);
+                        new AddStructuresToResidueDBTask(ids, residueDB, titleDB);
                     }
                     break;
                 case LOOKUP:
@@ -67,7 +67,7 @@ public class MotifSearchUpdate {
         // perform all steps that remove structures from archive, database, or lookup
         for (Context context : Context.values()) {
             String[] ids = getDeltaMinusIdentifierList(getFullIdentifierList(), context);
-            logger.info("[{}] incremental mode - {} entries ({})",
+            logger.info("[{}] Incremental mode - {} entries ({})",
                     TASK_NAME,
                     ids.length,
                     Arrays.toString(ids));
@@ -78,7 +78,7 @@ public class MotifSearchUpdate {
                     break;
                 case RESIDUE:
                     if (!MotifSearch.NO_MONGO_DB) {
-                        new RemoveStructuresFromResidueDBTask(ids, residueDB);
+                        new RemoveStructuresFromResidueDBTask(ids, residueDB, titleDB);
                     }
                     break;
                 case LOOKUP:
@@ -121,7 +121,7 @@ public class MotifSearchUpdate {
                 throw new UnsupportedOperationException("context " + context + " not supported");
             }
         } catch (IOException e) {
-            logger.warn("[{}] no existing data - starting from scratch",
+            logger.warn("[{}] No existing data - starting from scratch",
                     TASK_NAME);
             return Stream.of(fullIdentifierList)
                     .map(String::toLowerCase)
@@ -157,7 +157,7 @@ public class MotifSearchUpdate {
                 throw new UnsupportedOperationException("context " + context + " not supported");
             }
         } catch (IOException e) {
-            logger.warn("[{}] no existing data - no need for cleanup of obsolete entries",
+            logger.warn("[{}] No existing data - no need for cleanup of obsolete entries",
                     TASK_NAME);
             return new String[0];
         }

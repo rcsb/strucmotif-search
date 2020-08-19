@@ -16,6 +16,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
+import org.rcsb.strucmotif.persistence.MongoTitleDB;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,17 +27,19 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class MongoDBSelectionReaderImpl implements SelectionReader {
+public class MongoSelectionReaderImpl implements SelectionReader {
     private final MongoResidueDB residueDB;
+    private final MongoTitleDB titleDB;
 
     @Inject
-    public MongoDBSelectionReaderImpl(MongoResidueDB residueDB) {
+    public MongoSelectionReaderImpl(MongoResidueDB residueDB, MongoTitleDB titleDB) {
         this.residueDB = residueDB;
+        this.titleDB = titleDB;
     }
 
     @Override
     public Structure readById(String pdbId, Collection<IndexSelection> selection) {
-        String title = residueDB.selectTitle(pdbId);
+        String title = titleDB.selectTitle(pdbId);
         Map<ChainIdentifier, List<Residue>> tmp = new LinkedHashMap<>();
 
         int aIndex = 0;

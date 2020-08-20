@@ -24,14 +24,15 @@ import java.util.stream.Stream;
 /**
  * Will cleanup the inverted index in a rather time-intensive manner.
  */
-public class RemoveStructuresFromLookupTask {
-    private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromLookupTask.class);
-    private static final String TASK_NAME = RemoveStructuresFromLookupTask.class.getSimpleName();
+public class RemoveStructuresFromInvertedIndexTask {
+    private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromInvertedIndexTask.class);
+    private static final String TASK_NAME = RemoveStructuresFromInvertedIndexTask.class.getSimpleName();
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
 
-    public RemoveStructuresFromLookupTask(String[] ids, InvertedIndex motifLookup) throws IOException {
-        logger.info("[{}] starting removal of obsolete structures from index",
+    public RemoveStructuresFromInvertedIndexTask(String[] ids, InvertedIndex motifLookup) throws IOException {
+        // TODO update
+        logger.info("[{}] Starting removal of obsolete structures from index",
                 TASK_NAME);
 
         logger.info("[{}] {} structures to remove ({})",
@@ -52,7 +53,7 @@ public class RemoveStructuresFromLookupTask {
                 .filter(path -> !Files.isDirectory(path))
                 .map(Path::toFile)
                 .map(File::getName)
-                .map(RemoveStructuresFromLookupTask::of)
+                .map(RemoveStructuresFromInvertedIndexTask::of)
                 .forEach(wordDescriptor -> motifLookup.delete(wordDescriptor, identifiers));
 
         // update index file - drop all ids to deregister them
@@ -61,7 +62,7 @@ public class RemoveStructuresFromLookupTask {
                 .collect(Collectors.joining("\n"));
         Files.write(MotifSearch.LOOKUP_LIST, output.getBytes());
 
-        logger.info("[{}] finished cleanup of lookup",
+        logger.info("[{}] Finished cleanup of lookup",
                 TASK_NAME);
     }
 

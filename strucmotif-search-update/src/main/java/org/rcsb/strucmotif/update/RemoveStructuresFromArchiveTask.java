@@ -19,7 +19,7 @@ public class RemoveStructuresFromArchiveTask {
     private static final String TASK_NAME = RemoveStructuresFromArchiveTask.class.getSimpleName();
 
     public RemoveStructuresFromArchiveTask(String[] args) throws IOException {
-        logger.info("[{}] starting remove structures from archive",
+        logger.info("[{}] Starting remove structures from archive",
                 TASK_NAME);
 
         List<String> identifiers = List.of(args);
@@ -29,7 +29,7 @@ public class RemoveStructuresFromArchiveTask {
                     try {
                         Path path = MotifSearch.ARCHIVE_PATH.resolve(id + ".bcif");
                         if (Files.exists(path)) {
-                            logger.info("[{}] [{}] removing optimized structure",
+                            logger.info("[{}] [{}] Removing optimized structure",
                                     id,
                                     TASK_NAME);
                             Files.delete(path);
@@ -45,7 +45,7 @@ public class RemoveStructuresFromArchiveTask {
                 .collect(Collectors.joining("\n"));
         Files.write(MotifSearch.ARCHIVE_LIST, archiveFileOutput.getBytes());
 
-        logger.info("[{}] finished archive cleaning",
+        logger.info("[{}] Finished archive cleaning",
                 TASK_NAME);
     }
 }

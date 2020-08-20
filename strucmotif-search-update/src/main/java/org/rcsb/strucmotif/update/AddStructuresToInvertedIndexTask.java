@@ -53,18 +53,18 @@ import java.util.stream.Collectors;
  *     flushing of all other threads.</li>
  * </ul>
  */
-public class AddStructuresToLookupTask {
-    private static final Logger logger = LoggerFactory.getLogger(AddStructuresToLookupTask.class);
+public class AddStructuresToInvertedIndexTask {
+    private static final Logger logger = LoggerFactory.getLogger(AddStructuresToInvertedIndexTask.class);
     private static final int CHUNK_SIZE = 400;
-    private static final String TASK_NAME = AddStructuresToLookupTask.class.getSimpleName();
+    private static final String TASK_NAME = AddStructuresToInvertedIndexTask.class.getSimpleName();
     private final InvertedIndex motifLookup;
     private final RenumberedReader renumberedReader;
 
-    public AddStructuresToLookupTask(String[] args, InvertedIndex motifLookup, RenumberedReader renumberedReader) throws IOException {
+    public AddStructuresToInvertedIndexTask(String[] args, InvertedIndex motifLookup, RenumberedReader renumberedReader) throws IOException {
         this.motifLookup = motifLookup;
         this.renumberedReader = renumberedReader;
 
-        logger.info("[{}] starting structural motif search index update",
+        logger.info("[{}] Starting structural motif search index update",
                 TASK_NAME);
 
         List<String> identifiers = Arrays.stream(args).collect(Collectors.toList());
@@ -86,7 +86,7 @@ public class AddStructuresToLookupTask {
                 totalFileCount);
 
         Partition<Path> partitions = new Partition<>(paths, CHUNK_SIZE);
-        logger.info("[{}] formed {} partitions",
+        logger.info("[{}] Formed {} partitions",
                 TASK_NAME,
                 partitions.size());
 
@@ -96,7 +96,7 @@ public class AddStructuresToLookupTask {
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
             context.partitionContext = (i + 1) + " / " + partitions.size();
-            logger.info("[{}] start processing partition",
+            logger.info("[{}] Start processing partition",
                     context.partitionContext);
 
             context.structureCounter = new AtomicInteger();
@@ -108,7 +108,7 @@ public class AddStructuresToLookupTask {
             writeMotifs(context);
         }
 
-        logger.info("[{}] finished index update",
+        logger.info("[{}] Finished index update",
                 TASK_NAME);
     }
 
@@ -129,13 +129,13 @@ public class AddStructuresToLookupTask {
         try {
             structure = renumberedReader.readById(structureIdentifier);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] [{}] source file missing unexpectedly",
+            logger.warn("[{}] [{}] Source file missing unexpectedly",
                     context.partitionContext,
                     structureContext,
                     e);
             return;
         } catch (UnsupportedOperationException e) {
-            logger.warn("[{}] [{}] no valid polymer chains",
+            logger.warn("[{}] [{}] No valid polymer chains",
                     context.partitionContext,
                     structureContext);
             return;
@@ -156,13 +156,13 @@ public class AddStructuresToLookupTask {
                         targetIdentifiers.add(targetIdentifier);
                         structureMotifCounter.incrementAndGet();
                     });
-            logger.info("[{}] [{}] extracted {} words",
+            logger.info("[{}] [{}] Extracted {} words",
                     context.partitionContext,
                     structureContext,
                     structureMotifCounter.get());
             context.processed.add(structureIdentifier);
         } catch (Exception e) {
-            logger.warn("[{}] [{}] failed",
+            logger.warn("[{}] [{}] Failed",
                     context.partitionContext,
                     structureContext,
                     e);
@@ -170,7 +170,7 @@ public class AddStructuresToLookupTask {
     }
 
     private void writeMotifs(Context context) {
-        logger.info("[{}] persisting {} unique word descriptors to file system",
+        logger.info("[{}] Persisting {} unique word descriptors",
                 context.partitionContext,
                 context.buffer.size());
 

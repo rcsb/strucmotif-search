@@ -23,7 +23,7 @@ public class AddStructuresToArchiveTask {
     private static final String TASK_NAME = AddStructuresToArchiveTask.class.getSimpleName();
 
     public AddStructuresToArchiveTask(String[] args, StructureWriter renumberedWriter) throws IOException {
-        logger.info("[{}] starting structural motif search archive update",
+        logger.info("[{}] Starting structural motif search archive update",
                 TASK_NAME);
 
         List<String> identifiers = List.of(args);
@@ -36,7 +36,7 @@ public class AddStructuresToArchiveTask {
         identifiers.parallelStream()
                 .forEach(id -> {
                     try {
-                        logger.info("[{} / {}] renumbering {}",
+                        logger.info("[{} / {}] Renumbering {}",
                                 counter.incrementAndGet(),
                                 target,
                                 id);
@@ -60,7 +60,7 @@ public class AddStructuresToArchiveTask {
 
         processedWriter.close();
 
-        logger.info("[{}] finished archive update",
+        logger.info("[{}] Finished archive update",
                 TASK_NAME);
     }
 

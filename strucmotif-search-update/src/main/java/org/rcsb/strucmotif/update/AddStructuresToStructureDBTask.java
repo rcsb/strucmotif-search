@@ -10,7 +10,7 @@ import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.RenumberedReaderImpl;
+import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.slf4j.Logger;
@@ -33,12 +33,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class AddStructuresToResidueDBTask {
-    private static final Logger logger = LoggerFactory.getLogger(AddStructuresToResidueDBTask.class);
-    private static final String TASK_NAME = AddStructuresToResidueDBTask.class.getSimpleName();
+public class AddStructuresToStructureDBTask {
+    private static final Logger logger = LoggerFactory.getLogger(AddStructuresToStructureDBTask.class);
+    private static final String TASK_NAME = AddStructuresToStructureDBTask.class.getSimpleName();
     private static final int CHUNK_SIZE = 400;
 
-    public AddStructuresToResidueDBTask(String[] args, MongoResidueDB residueDB, MongoTitleDB titleDB) {
+    public AddStructuresToStructureDBTask(String[] args, RenumberedReader renumberedReader, MongoResidueDB residueDB, MongoTitleDB titleDB) {
         List<String> identifiers = Arrays.stream(args).collect(Collectors.toList());
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
         Collections.shuffle(identifiers);
@@ -55,14 +55,14 @@ public class AddStructuresToResidueDBTask {
                 totalFileCount);
 
         Partition<Path> partitions = new Partition<>(paths, CHUNK_SIZE);
-        logger.info("[{}] formed {} partitions",
+        logger.info("[{}] Formed {} partitions",
                 TASK_NAME,
                 partitions.size());
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
             String partitionContext = (i + 1) + " / " + partitions.size();
-            logger.info("[{}] start processing partition",
+            logger.info("[{}] Start processing partition",
                     partitionContext);
 
             Set<String> processed = new HashSet<>();
@@ -73,7 +73,7 @@ public class AddStructuresToResidueDBTask {
                     .forEach(path -> {
                         String pdbId = path.toFile().getName().split("\\.")[0].toLowerCase();
                         try (InputStream inputStream = Files.newInputStream(path)) {
-                            Structure structure = new RenumberedReaderImpl().readFromInputStream(inputStream);
+                            Structure structure = renumberedReader.readFromInputStream(inputStream);
                             String title = structure.getTitle();
                             titleObjects.add(new BasicDBObjectBuilder()
                                     .add("_id", pdbId)
@@ -118,12 +118,12 @@ public class AddStructuresToResidueDBTask {
 //                            throw new UncheckedIOException(e);
                         } catch (UnsupportedOperationException e) {
                             // this isn't bad
-                            logger.warn("[{}] failed due to empty atom_site record (no valid backbone trace) {}",
+                            logger.warn("[{}] Failed due to empty atom_site record (no valid backbone trace) {}",
                                     partitionContext,
                                     pdbId);
                         } catch (Exception e) {
                             // this is bad
-                            logger.warn("[{}] failed with unexplained reason {}",
+                            logger.warn("[{}] Failed with unexplained reason {}",
                                     partitionContext,
                                     pdbId,
                                     e);
@@ -135,7 +135,7 @@ public class AddStructuresToResidueDBTask {
                 continue;
             }
 
-            logger.info("[{}] writing to MongoDB",
+            logger.info("[{}] Writing to MongoDB",
                     partitionContext);
             titleDB.insertTitles(titleObjects);
             // hack to ensure unique keys - not needed but we cannot afford DB-writing to fail here
@@ -154,7 +154,7 @@ public class AddStructuresToResidueDBTask {
             }
         }
 
-        logger.info("[{}] finished update of residue-DB",
+        logger.info("[{}] Finished update of residue-DB",
                 TASK_NAME);
     }
 

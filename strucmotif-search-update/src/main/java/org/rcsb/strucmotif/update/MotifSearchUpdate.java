@@ -30,7 +30,7 @@ public class MotifSearchUpdate {
     enum Context {
         ARCHIVE,
         RESIDUE,
-        LOOKUP
+        INDEX
     }
 
     public static void main(String[] args) throws IOException {
@@ -41,9 +41,11 @@ public class MotifSearchUpdate {
         MongoResidueDB residueDB = injector.getInstance(MongoResidueDB.class);
         MongoTitleDB titleDB = injector.getInstance(MongoTitleDB.class);
 
+        String[] full = getFullIdentifierList();
+
         // perform all steps that add structures to archive, database, or lookup
         for (Context context : Context.values()) {
-            String[] ids = getDeltaPlusIdentifierList(getFullIdentifierList(), context);
+            String[] ids = getDeltaPlusIdentifierList(full, context);
                 logger.info("[{}] Incremental mode - {} entries ({})",
                         TASK_NAME,
                         ids.length,
@@ -55,11 +57,11 @@ public class MotifSearchUpdate {
                     break;
                 case RESIDUE:
                     if (!MotifSearch.NO_MONGO_DB) {
-                        new AddStructuresToResidueDBTask(ids, residueDB, titleDB);
+                        new AddStructuresToStructureDBTask(ids, renumberedReader, residueDB, titleDB);
                     }
                     break;
-                case LOOKUP:
-                    new AddStructuresToLookupTask(ids, motifLookup, renumberedReader);
+                case INDEX:
+                    new AddStructuresToInvertedIndexTask(ids, motifLookup, renumberedReader);
                     break;
             }
         }
@@ -74,15 +76,15 @@ public class MotifSearchUpdate {
 
             switch (context) {
                 case ARCHIVE:
-                    new RemoveStructuresFromArchiveTask(ids);
+//                    new RemoveStructuresFromArchiveTask(ids);
                     break;
                 case RESIDUE:
                     if (!MotifSearch.NO_MONGO_DB) {
-                        new RemoveStructuresFromResidueDBTask(ids, residueDB, titleDB);
+//                        new RemoveStructuresFromStructureDBTask(ids, residueDB, titleDB);
                     }
                     break;
-                case LOOKUP:
-                    new RemoveStructuresFromLookupTask(ids, motifLookup);
+                case INDEX:
+//                    new RemoveStructuresFromInvertedIndexTask(ids, motifLookup);
                     break;
             }
         }
@@ -103,7 +105,7 @@ public class MotifSearchUpdate {
                         .map(String::toLowerCase)
                         .filter(id -> !known.contains(id))
                         .toArray(String[]::new);
-            } else if (context == Context.LOOKUP) {
+            } else if (context == Context.INDEX) {
                 Set<String> known = Files.lines(MotifSearch.LOOKUP_LIST)
                         .collect(Collectors.toSet());
                 return Stream.of(fullIdentifierList)
@@ -143,7 +145,7 @@ public class MotifSearchUpdate {
                         .map(String::toLowerCase)
                         .filter(id -> !fil.contains(id))
                         .toArray(String[]::new);
-            } else if (context == Context.LOOKUP) {
+            } else if (context == Context.INDEX) {
                 return Files.lines(MotifSearch.LOOKUP_LIST)
                         .map(String::toLowerCase)
                         .filter(id -> !fil.contains(id))

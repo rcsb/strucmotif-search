@@ -12,12 +12,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RemoveStructuresFromResidueDBTask {
-    private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromResidueDBTask.class);
-    private static final String TASK_NAME = RemoveStructuresFromResidueDBTask.class.getSimpleName();
+public class RemoveStructuresFromStructureDBTask {
+    private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromStructureDBTask.class);
+    private static final String TASK_NAME = RemoveStructuresFromStructureDBTask.class.getSimpleName();
 
-    public RemoveStructuresFromResidueDBTask(String[] ids, MongoResidueDB residueDB, MongoTitleDB titleDB) throws IOException {
-        logger.info("[{}] starting removal of obsolete structures from component-DB",
+    public RemoveStructuresFromStructureDBTask(String[] ids, MongoResidueDB residueDB, MongoTitleDB titleDB) throws IOException {
+        logger.info("[{}] Starting removal of obsolete structures from component-DB",
                 TASK_NAME);
 
         logger.info("[{}] {} structures to remove ({})",
@@ -42,7 +42,7 @@ public class RemoveStructuresFromResidueDBTask {
                 .collect(Collectors.joining("\n"));
         Files.write(MotifSearch.RESIDUE_LIST, output.getBytes());
 
-        logger.info("[{}] finished cleanup of residue-DB",
+        logger.info("[{}] Finished cleanup of residue-DB",
                 TASK_NAME);
     }
 }

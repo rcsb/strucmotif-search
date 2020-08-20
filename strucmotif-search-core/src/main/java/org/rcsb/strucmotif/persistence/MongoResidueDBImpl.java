@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.persistence;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
@@ -12,6 +13,7 @@ import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@Singleton
 public class MongoResidueDBImpl implements MongoResidueDB {
     private final MongoCollection<DBObject> residues;
 

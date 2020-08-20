@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif;
 
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.Set;

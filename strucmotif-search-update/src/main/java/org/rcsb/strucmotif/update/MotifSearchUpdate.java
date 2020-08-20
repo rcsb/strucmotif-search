@@ -76,15 +76,15 @@ public class MotifSearchUpdate {
 
             switch (context) {
                 case ARCHIVE:
-//                    new RemoveStructuresFromArchiveTask(ids);
+                    new RemoveStructuresFromArchiveTask(ids);
                     break;
                 case RESIDUE:
                     if (!MotifSearch.NO_MONGO_DB) {
-//                        new RemoveStructuresFromStructureDBTask(ids, residueDB, titleDB);
+                        new RemoveStructuresFromStructureDBTask(ids, residueDB, titleDB);
                     }
                     break;
                 case INDEX:
-//                    new RemoveStructuresFromInvertedIndexTask(ids, motifLookup);
+                    new RemoveStructuresFromInvertedIndexTask(ids, motifLookup);
                     break;
             }
         }

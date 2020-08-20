@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.update;
 
+import com.google.common.collect.Sets;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
@@ -9,17 +10,12 @@ import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Will cleanup the inverted index in a rather time-intensive manner.
@@ -27,11 +23,8 @@ import java.util.stream.Stream;
 public class RemoveStructuresFromInvertedIndexTask {
     private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromInvertedIndexTask.class);
     private static final String TASK_NAME = RemoveStructuresFromInvertedIndexTask.class.getSimpleName();
-    private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
-            .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
 
     public RemoveStructuresFromInvertedIndexTask(String[] ids, InvertedIndex motifLookup) throws IOException {
-        // TODO update
         logger.info("[{}] Starting removal of obsolete structures from index",
                 TASK_NAME);
 
@@ -46,14 +39,18 @@ public class RemoveStructuresFromInvertedIndexTask {
 
         List<String> identifiers = List.of(ids);
 
-        // walk whole lookup: lookup will check each time if manipulation is needed
-        Files.walk(MotifSearch.LOOKUP_PATH, FileVisitOption.FOLLOW_LINKS)
-                .parallel()
-                // ignore directories
-                .filter(path -> !Files.isDirectory(path))
-                .map(Path::toFile)
-                .map(File::getName)
-                .map(RemoveStructuresFromInvertedIndexTask::of)
+        // walk whole lookup: lookup will check each time if manipulation is needed - 8,337,760 combinations
+        // TODO maybe querying mongo would be faster
+        Sets.cartesianProduct(Set.of(ResidueType.values()),
+                Set.of(ResidueType.values()),
+                Set.of(DistanceType.values()),
+                Set.of(DistanceType.values()),
+                Set.of(AngleType.values()))
+                .stream()
+                // filter away flipped identifiers - don't need them
+                .filter(v -> ((ResidueType) v.get(0)).getOneLetterCode().compareTo(((ResidueType) v.get(1)).getOneLetterCode()) <= 0)
+                // is this still Java?
+                .map(v -> new ResiduePairDescriptor((ResidueType) v.get(0), (ResidueType) v.get(1), (DistanceType) v.get(2), (DistanceType) v.get(3), (AngleType) v.get(4)))
                 .forEach(wordDescriptor -> motifLookup.delete(wordDescriptor, identifiers));
 
         // update index file - drop all ids to deregister them
@@ -64,15 +61,5 @@ public class RemoveStructuresFromInvertedIndexTask {
 
         logger.info("[{}] Finished cleanup of lookup",
                 TASK_NAME);
-    }
-
-    private static ResiduePairDescriptor of(String raw) {
-        String[] split = raw.split("\\.")[0].split("-");
-        ResidueType residueType1 = OLC_LOOKUP.getOrDefault(split[0].substring(0, 1), null);
-        ResidueType residueType2 = OLC_LOOKUP.getOrDefault(split[0].substring(1, 2), null);
-        DistanceType d1 = DistanceType.ofIntRepresentation(Integer.parseInt(split[1]));
-        DistanceType d2 = DistanceType.ofIntRepresentation(Integer.parseInt(split[2]));
-        AngleType a = AngleType.ofIntRepresentation(Integer.parseInt(split[3]));
-        return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a);
     }
 }

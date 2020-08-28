@@ -65,7 +65,7 @@ Current benchmark times to search in `160,467` structure as of `2/17/20`.
 - default maximum distance of 2 backbone atoms is 20 A
 - default tolerance value might not find all relevant matches
 - no support for alpha carbon traces
-- data should be stored on SSD (~6 GB for archive, ~65 GB for lookup table, ~40 GB for residue-DB)
+- data should be stored on SSD (~6 GB for archive, ~65 GB for inverted index, ~40 GB for residue-DB)
 
 ## Implementation
 An inverted indexing strategy is employed to find all similar motif occurrences in a search space of >160k structures.

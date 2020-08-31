@@ -30,7 +30,7 @@ public class MotifSearchUpdate {
     private static final String TASK_NAME = MotifSearchUpdate.class.getSimpleName();
     private static final String RCSB_ENTRY_LIST = "http://www.rcsb.org/pdb/json/getCurrent";
 
-    enum Context {
+    public enum Context {
         ARCHIVE,
         RESIDUE,
         INDEX
@@ -102,7 +102,7 @@ public class MotifSearchUpdate {
      * @param known the registered identifiers
      * @return array of IDs that need to be processed for the given context
      */
-    private static Set<StructureIdentifier> getDeltaPlusIdentifiers(Set<StructureIdentifier> requested, Set<StructureIdentifier> known) {
+    public static Set<StructureIdentifier> getDeltaPlusIdentifiers(Set<StructureIdentifier> requested, Set<StructureIdentifier> known) {
         if (known.isEmpty()) {
             logger.warn("[{}] No existing data - starting from scratch",
                     TASK_NAME);
@@ -120,7 +120,7 @@ public class MotifSearchUpdate {
      * @param known the registered identifiers
      * @return array of IDs that need to be remove for the given context
      */
-    private static Set<StructureIdentifier> getDeltaMinusIdentifiers(Set<StructureIdentifier> requested, Set<StructureIdentifier> known) {
+    public static Set<StructureIdentifier> getDeltaMinusIdentifiers(Set<StructureIdentifier> requested, Set<StructureIdentifier> known) {
         if (known.isEmpty()) {
             logger.warn("[{}] No existing data - no need for cleanup of obsolete entries",
                     TASK_NAME);
@@ -132,7 +132,7 @@ public class MotifSearchUpdate {
         }
     }
 
-    private static Set<StructureIdentifier> getKnownIdentifiers(Context context, UpdateStateManager updateStateManager) {
+    public static Set<StructureIdentifier> getKnownIdentifiers(Context context, UpdateStateManager updateStateManager) {
         if (context == Context.ARCHIVE) {
             return updateStateManager.selectArchiveEntries();
         } else if (context == Context.INDEX) {
@@ -144,7 +144,7 @@ public class MotifSearchUpdate {
         }
     }
 
-    private static Set<StructureIdentifier> getAllIdentifiers() throws IOException {
+    public static Set<StructureIdentifier> getAllIdentifiers() throws IOException {
         GetCurrentResponse response;
         try (InputStream inputStream = new URL(RCSB_ENTRY_LIST).openStream()) {
             try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {

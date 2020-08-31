@@ -2,24 +2,24 @@ package org.rcsb.strucmotif.persistence;
 
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
-import java.util.List;
+import java.util.Set;
 
 public interface UpdateStateManager {
-    List<StructureIdentifier> getArchiveEntries();
+    Set<StructureIdentifier> selectArchiveEntries();
 
-    List<StructureIdentifier> getResidueDBEntries();
+    Set<StructureIdentifier> selectResidueDBEntries();
 
-    List<StructureIdentifier> getInvertedIndexEntries();
+    Set<StructureIdentifier> selectInvertedIndexEntries();
 
-    void insertArchiveEntries(List<StructureIdentifier> additions);
+    void insertArchiveEntries(Set<StructureIdentifier> additions);
 
-    void insertResidueDBEntries(List<StructureIdentifier> additions);
+    void insertResidueDBEntries(Set<StructureIdentifier> additions);
 
-    void insertInvertedIndexEntries(List<StructureIdentifier> additions);
+    void insertInvertedIndexEntries(Set<StructureIdentifier> additions);
 
-    void removeArchiveEntries(List<StructureIdentifier> removals);
+    void deleteArchiveEntries(Set<StructureIdentifier> removals);
 
-    void removeResidueDBEntries(List<StructureIdentifier> removals);
+    void deleteResidueDBEntries(Set<StructureIdentifier> removals);
 
-    void removeInvertedIndexEntries(List<StructureIdentifier> removals);
+    void deleteInvertedIndexEntries(Set<StructureIdentifier> removals);
 }

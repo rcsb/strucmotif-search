@@ -4,57 +4,96 @@ import com.google.inject.Singleton;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.rmi.UnexpectedException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class FileSystemUpdateStateManagerImpl implements UpdateStateManager {
-    private static final Path ARCHIVE_LIST = MotifSearch.ARCHIVE_LIST;
-    private static final Path RESIDUE_LIST = MotifSearch.RESIDUE_LIST;
-    private static final Path INDEX_LIST = MotifSearch.INDEX_LIST;
-
     @Override
-    public List<StructureIdentifier> getArchiveEntries() {
-        return null;
+    public Set<StructureIdentifier> selectArchiveEntries() {
+        return select(MotifSearch.ARCHIVE_PATH);
     }
 
     @Override
-    public List<StructureIdentifier> getResidueDBEntries() {
-        return null;
+    public Set<StructureIdentifier> selectResidueDBEntries() {
+        return select(MotifSearch.RESIDUE_LIST);
     }
 
     @Override
-    public List<StructureIdentifier> getInvertedIndexEntries() {
-        return null;
+    public Set<StructureIdentifier> selectInvertedIndexEntries() {
+        return select(MotifSearch.INDEX_LIST);
+    }
+
+    private Set<StructureIdentifier> select(Path path) {
+        try {
+            return Files.lines(path)
+                    .map(StructureIdentifier::new)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            // happens for full load
+            return Collections.emptySet();
+        }
     }
 
     @Override
-    public void insertArchiveEntries(List<StructureIdentifier> additions) {
-
+    public void insertArchiveEntries(Set<StructureIdentifier> additions) {
+        insert(additions, MotifSearch.ARCHIVE_LIST);
     }
 
     @Override
-    public void insertResidueDBEntries(List<StructureIdentifier> additions) {
-
+    public void insertResidueDBEntries(Set<StructureIdentifier> additions) {
+        insert(additions, MotifSearch.RESIDUE_LIST);
     }
 
     @Override
-    public void insertInvertedIndexEntries(List<StructureIdentifier> additions) {
+    public void insertInvertedIndexEntries(Set<StructureIdentifier> additions) {
+        insert(additions, MotifSearch.INDEX_LIST);
+    }
 
+    private void insert(Set<StructureIdentifier> additions, Path path) {
+        try {
+            FileWriter processedWriter = new FileWriter(path.toFile(), true);
+            for (StructureIdentifier structureIdentifier : additions) {
+                processedWriter.append(structureIdentifier.getPdbId()).append("\n");
+            }
+            processedWriter.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     @Override
-    public void removeArchiveEntries(List<StructureIdentifier> removals) {
-
+    public void deleteArchiveEntries(Set<StructureIdentifier> removals) {
+        delete(removals, MotifSearch.ARCHIVE_LIST);
     }
 
     @Override
-    public void removeResidueDBEntries(List<StructureIdentifier> removals) {
-
+    public void deleteResidueDBEntries(Set<StructureIdentifier> removals) {
+        delete(removals, MotifSearch.RESIDUE_LIST);
     }
 
     @Override
-    public void removeInvertedIndexEntries(List<StructureIdentifier> removals) {
+    public void deleteInvertedIndexEntries(Set<StructureIdentifier> removals) {
+        delete(removals, MotifSearch.INDEX_LIST);
+    }
 
+    private void delete(Set<StructureIdentifier> removals, Path path) {
+        Set<String> identifiers = removals.stream().map(StructureIdentifier::getPdbId).collect(Collectors.toSet());
+        try {
+            String output = Files.lines(path)
+                    .filter(line -> !identifiers.contains(line))
+                    .collect(Collectors.joining("\n"));
+            Files.write(path, output.getBytes());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

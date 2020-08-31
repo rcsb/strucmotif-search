@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.persistence;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
 import java.util.List;
 
@@ -14,5 +15,5 @@ public interface MongoResidueDB {
 
     void insertResidues(List<DBObject> components);
 
-    void deleteResidues(String pdbId);
+    void deleteResidues(StructureIdentifier pdbId);
 }

@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class MongoTitleDBImpl implements MongoTitleDB {
     }
 
     @Override
-    public void deleteTitle(String pdbId) {
-        titles.deleteOne(eq("_id", pdbId));
+    public void deleteTitle(StructureIdentifier pdbId) {
+        titles.deleteOne(eq("_id", pdbId.getPdbId()));
     }
 }

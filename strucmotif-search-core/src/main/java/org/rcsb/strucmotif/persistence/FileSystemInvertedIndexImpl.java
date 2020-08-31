@@ -17,9 +17,11 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,11 +38,11 @@ public class FileSystemInvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Map<String, List<ResiduePairIdentifier>> residuePairOccurrences) {
+    public void insert(ResiduePairDescriptor residuePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>> residuePairOccurrences) {
         try {
             Map<String, Object> data = residuePairOccurrences.entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey,
+                    .collect(Collectors.toMap(entry -> entry.getKey().getPdbId(),
                             entry -> entry.getValue()
                                     .stream()
                                     .map(this::createObjectArray)
@@ -161,12 +163,13 @@ public class FileSystemInvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void delete(ResiduePairDescriptor residuePairDescriptor, List<String> idsToRemove) {
+    public void delete(ResiduePairDescriptor residuePairDescriptor, Collection<StructureIdentifier> idsToRemove) {
         try {
+            Set<String> identifiers = idsToRemove.stream().map(StructureIdentifier::getPdbId).collect(Collectors.toSet());
             Map<String, Object> map = getMap(residuePairDescriptor);
 
             // if no entry would be removed: dont bother and return
-            if (idsToRemove.stream().noneMatch(map::containsKey)) {
+            if (identifiers.stream().noneMatch(map::containsKey)) {
                 return;
             }
 
@@ -174,7 +177,7 @@ public class FileSystemInvertedIndexImpl implements InvertedIndex {
             Map<String, Object> filteredMap = map.entrySet()
                     .stream()
                     // let only entries pass if there key is still valid
-                    .filter(entry -> !idsToRemove.contains(entry.getKey()))
+                    .filter(entry -> !identifiers.contains(entry.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             // serialize message

@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -13,6 +14,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.rcsb.strucmotif.persistence.MongoTitleDB;
+import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,8 +40,8 @@ public class AddStructuresToStructureDBTask {
     private static final String TASK_NAME = AddStructuresToStructureDBTask.class.getSimpleName();
     private static final int CHUNK_SIZE = 400;
 
-    public AddStructuresToStructureDBTask(String[] args, RenumberedReader renumberedReader, MongoResidueDB residueDB, MongoTitleDB titleDB) {
-        List<String> identifiers = Arrays.stream(args).collect(Collectors.toList());
+    public AddStructuresToStructureDBTask(Set<StructureIdentifier> ids, RenumberedReader renumberedReader, MongoResidueDB residueDB, MongoTitleDB titleDB, UpdateStateManager updateStateManager) {
+        List<StructureIdentifier> identifiers = new ArrayList<>(ids);
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
         Collections.shuffle(identifiers);
 
@@ -65,13 +67,14 @@ public class AddStructuresToStructureDBTask {
             logger.info("[{}] Start processing partition",
                     partitionContext);
 
-            Set<String> processed = new HashSet<>();
+            Set<StructureIdentifier> processed = new HashSet<>();
             List<DBObject> titleObjects = new ArrayList<>();
             List<DBObject> residueObjects = new ArrayList<>();
 
             partitions.get(i)
                     .forEach(path -> {
                         String pdbId = path.toFile().getName().split("\\.")[0].toLowerCase();
+                        StructureIdentifier structureIdentifier = new StructureIdentifier(pdbId);
                         try (InputStream inputStream = Files.newInputStream(path)) {
                             Structure structure = renumberedReader.readFromInputStream(inputStream);
                             String title = structure.getTitle();
@@ -113,7 +116,7 @@ public class AddStructuresToStructureDBTask {
                                 }
                             }
 
-                            processed.add(pdbId);
+                            processed.add(structureIdentifier);
                         } catch (IOException e) {
 //                            throw new UncheckedIOException(e);
                         } catch (UnsupportedOperationException e) {
@@ -143,15 +146,7 @@ public class AddStructuresToStructureDBTask {
                     .filter(distinctByKey(dbObject -> dbObject.get("_id")))
                     .collect(Collectors.toList()));
 
-            try {
-                FileWriter processedWriter = new FileWriter(MotifSearch.RESIDUE_LIST.toFile(), true);
-                for (String pdbId : processed) {
-                    processedWriter.append(pdbId).append("\n");
-                }
-                processedWriter.close();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
+            updateStateManager.insertInvertedIndexEntries(processed);
         }
 
         logger.info("[{}] Finished update of residue-DB",

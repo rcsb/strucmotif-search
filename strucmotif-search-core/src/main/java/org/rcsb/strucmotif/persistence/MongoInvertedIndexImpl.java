@@ -16,7 +16,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -33,7 +33,7 @@ public class MongoInvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Map<String, List<ResiduePairIdentifier>> residuePairOccurrences) {
+    public void insert(ResiduePairDescriptor residuePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>> residuePairOccurrences) {
         String descriptorKey = residuePairDescriptor.toString();
         Bson filter = eq("_id", descriptorKey);
 
@@ -43,8 +43,8 @@ public class MongoInvertedIndexImpl implements InvertedIndex {
         }
 
         BasicDBObjectBuilder mapBuilder = new BasicDBObjectBuilder();
-        for (Map.Entry<String, List<ResiduePairIdentifier>> entry : residuePairOccurrences.entrySet()) {
-            String structureKey = entry.getKey();
+        for (Map.Entry<StructureIdentifier, Collection<ResiduePairIdentifier>> entry : residuePairOccurrences.entrySet()) {
+            String structureKey = entry.getKey().getPdbId();
             Object[] values = entry.getValue()
                     .stream()
                     .map(this::createObjectArray)
@@ -139,12 +139,12 @@ public class MongoInvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void delete(ResiduePairDescriptor residuePairDescriptor, List<String> structureIdentifiers) {
+    public void delete(ResiduePairDescriptor residuePairDescriptor, Collection<StructureIdentifier> structureIdentifiers) {
         String descriptorKey = residuePairDescriptor.toString();
 
         BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
-        for (String id : structureIdentifiers) {
-            builder.add(id, 0);
+        for (StructureIdentifier id : structureIdentifiers) {
+            builder.add(id.getPdbId(), 0);
         }
 
         // this operation is safe if requested id doesn't exist

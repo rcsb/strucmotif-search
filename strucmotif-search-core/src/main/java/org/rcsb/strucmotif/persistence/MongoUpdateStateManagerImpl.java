@@ -7,6 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
 import java.util.List;
+import java.util.Set;
 
 public class MongoUpdateStateManagerImpl implements UpdateStateManager {
     private final MongoCollection<DBObject> archiveState;
@@ -22,47 +23,47 @@ public class MongoUpdateStateManagerImpl implements UpdateStateManager {
     }
 
     @Override
-    public List<StructureIdentifier> getArchiveEntries() {
+    public Set<StructureIdentifier> selectArchiveEntries() {
         return null;
     }
 
     @Override
-    public List<StructureIdentifier> getResidueDBEntries() {
+    public Set<StructureIdentifier> selectResidueDBEntries() {
         return null;
     }
 
     @Override
-    public List<StructureIdentifier> getInvertedIndexEntries() {
+    public Set<StructureIdentifier> selectInvertedIndexEntries() {
         return null;
     }
 
     @Override
-    public void insertArchiveEntries(List<StructureIdentifier> additions) {
+    public void insertArchiveEntries(Set<StructureIdentifier> additions) {
 
     }
 
     @Override
-    public void insertResidueDBEntries(List<StructureIdentifier> additions) {
+    public void insertResidueDBEntries(Set<StructureIdentifier> additions) {
 
     }
 
     @Override
-    public void insertInvertedIndexEntries(List<StructureIdentifier> additions) {
+    public void insertInvertedIndexEntries(Set<StructureIdentifier> additions) {
 
     }
 
     @Override
-    public void removeArchiveEntries(List<StructureIdentifier> removals) {
+    public void deleteArchiveEntries(Set<StructureIdentifier> removals) {
 
     }
 
     @Override
-    public void removeResidueDBEntries(List<StructureIdentifier> removals) {
+    public void deleteResidueDBEntries(Set<StructureIdentifier> removals) {
 
     }
 
     @Override
-    public void removeInvertedIndexEntries(List<StructureIdentifier> removals) {
+    public void deleteInvertedIndexEntries(Set<StructureIdentifier> removals) {
 
     }
 }

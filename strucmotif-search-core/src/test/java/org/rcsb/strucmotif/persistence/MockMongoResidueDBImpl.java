@@ -4,6 +4,7 @@ import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +74,7 @@ public class MockMongoResidueDBImpl implements MongoResidueDB {
     }
 
     @Override
-    public void deleteResidues(String pdbId) {
+    public void deleteResidues(StructureIdentifier pdbId) {
         throw new UnsupportedOperationException();
     }
 }

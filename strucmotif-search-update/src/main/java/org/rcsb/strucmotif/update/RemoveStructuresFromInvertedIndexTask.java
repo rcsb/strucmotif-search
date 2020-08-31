@@ -1,21 +1,18 @@
 package org.rcsb.strucmotif.update;
 
 import com.google.common.collect.Sets;
-import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Will cleanup the inverted index in a rather time-intensive manner.
@@ -24,20 +21,18 @@ public class RemoveStructuresFromInvertedIndexTask {
     private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromInvertedIndexTask.class);
     private static final String TASK_NAME = RemoveStructuresFromInvertedIndexTask.class.getSimpleName();
 
-    public RemoveStructuresFromInvertedIndexTask(String[] ids, InvertedIndex motifLookup) throws IOException {
+    public RemoveStructuresFromInvertedIndexTask(Set<StructureIdentifier> identifiers, InvertedIndex motifLookup, UpdateStateManager updateStateManager) throws IOException {
         logger.info("[{}] Starting removal of obsolete structures from index",
                 TASK_NAME);
 
         logger.info("[{}] {} structures to remove ({})",
                 TASK_NAME,
-                ids.length,
-                Arrays.toString(ids));
+                identifiers.size(),
+                identifiers);
 
-        if (ids.length == 0) {
+        if (identifiers.isEmpty()) {
             return;
         }
-
-        List<String> identifiers = List.of(ids);
 
         // walk whole lookup: lookup will check each time if manipulation is needed - 8,337,760 combinations
         // TODO maybe querying mongo would be faster
@@ -54,10 +49,7 @@ public class RemoveStructuresFromInvertedIndexTask {
                 .forEach(wordDescriptor -> motifLookup.delete(wordDescriptor, identifiers));
 
         // update index file - drop all ids to deregister them
-        String output = Files.lines(MotifSearch.INDEX_LIST)
-                .filter(line -> !identifiers.contains(line))
-                .collect(Collectors.joining("\n"));
-        Files.write(MotifSearch.INDEX_LIST, output.getBytes());
+        updateStateManager.deleteInvertedIndexEntries(identifiers);
 
         logger.info("[{}] Finished cleanup of lookup",
                 TASK_NAME);

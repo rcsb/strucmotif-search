@@ -4,6 +4,7 @@ import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +61,7 @@ public class MockMongoTitleDBImpl implements MongoTitleDB {
     }
 
     @Override
-    public void deleteTitle(String pdbId) {
+    public void deleteTitle(StructureIdentifier pdbId) {
         throw new UnsupportedOperationException();
     }
 }

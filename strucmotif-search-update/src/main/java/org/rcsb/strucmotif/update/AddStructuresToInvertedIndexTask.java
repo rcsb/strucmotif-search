@@ -2,20 +2,21 @@ package org.rcsb.strucmotif.update;
 
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.ResidueGraph;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -60,14 +61,14 @@ public class AddStructuresToInvertedIndexTask {
     private final InvertedIndex motifLookup;
     private final RenumberedReader renumberedReader;
 
-    public AddStructuresToInvertedIndexTask(String[] args, InvertedIndex motifLookup, RenumberedReader renumberedReader) throws IOException {
+    public AddStructuresToInvertedIndexTask(Set<StructureIdentifier> ids, InvertedIndex motifLookup, RenumberedReader renumberedReader, UpdateStateManager updateStateManager) throws IOException {
         this.motifLookup = motifLookup;
         this.renumberedReader = renumberedReader;
 
         logger.info("[{}] Starting structural motif search index update",
                 TASK_NAME);
 
-        List<String> identifiers = Arrays.stream(args).collect(Collectors.toList());
+        List<StructureIdentifier> identifiers = new ArrayList<>(ids);
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
         Collections.shuffle(identifiers);
 
@@ -90,8 +91,7 @@ public class AddStructuresToInvertedIndexTask {
                 TASK_NAME,
                 partitions.size());
 
-        Context context = new Context();
-        context.processed = Collections.synchronizedSet(new HashSet<>());
+        Context context = new Context(updateStateManager);
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
@@ -113,21 +113,28 @@ public class AddStructuresToInvertedIndexTask {
     }
 
     static class Context {
-        Set<String> processed;
+        final UpdateStateManager updateStateManager;
+        final Set<StructureIdentifier> processed;
         String partitionContext;
-        Map<ResiduePairDescriptor, Map<String, List<ResiduePairIdentifier>>> buffer;
+        Map<ResiduePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>>> buffer;
         AtomicInteger structureCounter;
+
+        public Context(UpdateStateManager updateStateManager) {
+            this.updateStateManager = updateStateManager;
+            this.processed = Collections.synchronizedSet(new HashSet<>());
+        }
     }
 
     private void detectMotifs(Path path, Context context) {
-        String structureIdentifier = path.toFile().getName().split("\\.")[0];
+        String pdbId = path.toFile().getName().split("\\.")[0];
+        StructureIdentifier structureIdentifier = new StructureIdentifier(pdbId);
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + CHUNK_SIZE + "] [" + structureIdentifier;
+        String structureContext = count + " / " + CHUNK_SIZE + "] [" + pdbId;
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;
         try {
-            structure = renumberedReader.readById(structureIdentifier);
+            structure = renumberedReader.readById(pdbId);
         } catch (UncheckedIOException e) {
             logger.warn("[{}] [{}] Source file missing unexpectedly",
                     context.partitionContext,
@@ -151,8 +158,8 @@ public class AddStructuresToInvertedIndexTask {
                         ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
                         ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
 
-                        Map<String, List<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
-                        List<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedList(new ArrayList<>()));
+                        Map<StructureIdentifier, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
+                        Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
                         targetIdentifiers.add(targetIdentifier);
                         structureMotifCounter.incrementAndGet();
                     });
@@ -178,7 +185,7 @@ public class AddStructuresToInvertedIndexTask {
         AtomicInteger bufferCount = new AtomicInteger();
         context.buffer.entrySet().parallelStream().forEach(entry -> {
             ResiduePairDescriptor full = entry.getKey();
-            Map<String, List<ResiduePairIdentifier>> output = entry.getValue();
+            Map<StructureIdentifier, Collection<ResiduePairIdentifier>> output = entry.getValue();
 
             if (bufferCount.incrementAndGet() % 100000 == 0) {
                 logger.info("[{}] {} / {}",
@@ -194,15 +201,7 @@ public class AddStructuresToInvertedIndexTask {
         });
         context.buffer.clear();
 
-        try {
-            FileWriter processedWriter = new FileWriter(MotifSearch.INDEX_LIST.toFile(), true);
-            for (String pdbId : context.processed) {
-                processedWriter.append(pdbId).append("\n");
-            }
-            processedWriter.close();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        context.updateStateManager.insertInvertedIndexEntries(context.processed);
         context.processed.clear();
     }
 }

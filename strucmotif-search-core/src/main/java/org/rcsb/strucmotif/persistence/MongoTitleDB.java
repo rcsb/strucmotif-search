@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.persistence;
 
 import com.mongodb.DBObject;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
 import java.util.List;
 
@@ -12,5 +13,5 @@ public interface MongoTitleDB {
 
     void insertTitles(List<DBObject> titles);
 
-    void deleteTitle(String pdbId);
+    void deleteTitle(StructureIdentifier pdbId);
 }

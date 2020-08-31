@@ -7,6 +7,7 @@ import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -34,9 +35,9 @@ public class MongoResidueDBImpl implements MongoResidueDB {
     }
 
     @Override
-    public void deleteResidues(String pdbId) {
+    public void deleteResidues(StructureIdentifier pdbId) {
         // pdbId is at start of all components to remove
-        Pattern pattern = Pattern.compile("^" + pdbId);
+        Pattern pattern = Pattern.compile("^" + pdbId.getPdbId());
         residues.deleteMany(Filters.regex("_id", pattern));
     }
 }

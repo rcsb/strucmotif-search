@@ -6,7 +6,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -20,7 +20,7 @@ public interface InvertedIndex {
      * @param residuePairDescriptor the bin for which new data should be written
      * @param residuePairOccurrences the data to append to this bin - keys are pdbIds, values are all words of this descriptor
      */
-    void insert(ResiduePairDescriptor residuePairDescriptor, Map<String, List<ResiduePairIdentifier>> residuePairOccurrences);
+    void insert(ResiduePairDescriptor residuePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>> residuePairOccurrences);
 
     /**
      * Perform lookup for a particular bin.
@@ -34,7 +34,7 @@ public interface InvertedIndex {
      * @param residuePairDescriptor the bin to manipulate
      * @param structureIdentifiers all structure identifiers to remove
      */
-    void delete(ResiduePairDescriptor residuePairDescriptor, List<String> structureIdentifiers);
+    void delete(ResiduePairDescriptor residuePairDescriptor, Collection<StructureIdentifier> structureIdentifiers);
 
     /**
      * Create directories to store data when lookup table is created (it is not checked whether directories exist during

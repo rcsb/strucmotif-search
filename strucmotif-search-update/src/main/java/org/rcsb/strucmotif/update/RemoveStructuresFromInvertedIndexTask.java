@@ -54,10 +54,10 @@ public class RemoveStructuresFromInvertedIndexTask {
                 .forEach(wordDescriptor -> motifLookup.delete(wordDescriptor, identifiers));
 
         // update index file - drop all ids to deregister them
-        String output = Files.lines(MotifSearch.LOOKUP_LIST)
+        String output = Files.lines(MotifSearch.INDEX_LIST)
                 .filter(line -> !identifiers.contains(line))
                 .collect(Collectors.joining("\n"));
-        Files.write(MotifSearch.LOOKUP_LIST, output.getBytes());
+        Files.write(MotifSearch.INDEX_LIST, output.getBytes());
 
         logger.info("[{}] Finished cleanup of lookup",
                 TASK_NAME);

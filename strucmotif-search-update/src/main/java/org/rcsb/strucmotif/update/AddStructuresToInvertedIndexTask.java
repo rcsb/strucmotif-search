@@ -195,7 +195,7 @@ public class AddStructuresToInvertedIndexTask {
         context.buffer.clear();
 
         try {
-            FileWriter processedWriter = new FileWriter(MotifSearch.LOOKUP_LIST.toFile(), true);
+            FileWriter processedWriter = new FileWriter(MotifSearch.INDEX_LIST.toFile(), true);
             for (String pdbId : context.processed) {
                 processedWriter.append(pdbId).append("\n");
             }

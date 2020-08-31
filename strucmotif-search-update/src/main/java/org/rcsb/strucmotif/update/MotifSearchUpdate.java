@@ -106,7 +106,7 @@ public class MotifSearchUpdate {
                         .filter(id -> !known.contains(id))
                         .toArray(String[]::new);
             } else if (context == Context.INDEX) {
-                Set<String> known = Files.lines(MotifSearch.LOOKUP_LIST)
+                Set<String> known = Files.lines(MotifSearch.INDEX_LIST)
                         .collect(Collectors.toSet());
                 return Stream.of(fullIdentifierList)
                         .map(String::toLowerCase)
@@ -146,7 +146,7 @@ public class MotifSearchUpdate {
                         .filter(id -> !fil.contains(id))
                         .toArray(String[]::new);
             } else if (context == Context.INDEX) {
-                return Files.lines(MotifSearch.LOOKUP_LIST)
+                return Files.lines(MotifSearch.INDEX_LIST)
                         .map(String::toLowerCase)
                         .filter(id -> !fil.contains(id))
                         .toArray(String[]::new);

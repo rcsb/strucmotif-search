@@ -24,6 +24,7 @@ import org.rcsb.strucmotif.io.read.SelectionReader;
 import org.rcsb.strucmotif.io.write.RenumberedWriterImpl;
 import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.rcsb.strucmotif.persistence.FileSystemInvertedIndexImpl;
+import org.rcsb.strucmotif.persistence.FileSystemUpdateStateManagerImpl;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.MongoClientHolder;
 import org.rcsb.strucmotif.persistence.MongoClientHolderImpl;
@@ -32,6 +33,8 @@ import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.rcsb.strucmotif.persistence.MongoResidueDBImpl;
 import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.rcsb.strucmotif.persistence.MongoTitleDBImpl;
+import org.rcsb.strucmotif.persistence.MongoUpdateStateManagerImpl;
+import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +70,7 @@ public class MotifSearch {
             bind(MongoTitleDB.class).to(NO_MONGO_DB ? null : MongoTitleDBImpl.class);
             bind(InvertedIndex.class).to(NO_MONGO_DB ? FileSystemInvertedIndexImpl.class : MongoInvertedIndexImpl.class);
             bind(MongoClientHolder.class).to(MongoClientHolderImpl.class);
+            bind(UpdateStateManager.class).to(NO_MONGO_DB ? FileSystemUpdateStateManagerImpl.class : MongoUpdateStateManagerImpl.class);
         }
     };
 
@@ -77,7 +81,7 @@ public class MotifSearch {
     public static final Path ARCHIVE_PATH;
     public static final Path LOOKUP_PATH;
     public static final Path ARCHIVE_LIST;
-    public static final Path LOOKUP_LIST;
+    public static final Path INDEX_LIST;
     public static final Path RESIDUE_LIST;
 
     public static final boolean NO_MONGO_DB;
@@ -125,7 +129,7 @@ public class MotifSearch {
             // keeps track of all files for which a reduced/optimized coordinate file exists
             ARCHIVE_LIST = DATA_ROOT.resolve("archive.list");
             // all structures currently present in the index (may be empty structures - processed but not containing any valid words)
-            LOOKUP_LIST = DATA_ROOT.resolve("lookup.list");
+            INDEX_LIST = DATA_ROOT.resolve("lookup.list");
             // all structures currently indexed in the component-DB
             RESIDUE_LIST = DATA_ROOT.resolve("component.list");
 

@@ -62,7 +62,9 @@ public class FileSystemUpdateStateManagerImpl implements UpdateStateManager {
         try {
             FileWriter processedWriter = new FileWriter(path.toFile(), true);
             for (StructureIdentifier structureIdentifier : additions) {
-                processedWriter.append(structureIdentifier.getPdbId()).append("\n");
+                // let's concat externally in case 'append' invocation from multiple threads race
+                String update = structureIdentifier.getPdbId() + "\n";
+                processedWriter.append(update);
             }
             processedWriter.close();
         } catch (IOException e) {

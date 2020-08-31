@@ -44,6 +44,7 @@ public class AddStructuresToArchiveTask {
 
                         MmCifFile cifFile = readById(id.getPdbId()).as(StandardSchemata.MMCIF);
                         renumberedWriter.write(cifFile);
+                        updateStateManager.insertArchiveEntries(Set.of(id));
                     } catch (IOException e) {
                         logger.warn("[{} / {}] {} failed - no source file @ RCSB",
                                 counter.get(),
@@ -52,7 +53,6 @@ public class AddStructuresToArchiveTask {
                     }
                 });
 
-        updateStateManager.insertArchiveEntries(identifiers);
 
         logger.info("[{}] Finished archive update",
                 TASK_NAME);

@@ -7,14 +7,13 @@ import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Set;
 
-public class RemoveStructuresFromStructureDBTask {
-    private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromStructureDBTask.class);
-    private static final String TASK_NAME = RemoveStructuresFromStructureDBTask.class.getSimpleName();
+public class DeleteStructuresFromStructureDBTask {
+    private static final Logger logger = LoggerFactory.getLogger(DeleteStructuresFromStructureDBTask.class);
+    private static final String TASK_NAME = DeleteStructuresFromStructureDBTask.class.getSimpleName();
 
-    public RemoveStructuresFromStructureDBTask(Set<StructureIdentifier> identifiers, MongoResidueDB residueDB, MongoTitleDB titleDB, UpdateStateManager updateStateManager) throws IOException {
+    public DeleteStructuresFromStructureDBTask(Set<StructureIdentifier> identifiers, MongoResidueDB residueDB, MongoTitleDB titleDB, UpdateStateManager updateStateManager) {
         logger.info("[{}] Starting removal of obsolete structures from component-DB",
                 TASK_NAME);
 

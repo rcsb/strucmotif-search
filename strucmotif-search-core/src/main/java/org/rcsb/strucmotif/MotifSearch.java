@@ -63,14 +63,21 @@ public class MotifSearch {
             bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
             bind(AllPurposeReader.class).to(AllPurposeReaderImpl.class);
             bind(RenumberedReader.class).to(RenumberedReaderImpl.class);
-            bind(SelectionReader.class).to(NO_MONGO_DB ? FileSystemSelectionReaderImpl.class : MongoSelectionReaderImpl.class);
             bind(StructureWriter.class).to(RenumberedWriterImpl.class);
             bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
-            bind(MongoResidueDB.class).to(NO_MONGO_DB ? null : MongoResidueDBImpl.class);
-            bind(MongoTitleDB.class).to(NO_MONGO_DB ? null : MongoTitleDBImpl.class);
-            bind(InvertedIndex.class).to(NO_MONGO_DB ? FileSystemInvertedIndexImpl.class : MongoInvertedIndexImpl.class);
-            bind(MongoClientHolder.class).to(MongoClientHolderImpl.class);
-            bind(UpdateStateManager.class).to(NO_MONGO_DB ? FileSystemUpdateStateManagerImpl.class : MongoUpdateStateManagerImpl.class);
+
+            if (NO_MONGO_DB) {
+                bind(SelectionReader.class).to(FileSystemSelectionReaderImpl.class);
+                bind(InvertedIndex.class).to(FileSystemInvertedIndexImpl.class);
+                bind(UpdateStateManager.class).to(FileSystemUpdateStateManagerImpl.class);
+            } else {
+                bind(SelectionReader.class).to(MongoSelectionReaderImpl.class);
+                bind(InvertedIndex.class).to(MongoInvertedIndexImpl.class);
+                bind(UpdateStateManager.class).to(MongoUpdateStateManagerImpl.class);
+                bind(MongoResidueDB.class).to(MongoResidueDBImpl.class);
+                bind(MongoTitleDB.class).to(MongoTitleDBImpl.class);
+                bind(MongoClientHolder.class).to(MongoClientHolderImpl.class);
+            }
         }
     };
 
@@ -135,7 +142,7 @@ public class MotifSearch {
 
             NO_MONGO_DB = Boolean.parseBoolean(prop.getProperty("no.mongodb"));
             if (NO_MONGO_DB) {
-                logger.info("Coordinates will be read from bcif - enable MongoDB for improved performance");
+                logger.info("Falling back to file-system based implementation - enable MongoDB for improved performance");
             }
 
             DECIMAL_FORMAT = new DecimalFormat(prop.getProperty("decimal.format"));

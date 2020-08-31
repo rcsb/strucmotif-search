@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.update;
 import com.google.gson.Gson;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Singleton
 public class MotifSearchUpdate {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchUpdate.class);
     private static final String TASK_NAME = MotifSearchUpdate.class.getSimpleName();
@@ -80,15 +82,15 @@ public class MotifSearchUpdate {
 
             switch (context) {
                 case ARCHIVE:
-                    new RemoveStructuresFromArchiveTask(ids, updateStateManager);
+                    new DeleteStructuresFromArchiveTask(ids, updateStateManager);
                     break;
                 case RESIDUE:
                     if (!MotifSearch.NO_MONGO_DB) {
-                        new RemoveStructuresFromStructureDBTask(ids, residueDB, titleDB, updateStateManager);
+                        new DeleteStructuresFromStructureDBTask(ids, residueDB, titleDB, updateStateManager);
                     }
                     break;
                 case INDEX:
-                    new RemoveStructuresFromInvertedIndexTask(ids, motifLookup, updateStateManager);
+                    new DeleteStructuresFromInvertedIndexTask(ids, motifLookup, updateStateManager);
                     break;
             }
         }

@@ -11,17 +11,16 @@ import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Set;
 
 /**
  * Will cleanup the inverted index in a rather time-intensive manner.
  */
-public class RemoveStructuresFromInvertedIndexTask {
-    private static final Logger logger = LoggerFactory.getLogger(RemoveStructuresFromInvertedIndexTask.class);
-    private static final String TASK_NAME = RemoveStructuresFromInvertedIndexTask.class.getSimpleName();
+public class DeleteStructuresFromInvertedIndexTask {
+    private static final Logger logger = LoggerFactory.getLogger(DeleteStructuresFromInvertedIndexTask.class);
+    private static final String TASK_NAME = DeleteStructuresFromInvertedIndexTask.class.getSimpleName();
 
-    public RemoveStructuresFromInvertedIndexTask(Set<StructureIdentifier> identifiers, InvertedIndex motifLookup, UpdateStateManager updateStateManager) throws IOException {
+    public DeleteStructuresFromInvertedIndexTask(Set<StructureIdentifier> identifiers, InvertedIndex motifLookup, UpdateStateManager updateStateManager) {
         logger.info("[{}] Starting removal of obsolete structures from index",
                 TASK_NAME);
 

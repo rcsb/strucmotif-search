@@ -23,7 +23,7 @@ public class AddStructuresToArchiveTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToArchiveTask.class);
     private static final String TASK_NAME = AddStructuresToArchiveTask.class.getSimpleName();
 
-    public AddStructuresToArchiveTask(Set<StructureIdentifier> identifiers, StructureWriter renumberedWriter, UpdateStateManager updateStateManager) throws IOException {
+    public AddStructuresToArchiveTask(Set<StructureIdentifier> identifiers, StructureWriter renumberedWriter, UpdateStateManager updateStateManager) {
         logger.info("[{}] Starting structural motif search archive update",
                 TASK_NAME);
 

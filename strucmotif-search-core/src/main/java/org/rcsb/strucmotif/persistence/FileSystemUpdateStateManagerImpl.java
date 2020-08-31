@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.rmi.UnexpectedException;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -19,7 +17,7 @@ import java.util.stream.Collectors;
 public class FileSystemUpdateStateManagerImpl implements UpdateStateManager {
     @Override
     public Set<StructureIdentifier> selectArchiveEntries() {
-        return select(MotifSearch.ARCHIVE_PATH);
+        return select(MotifSearch.ARCHIVE_LIST);
     }
 
     @Override

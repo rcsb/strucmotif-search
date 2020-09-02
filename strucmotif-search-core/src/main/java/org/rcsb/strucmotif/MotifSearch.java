@@ -53,7 +53,7 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class MotifSearch {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearch.class);
-    public static final AbstractModule MOTIF_SEARCH_MODULE = new AbstractModule() {
+    private static final AbstractModule MOTIF_SEARCH_MODULE = new AbstractModule() {
         @Override
         protected void configure() {
             super.configure();
@@ -105,8 +105,8 @@ public class MotifSearch {
         this.queryBuilder = injector.getInstance(QueryBuilder.class);
     }
 
-    public Injector getInjector() {
-        return injector;
+    public static <T> T getInstance(Class<T> type) {
+        return INSTANCE.injector.getInstance(type);
     }
 
     public static QueryBuilder newQuery() {

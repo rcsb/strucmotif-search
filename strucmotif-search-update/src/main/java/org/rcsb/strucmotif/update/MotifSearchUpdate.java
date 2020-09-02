@@ -1,9 +1,6 @@
 package org.rcsb.strucmotif.update;
 
 import com.google.gson.Gson;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
@@ -24,7 +21,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Singleton
 public class MotifSearchUpdate {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchUpdate.class);
     private static final String TASK_NAME = MotifSearchUpdate.class.getSimpleName();
@@ -37,13 +33,12 @@ public class MotifSearchUpdate {
     }
 
     public static void main(String[] args) throws IOException {
-        Injector injector = Guice.createInjector(MotifSearch.MOTIF_SEARCH_MODULE);
-        StructureWriter renumberedWriter = injector.getInstance(StructureWriter.class);
-        RenumberedReader renumberedReader = injector.getInstance(RenumberedReader.class);
-        InvertedIndex motifLookup = injector.getInstance(InvertedIndex.class);
-        MongoResidueDB residueDB = injector.getInstance(MongoResidueDB.class);
-        MongoTitleDB titleDB = injector.getInstance(MongoTitleDB.class);
-        UpdateStateManager updateStateManager = injector.getInstance(UpdateStateManager.class);
+        StructureWriter renumberedWriter = MotifSearch.getInstance(StructureWriter.class);
+        RenumberedReader renumberedReader = MotifSearch.getInstance(RenumberedReader.class);
+        InvertedIndex motifLookup = MotifSearch.getInstance(InvertedIndex.class);
+        MongoResidueDB residueDB = MotifSearch.getInstance(MongoResidueDB.class);
+        MongoTitleDB titleDB = MotifSearch.getInstance(MongoTitleDB.class);
+        UpdateStateManager updateStateManager = MotifSearch.getInstance(UpdateStateManager.class);
 
         Set<StructureIdentifier> all = getAllIdentifiers();
 

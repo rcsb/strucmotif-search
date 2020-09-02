@@ -97,11 +97,16 @@ public class MotifSearch {
     private static final DecimalFormat DECIMAL_FORMAT;
     private static final MotifSearch INSTANCE = new MotifSearch();
 
+    private final Injector injector;
     private final QueryBuilder queryBuilder;
 
     private MotifSearch() {
-        Injector injector = Guice.createInjector(MOTIF_SEARCH_MODULE);
+        this.injector = Guice.createInjector(MOTIF_SEARCH_MODULE);
         this.queryBuilder = injector.getInstance(QueryBuilder.class);
+    }
+
+    public Injector getInjector() {
+        return injector;
     }
 
     public static QueryBuilder newQuery() {

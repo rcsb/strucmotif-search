@@ -53,55 +53,60 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class MotifSearch {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearch.class);
-    private static final AbstractModule MOTIF_SEARCH_MODULE = new AbstractModule() {
-        @Override
-        protected void configure() {
-            super.configure();
-            bind(Alignment.class).to(QuaternionAlignment.class);
-            bind(InternalMotifSearch.class).to(InternalMotifSearchImpl.class);
-            bind(MotifPruner.class).to(MotifPrunerImpl.class);
-            bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
-            bind(AllPurposeReader.class).to(AllPurposeReaderImpl.class);
-            bind(RenumberedReader.class).to(RenumberedReaderImpl.class);
-            bind(StructureWriter.class).to(RenumberedWriterImpl.class);
-            bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
-
-            if (NO_MONGO_DB) {
-                bind(SelectionReader.class).to(FileSystemSelectionReaderImpl.class);
-                bind(InvertedIndex.class).to(FileSystemInvertedIndexImpl.class);
-                bind(UpdateStateManager.class).to(FileSystemUpdateStateManagerImpl.class);
-            } else {
-                bind(SelectionReader.class).to(MongoSelectionReaderImpl.class);
-                bind(InvertedIndex.class).to(MongoInvertedIndexImpl.class);
-                bind(UpdateStateManager.class).to(MongoUpdateStateManagerImpl.class);
-                bind(MongoResidueDB.class).to(MongoResidueDBImpl.class);
-                bind(MongoTitleDB.class).to(MongoTitleDBImpl.class);
-                bind(MongoClientHolder.class).to(MongoClientHolderImpl.class);
-            }
-        }
-    };
 
     public static final double DISTANCE_CUTOFF;
     public static final double DISTANCE_CUTOFF_SQUARED;
 
-    private static final Path DATA_ROOT;
+    public static final Path DATA_ROOT;
     public static final Path ARCHIVE_PATH;
     public static final Path LOOKUP_PATH;
     public static final Path ARCHIVE_LIST;
     public static final Path INDEX_LIST;
     public static final Path RESIDUE_LIST;
 
-    public static final boolean NO_MONGO_DB;
+    public static final String DB_URI;
+    public static final boolean NO_DB;
 
+    public static final int THREADS;
     public static final ForkJoinPool FORK_JOIN_POOL;
-    private static final DecimalFormat DECIMAL_FORMAT;
+
+    public static final DecimalFormat DECIMAL_FORMAT;
+
     private static final MotifSearch INSTANCE = new MotifSearch();
 
     private final Injector injector;
     private final QueryBuilder queryBuilder;
 
     private MotifSearch() {
-        this.injector = Guice.createInjector(MOTIF_SEARCH_MODULE);
+        AbstractModule module = new AbstractModule() {
+            @Override
+            protected void configure() {
+                super.configure();
+                bind(Alignment.class).to(QuaternionAlignment.class);
+                bind(InternalMotifSearch.class).to(InternalMotifSearchImpl.class);
+                bind(MotifPruner.class).to(MotifPrunerImpl.class);
+                bind(TargetAssembler.class).to(TargetAssemblerImpl.class);
+                bind(AllPurposeReader.class).to(AllPurposeReaderImpl.class);
+                bind(RenumberedReader.class).to(RenumberedReaderImpl.class);
+                bind(StructureWriter.class).to(RenumberedWriterImpl.class);
+                bind(MessagePackCodec.class).to(MinimizedMessagePackCodec.class);
+
+                if (NO_DB) {
+                    bind(SelectionReader.class).to(FileSystemSelectionReaderImpl.class);
+                    bind(InvertedIndex.class).to(FileSystemInvertedIndexImpl.class);
+                    bind(UpdateStateManager.class).to(FileSystemUpdateStateManagerImpl.class);
+                } else {
+                    bind(SelectionReader.class).to(MongoSelectionReaderImpl.class);
+                    bind(InvertedIndex.class).to(MongoInvertedIndexImpl.class);
+                    bind(UpdateStateManager.class).to(MongoUpdateStateManagerImpl.class);
+                    bind(MongoResidueDB.class).to(MongoResidueDBImpl.class);
+                    bind(MongoTitleDB.class).to(MongoTitleDBImpl.class);
+                    bind(MongoClientHolder.class).to(MongoClientHolderImpl.class);
+                }
+            }
+        };
+
+        this.injector = Guice.createInjector(module);
         this.queryBuilder = injector.getInstance(QueryBuilder.class);
     }
 
@@ -117,6 +122,7 @@ public class MotifSearch {
         return DECIMAL_FORMAT.format(object);
     }
 
+    // use static block to set config before instance is created
     static {
         logger.info("Setting motif search constants");
         try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties")) {
@@ -124,9 +130,10 @@ public class MotifSearch {
             Properties prop = new Properties();
             prop.load(input);
 
-            int threads = Runtime.getRuntime().availableProcessors();
-            logger.debug("Will use {} threads", threads);
-            FORK_JOIN_POOL = new ForkJoinPool(threads);
+            String threadValue = prop.getProperty("number.threads");
+            THREADS = threadValue != null ? Integer.parseInt(threadValue) : Runtime.getRuntime().availableProcessors();
+            logger.info("Will use {} threads", THREADS);
+            FORK_JOIN_POOL = new ForkJoinPool(THREADS);
 
             // the cutoff up to which words are detected
             DISTANCE_CUTOFF = Double.parseDouble(prop.getProperty("distance.cutoff"));
@@ -134,6 +141,7 @@ public class MotifSearch {
 
             // the root path of all service data
             DATA_ROOT = Paths.get(prop.getProperty("path.root"));
+            logger.info("Data root is {}", DATA_ROOT);
             // an optimized archive - minimal information, maximum IO performance for whole files
             ARCHIVE_PATH = DATA_ROOT.resolve("archive").resolve("bcif-renum");
             // the location of the lookup
@@ -145,16 +153,20 @@ public class MotifSearch {
             // all structures currently indexed in the component-DB
             RESIDUE_LIST = DATA_ROOT.resolve("component.list");
 
-            NO_MONGO_DB = Boolean.parseBoolean(prop.getProperty("no.mongodb"));
-            if (NO_MONGO_DB) {
+            NO_DB = Boolean.parseBoolean(prop.getProperty("no.db"));
+            if (NO_DB) {
+                DB_URI = null;
                 logger.info("Falling back to file-system based implementation - enable MongoDB for improved performance");
+            } else {
+                DB_URI = prop.getProperty("db.connection.uri", null);
+                logger.info("MongoDB connection is {}",
+                        DB_URI == null ? "not specified - using local MongoDB server" :
+                                DB_URI.replaceFirst("://.*@", "login"));
             }
 
             DECIMAL_FORMAT = new DecimalFormat(prop.getProperty("decimal.format"));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
-
-        logger.debug("Data root path is {}", DATA_ROOT);
     }
 }

@@ -56,7 +56,7 @@ public class MotifSearchUpdate {
                     new AddStructuresToArchiveTask(ids, renumberedWriter, updateStateManager);
                     break;
                 case RESIDUE:
-                    if (!MotifSearch.NO_MONGO_DB) {
+                    if (!MotifSearch.NO_DB) {
                         new AddStructuresToStructureDBTask(ids, renumberedReader, residueDB, titleDB, updateStateManager);
                     }
                     break;
@@ -80,7 +80,7 @@ public class MotifSearchUpdate {
                     new DeleteStructuresFromArchiveTask(ids, updateStateManager);
                     break;
                 case RESIDUE:
-                    if (!MotifSearch.NO_MONGO_DB) {
+                    if (!MotifSearch.NO_DB) {
                         new DeleteStructuresFromStructureDBTask(ids, residueDB, titleDB, updateStateManager);
                     }
                     break;

@@ -114,13 +114,15 @@ public class MotifSearch {
      */
     public static final DecimalFormat DECIMAL_FORMAT;
 
-    private static final MotifSearch INSTANCE = new MotifSearch();
+    private static final MotifSearch INSTANCE;
 
     private final Injector injector;
     private final QueryBuilder queryBuilder;
 
     private MotifSearch() {
-        AbstractModule module = new AbstractModule() {
+        logger.info("@init");
+        AbstractModule module;
+        module = new AbstractModule() {
             @Override
             protected void configure() {
                 super.configure();
@@ -181,6 +183,7 @@ public class MotifSearch {
 
     // use static block to set config before instance is created
     static {
+        logger.info("@clinit");
         logger.info("Setting motif search constants");
         try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties")) {
             Objects.requireNonNull(input, "Did not find property file: 'config.properties' on classpath");
@@ -225,5 +228,7 @@ public class MotifSearch {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+
+        INSTANCE = new MotifSearch();
     }
 }

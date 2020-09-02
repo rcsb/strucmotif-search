@@ -1,19 +1,21 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.google.inject.Inject;
 import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@Service
 public class MongoTitleDBImpl implements MongoTitleDB {
     private final MongoCollection<DBObject> titles;
 
-    @Inject
+    @Autowired
     public MongoTitleDBImpl(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         titles = database.getCollection("titles", DBObject.class);

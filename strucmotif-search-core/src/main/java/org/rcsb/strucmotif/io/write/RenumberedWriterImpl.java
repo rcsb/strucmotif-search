@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.write;
 
-import com.google.inject.Singleton;
 import org.rcsb.cif.CifBuilder;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.CifOptions;
@@ -19,18 +18,26 @@ import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
-import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
-@Singleton
+@Service
 public class RenumberedWriterImpl implements StructureWriter {
     private static final CifOptions OPTIONS = CifOptions.builder()
             .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
             .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)
             .encodingStrategyHint("atom_site", "Cartn_z", "delta", 1)
             .build();
+    private final MotifSearchConfig motifSearchConfig;
+
+    @Autowired
+    public RenumberedWriterImpl(MotifSearchConfig motifSearchConfig) {
+        this.motifSearchConfig = motifSearchConfig;
+    }
 
     @Override
     public void write(MmCifFile inputFile) {
@@ -124,7 +131,7 @@ public class RenumberedWriterImpl implements StructureWriter {
 
         try {
             CifIO.writeBinary(outputFile,
-                    MotifSearch.ARCHIVE_PATH.resolve(pdbId.toLowerCase() + ".bcif"),
+                    motifSearchConfig.getArchivePath().resolve(pdbId.toLowerCase() + ".bcif"),
                     OPTIONS);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.BasicDBObjectBuilder;
@@ -15,6 +14,8 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.Map;
@@ -22,11 +23,12 @@ import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Filters.eq;
 
+@Service
 public class MongoInvertedIndexImpl implements InvertedIndex {
     private static final UpdateOptions UPSERT_OPTIONS = new UpdateOptions().upsert(true);
     private final MongoCollection<DBObject> invertedIndex;
 
-    @Inject
+    @Autowired
     public MongoInvertedIndexImpl(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         invertedIndex = database.getCollection("index", DBObject.class);

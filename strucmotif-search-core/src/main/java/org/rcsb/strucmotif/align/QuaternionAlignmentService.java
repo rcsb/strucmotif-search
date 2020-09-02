@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.align;
 
-import com.google.inject.Singleton;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AlignmentResultImpl;
 import org.rcsb.strucmotif.domain.AtomCorrespondence;
@@ -10,12 +9,13 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.math.Algebra;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 
-@Singleton
-public class QuaternionAlignment implements Alignment {
+@Service
+public class QuaternionAlignmentService implements AlignmentService {
     private static final double[][] IDENTITY_MATRIX_3D = new double[][] {
             { 1, 0, 0 },
             { 0, 1, 0 },

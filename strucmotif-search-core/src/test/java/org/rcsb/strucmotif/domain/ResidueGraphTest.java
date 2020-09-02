@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain;
 
-import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.GuiceJUnit4Runner;
@@ -26,9 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(GuiceJUnit4Runner.class)
 public class ResidueGraphTest {
-    @Inject
     private AllPurposeReader allPurposeReader;
-    @Inject
     private RenumberedReader renumberedReader;
 
     @Test
@@ -36,7 +33,7 @@ public class ResidueGraphTest {
         Structure structure = renumberedReader.readById("3vvk");
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
         LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
@@ -60,7 +57,7 @@ public class ResidueGraphTest {
         Structure structure = renumberedReader.readById("1dsd");
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
         LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
@@ -85,7 +82,7 @@ public class ResidueGraphTest {
     @Test
     public void shouldReportMotifsFromGenericRead() {
         Structure structure = allPurposeReader.readById("200l");
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(5939, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -106,7 +103,7 @@ public class ResidueGraphTest {
     @Test
     public void shouldReportMotifsFromGenericReadWithAssemblies() {
         Structure structure = allPurposeReader.readById("1acj");
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(25230, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -127,7 +124,7 @@ public class ResidueGraphTest {
     @Test
     public void shouldReportMotifsFromHighThroughputRead() {
         Structure structure = renumberedReader.readById("200l");
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(5947,  residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -148,7 +145,7 @@ public class ResidueGraphTest {
     @Test
     public void shouldReportMotifsFromHighThroughputReadWithAssemblies() {
         Structure structure = renumberedReader.readById("1acj");
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(25196, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -176,7 +173,7 @@ public class ResidueGraphTest {
     public void shouldReportMotifsForArginineTweezers() {
         Structure structure = renumberedReader.readById("4ob8");
         List<ResiduePairDescriptor> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         residueGraph.residuePairOccurrencesParallel()
                 .filter(wordOccurrence -> residuePairDescriptors.contains(wordOccurrence.getResiduePairDescriptor()))

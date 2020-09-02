@@ -3,8 +3,8 @@ package org.rcsb.strucmotif;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import org.rcsb.strucmotif.align.Alignment;
-import org.rcsb.strucmotif.align.QuaternionAlignment;
+import org.rcsb.strucmotif.align.AlignmentService;
+import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.core.InternalMotifSearch;
 import org.rcsb.strucmotif.core.InternalMotifSearchImpl;
 import org.rcsb.strucmotif.core.MotifPruner;
@@ -45,7 +45,7 @@ public class MockMotifSearch {
     static class MockModule extends AbstractModule {
         protected void configure() {
             super.configure();
-            bind(Alignment.class).to(QuaternionAlignment.class);
+            bind(AlignmentService.class).to(QuaternionAlignmentService.class);
             bind(InternalMotifSearch.class).to(InternalMotifSearchImpl.class);
             bind(MotifPruner.class).to(MotifPrunerImpl.class);
             bind(TargetAssembler.class).to(TargetAssemblerImpl.class);

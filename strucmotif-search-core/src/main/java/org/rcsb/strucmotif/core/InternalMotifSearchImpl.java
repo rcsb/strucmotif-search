@@ -1,9 +1,7 @@
 package org.rcsb.strucmotif.core;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.rcsb.strucmotif.MotifSearch;
-import org.rcsb.strucmotif.align.Alignment;
+import org.rcsb.strucmotif.align.AlignmentService;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
@@ -12,22 +10,28 @@ import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-@Singleton
+@Service
 public class InternalMotifSearchImpl implements InternalMotifSearch {
     private static final Logger logger = LoggerFactory.getLogger(InternalMotifSearchImpl.class);
     private final TargetAssembler targetAssembler;
-    private final Alignment alignment;
+    private final AlignmentService alignment;
+    private final ThreadPool threadPool;
+    private final MotifSearchConfig motifSearchConfig;
 
-    @Inject
-    public InternalMotifSearchImpl(TargetAssembler targetAssembler, Alignment alignment) {
+    @Autowired
+    public InternalMotifSearchImpl(TargetAssembler targetAssembler, AlignmentService alignment, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
         this.targetAssembler = targetAssembler;
         this.alignment = alignment;
+        this.threadPool = threadPool;
+        this.motifSearchConfig = motifSearchConfig;
     }
 
     @Override
@@ -40,7 +44,7 @@ public class InternalMotifSearchImpl implements InternalMotifSearch {
 
             if (queryResiduePairDescriptors.isEmpty()) {
                 throw new IllegalArgumentException("did not find any valid motifs in " + queryStructure.getStructure().getStructureIdentifier() +
-                        " - maybe distance cutoff (" + MotifSearch.DISTANCE_CUTOFF + ") exceeded? - maybe wrong selection?");
+                        " - maybe distance cutoff (" + motifSearchConfig.getDistanceCutoff() + ") exceeded? - maybe wrong selection?");
             }
 
             Parameters parameters = query.getParameters();
@@ -76,27 +80,29 @@ public class InternalMotifSearchImpl implements InternalMotifSearch {
     }
 
     private List<Hit> scoreHits(Parameters parameters, MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-        boolean honorLimit = parameters.hasLimit();
+        boolean honorLimit = parameters.hasLimit() || motifSearchConfig.getMaxResults() > 0;
         result.getTimings().structuresStart();
-        List<Hit> hits = honorLimit ? scoreHitsLimited(parameters, result, hitScorer) : scoreHitsUnlimited(result, hitScorer);
+        List<Hit> hits = honorLimit ?
+                scoreHitsLimited(result, hitScorer, Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults())) :
+                scoreHitsUnlimited(result, hitScorer);
         result.getTimings().structuresStop();
         return hits;
     }
 
-    private List<Hit> scoreHitsLimited(Parameters parameters, MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-        return MotifSearch.FORK_JOIN_POOL.submit(() -> result.getTargetStructures()
+    private List<Hit> scoreHitsLimited(MotifSearchResult result, HitScorer hitScorer, int limit) throws ExecutionException, InterruptedException {
+        return threadPool.submit(() -> result.getTargetStructures()
                 .values()
                 .parallelStream()
                 .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))
                 // hits filtered by high RMSD value are reported as null
                 .filter(Objects::nonNull)
-                .limit(parameters.getLimit())
+                .limit(limit)
                 .collect(Collectors.toList()))
                 .get();
     }
 
     private List<Hit> scoreHitsUnlimited(MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-        return MotifSearch.FORK_JOIN_POOL.submit(() -> result.getTargetStructures()
+        return threadPool.submit(() -> result.getTargetStructures()
                 .values()
                 .parallelStream()
                 .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))

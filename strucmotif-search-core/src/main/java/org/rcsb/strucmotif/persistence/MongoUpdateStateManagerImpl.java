@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.google.inject.Inject;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -8,6 +7,8 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.conversions.Bson;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
@@ -17,13 +18,14 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.pullAll;
 import static com.mongodb.client.model.Updates.pushEach;
 
+@Service
 public class MongoUpdateStateManagerImpl implements UpdateStateManager {
     private static final String ARCHIVE_KEY = "archive";
     private static final String RESIDUE_KEY = "residue";
     private static final String INDEX_KEY = "index";
     private final MongoCollection<DBObject> state;
 
-    @Inject
+    @Autowired
     public MongoUpdateStateManagerImpl(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         state = database.getCollection("state", DBObject.class);

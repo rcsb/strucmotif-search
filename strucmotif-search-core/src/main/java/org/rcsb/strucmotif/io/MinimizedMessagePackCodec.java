@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import com.google.inject.Singleton;
+import org.springframework.stereotype.Service;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.Map;
  * Gives room to further optimize the Mol* MessagePack codec. Many categories are not needed and could be omitted.
  * https://github.com/google/flatbuffers/blob/2706381eef639dc19eab2b823bc86d2b8521e230/java/com/google/flatbuffers/Utf8Safe.java#L73
  */
-@Singleton
+@Service
 public class MinimizedMessagePackCodec implements MessagePackCodec {
     @Override
     public byte[] encodeArray(Object[] array) {

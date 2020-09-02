@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.read;
 
-import com.google.inject.Singleton;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.CifOptions;
 import org.rcsb.cif.model.CifFile;
@@ -15,6 +14,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -26,7 +26,7 @@ import java.util.Collection;
 /**
  * An all-purpose reader structure reader. Used to read the original binary files as well as user input.
  */
-@Singleton
+@Service
 public class AllPurposeReaderImpl implements AllPurposeReader {
     private static final Logger logger = LoggerFactory.getLogger(AllPurposeReaderImpl.class);
     private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_PLAIN).build();

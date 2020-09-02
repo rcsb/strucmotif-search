@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.query;
 
-import com.google.inject.Inject;
 import org.rcsb.strucmotif.core.InternalMotifSearch;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
@@ -10,6 +9,8 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -22,13 +23,14 @@ import java.util.Set;
 /**
  * The entry point to create {@link MotifSearchQuery} instances.
  */
+@Service
 public class QueryBuilder {
     private final AllPurposeReader allPurposeReader;
     private final MotifPruner motifPruner;
     private final InternalMotifSearch internalMotifSearch;
     private static final int MAXIMUM_MOTIF_SIZE = 10;
 
-    @Inject
+    @Autowired
     public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, InternalMotifSearch internalMotifSearch) {
         this.allPurposeReader = allPurposeReader;
         this.motifPruner = motifPruner;

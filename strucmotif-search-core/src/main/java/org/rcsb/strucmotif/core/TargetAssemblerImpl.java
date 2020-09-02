@@ -1,8 +1,7 @@
 package org.rcsb.strucmotif.core;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
@@ -20,6 +19,8 @@ import org.rcsb.strucmotif.io.read.SelectionReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -32,16 +33,18 @@ import java.util.stream.Collectors;
  * subgraph isomorphism: the query is a graph and we want to find all target structures which contain this query as a
  * subgraph.
  */
-@Singleton
+@Service
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
     private final InvertedIndex motifLookup;
     private final SelectionReader selectionReader;
+    private final ThreadPool threadPool;
 
-    @Inject
-    public TargetAssemblerImpl(InvertedIndex motifLookup, SelectionReader selectionReader) {
+    @Autowired
+    public TargetAssemblerImpl(InvertedIndex motifLookup, SelectionReader selectionReader, ThreadPool threadPool) {
         this.motifLookup = motifLookup;
         this.selectionReader = selectionReader;
+        this.threadPool = threadPool;
     }
 
     @Override
@@ -118,20 +121,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
 
             // focus on valid target structures as this set should be smaller
-//            response.setTargetStructures(targetStructures.entrySet()
-//                    .parallelStream()
-//                    .filter(entry -> {
-//                        ResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());
-//                        // candidate must have valid path to extend from previous generation
-//                        if (residuePairIdentifiers == null) {
-//                            return false;
-//                        }
-//
-//                        // append target structure by whatever the new residue pair identifiers for this structure have to offer
-//                        return entry.getValue().consume(residuePairIdentifiers, overlapProfile);
-//                    })
-//                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-            response.setTargetStructures(MotifSearch.FORK_JOIN_POOL.submit(() -> targetStructures.entrySet()
+            response.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
                     .parallelStream()
                     .filter(entry -> {
                         ResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());

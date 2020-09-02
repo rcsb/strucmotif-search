@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain;
 
-import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -32,7 +31,7 @@ public class ResidueGraph {
     private final Map<Residue, IndexSelection> indexSelectionResolver;
     private final Map<Residue, LabelSelection> labelSelectionResolver;
 
-    public ResidueGraph(Structure structure) {
+    public ResidueGraph(Structure structure, double squaredCutoff) {
         this.indexSelectionResolver = new HashMap<>();
         this.labelSelectionResolver = new HashMap<>();
 
@@ -99,7 +98,7 @@ public class ResidueGraph {
                                 }
 
                                 double squaredDistance = distanceSquared3d(backboneCoordinates1, backboneCoordinates2);
-                                if (squaredDistance < MotifSearch.DISTANCE_CUTOFF_SQUARED) {
+                                if (squaredDistance < squaredCutoff) {
                                     Map<Residue, Double> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residue1, key -> new HashMap<>());
                                     innerPolymerAnchorMap.put(residue2, Math.sqrt(squaredDistance));
 

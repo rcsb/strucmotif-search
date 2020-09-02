@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.io.read;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import org.rcsb.strucmotif.domain.Matrix4DTransformation;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
@@ -17,6 +15,8 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
 import org.rcsb.strucmotif.persistence.MongoResidueDB;
 import org.rcsb.strucmotif.persistence.MongoTitleDB;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,12 +26,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Singleton
+@Service
 public class MongoSelectionReaderImpl implements SelectionReader {
     private final MongoResidueDB residueDB;
     private final MongoTitleDB titleDB;
 
-    @Inject
+    @Autowired
     public MongoSelectionReaderImpl(MongoResidueDB residueDB, MongoTitleDB titleDB) {
         this.residueDB = residueDB;
         this.titleDB = titleDB;

@@ -6,7 +6,7 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 
 import java.util.List;
 
-public interface Alignment {
+public interface AlignmentService {
     /**
      * Align 2 sets of residues to one another using quaternions.
      * @param reference the reference set of residues

@@ -1,24 +1,24 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.mongodb.BasicDBList;
 import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Filters.eq;
 
-@Singleton
+@Service
 public class MongoResidueDBImpl implements MongoResidueDB {
     private final MongoCollection<DBObject> residues;
 
-    @Inject
+    @Autowired
     public MongoResidueDBImpl(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         residues = database.getCollection("components", DBObject.class);

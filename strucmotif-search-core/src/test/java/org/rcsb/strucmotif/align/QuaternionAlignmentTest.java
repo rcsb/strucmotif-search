@@ -27,7 +27,7 @@ import static org.rcsb.strucmotif.domain.Matrix4DTransformation.IDENTITY_MATRIX_
 @RunWith(GuiceJUnit4Runner.class)
 public class QuaternionAlignmentTest {
     @Inject
-    private Alignment alignment;
+    private AlignmentService alignment;
     @Inject
     private AllPurposeReader allPurposeReader;
     private static int seqId = 1;

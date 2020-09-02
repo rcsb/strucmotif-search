@@ -1,11 +1,13 @@
 package org.rcsb.strucmotif.core;
 
-import com.google.inject.Singleton;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,11 +21,18 @@ import java.util.stream.Collectors;
  * A motif may be best described by the minimal spanning tree which connects all vertices in the most compact fashion.
  * Uses Kruskal's algorithm to determine tree.
  */
-@Singleton
+@Service
 public class MotifPrunerImpl implements MotifPruner {
+    private final MotifSearchConfig motifSearchConfig;
+
+    @Autowired
+    public MotifPrunerImpl(MotifSearchConfig motifSearchConfig) {
+        this.motifSearchConfig = motifSearchConfig;
+    }
+
     @Override
     public List<ResiduePairOccurrence> prune(Structure structure) {
-        ResidueGraph residueGraph = new ResidueGraph(structure);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
 
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()
                 .collect(Collectors.toList());
@@ -34,7 +43,7 @@ public class MotifPrunerImpl implements MotifPruner {
                 .mapToLong(Collection::size)
                 .sum();
 
-        // ignore motifs with <3 identifiers
+        // ignore motifs with <4 identifiers
         if (residueCount < 4) {
             return residuePairOccurrences;
         }

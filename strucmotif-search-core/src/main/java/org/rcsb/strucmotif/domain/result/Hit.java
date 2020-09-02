@@ -1,10 +1,10 @@
 package org.rcsb.strucmotif.domain.result;
 
-import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * hit (i.e. structure identifiers, component identifiers, and transformation).
  */
 public class Hit {
+    private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
     private final StructureIdentifier structureIdentifier;
     private final String title;
     private final LabelSelection[] selection;
@@ -74,8 +75,12 @@ public class Hit {
         return Objects.hash(structureIdentifier, selection, rootMeanSquareDeviation);
     }
 
+
     @Override
     public String toString() {
-        return structureIdentifier + " " + Arrays.toString(selection) + " (" + Arrays.stream(residueTypes).map(ResidueType::getThreeLetterCode).collect(Collectors.toList()) + ") " + MotifSearch.format(rootMeanSquareDeviation);
+        return structureIdentifier + " " +
+                Arrays.toString(selection) + " (" +
+                Arrays.stream(residueTypes).map(ResidueType::getThreeLetterCode).collect(Collectors.toList()) + ") " +
+                DECIMAL_FORMAT.format(rootMeanSquareDeviation);
     }
 }

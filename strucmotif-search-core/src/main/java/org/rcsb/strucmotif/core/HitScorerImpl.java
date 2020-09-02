@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.align.Alignment;
+import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
@@ -10,6 +10,7 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -20,9 +21,9 @@ public class HitScorerImpl implements HitScorer {
     private final List<Residue> queryResidues;
     private final double rmsdCutoff;
     private final AtomPairingScheme atomPairingScheme;
-    private final Alignment alignment;
+    private final AlignmentService alignment;
 
-    public HitScorerImpl(QueryStructure queryStructure, double rmsdCutoff, AtomPairingScheme atomPairingScheme, Alignment alignment) {
+    public HitScorerImpl(QueryStructure queryStructure, double rmsdCutoff, AtomPairingScheme atomPairingScheme, AlignmentService alignment) {
         this.queryResidues = queryStructure.getResidues();
         this.rmsdCutoff = rmsdCutoff;
         this.atomPairingScheme = atomPairingScheme;

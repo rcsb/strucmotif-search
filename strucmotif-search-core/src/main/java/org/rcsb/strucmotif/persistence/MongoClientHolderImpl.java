@@ -1,24 +1,26 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.google.inject.Singleton;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
-import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@Singleton
+@Service
 public class MongoClientHolderImpl implements MongoClientHolder {
     private static final Logger logger = LoggerFactory.getLogger(MongoClientHolderImpl.class);
     private final MongoDatabase database;
 
-    public MongoClientHolderImpl() {
+    @Autowired
+    public MongoClientHolderImpl(MotifSearchConfig motifSearchConfig) {
         MongoClient mongoClient;
-        String uri = MotifSearch.DB_CONNECTION_URI;
+        String uri = motifSearchConfig.getDbConnectionUri();
         logger.info("Acquiring MongoClient - URI: {}", uri);
         if (uri != null && !uri.isBlank()) {
-            mongoClient = new MongoClient(new MongoClientURI(MotifSearch.DB_CONNECTION_URI));
+            mongoClient = new MongoClient(new MongoClientURI(uri));
         } else {
             mongoClient = new MongoClient();
         }

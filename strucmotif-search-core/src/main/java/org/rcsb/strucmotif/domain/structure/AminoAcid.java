@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import org.rcsb.strucmotif.align.QuaternionAlignment;
+import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.domain.Matrix4DTransformation;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
@@ -66,7 +66,7 @@ public class AminoAcid extends Residue {
                 findAtomUnsafe("C").getCoord());
         double[] centroid = Algebra.centroid3d(coordList);
 
-        Matrix4DTransformation transformation = QuaternionAlignment.align(coordList, centroid, REFERENCE_BACKBONE, REFERENCE_CENTROID).getFirst();
+        Matrix4DTransformation transformation = QuaternionAlignmentService.align(coordList, centroid, REFERENCE_BACKBONE, REFERENCE_CENTROID).getFirst();
         return StructureFactory.createAtom(new AtomIdentifier("CB", -1), transformation.transformVector(REFERENCE_CB));
     }
 

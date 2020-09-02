@@ -1,16 +1,17 @@
 package org.rcsb.strucmotif.io.read;
 
-import com.google.inject.Singleton;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.CifOptions;
 import org.rcsb.cif.model.binary.BinaryFile;
-import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,13 +23,19 @@ import java.util.Collection;
  * A dedicated structure reader implementation for renumbered files (which will yield and be accessible by {@link
  * IndexSelection} in a consistent way).
  */
-@Singleton
+@Service
 public class RenumberedReaderImpl implements RenumberedReader {
     private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_PLAIN).build();
+    private final MotifSearchConfig motifSearchConfig;
+
+    @Autowired
+    public RenumberedReaderImpl(MotifSearchConfig motifSearchConfig) {
+        this.motifSearchConfig = motifSearchConfig;
+    }
 
     @Override
     public Structure readById(String pdbId, Collection<IndexSelection> selection) {
-        Path path = MotifSearch.ARCHIVE_PATH.resolve(pdbId + ".bcif");
+        Path path = motifSearchConfig.getArchivePath().resolve(pdbId + ".bcif");
         try {
             BinaryFile cifFile = (BinaryFile) CifIO.readFromPath(path, OPTIONS);
             return new RenumberedReaderState(cifFile, selection).build();

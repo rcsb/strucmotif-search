@@ -218,7 +218,7 @@ public class MotifSearch {
                 DB_CONNECTION_URI = prop.getProperty("db.connection.uri", null);
                 logger.info("MongoDB connection is {}",
                         DB_CONNECTION_URI == null ? "not specified - using local MongoDB server" :
-                                DB_CONNECTION_URI.replaceFirst("://.*@", "login"));
+                                DB_CONNECTION_URI.replaceFirst("://.*@", "://login@"));
             }
 
             DECIMAL_FORMAT = new DecimalFormat(prop.getProperty("decimal.format"));

@@ -5,16 +5,20 @@ import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
 import org.rcsb.strucmotif.MotifSearch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 public class MongoClientHolderImpl implements MongoClientHolder {
+    private static final Logger logger = LoggerFactory.getLogger(MongoClientHolderImpl.class);
     private final MongoDatabase database;
 
     public MongoClientHolderImpl() {
         MongoClient mongoClient;
-        if (MotifSearch.DB_CONNECTION_URI != null) {
-            MongoClientURI uri = new MongoClientURI(MotifSearch.DB_CONNECTION_URI);
-            mongoClient = new MongoClient(uri);
+        String uri = MotifSearch.DB_CONNECTION_URI;
+        logger.info("Acquiring MongoClient - URI: {}", uri);
+        if (uri != null && !uri.isBlank()) {
+            mongoClient = new MongoClient(new MongoClientURI(MotifSearch.DB_CONNECTION_URI));
         } else {
             mongoClient = new MongoClient();
         }

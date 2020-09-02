@@ -119,7 +119,7 @@ public class MotifSearch {
 
     static {
         logger.info("Setting motif search constants");
-        try (InputStream input = MotifSearch.class.getClassLoader().getResourceAsStream("config.properties")) {
+        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties")) {
             Objects.requireNonNull(input, "Did not find property file: 'config.properties' on classpath");
             Properties prop = new Properties();
             prop.load(input);

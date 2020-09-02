@@ -120,7 +120,6 @@ public class MotifSearch {
     private final QueryBuilder queryBuilder;
 
     private MotifSearch() {
-        logger.info("@init");
         AbstractModule module;
         module = new AbstractModule() {
             @Override
@@ -183,7 +182,6 @@ public class MotifSearch {
 
     // use static block to set config before instance is created
     static {
-        logger.info("@clinit");
         logger.info("Setting motif search constants");
         try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties")) {
             Objects.requireNonNull(input, "Did not find property file: 'config.properties' on classpath");

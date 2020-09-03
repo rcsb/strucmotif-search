@@ -1,4 +1,4 @@
-package org.rcsb.strucmotif;
+package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;

@@ -4,52 +4,85 @@ import org.rcsb.cif.CifIO;
 import org.rcsb.cif.model.CifFile;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
-import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.io.write.StructureWriter;
-import org.rcsb.strucmotif.persistence.UpdateStateManager;
+import org.rcsb.strucmotif.io.write.RenumberedWriter;
+import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Creates dedicated, reduced representation of all structure files. Prepares structures to be added to the index.
  */
-public class AddStructuresToArchiveTask {
+@Service
+public class AddStructuresToArchiveTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToArchiveTask.class);
     private static final String TASK_NAME = AddStructuresToArchiveTask.class.getSimpleName();
 
-    public AddStructuresToArchiveTask(Set<StructureIdentifier> identifiers, StructureWriter renumberedWriter, UpdateStateManager updateStateManager) {
+    private final RenumberedWriter structureWriter;
+    private final StateRepository stateRepository;
+    private final boolean local;
+    private final Path dataSourcePath;
+
+    @Autowired
+    public AddStructuresToArchiveTask(MotifSearchConfig motifSearchConfig, RenumberedWriter structureWriter, StateRepository stateRepository) {
+        this.structureWriter = structureWriter;
+        this.stateRepository = stateRepository;
+
+        Path dataSourcePath = Paths.get(motifSearchConfig.getDataSource());
+        if (Files.exists(dataSourcePath)) {
+            this.local = true;
+            this.dataSourcePath = dataSourcePath;
+        } else {
+            this.local = false;
+            this.dataSourcePath = null;
+        }
+
+        // ensure directories exist
+        try {
+            Files.createDirectories(motifSearchConfig.getArchivePath());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public void execute(Collection<StructureIdentifier> delta) {
         logger.info("[{}] Starting structural motif search archive update",
                 TASK_NAME);
 
         AtomicInteger counter = new AtomicInteger();
-        int target = identifiers.size();
+        int target = delta.size();
 
-        // write structure
-        identifiers.parallelStream()
-                .forEach(id -> {
+        // write structures to file system
+        delta.parallelStream().forEach(id -> {
                     try {
                         logger.info("[{} / {}] Renumbering {}",
                                 counter.incrementAndGet(),
                                 target,
                                 id);
 
-                        // ensure directories exist
-                        Files.createDirectories(MotifSearch.ARCHIVE_PATH);
-
                         MmCifFile cifFile = readById(id.getPdbId()).as(StandardSchemata.MMCIF);
-                        renumberedWriter.write(cifFile);
-                        updateStateManager.insertArchiveEntries(Set.of(id));
+                        structureWriter.write(cifFile);
+                        stateRepository.insertKnown(Set.of(id));
                     } catch (IOException e) {
-                        logger.warn("[{} / {}] {} failed - no source file @ RCSB",
+                        logger.warn("[{} / {}] {} failed - no source file",
                                 counter.get(),
                                 target,
                                 id, e);
+                        // fail complete update
+                        throw new UncheckedIOException(e);
                     }
                 });
 
@@ -58,7 +91,11 @@ public class AddStructuresToArchiveTask {
                 TASK_NAME);
     }
 
-    protected CifFile readById(String pdbId) throws IOException {
-        return CifIO.readById(pdbId);
+    private CifFile readById(String pdbId) throws IOException {
+        if (local) {
+            return CifIO.readFromPath(dataSourcePath.resolve(pdbId + ".bcif.gz"));
+        } else {
+            return CifIO.readById(pdbId);
+        }
     }
 }

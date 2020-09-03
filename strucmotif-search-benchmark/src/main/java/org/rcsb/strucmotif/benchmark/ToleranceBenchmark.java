@@ -13,7 +13,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.Motifs;
-import org.rcsb.strucmotif.PositionSpecificExchange;
+import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 

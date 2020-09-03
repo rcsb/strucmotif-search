@@ -36,7 +36,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
 
     @Override
     public Structure readById(StructureIdentifier structureIdentifier, Collection<IndexSelection> selection) {
-        Path path = motifSearchConfig.getArchivePath().resolve(structureIdentifier.getPdbId() + ".bcif");
+        Path path = motifSearchConfig.getArchivePath().resolve(structureIdentifier.getPdbId() + ".bcif.gz");
         try {
             BinaryFile cifFile = (BinaryFile) CifIO.readFromPath(path, OPTIONS);
             return new RenumberedReaderState(cifFile, selection).build();

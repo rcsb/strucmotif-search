@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.update;
 
-import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -8,11 +8,12 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
-import org.rcsb.strucmotif.persistence.UpdateStateManager;
+import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,57 +29,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * Routine to add new structures to the structural motif search tool. Single argument is an array of PDB-identifiers to
- * process. The array may be empty (causing a no-operation).
- * <p>
- * This will:
- * <ul>
- *     <li>creating 'optimized' binary structure files for all structures</li>
- *     <li>determining all words (i.e. pairs of components) and adding them to the inverted index</li>
- *     <li>keep track of the ids of all 'registered' files in the optimized archive and in the index</li>
- * </ul>
- * <p>
- * Implementation details: Files will be obtained on-the-fly from <code>models.rcsb.org</code>. That means that this
- * step strictly requires that the binary CIF creation during update did finish. Touching the files of the inverted
- * index is costly. Therefore, this update step 'buffers' results for a number of structures before 'flushing'
- * everything to the file system. Default batch size is 400.
- * <p>
- * Risks:
- * <ul>
- *     <li>Stopping or a (JVM)-crash during writing to file system will most likely compromise the whole index - you
- *     will experience MessagePack acting up as a consequence (caused by fixed length arrays ending prematurely). There
- *     is no obvious way to recover, so backup/snapshot accordingly.</li>
- *     <li>Implementation is using all available resources of the common thread pool.</li>
- *     <li>Writing to file system is done in parallel (no file is touched twice during 1 write operation, though).</li>
- *     <li>Be aware that some structures will compute for a considerable time (up to several hours) and will block
- *     flushing of all other threads.</li>
- * </ul>
+ * Update the inverted index.
  */
-public class AddStructuresToInvertedIndexTask {
+@Service
+public class AddStructuresToInvertedIndexTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToInvertedIndexTask.class);
-    private static final int CHUNK_SIZE = 400;
     private static final String TASK_NAME = AddStructuresToInvertedIndexTask.class.getSimpleName();
     private final InvertedIndex motifLookup;
     private final RenumberedReader renumberedReader;
+    private final MotifSearchConfig motifSearchConfig;
+    private final StateRepository stateRepository;
 
-    public AddStructuresToInvertedIndexTask(Set<StructureIdentifier> ids, InvertedIndex motifLookup, RenumberedReader renumberedReader, UpdateStateManager updateStateManager) throws IOException {
+    @Autowired
+    public AddStructuresToInvertedIndexTask(InvertedIndex motifLookup, RenumberedReader renumberedReader, MotifSearchConfig motifSearchConfig, StateRepository stateRepository) {
         this.motifLookup = motifLookup;
         this.renumberedReader = renumberedReader;
+        this.motifSearchConfig = motifSearchConfig;
+        this.stateRepository = stateRepository;
+    }
 
-        logger.info("[{}] Starting structural motif search index update",
+    @Override
+    public void execute(Collection<StructureIdentifier> delta) {
+        logger.info("[{}] Starting structural motif search inverted index update",
                 TASK_NAME);
 
-        List<StructureIdentifier> identifiers = new ArrayList<>(ids);
+        List<StructureIdentifier> identifiers = new ArrayList<>(delta);
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
         Collections.shuffle(identifiers);
-
-        // create respectively ensure directories exist
-        motifLookup.createDirectories();
 
         // we assume that the argument list does not contain any identifiers already present in the index
         // work on optimized path so that component index mapping is valid
         List<Path> paths = identifiers.stream()
-                .map(id -> MotifSearch.ARCHIVE_PATH.resolve(id + ".bcif"))
+                .map(id -> motifSearchConfig.getArchivePath().resolve(id + ".bcif.gz"))
                 .collect(Collectors.toList());
 
         long totalFileCount = paths.size();
@@ -86,12 +68,12 @@ public class AddStructuresToInvertedIndexTask {
                 TASK_NAME,
                 totalFileCount);
 
-        Partition<Path> partitions = new Partition<>(paths, CHUNK_SIZE);
+        Partition<Path> partitions = new Partition<>(paths, motifSearchConfig.getChunkSize());
         logger.info("[{}] Formed {} partitions",
                 TASK_NAME,
                 partitions.size());
 
-        Context context = new Context(updateStateManager);
+        Context context = new Context(stateRepository);
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
@@ -108,18 +90,18 @@ public class AddStructuresToInvertedIndexTask {
             writeMotifs(context);
         }
 
-        logger.info("[{}] Finished index update",
+        logger.info("[{}] Finished inverted index update",
                 TASK_NAME);
     }
 
     static class Context {
-        final UpdateStateManager updateStateManager;
+        final StateRepository updateStateManager;
         final Set<StructureIdentifier> processed;
         String partitionContext;
         Map<ResiduePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>>> buffer;
         AtomicInteger structureCounter;
 
-        public Context(UpdateStateManager updateStateManager) {
+        public Context(StateRepository updateStateManager) {
             this.updateStateManager = updateStateManager;
             this.processed = Collections.synchronizedSet(new HashSet<>());
         }
@@ -129,18 +111,19 @@ public class AddStructuresToInvertedIndexTask {
         String pdbId = path.toFile().getName().split("\\.")[0];
         StructureIdentifier structureIdentifier = new StructureIdentifier(pdbId);
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + CHUNK_SIZE + "] [" + pdbId;
+        String structureContext = count + " / " + motifSearchConfig.getChunkSize() + "] [" + pdbId;
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;
         try {
-            structure = renumberedReader.readById(pdbId);
+            structure = renumberedReader.readById(structureIdentifier);
         } catch (UncheckedIOException e) {
             logger.warn("[{}] [{}] Source file missing unexpectedly",
                     context.partitionContext,
                     structureContext,
                     e);
-            return;
+            // fail complete update
+            throw e;
         } catch (UnsupportedOperationException e) {
             logger.warn("[{}] [{}] No valid polymer chains",
                     context.partitionContext,
@@ -149,7 +132,7 @@ public class AddStructuresToInvertedIndexTask {
         }
 
         try {
-            ResidueGraph residueGraph = new ResidueGraph(structure);
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
@@ -163,21 +146,23 @@ public class AddStructuresToInvertedIndexTask {
                         targetIdentifiers.add(targetIdentifier);
                         structureMotifCounter.incrementAndGet();
                     });
-            logger.info("[{}] [{}] Extracted {} words",
+            logger.info("[{}] [{}] Extracted {} residue pairs",
                     context.partitionContext,
                     structureContext,
                     structureMotifCounter.get());
             context.processed.add(structureIdentifier);
         } catch (Exception e) {
-            logger.warn("[{}] [{}] Failed",
+            logger.warn("[{}] [{}] Residue graph determination failed",
                     context.partitionContext,
                     structureContext,
                     e);
+            // fail complete update
+            throw e;
         }
     }
 
     private void writeMotifs(Context context) {
-        logger.info("[{}] Persisting {} unique word descriptors",
+        logger.info("[{}] Persisting {} unique residue pair descriptors",
                 context.partitionContext,
                 context.buffer.size());
 
@@ -201,7 +186,7 @@ public class AddStructuresToInvertedIndexTask {
         });
         context.buffer.clear();
 
-        context.updateStateManager.insertInvertedIndexEntries(context.processed);
+        context.updateStateManager.insertIndexed(context.processed);
         context.processed.clear();
     }
 }

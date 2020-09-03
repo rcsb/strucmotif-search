@@ -9,11 +9,13 @@ import java.nio.file.Paths;
 public class MotifSearchConfig {
     private double distanceCutoff = 20;
     private String rootPath = "/opt/data/";
+    private String dataSource = "/opt/pdb/";
     private int numberThreads = Runtime.getRuntime().availableProcessors();
     private String dbConnectionUri;
     private int maxResults = 10000;
     private int decimalPlacesRMSD = 2;
     private int decimalPlacesMatrix = 3;
+    private int chunkSize = 400;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -29,6 +31,14 @@ public class MotifSearchConfig {
 
     public void setRootPath(String rootPath) {
         this.rootPath = rootPath;
+    }
+
+    public String getDataSource() {
+        return dataSource;
+    }
+
+    public void setDataSource(String dataSource) {
+        this.dataSource = dataSource;
     }
 
     public int getNumberThreads() {
@@ -71,8 +81,16 @@ public class MotifSearchConfig {
         this.decimalPlacesMatrix = decimalPlacesMatrix;
     }
 
+    public int getChunkSize() {
+        return chunkSize;
+    }
+
+    public void setChunkSize(int chunkSize) {
+        this.chunkSize = chunkSize;
+    }
+
     public Path getArchivePath() {
-        return Paths.get(rootPath).resolve("archive").resolve("renum");
+        return Paths.get(rootPath).resolve("archive");
     }
 
     public double getSquaredDistanceCutoff() {

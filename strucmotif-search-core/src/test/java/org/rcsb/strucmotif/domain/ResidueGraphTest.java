@@ -13,7 +13,6 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.RenumberedReader;
 
 import java.util.ArrayList;
 import java.util.List;

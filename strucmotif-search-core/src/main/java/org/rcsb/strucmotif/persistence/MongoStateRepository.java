@@ -19,34 +19,34 @@ import static com.mongodb.client.model.Updates.pullAll;
 import static com.mongodb.client.model.Updates.pushEach;
 
 @Service
-public class MongoUpdateStateManager implements UpdateStateManager {
+public class MongoStateRepository implements StateRepository {
     // all 'known' entry identifiers, this is a superset of 'structures' as e.g. alpha carbon traces will fail processing
     private static final String REGISTERED_KEY = "registered";
     // all 'healthy' structures that can appear as search results
     private static final String STRUCTURES_KEY = "structures";
     // all structures registered in the inverted index (this should be equal to 'structures')
-    private static final String INDEX_KEY = "index";
+    private static final String INVERTED_INDEX_KEY = "index";
     private final MongoCollection<DBObject> state;
 
     @Autowired
-    public MongoUpdateStateManager(MongoClientHolder mongoClientHolder) {
+    public MongoStateRepository(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         state = database.getCollection("state", DBObject.class);
     }
 
     @Override
-    public Collection<StructureIdentifier> selectArchiveEntries() {
+    public Collection<StructureIdentifier> selectKnown() {
         return select(REGISTERED_KEY);
     }
 
     @Override
-    public Collection<StructureIdentifier> selectResidueDBEntries() {
+    public Collection<StructureIdentifier> selectSupported() {
         return select(STRUCTURES_KEY);
     }
 
     @Override
-    public Collection<StructureIdentifier> selectInvertedIndexEntries() {
-        return select(INDEX_KEY);
+    public Collection<StructureIdentifier> selectIndexed() {
+        return select(INVERTED_INDEX_KEY);
     }
 
     private Collection<StructureIdentifier> select(String key) {
@@ -57,18 +57,18 @@ public class MongoUpdateStateManager implements UpdateStateManager {
     }
 
     @Override
-    public void insertArchiveEntries(Collection<StructureIdentifier> additions) {
+    public void insertKnown(Collection<StructureIdentifier> additions) {
         insert(additions, REGISTERED_KEY);
     }
 
     @Override
-    public void insertResidueDBEntries(Collection<StructureIdentifier> additions) {
+    public void insertSupported(Collection<StructureIdentifier> additions) {
         insert(additions, STRUCTURES_KEY);
     }
 
     @Override
-    public void insertInvertedIndexEntries(Collection<StructureIdentifier> additions) {
-        insert(additions, INDEX_KEY);
+    public void insertIndexed(Collection<StructureIdentifier> additions) {
+        insert(additions, INVERTED_INDEX_KEY);
     }
 
     private void insert(Collection<StructureIdentifier> additions, String key) {
@@ -84,18 +84,18 @@ public class MongoUpdateStateManager implements UpdateStateManager {
     }
 
     @Override
-    public void deleteArchiveEntries(Collection<StructureIdentifier> removals) {
+    public void deleteKnown(Collection<StructureIdentifier> removals) {
         delete(removals, REGISTERED_KEY);
     }
 
     @Override
-    public void deleteResidueDBEntries(Collection<StructureIdentifier> removals) {
+    public void deleteSupported(Collection<StructureIdentifier> removals) {
         delete(removals, STRUCTURES_KEY);
     }
 
     @Override
-    public void deleteInvertedIndexEntries(Collection<StructureIdentifier> removals) {
-        delete(removals, INDEX_KEY);
+    public void deleteIndexed(Collection<StructureIdentifier> removals) {
+        delete(removals, INVERTED_INDEX_KEY);
     }
 
     private void delete(Collection<StructureIdentifier> removals, String key) {

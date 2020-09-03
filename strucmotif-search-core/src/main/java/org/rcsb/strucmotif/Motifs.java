@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif;
 
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;

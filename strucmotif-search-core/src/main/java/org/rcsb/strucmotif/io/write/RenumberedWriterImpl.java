@@ -26,11 +26,12 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 @Service
-public class RenumberedWriterImpl implements StructureWriter {
+public class RenumberedWriterImpl implements RenumberedWriter {
     private static final CifOptions OPTIONS = CifOptions.builder()
             .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
             .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)
             .encodingStrategyHint("atom_site", "Cartn_z", "delta", 1)
+            .gzip(true)
             .build();
     private final MotifSearchConfig motifSearchConfig;
 
@@ -131,7 +132,7 @@ public class RenumberedWriterImpl implements StructureWriter {
 
         try {
             CifIO.writeBinary(outputFile,
-                    motifSearchConfig.getArchivePath().resolve(pdbId.toLowerCase() + ".bcif"),
+                    motifSearchConfig.getArchivePath().resolve(pdbId.toLowerCase() + ".bcif.gz"),
                     OPTIONS);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

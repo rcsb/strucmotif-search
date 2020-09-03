@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 /**
- * The specification on how to insert and select residue pair occurrences. Update operate is not directly supported (rather
- * invalid/obsolete identifiers have to be removed manually and subsequently the new data can be inserted).
+ * The specification on how to insert and select residue pair occurrences. Update operate is not directly supported
+ * (rather invalid/obsolete identifiers have to be removed manually and subsequently the new data can be inserted).
  */
 public interface InvertedIndex {
     /**
@@ -35,11 +35,4 @@ public interface InvertedIndex {
      * @param structureIdentifiers all structure identifiers to remove
      */
     void delete(ResiduePairDescriptor residuePairDescriptor, Collection<StructureIdentifier> structureIdentifiers);
-
-    /**
-     * Create directories to store data when lookup table is created (it is not checked whether directories exist during
-     * updating).
-     * @throws IOException when creation fails
-     */
-    void createDirectories() throws IOException;
 }

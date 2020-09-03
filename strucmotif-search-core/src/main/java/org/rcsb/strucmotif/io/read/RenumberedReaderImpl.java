@@ -6,6 +6,7 @@ import org.rcsb.cif.model.binary.BinaryFile;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -34,8 +35,8 @@ public class RenumberedReaderImpl implements RenumberedReader {
     }
 
     @Override
-    public Structure readById(String pdbId, Collection<IndexSelection> selection) {
-        Path path = motifSearchConfig.getArchivePath().resolve(pdbId + ".bcif");
+    public Structure readById(StructureIdentifier structureIdentifier, Collection<IndexSelection> selection) {
+        Path path = motifSearchConfig.getArchivePath().resolve(structureIdentifier.getPdbId() + ".bcif");
         try {
             BinaryFile cifFile = (BinaryFile) CifIO.readFromPath(path, OPTIONS);
             return new RenumberedReaderState(cifFile, selection).build();
@@ -150,7 +151,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
             addResidue();
             addChain();
 
-            return StructureFactory.createStructure(structureIdentifier, title, buildAssembly(chains));
+            return StructureFactory.createStructure(structureIdentifier, buildAssembly(chains));
         }
     }
 }

@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.domain;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rcsb.strucmotif.GuiceJUnit4Runner;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;

@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.io;
 import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rcsb.strucmotif.GuiceJUnit4Runner;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;

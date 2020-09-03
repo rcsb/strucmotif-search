@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.persistence;
 import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rcsb.strucmotif.GuiceJUnit4Runner;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.AngleType;

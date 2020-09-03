@@ -132,8 +132,7 @@ public class TargetStructure {
                 .collect(Collectors.toSet());
 
         try {
-            Structure structure = selectionReader.readById(structureIdentifier.getPdbId(), indexSelectors);
-            this.title = structure.getTitle();
+            Structure structure = selectionReader.readById(structureIdentifier, indexSelectors);
             IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 

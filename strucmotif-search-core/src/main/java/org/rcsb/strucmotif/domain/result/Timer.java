@@ -3,7 +3,7 @@ package org.rcsb.strucmotif.domain.result;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A simple timer class to track timings.
+ * Tracks timings.
  */
 public class Timer {
     private long start;

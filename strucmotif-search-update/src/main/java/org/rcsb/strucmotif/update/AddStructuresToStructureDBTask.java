@@ -12,8 +12,6 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
-import org.rcsb.strucmotif.persistence.MongoResidueDB;
-import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

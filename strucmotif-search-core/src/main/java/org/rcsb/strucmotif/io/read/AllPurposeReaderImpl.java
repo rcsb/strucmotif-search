@@ -8,6 +8,7 @@ import org.rcsb.cif.model.binary.BinaryFile;
 import org.rcsb.cif.model.text.TextFile;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -33,9 +34,9 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
     private static final String FETCH_URL = "https://models.rcsb.org/%s.bcif";
 
     @Override
-    public Structure readById(String pdbId, Collection<LabelSelection> selection) {
+    public Structure readById(StructureIdentifier structureIdentifier, Collection<LabelSelection> selection) {
         try {
-            URL url = new URL(String.format(FETCH_URL, pdbId));
+            URL url = new URL(String.format(FETCH_URL, structureIdentifier.getPdbId()));
             logger.debug("Loading structure from {} - selection: {}", url, selection);
             InputStream inputStream = url.openStream();
             BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream, OPTIONS);
@@ -142,7 +143,7 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
             addResidue();
             addChain();
 
-            return StructureFactory.createStructure(structureIdentifier, title, buildAssembly(chains));
+            return StructureFactory.createStructure(structureIdentifier, buildAssembly(chains));
         }
 
         private int determineFirstModelEnd() {

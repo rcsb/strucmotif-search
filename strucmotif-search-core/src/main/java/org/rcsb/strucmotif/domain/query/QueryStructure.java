@@ -84,6 +84,12 @@ public class QueryStructure {
         return sorted;
     }
 
+    /**
+     * Check if two identifiers reference an overlapping index selection.
+     * @param sortedWordResiduePairIdentifier reference
+     * @param candidateIdentifier candidate
+     * @return true if describing an overlapping selection
+     */
     private boolean match(ResiduePairIdentifier sortedWordResiduePairIdentifier, ResiduePairIdentifier candidateIdentifier) {
         return sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection1()) ||
                 sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection2()) ||

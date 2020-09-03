@@ -10,8 +10,8 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -19,34 +19,37 @@ import static com.mongodb.client.model.Updates.pullAll;
 import static com.mongodb.client.model.Updates.pushEach;
 
 @Service
-public class MongoUpdateStateManagerImpl implements UpdateStateManager {
-    private static final String ARCHIVE_KEY = "archive";
-    private static final String RESIDUE_KEY = "residue";
+public class MongoUpdateStateManager implements UpdateStateManager {
+    // all 'known' entry identifiers, this is a superset of 'structures' as e.g. alpha carbon traces will fail processing
+    private static final String REGISTERED_KEY = "registered";
+    // all 'healthy' structures that can appear as search results
+    private static final String STRUCTURES_KEY = "structures";
+    // all structures registered in the inverted index (this should be equal to 'structures')
     private static final String INDEX_KEY = "index";
     private final MongoCollection<DBObject> state;
 
     @Autowired
-    public MongoUpdateStateManagerImpl(MongoClientHolder mongoClientHolder) {
+    public MongoUpdateStateManager(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         state = database.getCollection("state", DBObject.class);
     }
 
     @Override
-    public Set<StructureIdentifier> selectArchiveEntries() {
-        return select(ARCHIVE_KEY);
+    public Collection<StructureIdentifier> selectArchiveEntries() {
+        return select(REGISTERED_KEY);
     }
 
     @Override
-    public Set<StructureIdentifier> selectResidueDBEntries() {
-        return select(RESIDUE_KEY);
+    public Collection<StructureIdentifier> selectResidueDBEntries() {
+        return select(STRUCTURES_KEY);
     }
 
     @Override
-    public Set<StructureIdentifier> selectInvertedIndexEntries() {
+    public Collection<StructureIdentifier> selectInvertedIndexEntries() {
         return select(INDEX_KEY);
     }
 
-    private Set<StructureIdentifier> select(String key) {
+    private Collection<StructureIdentifier> select(String key) {
         return ((BasicDBList) state.find(eq("_id", key)).first().get("v")).stream()
                 .map(String.class::cast)
                 .map(StructureIdentifier::new)
@@ -54,21 +57,21 @@ public class MongoUpdateStateManagerImpl implements UpdateStateManager {
     }
 
     @Override
-    public void insertArchiveEntries(Set<StructureIdentifier> additions) {
-        insert(additions, ARCHIVE_KEY);
+    public void insertArchiveEntries(Collection<StructureIdentifier> additions) {
+        insert(additions, REGISTERED_KEY);
     }
 
     @Override
-    public void insertResidueDBEntries(Set<StructureIdentifier> additions) {
-        insert(additions, RESIDUE_KEY);
+    public void insertResidueDBEntries(Collection<StructureIdentifier> additions) {
+        insert(additions, STRUCTURES_KEY);
     }
 
     @Override
-    public void insertInvertedIndexEntries(Set<StructureIdentifier> additions) {
+    public void insertInvertedIndexEntries(Collection<StructureIdentifier> additions) {
         insert(additions, INDEX_KEY);
     }
 
-    private void insert(Set<StructureIdentifier> additions, String key) {
+    private void insert(Collection<StructureIdentifier> additions, String key) {
         Bson filter = eq("_id", key);
 
         // ensure document exists
@@ -81,21 +84,21 @@ public class MongoUpdateStateManagerImpl implements UpdateStateManager {
     }
 
     @Override
-    public void deleteArchiveEntries(Set<StructureIdentifier> removals) {
-        delete(removals, ARCHIVE_KEY);
+    public void deleteArchiveEntries(Collection<StructureIdentifier> removals) {
+        delete(removals, REGISTERED_KEY);
     }
 
     @Override
-    public void deleteResidueDBEntries(Set<StructureIdentifier> removals) {
-        delete(removals, RESIDUE_KEY);
+    public void deleteResidueDBEntries(Collection<StructureIdentifier> removals) {
+        delete(removals, STRUCTURES_KEY);
     }
 
     @Override
-    public void deleteInvertedIndexEntries(Set<StructureIdentifier> removals) {
+    public void deleteInvertedIndexEntries(Collection<StructureIdentifier> removals) {
         delete(removals, INDEX_KEY);
     }
 
-    private void delete(Set<StructureIdentifier> removals, String key) {
+    private void delete(Collection<StructureIdentifier> removals, String key) {
         state.findOneAndUpdate(eq("_id", key),
                 pullAll("v", removals.stream().map(StructureIdentifier::getPdbId).collect(Collectors.toList())));
     }

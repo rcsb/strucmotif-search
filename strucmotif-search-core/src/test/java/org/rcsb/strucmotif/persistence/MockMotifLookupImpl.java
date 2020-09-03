@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.persistence;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.io.MessagePackCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

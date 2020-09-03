@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.align;
 import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rcsb.strucmotif.GuiceJUnit4Runner;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;

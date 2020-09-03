@@ -19,15 +19,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @Service
-public class InternalMotifSearchImpl implements InternalMotifSearch {
-    private static final Logger logger = LoggerFactory.getLogger(InternalMotifSearchImpl.class);
+public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
+    private static final Logger logger = LoggerFactory.getLogger(MotifSearchRuntimeImpl.class);
     private final TargetAssembler targetAssembler;
     private final AlignmentService alignment;
     private final ThreadPool threadPool;
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public InternalMotifSearchImpl(TargetAssembler targetAssembler, AlignmentService alignment, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, AlignmentService alignment, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
         this.targetAssembler = targetAssembler;
         this.alignment = alignment;
         this.threadPool = threadPool;

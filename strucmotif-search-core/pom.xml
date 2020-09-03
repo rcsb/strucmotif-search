@@ -17,6 +17,7 @@
             <version>2.0.2</version>
         </dependency>
 
+        <!-- dependency injection and configuration -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -36,6 +37,13 @@
             <version>3.12.1</version>
         </dependency>
 
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <version>2.3.3.RELEASE</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>

@@ -13,5 +13,5 @@ public interface AlignmentResult {
 
     Transformation getTransformation();
 
-    RootMeanSquareDeviation getScore();
+    AlignmentScore getScore();
 }

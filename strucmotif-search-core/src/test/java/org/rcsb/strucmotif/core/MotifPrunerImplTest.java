@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.core;
 import com.google.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rcsb.strucmotif.GuiceJUnit4Runner;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;

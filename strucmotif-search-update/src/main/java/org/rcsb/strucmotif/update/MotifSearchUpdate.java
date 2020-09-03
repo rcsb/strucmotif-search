@@ -6,8 +6,6 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
 import org.rcsb.strucmotif.io.write.StructureWriter;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
-import org.rcsb.strucmotif.persistence.MongoResidueDB;
-import org.rcsb.strucmotif.persistence.MongoTitleDB;
 import org.rcsb.strucmotif.persistence.UpdateStateManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

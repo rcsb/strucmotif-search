@@ -18,14 +18,12 @@ public class StructureFactory {
     /**
      * Construct a new structure.
      * @param structureIdentifier the PDB-id
-     * @param title the title (description) of this structure
      * @param chains all chains present
      * @return the constructed Structure instance
      */
     public static Structure createStructure(StructureIdentifier structureIdentifier,
-                                            String title,
                                             List<Chain> chains) {
-        return new Structure(structureIdentifier, title, chains);
+        return new Structure(structureIdentifier, chains);
     }
 
     /**

@@ -72,7 +72,7 @@ public class MotifSearchConfig {
     }
 
     public Path getArchivePath() {
-        return Paths.get(rootPath).resolve("archive").resolve("bcif-renum");
+        return Paths.get(rootPath).resolve("archive").resolve("renum");
     }
 
     public double getSquaredDistanceCutoff() {

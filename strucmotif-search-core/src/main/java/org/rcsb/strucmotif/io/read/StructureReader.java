@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.io.read;
 
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.Selection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -13,20 +14,20 @@ import java.util.Collection;
 public interface StructureReader<S extends Selection> {
     /**
      * Read by id - path is resolved internally.
-     * @param pdbId the id to read
+     * @param structureIdentifier the id to read
      * @return the {@link Structure} read
      */
-    default Structure readById(String pdbId) {
-        return readById(pdbId, null);
+    default Structure readById(StructureIdentifier structureIdentifier) {
+        return readById(structureIdentifier, null);
     }
 
     /**
      * Read by id with selection.
-     * @param pdbId the id to read
+     * @param structureIdentifier the id to read
      * @param selection the components to parse (ignoring everything else)
      * @return the {@link Structure} read
      */
-    Structure readById(String pdbId, Collection<S> selection);
+    Structure readById(StructureIdentifier structureIdentifier, Collection<S> selection);
 
     Structure readFromInputStream(InputStream inputStream);
 

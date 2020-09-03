@@ -12,27 +12,16 @@ import java.util.List;
  */
 public class Structure {
     private final StructureIdentifier structureIdentifier;
-    private final String title;
     private final List<Chain> chains;
 
     /**
      * Construct a new structure.
      * @param structureIdentifier the PDB-id
-     * @param title the title (description) of this structure
      * @param chains all chains present
      */
-    Structure(StructureIdentifier structureIdentifier, String title, List<Chain> chains) {
+    Structure(StructureIdentifier structureIdentifier, List<Chain> chains) {
         this.structureIdentifier = structureIdentifier;
-        this.title = title;
         this.chains = chains;
-    }
-
-    /**
-     * Reports the title of this structure.
-     * @return a string
-     */
-    public String getTitle() {
-        return title;
     }
 
     /**
@@ -53,8 +42,6 @@ public class Structure {
 
     @Override
     public String toString() {
-        return structureIdentifier +
-                " (" + title + ") chains: " +
-                chains;
+        return structureIdentifier + " chains: " + chains;
     }
 }

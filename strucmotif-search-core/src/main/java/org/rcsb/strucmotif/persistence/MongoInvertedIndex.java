@@ -24,12 +24,12 @@ import java.util.stream.Stream;
 import static com.mongodb.client.model.Filters.eq;
 
 @Service
-public class MongoInvertedIndexImpl implements InvertedIndex {
+public class MongoInvertedIndex implements InvertedIndex {
     private static final UpdateOptions UPSERT_OPTIONS = new UpdateOptions().upsert(true);
     private final MongoCollection<DBObject> invertedIndex;
 
     @Autowired
-    public MongoInvertedIndexImpl(MongoClientHolder mongoClientHolder) {
+    public MongoInvertedIndex(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         invertedIndex = database.getCollection("index", DBObject.class);
     }
@@ -151,10 +151,5 @@ public class MongoInvertedIndexImpl implements InvertedIndex {
 
         // this operation is safe if requested id doesn't exist
         invertedIndex.updateOne(eq("_id", descriptorKey), new BasicDBObject("$unset", builder.get()));
-    }
-
-    @Override
-    public void createDirectories() {
-        // nothing to do
     }
 }

@@ -4,8 +4,6 @@ import com.google.inject.Inject;
 import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.rcsb.strucmotif.GuiceJUnit4Runner;
-import org.rcsb.strucmotif.MockMotifSearch;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;

@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
-import org.rcsb.strucmotif.core.InternalMotifSearch;
+import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
@@ -17,20 +17,20 @@ import java.util.Set;
  * The immutable container for a structural motif query.
  */
 public class MotifSearchQuery {
-    private final InternalMotifSearch internalMotifSearch;
+    private final MotifSearchRuntime motifSearchRuntime;
     private final QueryStructure queryStructure;
     private final Parameters parameters;
     private final Map<LabelSelection, Set<ResidueType>> exchanges;
     private final Collection<StructureIdentifier> whitelist;
     private final Collection<StructureIdentifier> blacklist;
 
-    MotifSearchQuery(InternalMotifSearch internalMotifSearch,
+    MotifSearchQuery(MotifSearchRuntime motifSearchRuntime,
                      Structure structure,
                      Parameters parameters,
                      Map<LabelSelection, Set<ResidueType>> exchanges,
                      Collection<StructureIdentifier> whitelist,
                      Collection<StructureIdentifier> blacklist) {
-        this.internalMotifSearch = internalMotifSearch;
+        this.motifSearchRuntime = motifSearchRuntime;
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(structure);
         this.queryStructure = new QueryStructure(structure, residuePairOccurrences);
         this.parameters = parameters;
@@ -72,6 +72,6 @@ public class MotifSearchQuery {
     }
 
     public MotifSearchResult run() {
-        return internalMotifSearch.performSearch(this);
+        return motifSearchRuntime.performSearch(this);
     }
 }

@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
-import org.rcsb.strucmotif.core.InternalMotifSearch;
+import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
@@ -27,11 +27,11 @@ import java.util.Set;
 public class QueryBuilder {
     private final AllPurposeReader allPurposeReader;
     private final MotifPruner motifPruner;
-    private final InternalMotifSearch internalMotifSearch;
+    private final MotifSearchRuntime internalMotifSearch;
     private static final int MAXIMUM_MOTIF_SIZE = 10;
 
     @Autowired
-    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, InternalMotifSearch internalMotifSearch) {
+    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, MotifSearchRuntime internalMotifSearch) {
         this.allPurposeReader = allPurposeReader;
         this.motifPruner = motifPruner;
         this.internalMotifSearch = internalMotifSearch;
@@ -44,7 +44,7 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, Collection<LabelSelection> selection) {
-        Structure structure = allPurposeReader.readById(pdbId, selection);
+        Structure structure = allPurposeReader.readById(new StructureIdentifier(pdbId), selection);
         return defineByStructure(structure);
     }
 
@@ -100,7 +100,6 @@ public class QueryBuilder {
         private int backboneDistanceTolerance;
         private int sideChainDistanceTolerance;
         private int angleTolerance;
-        private boolean parallel;
         private double rmsdCutoff;
         private MotifPruner motifPruner;
         private AtomPairingScheme atomPairingScheme;
@@ -111,7 +110,6 @@ public class QueryBuilder {
             this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
-            this.parallel = Parameters.DEFAULT_PARALLELISM;
             this.rmsdCutoff = Parameters.DEFAULT_RMSD_CUTOFF;
             // defines the 'default' motif pruning strategy
             this.motifPruner = QueryBuilder.this.motifPruner;
@@ -147,16 +145,6 @@ public class QueryBuilder {
          */
         public MandatoryBuilder angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
-            return this;
-        }
-
-        /**
-         * Specify whether code should be executed in parallel (default: true).
-         * @param parallel parallelism flag
-         * @return this builder
-         */
-        public MandatoryBuilder parallel(boolean parallel) {
-            this.parallel = parallel;
             return this;
         }
 
@@ -200,7 +188,6 @@ public class QueryBuilder {
             Parameters parameters = new Parameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
-                    parallel,
                     rmsdCutoff,
                     motifPruner,
                     atomPairingScheme,

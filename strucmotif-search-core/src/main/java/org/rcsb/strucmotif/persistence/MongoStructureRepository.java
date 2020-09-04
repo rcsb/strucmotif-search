@@ -35,7 +35,7 @@ import static com.mongodb.client.model.Filters.eq;
 public class MongoStructureRepository implements StructureRepository {
     /**
      * Key is: pdbId:assemblyId:residueIndex
-     * Value is: ["labelAsymId", labelSeqId, "oneLetterCode", 1.x, 1.y, 1.z, 2.x, 2.y, 2.z, ...]
+     * Value is: ["labelAsymId", labelSeqId, "oneLetterCode", "labelAtomId1", 1.x, 1.y, 1.z, "labelAtomId2", 2.x, 2.y, 2.z, ...]
      */
     private final MongoCollection<DBObject> structures;
 

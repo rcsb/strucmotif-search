@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.MotifSearch;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
@@ -36,13 +34,13 @@ import java.util.stream.Collectors;
 @Service
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
-    private final InvertedIndex motifLookup;
+    private final InvertedIndex invertedIndex;
     private final SelectionReader selectionReader;
     private final ThreadPool threadPool;
 
     @Autowired
-    public TargetAssemblerImpl(InvertedIndex motifLookup, SelectionReader selectionReader, ThreadPool threadPool) {
-        this.motifLookup = motifLookup;
+    public TargetAssemblerImpl(InvertedIndex invertedIndex, SelectionReader selectionReader, ThreadPool threadPool) {
+        this.invertedIndex = invertedIndex;
         this.selectionReader = selectionReader;
         this.threadPool = threadPool;
     }
@@ -66,7 +64,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // asked to honor entry-level white- or blacklist
             if (whitelist || blacklist) {
                 residuePairIdentifiers = residuePairOccurrence.getResiduePairDescriptorsByTolerance(parameters, exchanges)
-                        .flatMap(motifLookup::select)
+                        .flatMap(invertedIndex::select)
                         // if there is a whitelist, this entry has to occur therein
                         .filter(pair -> !whitelist || query.getWhitelist().contains(pair.getFirst()))
                         // cannot occur in blacklist
@@ -75,7 +73,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             } else {
                 // standard mode: accepted everybody
                 residuePairIdentifiers = residuePairOccurrence.getResiduePairDescriptorsByTolerance(parameters, exchanges)
-                        .flatMap(motifLookup::select)
+                        .flatMap(invertedIndex::select)
                         .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat));
             }
 

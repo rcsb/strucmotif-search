@@ -27,9 +27,9 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, AlignmentService alignment, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, AlignmentService alignmentService, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
         this.targetAssembler = targetAssembler;
-        this.alignment = alignment;
+        this.alignment = alignmentService;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
     }

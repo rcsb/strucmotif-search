@@ -27,14 +27,14 @@ import java.util.Set;
 public class QueryBuilder {
     private final AllPurposeReader allPurposeReader;
     private final MotifPruner motifPruner;
-    private final MotifSearchRuntime internalMotifSearch;
+    private final MotifSearchRuntime motifSearchRuntime;
     private static final int MAXIMUM_MOTIF_SIZE = 10;
 
     @Autowired
-    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, MotifSearchRuntime internalMotifSearch) {
+    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime) {
         this.allPurposeReader = allPurposeReader;
         this.motifPruner = motifPruner;
-        this.internalMotifSearch = internalMotifSearch;
+        this.motifSearchRuntime = motifSearchRuntime;
     }
 
     /**
@@ -251,7 +251,7 @@ public class QueryBuilder {
          * @return the immutable instance of all query parameters
          */
         public MotifSearchQuery buildQuery() {
-            return new MotifSearchQuery(internalMotifSearch, structure, parameters, exchanges, whitelist, blacklist);
+            return new MotifSearchQuery(motifSearchRuntime, structure, parameters, exchanges, whitelist, blacklist);
         }
     }
 }

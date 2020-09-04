@@ -11,7 +11,8 @@ public class MotifSearch {
     private static final MotifSearch INSTANCE = new MotifSearch();
 
     private MotifSearch() {
-        this.queryBuilder = MotifSearchContext.getBean(QueryBuilder.class);
+        MotifSearchApplication.main(new String[0]);
+        this.queryBuilder = MotifSearchApplication.queryBuilder;
     }
 
     /**

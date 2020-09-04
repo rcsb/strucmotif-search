@@ -13,9 +13,9 @@ public class MotifSearchConfig {
     private String rootPath = "/opt/data/";
     private String dataSource = "/opt/pdb/";
     private int numberThreads = Runtime.getRuntime().availableProcessors();
-    private String dbConnectionUri;
+    private String dbConnectionUri = "mongodb://localhost:27017/?";
     private int maxResults = 10000;
-    private int decimalPlacesRMSD = 2;
+    private int decimalPlacesRmsd = 2;
     private int decimalPlacesMatrix = 3;
     private int chunkSize = 400;
 
@@ -67,12 +67,12 @@ public class MotifSearchConfig {
         this.maxResults = maxResults;
     }
 
-    public int getDecimalPlacesRMSD() {
-        return decimalPlacesRMSD;
+    public int getDecimalPlacesRmsd() {
+        return decimalPlacesRmsd;
     }
 
-    public void setDecimalPlacesRMSD(int decimalPlacesRMSD) {
-        this.decimalPlacesRMSD = decimalPlacesRMSD;
+    public void setDecimalPlacesRmsd(int decimalPlacesRmsd) {
+        this.decimalPlacesRmsd = decimalPlacesRmsd;
     }
 
     public int getDecimalPlacesMatrix() {

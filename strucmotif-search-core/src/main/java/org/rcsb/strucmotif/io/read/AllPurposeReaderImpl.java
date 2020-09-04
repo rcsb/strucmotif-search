@@ -30,7 +30,6 @@ import java.util.Collection;
 @Service
 public class AllPurposeReaderImpl implements AllPurposeReader {
     private static final Logger logger = LoggerFactory.getLogger(AllPurposeReaderImpl.class);
-    private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_PLAIN).build();
     private static final String FETCH_URL = "https://models.rcsb.org/%s.bcif";
 
     @Override
@@ -39,7 +38,7 @@ public class AllPurposeReaderImpl implements AllPurposeReader {
             URL url = new URL(String.format(FETCH_URL, structureIdentifier.getPdbId()));
             logger.debug("Loading structure from {} - selection: {}", url, selection);
             InputStream inputStream = url.openStream();
-            BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream, OPTIONS);
+            BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream);
             return new GenericReaderState(cifFile, selection).build();
         } catch (IOException e) {
             throw new UncheckedIOException(e);

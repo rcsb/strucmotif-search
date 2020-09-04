@@ -1,8 +1,9 @@
 package org.rcsb.strucmotif.io.read;
 
-import com.google.inject.Inject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -16,18 +17,20 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class RenumberedReaderImplTest {
-    @Inject
     private RenumberedReader renumberedReader;
 
+    @BeforeEach
+    public void init() {
+        this.renumberedReader = new RenumberedReaderImpl(new MotifSearchConfig());
+    }
+
     @Test
-    public void shouldHandleMicroheterogeneityAtSequenceLevel() {
-        Structure structure = renumberedReader.readById("1eta");
+    public void whenMicroheterogeneityAtSequenceLevel_thenReportCorrectResidueType() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1eta"));
         Chain chainA = structure.getChains().get(0);
         Chain chainB = structure.getChains().get(1);
         Set<Residue> chainA30 = chainA.getResidues()
@@ -38,42 +41,44 @@ public class RenumberedReaderImplTest {
                 .stream()
                 .filter(component -> component.getResidueIdentifier().getLabelSeqId() == 30)
                 .collect(Collectors.toSet());
-        assertEquals("duplicated positions due to microheterogeneity", 1, chainA30.size());
-        assertEquals("wrong type due to microheterogeneity", ResidueType.METHIONINE, chainA30.iterator().next().getResidueIdentifier().getResidueType());
-        assertEquals("duplicated positions due to microheterogeneity", 1, chainB30.size());
-        assertEquals("wrong type due to microheterogeneity", ResidueType.METHIONINE, chainB30.iterator().next().getResidueIdentifier().getResidueType());
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void shouldFailForOmittedFileWithoutModelNumber1() {
-        // multiple NMR models distributed over multiple structures - file will start with model nr 18
-        Structure structure = renumberedReader.readById("1ezc");
-        assertEquals(0, structure.getChains().size());
+        assertEquals(1, chainA30.size(), "duplicated positions due to microheterogeneity");
+        assertEquals(ResidueType.METHIONINE, chainA30.iterator().next().getResidueIdentifier().getResidueType(), "wrong type due to microheterogeneity");
+        assertEquals(1, chainB30.size(), "duplicated positions due to microheterogeneity");
+        assertEquals(ResidueType.METHIONINE, chainB30.iterator().next().getResidueIdentifier().getResidueType(), "wrong type due to microheterogeneity");
     }
 
     @Test
-    public void shouldBuildAndWriteAssemblyForVirusParticle() throws IOException {
-        Structure structure = renumberedReader.readById("2bfu");
-        assertEquals(2 * 60, structure.getChains().size());
+    public void whenNoModel1_thenThrowUnsupportedOperationException() {
+        assertThrows(UnsupportedOperationException.class, () -> {
+            // multiple NMR models distributed over multiple structures - file will start with model nr 18
+            Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1ezc"));
+            assertEquals(0, structure.getChains().size());
+        });
+    }
+
+    @Test
+    public void whenVirusParticle_thenWriteAssemblyCoordinates() throws IOException {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("2bfu"));
+        assertEquals(120, structure.getChains().size());
 
         new GenericTextStructureWriter().write(structure, Paths.get("target/test_renum.cif"));
     }
 
     @Test
-    public void shouldHandle4cha() {
-        Structure structure = renumberedReader.readById("4cha");
+    public void whenProcessing4cha_thenChainCountMatches() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("4cha"));
         assertEquals(6, structure.getChains().size());
     }
 
     @Test
-    public void shouldBuildAssembliesForDoubleIdentityOperatorAndDuplicatedChains() {
-        Structure structure = renumberedReader.readById("3uud");
+    public void whenDuplicatedChainsAndIdentityOperations_thenChainCountMatches() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("3uud"));
         assertEquals(4, structure.getChains().size());
     }
 
     @Test
-    public void shouldHandleMicroheterogeneity() {
-        Structure structure = renumberedReader.readById("2bwx");
+    public void whenMicroheterogeneity_thenAtomCountMatches() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("2bwx"));
         // group contains alt locs and microheterogeneity
         Residue residue = structure.getChains()
                 .get(0)
@@ -89,8 +94,8 @@ public class RenumberedReaderImplTest {
     }
 
     @Test
-    public void shouldCreateTrivialStructure() {
-        Structure structure = renumberedReader.readById("1exr");
+    public void whenProcessing1exr_thenCountsMatch() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1exr"));
         assertEquals(1, chainCount(structure));
         assertEquals(146, componentCount(structure));
         assertEquals(1150, atomCount(structure));
@@ -116,23 +121,23 @@ public class RenumberedReaderImplTest {
          */
         Residue residue = structure.getChains().get(0).getResidues().get(7);
         Atom atomN = residue.getAtoms().get(0);
-        assertArrayEquals(new double[] { 50.0, 12.6, 9.9 }, atomN.getCoord() , 0.1);
+        assertArrayEquals(new double[] { 50.0, 12.6, 9.9 }, atomN.getCoord(), Helpers.DELTA);
         Atom atomCA = residue.getAtoms().get(1);
-        assertArrayEquals(new double[] { 49.8, 12.9, 8.4 }, atomCA.getCoord() , 0.1);
+        assertArrayEquals(new double[] { 49.8, 12.9, 8.4 }, atomCA.getCoord(), Helpers.DELTA);
     }
 
     @Test
-    public void shouldCreateStructureWithSymmetry() {
-        Structure structure = renumberedReader.readById("1acj");
+    public void whenProcessingStructureWithSymmetry_thenCountsMatch() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1acj"));
         assertEquals(2, chainCount(structure));
         assertEquals(1056, componentCount(structure));
         assertEquals(8190, atomCount(structure));
     }
 
     @Test
-    public void shouldCreateStructureWithBioAssemblies() {
-        Structure structure = renumberedReader.readById("1m4x");
-        assertEquals(3 * 1680, chainCount(structure));
+    public void whenProcessingStructureWithAssembly_thenCountsMatch() {
+        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1m4x"));
+        assertEquals(5040, chainCount(structure));
         assertEquals(3 * 1680 * 413, componentCount(structure));
         assertEquals(3 * 1680 * 3231, atomCount(structure));
     }

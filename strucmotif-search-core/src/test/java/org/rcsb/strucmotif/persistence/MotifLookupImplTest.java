@@ -1,6 +1,8 @@
 package org.rcsb.strucmotif.persistence;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -9,18 +11,24 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.rcsb.strucmotif.Helpers.honorTolerance;
 
 public class MotifLookupImplTest {
     private InvertedIndex motifLookup;
+
+    @BeforeEach
+    public void init() {
+        // TODO mock this
+        this.motifLookup = new MongoInvertedIndex(new MongoClientHolderImpl(new MotifSearchConfig()));
+    }
+
     private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
             ResidueType.ARGININE,
             DistanceType.D15,
@@ -33,7 +41,7 @@ public class MotifLookupImplTest {
             AngleType.A100);
 
     @Test
-    public void shouldReportAssembliesForRandomExample() {
+    public void whenAccessingSpecificBin_thenObserveAssemblies() {
         assertTrue(motifLookup.select(BIN_WITH_ASSEMBLY)
                 .map(Pair::getSecond)
                 .flatMap(Arrays::stream)
@@ -48,7 +56,7 @@ public class MotifLookupImplTest {
     }
 
     @Test
-    public void shouldReportAssembliesForArginineTweezers() {
+    public void whenAccessingArginineTweezerBin_thenObserveAssemblies() {
         Map<StructureIdentifier, ResiduePairIdentifier[]> map = honorTolerance(ARGININE_TWEEZERS)
                 .flatMap(motifLookup::select)
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, MotifLookupImplTest::concat));
@@ -70,45 +78,5 @@ public class MotifLookupImplTest {
         // investigate what happens for a failing structure
         Arrays.stream(map.get(new StructureIdentifier("4ob8")))
                 .forEach(System.out::println);
-    }
-
-    private Stream<ResiduePairDescriptor> honorTolerance(ResiduePairDescriptor residuePairDescriptor) {
-        int alphaCarbonDistanceTolerance = 1;
-        int sideChainDistanceTolerance = 1;
-        int angleTolerance = 1;
-
-        int alphaCarbonDistance = residuePairDescriptor.getBackboneDistance().ordinal();
-        int sideChainDistance = residuePairDescriptor.getSideChainDistance().ordinal();
-        int dihedralAngle = residuePairDescriptor.getAngle().ordinal();
-        List<ResiduePairDescriptor> combinations = new ArrayList<>();
-
-        for (int i = -alphaCarbonDistanceTolerance; i <= alphaCarbonDistanceTolerance; i++) {
-            int ii = alphaCarbonDistance + i;
-            if (ii < 0 || ii >= DistanceType.values().length) {
-                continue;
-            }
-
-            for (int j = -sideChainDistanceTolerance; j <= sideChainDistanceTolerance; j++) {
-                int ij = sideChainDistance + j;
-                if (ij < 0 || ij >= DistanceType.values().length) {
-                    continue;
-                }
-
-                for (int k = -angleTolerance; k <= angleTolerance; k++) {
-                    int ik = dihedralAngle + k;
-                    if (ik < 0 || ik >= AngleType.values().length) {
-                        continue;
-                    }
-
-                    combinations.add(new ResiduePairDescriptor(residuePairDescriptor.getResidueType1(),
-                            residuePairDescriptor.getResidueType2(),
-                            DistanceType.values()[ii],
-                            DistanceType.values()[ij],
-                            AngleType.values()[ik]));
-                }
-            }
-        }
-
-        return combinations.stream();
     }
 }

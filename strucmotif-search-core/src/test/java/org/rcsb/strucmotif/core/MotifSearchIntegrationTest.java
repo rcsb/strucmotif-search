@@ -1,7 +1,8 @@
 package org.rcsb.strucmotif.core;
 
-import junit.framework.TestCase;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
@@ -9,18 +10,22 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
+import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
 
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
+
 public class MotifSearchIntegrationTest {
     private AllPurposeReader allPurposeReader;
 
-    private static InputStream getInputStream(String pdbId) {
-        return Thread.currentThread().getContextClassLoader().getResourceAsStream("orig/" + pdbId + ".bcif");
+    @BeforeEach
+    public void init() {
+        this.allPurposeReader = new AllPurposeReaderImpl();
     }
 
     /**
@@ -28,15 +33,16 @@ public class MotifSearchIntegrationTest {
      * exchanges.
      */
     @Test
-    public void searchForSuperfamilyTemplateWithExchanges() {
-        Structure structure = allPurposeReader.readFromInputStream(getInputStream("2mnr"),
+    public void whenSearchingForEnolaseSuperfamily_thenFindExchanges() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("2mnr"),
                 Set.of(new LabelSelection("A", 1, 162), // K
                 new LabelSelection("A", 1, 193), // D
                 new LabelSelection("A", 1, 219), // E
                 new LabelSelection("A", 1, 245), // E
                 new LabelSelection("A", 1, 295))); // H
 
-        QueryBuilder.OptionalStepBuilder buildParameters = MockMotifSearch.newQuery()
+        // TODO mock this
+        QueryBuilder.OptionalStepBuilder buildParameters = MotifSearch.newQuery()
                 .defineByStructure(structure)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
@@ -59,6 +65,6 @@ public class MotifSearchIntegrationTest {
                 .distinct()
                 .forEach(System.out::println);
 
-        TestCase.assertFalse("didnt observe exchange", observedExchanges.isEmpty());
+        assertFalse(observedExchanges.isEmpty(), "didnt observe exchange");
     }
 }

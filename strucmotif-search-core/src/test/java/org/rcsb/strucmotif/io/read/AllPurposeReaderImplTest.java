@@ -1,8 +1,7 @@
 package org.rcsb.strucmotif.io.read;
 
-import com.google.inject.Inject;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -15,19 +14,23 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class AllPurposeReaderImplTest {
-    @Inject
     private AllPurposeReader allPurposeReader;
+
+    @BeforeEach
+    public void init() {
+        this.allPurposeReader = new AllPurposeReaderImpl();
+    }
 
     // TODO 4udf seems slow
 
     @Test
-    public void shouldHandleMicroheterogeneityAtSequenceLevel() {
-        Structure structure = allPurposeReader.readById("1eta");
+    public void whenMicroheterogeneityAtSequenceLevel_thenReportCorrectResidueType() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1eta"));
         Chain chainA = structure.getChains().get(0);
         Chain chainB = structure.getChains().get(1);
         Set<Residue> chainA30 = chainA.getResidues()
@@ -38,30 +41,30 @@ public class AllPurposeReaderImplTest {
                 .stream()
                 .filter(component -> component.getResidueIdentifier().getLabelSeqId() == 30)
                 .collect(Collectors.toSet());
-        assertEquals("duplicated positions due to microheterogeneity", 1, chainA30.size());
-        assertEquals("wrong type due to microheterogeneity", ResidueType.METHIONINE, chainA30.iterator().next().getResidueIdentifier().getResidueType());
-        assertEquals("duplicated positions due to microheterogeneity", 1, chainB30.size());
-        assertEquals("wrong type due to microheterogeneity", ResidueType.METHIONINE, chainB30.iterator().next().getResidueIdentifier().getResidueType());
+        assertEquals(1, chainA30.size(), "duplicated positions due to microheterogeneity");
+        assertEquals(ResidueType.METHIONINE, chainA30.iterator().next().getResidueIdentifier().getResidueType(), "wrong type due to microheterogeneity");
+        assertEquals(1, chainB30.size(), "duplicated positions due to microheterogeneity");
+        assertEquals(ResidueType.METHIONINE, chainB30.iterator().next().getResidueIdentifier().getResidueType(), "wrong type due to microheterogeneity");
     }
 
     @Test
-    public void shouldSkipNmrModelsWithNumberUnequalToOne() {
+    public void whenNoModel1_thenReturnNoChains() {
         // multiple NMR models distributed over multiple structures - file will start with model nr 18
-        Structure structure = allPurposeReader.readById("1ezc");
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1ezc"));
         assertEquals(0, chainCount(structure));
     }
 
     @Test
-    public void shouldBuildAndWriteAssemblyForVirusParticle() throws IOException {
-        Structure structure = allPurposeReader.readById("2bfu");
+    public void whenVirusParticle_thenWriteAssemblyCoordinates() throws IOException {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("2bfu"));
         assertEquals(2 * 60, chainCount(structure));
 
         new GenericTextStructureWriter().write(structure, Paths.get("target/test_ap.cif"));
     }
 
     @Test
-    public void shouldHandle4cha() {
-        Structure structure = allPurposeReader.readById("4cha");
+    public void whenProcessing4cha_thenChainCountMatches() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("4cha"));
 
         assertEquals(6, chainCount(structure));
         assertEquals(477, entityCount(structure));
@@ -69,8 +72,8 @@ public class AllPurposeReaderImplTest {
     }
 
     @Test
-    public void shouldBuildAssembliesForDoubleIdentityOperatorAndDuplicatedChains() {
-        Structure structure = allPurposeReader.readById("3uud");
+    public void whenDuplicatedChainsAndIdentityOperations_thenChainCountMatches() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("3uud"));
 
         assertEquals(4, chainCount(structure));
         assertEquals(499, entityCount(structure));
@@ -78,8 +81,8 @@ public class AllPurposeReaderImplTest {
     }
 
     @Test
-    public void shouldHandleMicroheterogeneity() {
-        Structure structure = allPurposeReader.readById("2bwx");
+    public void whenMicroheterogeneity_thenAtomCountMatches() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("2bwx"));
         // group contains alt locs and microheterogeneity
         Residue residue = structure.getChains()
                 .get(0)
@@ -95,8 +98,8 @@ public class AllPurposeReaderImplTest {
     }
 
     @Test
-    public void shouldCreateTrivialStructure() {
-        Structure structure = allPurposeReader.readById("1exr");
+    public void whenProcessing1exr_thenCountsMatch() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1exr"));
 
         assertEquals(1, chainCount(structure));
         assertEquals(146, entityCount(structure));
@@ -104,17 +107,17 @@ public class AllPurposeReaderImplTest {
     }
 
     @Test
-    public void shouldCreateStructureWithSymmetry() {
-        Structure structure = allPurposeReader.readById("1acj");
+    public void whenProcessingStructureWithSymmetry_thenCountsMatch() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1acj"));
 
         assertEquals(2, chainCount(structure));
-        assertEquals(2 * 528, entityCount(structure));
+        assertEquals(1056, entityCount(structure));
         assertEquals(8190, atomCount(structure));
     }
 
     @Test
-    public void shouldCreateStructureWithBioAssemblies() {
-        Structure structure = allPurposeReader.readById("1m4x");
+    public void whenProcessingStructureWithAssembly_thenCountsMatch() {
+        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1m4x"));
 
         assertEquals(3 * 1680, chainCount(structure));
         assertEquals(3 * 1680 * 413, entityCount(structure));

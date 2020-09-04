@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.io.read;
 
 import org.rcsb.cif.CifIO;
-import org.rcsb.cif.CifOptions;
 import org.rcsb.cif.model.binary.BinaryFile;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
@@ -26,7 +25,6 @@ import java.util.Collection;
  */
 @Service
 public class RenumberedReaderImpl implements RenumberedReader {
-    private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_GZIPPED).build();
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
@@ -38,7 +36,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
     public Structure readById(StructureIdentifier structureIdentifier, Collection<IndexSelection> selection) {
         Path path = motifSearchConfig.getArchivePath().resolve(structureIdentifier.getPdbId() + ".bcif.gz");
         try {
-            BinaryFile cifFile = (BinaryFile) CifIO.readFromPath(path, OPTIONS);
+            BinaryFile cifFile = (BinaryFile) CifIO.readFromPath(path);
             return new RenumberedReaderState(cifFile, selection).build();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -53,7 +51,7 @@ public class RenumberedReaderImpl implements RenumberedReader {
     @Override
     public Structure readFromInputStream(InputStream inputStream, Collection<IndexSelection> selection) {
         try {
-            BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream, OPTIONS);
+            BinaryFile cifFile = (BinaryFile) CifIO.readFromInputStream(inputStream);
             return new RenumberedReaderState(cifFile, selection).build();
         } catch (IOException e) {
             throw new UncheckedIOException(e);

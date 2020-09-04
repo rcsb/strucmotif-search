@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +22,7 @@ import static com.mongodb.client.model.Updates.pushEach;
 @Service
 public class MongoStateRepository implements StateRepository {
     // all 'known' entry identifiers, this is a superset of 'structures' as e.g. alpha carbon traces will fail processing
-    private static final String REGISTERED_KEY = "registered";
+    private static final String KNOWN_KEY = "known";
     // all 'healthy' structures that can appear as search results
     private static final String STRUCTURES_KEY = "structures";
     // all structures registered in the inverted index (this should be equal to 'structures')
@@ -36,7 +37,7 @@ public class MongoStateRepository implements StateRepository {
 
     @Override
     public Collection<StructureIdentifier> selectKnown() {
-        return select(REGISTERED_KEY);
+        return select(KNOWN_KEY);
     }
 
     @Override
@@ -50,7 +51,12 @@ public class MongoStateRepository implements StateRepository {
     }
 
     private Collection<StructureIdentifier> select(String key) {
-        return ((BasicDBList) state.find(eq("_id", key)).first().get("v")).stream()
+        DBObject first = state.find(eq("_id", key)).first();
+        // state before first update
+        if (first == null) {
+            return Collections.emptySet();
+        }
+        return ((BasicDBList) first.get("v")).stream()
                 .map(String.class::cast)
                 .map(StructureIdentifier::new)
                 .collect(Collectors.toSet());
@@ -58,7 +64,7 @@ public class MongoStateRepository implements StateRepository {
 
     @Override
     public void insertKnown(Collection<StructureIdentifier> additions) {
-        insert(additions, REGISTERED_KEY);
+        insert(additions, KNOWN_KEY);
     }
 
     @Override
@@ -85,7 +91,7 @@ public class MongoStateRepository implements StateRepository {
 
     @Override
     public void deleteKnown(Collection<StructureIdentifier> removals) {
-        delete(removals, REGISTERED_KEY);
+        delete(removals, KNOWN_KEY);
     }
 
     @Override

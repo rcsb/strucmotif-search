@@ -22,7 +22,6 @@ import java.util.Set;
 @Service
 public class DeleteStructuresFromInvertedIndexTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(DeleteStructuresFromInvertedIndexTask.class);
-    private static final String TASK_NAME = DeleteStructuresFromInvertedIndexTask.class.getSimpleName();
     private final InvertedIndex invertedIndex;
     private final StateRepository stateRepository;
 
@@ -34,11 +33,8 @@ public class DeleteStructuresFromInvertedIndexTask implements UpdateTask {
 
     @Override
     public void execute(Collection<StructureIdentifier> delta) {
-        logger.info("[{}] Starting removal of obsolete structures from inverted index",
-                TASK_NAME);
-
-        logger.info("[{}] {} structures to remove ({})",
-                TASK_NAME,
+        logger.info("Starting removal of obsolete structures from inverted index");
+        logger.info("{} structures to remove ({})",
                 delta.size(),
                 delta);
 
@@ -63,7 +59,6 @@ public class DeleteStructuresFromInvertedIndexTask implements UpdateTask {
         // update index file - drop all ids to deregister them
         stateRepository.deleteIndexed(delta);
 
-        logger.info("[{}] Finished cleanup of inverted index",
-                TASK_NAME);
+        logger.info("Finished cleanup of inverted index");
     }
 }

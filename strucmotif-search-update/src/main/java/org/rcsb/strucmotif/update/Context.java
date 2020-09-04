@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public enum Context {
-    ARCHIVE,
-    RESIDUE,
+    BCIF,
+    STRUCTURES,
     INDEX;
 
     public static Context resolve(String s) {

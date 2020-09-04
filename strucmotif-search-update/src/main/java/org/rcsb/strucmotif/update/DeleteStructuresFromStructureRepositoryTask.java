@@ -13,7 +13,6 @@ import java.util.Collection;
 @Service
 public class DeleteStructuresFromStructureRepositoryTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(DeleteStructuresFromStructureRepositoryTask.class);
-    private static final String TASK_NAME = DeleteStructuresFromStructureRepositoryTask.class.getSimpleName();
     private final StructureRepository structureRepository;
     private final StateRepository stateRepository;
 
@@ -25,11 +24,8 @@ public class DeleteStructuresFromStructureRepositoryTask implements UpdateTask {
 
     @Override
     public void execute(Collection<StructureIdentifier> delta) {
-        logger.info("[{}] Starting removal of obsolete structures from structure repository",
-                TASK_NAME);
-
-        logger.info("[{}] {} structures to remove ({})",
-                TASK_NAME,
+        logger.info("Starting removal of obsolete structures from structure repository");
+        logger.info("{} structures to remove ({})",
                 delta.size(),
                 delta);
 
@@ -43,7 +39,6 @@ public class DeleteStructuresFromStructureRepositoryTask implements UpdateTask {
 
         stateRepository.deleteSupported(delta);
 
-        logger.info("[{}] Finished cleanup of structure repository",
-                TASK_NAME);
+        logger.info("Finished cleanup of structure repository");
     }
 }

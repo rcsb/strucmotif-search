@@ -28,7 +28,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class AddStructuresToArchiveTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToArchiveTask.class);
-    private static final String TASK_NAME = AddStructuresToArchiveTask.class.getSimpleName();
 
     private final RenumberedWriter structureWriter;
     private final StateRepository stateRepository;
@@ -59,8 +58,7 @@ public class AddStructuresToArchiveTask implements UpdateTask {
 
     @Override
     public void execute(Collection<StructureIdentifier> delta) {
-        logger.info("[{}] Starting structural motif search archive update",
-                TASK_NAME);
+        logger.info("Starting structural motif search archive update");
 
         AtomicInteger counter = new AtomicInteger();
         int target = delta.size();
@@ -87,8 +85,7 @@ public class AddStructuresToArchiveTask implements UpdateTask {
                 });
 
 
-        logger.info("[{}] Finished archive update",
-                TASK_NAME);
+        logger.info("Finished archive update");
     }
 
     private CifFile readById(String pdbId) throws IOException {

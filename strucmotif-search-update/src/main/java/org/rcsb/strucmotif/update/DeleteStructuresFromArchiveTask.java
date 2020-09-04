@@ -20,7 +20,6 @@ import java.util.Collection;
 @Service
 public class DeleteStructuresFromArchiveTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(DeleteStructuresFromArchiveTask.class);
-    private static final String TASK_NAME = DeleteStructuresFromArchiveTask.class.getSimpleName();
     private final MotifSearchConfig motifSearchConfig;
     private final MongoStateRepository stateRepository;
 
@@ -32,17 +31,14 @@ public class DeleteStructuresFromArchiveTask implements UpdateTask {
 
     @Override
     public void execute(Collection<StructureIdentifier> delta) {
-        logger.info("[{}] Starting remove structures from archive",
-                TASK_NAME);
+        logger.info("Starting remove structures from archive");
 
         // for each id: remove reduced file and
         delta.forEach(id -> {
                     try {
                         Path path = motifSearchConfig.getArchivePath().resolve(id + ".bcif.gz");
                         if (Files.exists(path)) {
-                            logger.info("[{}] [{}] Removing optimized structure",
-                                    id,
-                                    TASK_NAME);
+                            logger.info("[{}] Removing optimized structure", id);
                             Files.delete(path);
                         }
                     } catch (IOException e) {
@@ -52,7 +48,6 @@ public class DeleteStructuresFromArchiveTask implements UpdateTask {
 
         stateRepository.deleteKnown(delta);
 
-        logger.info("[{}] Finished archive cleaning",
-                TASK_NAME);
+        logger.info("Finished archive cleanup");
     }
 }

@@ -11,8 +11,7 @@ public class MotifSearch {
     private static final MotifSearch INSTANCE = new MotifSearch();
 
     private MotifSearch() {
-        // TODO resolve and manage bindings
-        this.queryBuilder = null;
+        this.queryBuilder = MotifSearchContext.getBean(QueryBuilder.class);
     }
 
     /**

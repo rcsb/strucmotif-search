@@ -34,7 +34,6 @@ import java.util.stream.Collectors;
 @Service
 public class AddStructuresToInvertedIndexTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToInvertedIndexTask.class);
-    private static final String TASK_NAME = AddStructuresToInvertedIndexTask.class.getSimpleName();
     private final InvertedIndex motifLookup;
     private final RenumberedReader renumberedReader;
     private final MotifSearchConfig motifSearchConfig;
@@ -50,8 +49,7 @@ public class AddStructuresToInvertedIndexTask implements UpdateTask {
 
     @Override
     public void execute(Collection<StructureIdentifier> delta) {
-        logger.info("[{}] Starting structural motif search inverted index update",
-                TASK_NAME);
+        logger.info("Starting structural motif search inverted index update");
 
         List<StructureIdentifier> identifiers = new ArrayList<>(delta);
         // we shuffle because certain 'troublemakers' (e.g. ribosomes or virus capsids) appear close together, in a full update this leads to 1 bin maxing out available heap space
@@ -64,22 +62,17 @@ public class AddStructuresToInvertedIndexTask implements UpdateTask {
                 .collect(Collectors.toList());
 
         long totalFileCount = paths.size();
-        logger.info("[{}] {} files to process in total",
-                TASK_NAME,
-                totalFileCount);
+        logger.info("{} files to process in total", totalFileCount);
 
         Partition<Path> partitions = new Partition<>(paths, motifSearchConfig.getChunkSize());
-        logger.info("[{}] Formed {} partitions",
-                TASK_NAME,
-                partitions.size());
+        logger.info("Formed {} partitions", partitions.size());
 
         Context context = new Context(stateRepository);
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
             context.partitionContext = (i + 1) + " / " + partitions.size();
-            logger.info("[{}] Start processing partition",
-                    context.partitionContext);
+            logger.info("[{}] Start processing partition", context.partitionContext);
 
             context.structureCounter = new AtomicInteger();
             context.buffer = new ConcurrentHashMap<>();
@@ -90,8 +83,7 @@ public class AddStructuresToInvertedIndexTask implements UpdateTask {
             writeMotifs(context);
         }
 
-        logger.info("[{}] Finished inverted index update",
-                TASK_NAME);
+        logger.info("Finished inverted index update");
     }
 
     static class Context {

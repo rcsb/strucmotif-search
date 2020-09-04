@@ -10,5 +10,8 @@
         <Root level="info">
             <AppenderRef ref="STDOUT"/>
         </Root>
+        <Logger name="org.mongodb" level="WARN" additivity="false">
+            <Appender-ref ref="STDOUT" />
+        </Logger>
     </Loggers>
 </Configuration>

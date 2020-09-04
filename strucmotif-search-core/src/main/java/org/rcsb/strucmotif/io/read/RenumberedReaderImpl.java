@@ -26,7 +26,7 @@ import java.util.Collection;
  */
 @Service
 public class RenumberedReaderImpl implements RenumberedReader {
-    private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_PLAIN).build();
+    private static final CifOptions OPTIONS = CifOptions.builder().fileFormatHint(CifOptions.CifOptionsBuilder.FileFormat.BCIF_GZIPPED).build();
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired

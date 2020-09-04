@@ -12,16 +12,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
  */
 @SpringBootApplication
 @EntityScan("org.rcsb.strucmotif")
-public class MotifSearchApplication implements CommandLineRunner {
+public class MotifSearchApplication {
     static QueryBuilder queryBuilder;
 
     public static void main(String[] args) {
         SpringApplication.run(MotifSearchApplication.class, args);
-    }
-
-    @Override
-    public void run(String... args) {
-
     }
 
     @Autowired

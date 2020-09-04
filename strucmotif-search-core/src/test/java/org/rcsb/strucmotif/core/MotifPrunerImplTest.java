@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import com.google.inject.Inject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -17,9 +15,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class MotifPrunerImplTest {
-    @Inject
     private AllPurposeReader allPurposeReader;
 
     private static InputStream getInputStream(String pdbId) {

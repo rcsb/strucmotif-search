@@ -1,13 +1,12 @@
 package org.rcsb.strucmotif.io;
 
-import com.google.inject.Inject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.read.RenumberedReader;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -19,9 +18,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class RenumberedReaderImplTest {
-    @Inject
     private RenumberedReader renumberedReader;
 
     @Test

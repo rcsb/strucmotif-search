@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import com.google.inject.Inject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -19,9 +17,7 @@ import java.util.stream.Collectors;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class AllPurposeReaderImplTest {
-    @Inject
     private AllPurposeReader allPurposeReader;
 
     private static InputStream getInputStream(String pdbId) {

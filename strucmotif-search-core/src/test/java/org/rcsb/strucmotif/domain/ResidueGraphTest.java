@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.domain;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -13,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
+import org.rcsb.strucmotif.io.read.RenumberedReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,6 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class ResidueGraphTest {
     private AllPurposeReader allPurposeReader;
     private RenumberedReader renumberedReader;

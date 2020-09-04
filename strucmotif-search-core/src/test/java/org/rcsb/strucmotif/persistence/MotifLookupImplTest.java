@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.google.inject.Inject;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -21,9 +19,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertTrue;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class MotifLookupImplTest {
-    @Inject
     private InvertedIndex motifLookup;
     private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
             ResidueType.ARGININE,

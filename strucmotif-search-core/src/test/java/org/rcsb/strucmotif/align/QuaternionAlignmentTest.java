@@ -1,8 +1,7 @@
 package org.rcsb.strucmotif.align;
 
-import com.google.inject.Inject;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
@@ -13,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
+import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
 
 import java.io.InputStream;
 import java.util.Collection;
@@ -23,15 +23,18 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.rcsb.strucmotif.domain.Matrix4DTransformation.IDENTITY_MATRIX_4D;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class QuaternionAlignmentTest {
-    @Inject
     private AlignmentService alignment;
-    @Inject
     private AllPurposeReader allPurposeReader;
+
+    @Before
+    public void init() {
+        alignment = new QuaternionAlignmentService();
+        allPurposeReader = new AllPurposeReaderImpl();
+    }
+
     private static int seqId = 1;
     private static int atomId = 1;
-
     private static Residue create(String compId, double[] coords) {
         Residue residue = StructureFactory.createResidue(new ResidueIdentifier(compId, seqId, seqId),
                 List.of(StructureFactory.createAtom(new AtomIdentifier("C", atomId), coords)),
@@ -63,6 +66,7 @@ public class QuaternionAlignmentTest {
                 create("PHE", new double[] { -18.577, -10.001, 17.996 }));
 
         AlignmentResult alignmentResult = alignment.align(container1, container2, AtomPairingScheme.ALL);
+
 
         assertEquals(0.719106, alignmentResult.getScore().doubleValue(), 0.001);
     }

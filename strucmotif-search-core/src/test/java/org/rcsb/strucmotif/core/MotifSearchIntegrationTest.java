@@ -1,9 +1,7 @@
 package org.rcsb.strucmotif.core;
 
-import com.google.inject.Inject;
 import junit.framework.TestCase;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
@@ -18,9 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RunWith(GuiceJUnit4Runner.class)
 public class MotifSearchIntegrationTest {
-    @Inject
     private AllPurposeReader allPurposeReader;
 
     private static InputStream getInputStream(String pdbId) {

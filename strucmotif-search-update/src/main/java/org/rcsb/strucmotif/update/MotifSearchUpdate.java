@@ -190,7 +190,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             return Collections.emptySet();
         } else {
             return known.stream()
-                    .filter(id -> !requested.contains(id))
+                    .filter(requested::contains)
                     .collect(Collectors.toSet());
         }
     }

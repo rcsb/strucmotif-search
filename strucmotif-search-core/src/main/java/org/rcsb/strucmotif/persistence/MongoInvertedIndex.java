@@ -15,7 +15,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.Map;
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Filters.eq;
 
-@Service
+@Repository
 public class MongoInvertedIndex implements InvertedIndex {
     private static final UpdateOptions UPSERT_OPTIONS = new UpdateOptions().upsert(true);
     private final MongoCollection<DBObject> invertedIndex;

@@ -8,8 +8,7 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.conversions.Bson;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +18,7 @@ import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.pullAll;
 import static com.mongodb.client.model.Updates.pushEach;
 
-@Service
+@Repository
 public class MongoStateRepository implements StateRepository {
     // all 'known' entry identifiers, this is a superset of 'structures' as e.g. alpha carbon traces will fail processing
     private static final String KNOWN_KEY = "known";

@@ -2,9 +2,9 @@ package org.rcsb.strucmotif.core;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
-import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.Hit;
@@ -13,11 +13,12 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
 import org.rcsb.strucmotif.io.read.SelectionReader;
 import org.rcsb.strucmotif.io.read.SelectionReaderImpl;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.StructureRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,26 +26,35 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
+@SpringBootTest
 public class MotifSearchIntegrationTest {
+    @Autowired
     private AllPurposeReader allPurposeReader;
+    @Autowired
+    private MotifPruner motifPruner;
+    @Autowired
+    private AlignmentService alignmentService;
+    @Autowired
+    private ThreadPool threadPool;
+    @Autowired
+    private MotifSearchConfig motifSearchConfig;
     private QueryBuilder queryBuilder;
 
     @BeforeEach
     public void init() {
-        this.allPurposeReader = new AllPurposeReaderImpl();
+        // TODO better way?
+        InvertedIndex invertedIndex = Mockito.mock(InvertedIndex.class);
+        StructureRepository structureRepository = Mockito.mock(StructureRepository.class);
+        when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
+        when(structureRepository.select(any(), any())).thenAnswer(Helpers::mockStructureRepositorySelect);
 
-        // TODO inject mocks, where to place?
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        MotifPruner motifPruner = new MotifPrunerImpl(motifSearchConfig);
-        InvertedIndex invertedIndex = Helpers.INVERTED_INDEX;
-        StructureRepository structureRepository = Helpers.STRUCTURE_REPOSITORY;
         SelectionReader selectionReader = new SelectionReaderImpl(structureRepository);
-        ThreadPool threadPool = new ThreadPoolImpl(motifSearchConfig);
-        AlignmentService alignmentService = new QuaternionAlignmentService();
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, selectionReader, threadPool);
-        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
+        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
         this.queryBuilder = new QueryBuilder(allPurposeReader, motifPruner, motifSearchRuntime);
     }
 

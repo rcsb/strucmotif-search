@@ -2,6 +2,8 @@ package org.rcsb.strucmotif.persistence;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.honorTolerance;
 
 public class InvertedIndexImplTest {
@@ -25,7 +29,8 @@ public class InvertedIndexImplTest {
 
     @BeforeEach
     public void init() {
-        this.invertedIndex = Helpers.INVERTED_INDEX;
+        invertedIndex = Mockito.mock(InvertedIndex.class);
+        when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
     }
 
     private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,

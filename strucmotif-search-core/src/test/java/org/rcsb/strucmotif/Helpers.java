@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif;
 
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.rcsb.strucmotif.domain.Matrix4DTransformation;
 import org.rcsb.strucmotif.domain.Pair;
@@ -19,8 +18,6 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
-import org.rcsb.strucmotif.persistence.InvertedIndex;
-import org.rcsb.strucmotif.persistence.StructureRepository;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -34,19 +31,11 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 public class Helpers {
     public static final double DELTA = 0.001;
 
-    public static final StructureRepository STRUCTURE_REPOSITORY = Mockito.mock(StructureRepository.class);
-    static {
-        when(STRUCTURE_REPOSITORY.select(any(), any())).thenAnswer(Helpers::readById);
-    }
-
     @SuppressWarnings("unchecked")
-    private static Structure readById(InvocationOnMock invocation) {
+    public static Structure mockStructureRepositorySelect(InvocationOnMock invocation) {
         StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
         Collection<IndexSelection> selection = (Collection<IndexSelection>) invocation.getArgument(1, Collection.class);
 
@@ -89,12 +78,7 @@ public class Helpers {
         return StructureFactory.createStructure(structureIdentifier, chains);
     }
 
-    public static final InvertedIndex INVERTED_INDEX = Mockito.mock(InvertedIndex.class);
-    static {
-        when(INVERTED_INDEX.select(any())).thenAnswer(Helpers::select);
-    }
-
-    private static Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> select(InvocationOnMock invocation) {
+    public static Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> mockInvertedIndexSelect(InvocationOnMock invocation) {
         ResiduePairDescriptor residuePairDescriptor = invocation.getArgument(0, ResiduePairDescriptor.class);
         boolean flipped = residuePairDescriptor.isFlipped();
 

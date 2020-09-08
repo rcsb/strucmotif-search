@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.persistence;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
-import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.conversions.Bson;
@@ -14,8 +13,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.pullAll;
@@ -37,20 +36,16 @@ public class MongoStateRepository implements StateRepository {
         state = database.getCollection("state", DBObject.class);
 
         // ensure collections exists - otherwise multiple threads might cause 'duplicate key
-        for (String key : Set.of(KNOWN_KEY, STRUCTURES_KEY, INVERTED_INDEX_KEY)) {
+        Stream.of(KNOWN_KEY, STRUCTURES_KEY, INVERTED_INDEX_KEY).forEach(key -> {
             Bson filter = eq("_id", key);
             if (state.countDocuments(filter) == 0) {
-                try {
-                    DBObject update = new BasicDBObjectBuilder()
-                            .add("_id", key)
-                            .add("v", Collections.emptyList())
-                            .get();
-                    state.insertOne(update);
-                } catch (MongoWriteException e) {
-                    // happens when multiple threads try to init collection at the same time
-                }
+                DBObject update = new BasicDBObjectBuilder()
+                        .add("_id", key)
+                        .add("v", Collections.emptyList())
+                        .get();
+                state.insertOne(update);
             }
-        }
+        });
     }
 
     @Override
@@ -98,7 +93,9 @@ public class MongoStateRepository implements StateRepository {
     private void insert(Collection<StructureIdentifier> additions, String key) {
         Bson filter = eq("_id", key);
 
-        List<String> update = additions.stream().map(StructureIdentifier::getPdbId).collect(Collectors.toList());
+        List<String> update = additions.stream()
+                .map(StructureIdentifier::getPdbId)
+                .collect(Collectors.toList());
         state.findOneAndUpdate(filter, pushEach("v", update));
     }
 
@@ -118,7 +115,10 @@ public class MongoStateRepository implements StateRepository {
     }
 
     private void delete(Collection<StructureIdentifier> removals, String key) {
+        List<String> update = removals.stream()
+                .map(StructureIdentifier::getPdbId)
+                .collect(Collectors.toList());
         state.findOneAndUpdate(eq("_id", key),
-                pullAll("v", removals.stream().map(StructureIdentifier::getPdbId).collect(Collectors.toList())));
+                pullAll("v", update));
     }
 }

@@ -5,7 +5,6 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -30,9 +29,8 @@ public interface InvertedIndex {
     Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor);
 
     /**
-     * Removes all information on a set of structures from a given file.
-     * @param residuePairDescriptor the bin to manipulate
-     * @param structureIdentifiers all structure identifiers to remove
+     * Removes all information on a structure from the index.
+     * @param structureIdentifier what to remove
      */
-    void delete(ResiduePairDescriptor residuePairDescriptor, Collection<StructureIdentifier> structureIdentifiers);
+    void delete(StructureIdentifier structureIdentifier);
 }

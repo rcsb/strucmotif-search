@@ -8,6 +8,7 @@ import com.mongodb.Function;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.UpdateOptions;
+import org.bson.BsonDocument;
 import org.bson.conversions.Bson;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
@@ -141,15 +142,9 @@ public class MongoInvertedIndex implements InvertedIndex {
     }
 
     @Override
-    public void delete(ResiduePairDescriptor residuePairDescriptor, Collection<StructureIdentifier> structureIdentifiers) {
-        String descriptorKey = residuePairDescriptor.toString();
-
-        BasicDBObjectBuilder builder = new BasicDBObjectBuilder();
-        for (StructureIdentifier id : structureIdentifiers) {
-            builder.add(id.getPdbId(), 0);
-        }
-
-        // this operation is safe if requested id doesn't exist
-        invertedIndex.updateOne(eq("_id", descriptorKey), new BasicDBObject("$unset", builder.get()));
+    public void delete(StructureIdentifier structureIdentifier) {
+        // db.index.update({}, { $unset: { "4cha": "" }}, { multi: true })
+        BasicDBObject update = new BasicDBObject("$unset", new BasicDBObject(structureIdentifier.getPdbId(), ""));
+        invertedIndex.updateMany(new BsonDocument(), update);
     }
 }

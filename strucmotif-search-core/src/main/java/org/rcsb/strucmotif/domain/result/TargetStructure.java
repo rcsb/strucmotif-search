@@ -37,7 +37,6 @@ public class TargetStructure {
     We use some non-final fields to achieve the lazy behavior and probably a rather easy implementation. Tread lightly.
      */
     private List<ResiduePairIdentifier[]> paths;
-    private String title;
     private LabelSelectionResolver labelSelectionResolver;
 
     public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, SelectionReader selectionReader) {
@@ -49,14 +48,6 @@ public class TargetStructure {
         for (ResiduePairIdentifier residuePairIdentifier : residuePairIdentifiers) {
             paths.add(new ResiduePairIdentifier[] { residuePairIdentifier });
         }
-    }
-
-    /**
-     * This structures title, only available once the structure was parsed.
-     * @return the title of this structure
-     */
-    public String getTitle() {
-        return title;
     }
 
     /**

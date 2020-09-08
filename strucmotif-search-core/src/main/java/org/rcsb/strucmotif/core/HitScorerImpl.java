@@ -10,7 +10,6 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -62,7 +61,6 @@ public class HitScorerImpl implements HitScorer {
         }
 
         return new Hit(targetStructure.getStructureIdentifier(),
-                targetStructure.getTitle(),
                 selection,
                 residueTypes,
                 alignmentResult.getScore().doubleValue(),

@@ -16,20 +16,17 @@ import java.util.stream.Collectors;
 public class Hit {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
     private final StructureIdentifier structureIdentifier;
-    private final String title;
     private final LabelSelection[] selection;
     private final ResidueType[] residueTypes;
     private final double rootMeanSquareDeviation;
     private final double[] transformation;
 
     public Hit(StructureIdentifier structureIdentifier,
-               String title,
                LabelSelection[] selection,
                ResidueType[] residueTypes,
                double rootMeanSquareDeviation,
                double[] transformation) {
         this.structureIdentifier = structureIdentifier;
-        this.title = title;
         this.selection = selection;
         this.residueTypes = residueTypes;
         this.rootMeanSquareDeviation = rootMeanSquareDeviation;
@@ -38,10 +35,6 @@ public class Hit {
 
     public StructureIdentifier getStructureIdentifier() {
         return structureIdentifier;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public LabelSelection[] getSelection() {

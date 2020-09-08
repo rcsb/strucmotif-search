@@ -37,20 +37,6 @@ public class DeleteStructuresFromInvertedIndexTask implements UpdateTask {
             return;
         }
 
-        // walk whole lookup: lookup will check each time if manipulation is needed - 8,337,760 combinations
-        // TODO maybe querying mongo would be faster
-//        Sets.cartesianProduct(Set.of(ResidueType.values()),
-//                Set.of(ResidueType.values()),
-//                Set.of(DistanceType.values()),
-//                Set.of(DistanceType.values()),
-//                Set.of(AngleType.values()))
-//                .stream()
-//                // filter away flipped identifiers - don't need them
-//                .filter(v -> ((ResidueType) v.get(0)).getOneLetterCode().compareTo(((ResidueType) v.get(1)).getOneLetterCode()) <= 0)
-//                // is this still Java?
-//                .map(v -> new ResiduePairDescriptor((ResidueType) v.get(0), (ResidueType) v.get(1), (DistanceType) v.get(2), (DistanceType) v.get(3), (AngleType) v.get(4)))
-//                .forEach(wordDescriptor -> invertedIndex.delete(wordDescriptor, delta));
-
         for (StructureIdentifier structureIdentifier : delta) {
             invertedIndex.delete(structureIdentifier);
             stateRepository.deleteIndexed(Set.of(structureIdentifier));

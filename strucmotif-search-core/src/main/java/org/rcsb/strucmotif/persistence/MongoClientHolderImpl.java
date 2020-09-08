@@ -18,10 +18,11 @@ public class MongoClientHolderImpl implements MongoClientHolder {
     public MongoClientHolderImpl(MotifSearchConfig motifSearchConfig) {
         MongoClient mongoClient;
         String uri = motifSearchConfig.getDbConnectionUri();
-        logger.info("Acquiring MongoClient - URI: {}", uri);
         if (uri != null && !uri.isBlank()) {
+            logger.info("Connecting to remote MongoDB: {}", uri.replaceAll(":[^:]*@", ":<hidden>@"));
             mongoClient = new MongoClient(new MongoClientURI(uri));
         } else {
+            logger.info("Connecting to local MongoDB");
             mongoClient = new MongoClient();
         }
         this.database = mongoClient.getDatabase("motif");

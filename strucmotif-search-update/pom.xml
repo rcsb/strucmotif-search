@@ -16,13 +16,6 @@
             <version>0.1.7-SNAPSHOT</version>
         </dependency>
 
-        <!-- used to compute cartesian product -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>29.0-jre</version>
-        </dependency>
-
         <!-- TODO better solution? these are needed when JAR is used directly but should not be propagated if module is used programmatically -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>

@@ -75,12 +75,13 @@ public class AddStructuresToArchiveTask implements UpdateTask {
                         structureWriter.write(cifFile);
                         stateRepository.insertKnown(Set.of(id));
                     } catch (IOException e) {
-                        logger.warn("[{} / {}] {} failed - no source file",
+                        // can 'safely' happen when obsolete entry was dropped from bcif data but still lingers in list
+                        logger.warn("[{} / {}] {} failed - no source file - obsolete entry?",
                                 counter.get(),
                                 target,
                                 id, e);
                         // fail complete update
-                        throw new UncheckedIOException(e);
+//                        throw new UncheckedIOException(e);
                     }
                 });
 

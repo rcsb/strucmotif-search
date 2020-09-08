@@ -13,6 +13,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * The routine to remove files from the structural motif search tool (e.g. after superseding an ID).
@@ -36,17 +37,16 @@ public class DeleteStructuresFromArchiveTask implements UpdateTask {
         // for each id: remove reduced file and
         delta.forEach(id -> {
                     try {
-                        Path path = motifSearchConfig.getArchivePath().resolve(id + ".bcif.gz");
+                        Path path = motifSearchConfig.getArchivePath().resolve(id.getPdbId() + ".bcif.gz");
                         if (Files.exists(path)) {
-                            logger.info("[{}] Removing optimized structure", id);
+                            logger.info("[{}] Removing optimized structure", id.getPdbId());
                             Files.delete(path);
                         }
+                        stateRepository.deleteKnown(Set.of(id));
                     } catch (IOException e) {
                         throw new UncheckedIOException(e);
                     }
                 });
-
-        stateRepository.deleteKnown(delta);
 
         logger.info("Finished archive cleanup");
     }

@@ -15,8 +15,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -51,7 +51,6 @@ public class AddStructuresToStructureRepositoryTask implements UpdateTask {
 
         AtomicInteger counter = new AtomicInteger();
         int target = paths.size();
-        Collection<StructureIdentifier> updated = new HashSet<>();
 
         // write structures
         paths.parallelStream().forEach(path -> {
@@ -65,7 +64,7 @@ public class AddStructuresToStructureRepositoryTask implements UpdateTask {
             try (InputStream inputStream = Files.newInputStream(path)) {
                 Structure structure = renumberedReader.readFromInputStream(inputStream);
                 structureRepository.insert(structure);
-                updated.add(structureIdentifier);
+                stateRepository.insertSupported(Set.of(structureIdentifier));
             } catch (UnsupportedOperationException e) {
                 // this isn't bad - alpha only trace or really weird structure
                 logger.warn("Failed due to empty atom_site record (no valid backbone trace) while processing {}",
@@ -78,7 +77,6 @@ public class AddStructuresToStructureRepositoryTask implements UpdateTask {
             }
         });
 
-        stateRepository.insertSupported(updated);
         logger.info("Finished update of structure repository");
     }
 }

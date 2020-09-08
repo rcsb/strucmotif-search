@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Set;
 
 @Service
 public class DeleteStructuresFromStructureRepositoryTask implements UpdateTask {
@@ -35,9 +36,8 @@ public class DeleteStructuresFromStructureRepositoryTask implements UpdateTask {
 
         for (StructureIdentifier id : delta) {
             structureRepository.delete(id);
+            stateRepository.deleteSupported(Set.of(id));
         }
-
-        stateRepository.deleteSupported(delta);
 
         logger.info("Finished cleanup of structure repository");
     }

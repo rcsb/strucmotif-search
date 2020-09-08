@@ -1,17 +1,20 @@
 package org.rcsb.strucmotif.persistence;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
+import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.conversions.Bson;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -32,6 +35,22 @@ public class MongoStateRepository implements StateRepository {
     public MongoStateRepository(MongoClientHolder mongoClientHolder) {
         MongoDatabase database = mongoClientHolder.getDatabase();
         state = database.getCollection("state", DBObject.class);
+
+        // ensure collections exists - otherwise multiple threads might cause 'duplicate key
+        for (String key : Set.of(KNOWN_KEY, STRUCTURES_KEY, INVERTED_INDEX_KEY)) {
+            Bson filter = eq("_id", key);
+            if (state.countDocuments(filter) == 0) {
+                try {
+                    DBObject update = new BasicDBObjectBuilder()
+                            .add("_id", key)
+                            .add("v", Collections.emptyList())
+                            .get();
+                    state.insertOne(update);
+                } catch (MongoWriteException e) {
+                    // happens when multiple threads try to init collection at the same time
+                }
+            }
+        }
     }
 
     @Override
@@ -78,11 +97,6 @@ public class MongoStateRepository implements StateRepository {
 
     private void insert(Collection<StructureIdentifier> additions, String key) {
         Bson filter = eq("_id", key);
-
-        // ensure document exists
-        if (state.countDocuments(filter) == 0) {
-            state.insertOne(new BasicDBObject("_id", key));
-        }
 
         List<String> update = additions.stream().map(StructureIdentifier::getPdbId).collect(Collectors.toList());
         state.findOneAndUpdate(filter, pushEach("v", update));

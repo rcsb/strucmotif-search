@@ -39,7 +39,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             System.out.println("Valid context values: " + Arrays.toString(Context.values()));
             System.out.println("Valid operation values: " + Arrays.toString(Operation.values()));
             System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
-            System.out.println("This call is idempotent - if you want to update entries you have to explicitly remove them first");
+            System.out.println("If you want to update entries you have to explicitly remove them first");
             System.out.println("Example: java -Xmx12G -jar update.jar ARCHIVE ADD 1acj 1exr 4hhb");
             return;
         }

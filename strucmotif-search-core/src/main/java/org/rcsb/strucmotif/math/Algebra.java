@@ -1,11 +1,6 @@
 package org.rcsb.strucmotif.math;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * A collection of algebraic or generic mathematical functions.
@@ -271,35 +266,6 @@ public class Algebra {
                 { rot[0][1], rot[1][1], rot[2][1] },
                 { rot[0][2], rot[1][2], rot[2][2] }
         };
-    }
-
-    /**
-     * Computes the cartesian product of a collection of lists (i.e. forms all combinations).
-     * (1, 2, 3) x (4, 5) x (6) =&gt; (1, 4, 6), (1, 5, 6), (2, 4, 6), (2, 5, 6), (3, 4, 6), (3, 5, 6)
-     * @param orderedSets all lists to process
-     * @return the cartesian product - empty if an list was empty
-     */
-    public static List<?> cartesianProduct(List<?>... orderedSets) {
-        if (orderedSets.length >= 2) {
-            List<?> product = orderedSets[0];
-            for (int i = 1; i < orderedSets.length; i++) {
-                product = product(product, orderedSets[i]);
-            }
-            return product;
-        }
-
-        return Collections.emptyList();
-    }
-
-    private static <A, B> List<?> product(List<A> a, List<B> b) {
-        return Optional.of(a.stream()
-                .map(e1 -> Optional.of(b.stream()
-                        .map(e2 -> Arrays.asList(e1, e2))
-                        .collect(Collectors.toList()))
-                        .orElse(Collections.emptyList()))
-                .flatMap(List::stream)
-                .collect(Collectors.toList()))
-                .orElse(Collections.emptyList());
     }
 
     public static double[][] composeTransformationMatrix(double[][] rotation3x3, double[] translation3d) {

@@ -1,12 +1,14 @@
 package org.rcsb.strucmotif.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Component
+@Configuration
+@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "strucmotif")
 public class MotifSearchConfig {
     private double distanceCutoff = 20;

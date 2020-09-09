@@ -19,7 +19,6 @@ public class Parameters {
     static final int DEFAULT_BACKBONE_DISTANCE_TOLERANCE = 1;
     static final int DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE = 1;
     static final int DEFAULT_ANGLE_TOLERANCE = 1;
-    static final boolean DEFAULT_PARALLELISM = true;
     static final double DEFAULT_RMSD_CUTOFF = 2.0;
 
     Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, double rmsdCutoff, MotifPruner motifPruner, AtomPairingScheme atomPairingScheme, int resultLimit) {

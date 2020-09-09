@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.domain.structure;
 
 import org.junit.jupiter.api.Test;
-import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.domain.Matrix4DTransformation;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;

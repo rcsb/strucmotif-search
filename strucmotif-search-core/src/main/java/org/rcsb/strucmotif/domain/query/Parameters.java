@@ -3,8 +3,6 @@ package org.rcsb.strucmotif.domain.query;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 
-import java.util.concurrent.ForkJoinPool;
-
 /**
  * Immutable instance capturing all parameters of a given search job.
  */

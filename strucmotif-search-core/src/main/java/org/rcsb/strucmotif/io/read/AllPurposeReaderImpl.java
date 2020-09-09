@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.io.read;
 
 import org.rcsb.cif.CifIO;
-import org.rcsb.cif.CifOptions;
 import org.rcsb.cif.model.CifFile;
 import org.rcsb.cif.model.IntColumn;
 import org.rcsb.cif.model.binary.BinaryFile;

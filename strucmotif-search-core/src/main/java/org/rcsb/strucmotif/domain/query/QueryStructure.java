@@ -5,6 +5,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
+import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -50,7 +51,7 @@ public class QueryStructure {
                 .collect(Collectors.toList());
 
         // we do this to ensure correct ordering
-        IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
+        SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
         this.residues = residueIdentifiers.stream()
                 .map(indexSelectionResolver::resolve)
                 .collect(Collectors.toList());

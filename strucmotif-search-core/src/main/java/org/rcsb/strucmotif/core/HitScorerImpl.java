@@ -7,7 +7,7 @@ import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
-import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
+import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
@@ -39,7 +39,7 @@ public class HitScorerImpl implements HitScorer {
         }
 
         // resolve identifiers
-        LabelSelectionResolver labelSelectionResolver = targetStructure.getLabelSelectionResolver();
+        SelectionResolver<LabelSelection> labelSelectionResolver = targetStructure.getLabelSelectionResolver();
         List<Residue> originalCandidate = alignmentResult.getOriginalCandidate();
 
         LabelSelection[] selection = new LabelSelection[originalCandidate.size()];

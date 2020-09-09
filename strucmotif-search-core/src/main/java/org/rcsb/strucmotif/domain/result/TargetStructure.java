@@ -5,7 +5,9 @@ import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
+import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.SelectionReader;
@@ -37,7 +39,7 @@ public class TargetStructure {
     We use some non-final fields to achieve the lazy behavior and probably a rather easy implementation. Tread lightly.
      */
     private List<ResiduePairIdentifier[]> paths;
-    private LabelSelectionResolver labelSelectionResolver;
+    private SelectionResolver<LabelSelection> labelSelectionResolver;
 
     public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, SelectionReader selectionReader) {
         this.selectionReader = selectionReader;
@@ -66,7 +68,7 @@ public class TargetStructure {
         return structureIdentifier;
     }
 
-    public LabelSelectionResolver getLabelSelectionResolver() {
+    public SelectionResolver<LabelSelection> getLabelSelectionResolver() {
         return labelSelectionResolver;
     }
 
@@ -124,7 +126,7 @@ public class TargetStructure {
 
         try {
             Structure structure = selectionReader.readById(structureIdentifier, indexSelectors);
-            IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
+            SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 
             return paths.stream()

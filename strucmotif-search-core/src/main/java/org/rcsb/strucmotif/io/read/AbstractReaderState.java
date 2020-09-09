@@ -40,7 +40,6 @@ abstract class AbstractReaderState<S extends Selection> {
 
     // all relevant categories
     final StructureIdentifier structureIdentifier;
-    final String title;
     final AtomSite atomSite;
     private final PdbxStructAssemblyGen pdbxStructAssemblyGen;
     private final PdbxStructOperList pdbxStructOperList;
@@ -74,7 +73,6 @@ abstract class AbstractReaderState<S extends Selection> {
         MmCifBlock block = cifFile.as(StandardSchemata.MMCIF).getFirstBlock();
 
         this.structureIdentifier = new StructureIdentifier(block.getBlockHeader().toLowerCase());
-        this.title = tryToGetTitle(block);
         this.atomSite = block.getAtomSite();
         this.pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         this.pdbxStructOperList = block.getPdbxStructOperList();
@@ -104,14 +102,6 @@ abstract class AbstractReaderState<S extends Selection> {
         }
         this.chains = new ArrayList<>();
         this.selectors = selection;
-    }
-
-    private String tryToGetTitle(MmCifBlock block) {
-        try {
-            return block.getStruct().getTitle().get(0).toLowerCase();
-        } catch (Exception e) {
-            return "UNKNOWN";
-        }
     }
 
     /**

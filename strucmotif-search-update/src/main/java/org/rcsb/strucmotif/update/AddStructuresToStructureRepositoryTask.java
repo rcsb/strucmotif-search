@@ -4,7 +4,7 @@ import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.RenumberedReader;
-import org.rcsb.strucmotif.persistence.MongoStateRepository;
+import org.rcsb.strucmotif.persistence.StateRepository;
 import org.rcsb.strucmotif.persistence.StructureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +26,10 @@ public class AddStructuresToStructureRepositoryTask implements UpdateTask {
     private final MotifSearchConfig motifSearchConfig;
     private final RenumberedReader renumberedReader;
     private final StructureRepository structureRepository;
-    private final MongoStateRepository stateRepository;
+    private final StateRepository stateRepository;
 
     @Autowired
-    public AddStructuresToStructureRepositoryTask(MotifSearchConfig motifSearchConfig, RenumberedReader renumberedReader, StructureRepository structureRepository, MongoStateRepository stateRepository) {
+    public AddStructuresToStructureRepositoryTask(MotifSearchConfig motifSearchConfig, RenumberedReader renumberedReader, StructureRepository structureRepository, StateRepository stateRepository) {
         this.motifSearchConfig = motifSearchConfig;
         this.renumberedReader = renumberedReader;
         this.structureRepository = structureRepository;

@@ -2,7 +2,7 @@ package org.rcsb.strucmotif.update;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.persistence.MongoStateRepository;
+import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,10 @@ import java.util.Set;
 public class DeleteStructuresFromArchiveTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(DeleteStructuresFromArchiveTask.class);
     private final MotifSearchConfig motifSearchConfig;
-    private final MongoStateRepository stateRepository;
+    private final StateRepository stateRepository;
 
     @Autowired
-    public DeleteStructuresFromArchiveTask(MotifSearchConfig motifSearchConfig, MongoStateRepository stateRepository) {
+    public DeleteStructuresFromArchiveTask(MotifSearchConfig motifSearchConfig, StateRepository stateRepository) {
         this.motifSearchConfig = motifSearchConfig;
         this.stateRepository = stateRepository;
     }

@@ -20,6 +20,7 @@ public class MotifSearchConfig {
     private int decimalPlacesRmsd = 2;
     private int decimalPlacesMatrix = 3;
     private int chunkSize = 400;
+    private int maxMotifSize = 10;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -91,6 +92,14 @@ public class MotifSearchConfig {
 
     public void setChunkSize(int chunkSize) {
         this.chunkSize = chunkSize;
+    }
+
+    public int getMaxMotifSize() {
+        return maxMotifSize;
+    }
+
+    public void setMaxMotifSize(int maxMotifSize) {
+        this.maxMotifSize = maxMotifSize;
     }
 
     public Path getArchivePath() {

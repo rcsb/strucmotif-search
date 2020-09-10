@@ -64,6 +64,7 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | `strucmotif.data-source` | Path to local CIF archive | fetch from RCSB PDB |
 | `strucmotif.number-threads` | Number of worker threads | available processors |
 | `strucmotif.db-connection-uri` | Set the MongoDB connection URI (including host, username and password) | use localhost |
+| `strucmotif.max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `strucmotif.max-results` | Maximum number of results that will be returned | `10000` |
 | `strucmotif.decimal-places-rmsd` | Number of decimal places reported for RMSD values | `2` |
 | `strucmotif.decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |

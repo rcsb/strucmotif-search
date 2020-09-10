@@ -55,7 +55,7 @@ public class MotifSearchIntegrationTest {
         SelectionReader selectionReader = new SelectionReaderImpl(structureRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, selectionReader, threadPool);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
-        this.queryBuilder = new QueryBuilder(allPurposeReader, motifPruner, motifSearchRuntime);
+        this.queryBuilder = new QueryBuilder(allPurposeReader, motifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
     /**

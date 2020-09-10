@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
@@ -28,13 +29,14 @@ public class QueryBuilder {
     private final AllPurposeReader allPurposeReader;
     private final MotifPruner motifPruner;
     private final MotifSearchRuntime motifSearchRuntime;
-    private static final int MAXIMUM_MOTIF_SIZE = 10;
+    private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime) {
+    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
         this.allPurposeReader = allPurposeReader;
         this.motifPruner = motifPruner;
         this.motifSearchRuntime = motifSearchRuntime;
+        this.motifSearchConfig = motifSearchConfig;
     }
 
     /**
@@ -72,9 +74,9 @@ public class QueryBuilder {
                 .mapToLong(Collection::size)
                 .sum();
 
-        if (componentCount > MAXIMUM_MOTIF_SIZE) {
-            throw new IllegalArgumentException("maximum motif size is " + MAXIMUM_MOTIF_SIZE + " - file contains " +
-                    componentCount + " components and may be plain structure data");
+        if (componentCount > motifSearchConfig.getMaxMotifSize()) {
+            throw new IllegalArgumentException("maximum motif size is " + motifSearchConfig.getMaxMotifSize() + " - " +
+                    "file contains " + componentCount + " components and may be plain structure data");
         }
 
         return new MandatoryBuilder(structure);

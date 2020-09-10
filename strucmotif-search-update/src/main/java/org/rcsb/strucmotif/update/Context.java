@@ -6,7 +6,8 @@ import java.util.NoSuchElementException;
 public enum Context {
     BCIF,
     STRUCTURES,
-    INDEX;
+    INDEX,
+    ALL;
 
     public static Context resolve(String s) {
         String uc = s.toUpperCase();

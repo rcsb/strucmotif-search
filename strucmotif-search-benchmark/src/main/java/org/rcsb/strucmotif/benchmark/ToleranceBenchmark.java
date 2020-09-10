@@ -17,44 +17,47 @@ import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 
-@State(Scope.Benchmark)
 public class ToleranceBenchmark {
     @Param({"1", "2", "3"})
     public int tolerance;
 
-    @Benchmark
-    public void searchForSerineProtease(Blackhole blackhole) {
-        blackhole.consume(run(Motifs.HDS, tolerance));
+    @State(Scope.Benchmark)
+    public static class MyState {
+        public QueryBuilder queryBuilder = MotifSearch.newQuery();
     }
 
     @Benchmark
-    public void searchForAminopeptidase(Blackhole blackhole) {
-        blackhole.consume(run(Motifs.KDDDE, tolerance));
+    public void searchForSerineProtease(Blackhole blackhole, MyState state) {
+        blackhole.consume(run(Motifs.HDS, tolerance, state));
     }
 
     @Benchmark
-    public void searchForZincCoordination(Blackhole blackhole) {
-        blackhole.consume(run(Motifs.CHH, tolerance));
+    public void searchForAminopeptidase(Blackhole blackhole, MyState state) {
+        blackhole.consume(run(Motifs.KDDDE, tolerance, state));
     }
 
     @Benchmark
-    public void searchForEnolaseSuperfamily(Blackhole blackhole) {
-        blackhole.consume(run(Motifs.KDEEH, tolerance));
+    public void searchForZincCoordination(Blackhole blackhole, MyState state) {
+        blackhole.consume(run(Motifs.CHH, tolerance, state));
     }
 
     @Benchmark
-    public void searchForEnolaseSuperfamilyExchanges(Blackhole blackhole) {
-        blackhole.consume(run(Motifs.KDEEH_EXCHANGES, tolerance));
+    public void searchForEnolaseSuperfamily(Blackhole blackhole, MyState state) {
+        blackhole.consume(run(Motifs.KDEEH, tolerance, state));
     }
 
     @Benchmark
-    public void searchForQuadruplex(Blackhole blackhole) {
-        blackhole.consume(run(Motifs.GGGG, tolerance));
+    public void searchForEnolaseSuperfamilyExchanges(Blackhole blackhole, MyState state) {
+        blackhole.consume(run(Motifs.KDEEH_EXCHANGES, tolerance, state));
     }
 
-    private MotifSearchResult run(Motifs motif, int tolerance) {
-        QueryBuilder.OptionalStepBuilder builder = MotifSearch.newQuery()
-                .defineByStructure(motif.getStructure())
+    @Benchmark
+    public void searchForQuadruplex(Blackhole blackhole, MyState state) {
+        blackhole.consume(run(Motifs.GGGG, tolerance, state));
+    }
+
+    private MotifSearchResult run(Motifs motif, int tolerance, MyState state) {
+        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructure(motif.getStructure())
                 .backboneDistanceTolerance(tolerance)
                 .sideChainDistanceTolerance(tolerance)
                 .angleTolerance(tolerance)

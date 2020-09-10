@@ -6,18 +6,14 @@ structure-defining patterns. This implementation traverses the whole PDB archive
 returning all highly similar occurrences of the query motif within a second.
 
 ## Getting started
-strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
+strucmotif-search is distributed by maven and supports Java 11+ and requires access to a MongoDB server. To get started, 
+append your `pom.xml` by:
 ```xml
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
   <version>...</version>
 </dependency>
-```
-
-Make sure to have a MongoDB server running, e.g.:
-```
-mongod --dbpath=/opt/data/mongodb
 ```
 
 ## Example
@@ -59,29 +55,18 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 - inter-chain & assembly support
 - position-specific exchanges
 - modified residues
-- can be run locally on an ordinary desktop system
 
-## Limitations
-- default maximum distance of 2 backbone atoms is 20 A
-- default tolerance value might not find all relevant matches
-- no support for alpha carbon traces
-- data should be stored on SSD (~6 GB for archive, ~150 GB for coordinate and inverted index databases)
+## Configuration
+| Property     | Action | Default Value/Behavior |
+| -----------  | ------ | ------- |
+| `strucmotif.distance-cutoff` | Maximum distance between alpha carbons that will be indexed | `20 Å` |
+| `strucmotif.root-path` | Path where optimized BinaryCIF files will be written | `/opt/data/` |
+| `strucmotif.data-source` | Path to local CIF archive | fetch from RCSB PDB |
+| `strucmotif.number-threads` | Number of worker threads | available processors |
+| `strucmotif.db-connection-uri` | Set the MongoDB connection URI (including host, username and password) | use localhost |
+| `strucmotif.max-results` | Maximum number of results that will be returned | `10000` |
+| `strucmotif.decimal-places-rmsd` | Number of decimal places reported for RMSD values | `2` |
+| `strucmotif.decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
+| `strucmotif.chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 
-## Implementation
-An inverted indexing strategy is employed to find all similar motif occurrences in a search space of >160k structures.
-All occurrences of amino acids & nucleotides pairs are described by a `ResiduePairDescriptor` that captures:
-- label of residue 1: e.g. histidine => `H`
-- label of residue 2: e.g. aspartic acid => `D`
-- distance between backbones (`CA` for amino acids): e.g. 6.456 Å => `6`
-- distance between side-chains (`CB` for amino acids): e.g. 8.693 Å => `9`
-- angle between vectors defined by backbone and side-chain coordinates: e.g. 90.5˚ => `5` 
-
-This allows composing compact yet informative descriptors such as `HD-6-9-5` for all residue pairs in the search space.
-Sequence positions where certain residue pairs occur can be addressed by a `ResiduePairIdentifier` that summarizes:
-- pdbId
-- id of assembly generation operation
-- combination of sequence indices which correspond to this particular `ResiduePairDescriptor`
-
-A search can be performed by fragmenting it into `ResiduePairDescriptor` instances, looking up all 
-occurrences of these `ResiduePairDescriptor`, and finding combinations which are compatible to the query. Subsequently, 
-this allows aligning the query and each candidate motif and score by RMSD.
+Configure by placing your `application.properties` on the classpath.

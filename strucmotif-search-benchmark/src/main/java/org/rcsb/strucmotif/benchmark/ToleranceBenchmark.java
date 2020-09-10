@@ -17,6 +17,7 @@ import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 
+@State(Scope.Benchmark)
 public class ToleranceBenchmark {
     @Param({"1", "2", "3"})
     public int tolerance;

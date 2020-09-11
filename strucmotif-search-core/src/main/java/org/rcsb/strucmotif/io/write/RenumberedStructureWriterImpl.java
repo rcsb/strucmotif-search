@@ -61,8 +61,8 @@ public class RenumberedStructureWriterImpl implements RenumberedStructureWriter 
     }
 
     @Override
-    public void write(MmCifFile mmCifFile) {
-        MmCifBlock block = mmCifFile.getFirstBlock();
+    public void write(MmCifFile source, Path destination) {
+        MmCifBlock block = source.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         Struct struct = block.getStruct();
@@ -150,8 +150,7 @@ public class RenumberedStructureWriterImpl implements RenumberedStructureWriter 
         CifFile outputFile = outputBuilder.leaveBlock().leaveFile();
 
         try {
-            Path outputPath = motifSearchConfig.getRenumberedStructurePath(new StructureIdentifier(pdbId));
-            CifIO.writeBinary(outputFile, outputPath, OPTIONS);
+            CifIO.writeBinary(outputFile, destination, OPTIONS);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

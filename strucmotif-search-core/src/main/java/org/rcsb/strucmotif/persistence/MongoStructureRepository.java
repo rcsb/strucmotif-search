@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.persistence;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObjectBuilder;
 import com.mongodb.DBObject;
+import com.mongodb.MongoBulkWriteException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
@@ -18,6 +19,8 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -33,6 +36,7 @@ import static com.mongodb.client.model.Filters.eq;
 
 @Repository
 public class MongoStructureRepository implements StructureRepository {
+    private static final Logger logger = LoggerFactory.getLogger(MongoStructureRepository.class);
     /**
      * Key is: pdbId:assemblyId:residueIndex
      * Value is: ["labelAsymId", labelSeqId, "oneLetterCode", "labelAtomId1", 1.x, 1.y, 1.z, "labelAtomId2", 2.x, 2.y, 2.z, ...]
@@ -117,7 +121,13 @@ public class MongoStructureRepository implements StructureRepository {
             }
         }
 
-        this.structures.insertMany(update);
+        try {
+            this.structures.insertMany(update);
+        } catch (MongoBulkWriteException e) {
+            if (e.getMessage().contains("duplicate key")) {
+                logger.warn("Rejected update for duplicate key", e);
+            }
+        }
     }
 
     @Override

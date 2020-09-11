@@ -6,7 +6,7 @@ import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.io.write.RenumberedWriter;
+import org.rcsb.strucmotif.io.write.RenumberedStructureWriter;
 import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +29,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class AddStructuresToArchiveTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToArchiveTask.class);
 
-    private final RenumberedWriter structureWriter;
+    private final RenumberedStructureWriter structureWriter;
     private final StateRepository stateRepository;
     private final boolean local;
     private final Path dataSourcePath;
 
     @Autowired
-    public AddStructuresToArchiveTask(MotifSearchConfig motifSearchConfig, RenumberedWriter structureWriter, StateRepository stateRepository) {
+    public AddStructuresToArchiveTask(MotifSearchConfig motifSearchConfig, RenumberedStructureWriter structureWriter, StateRepository stateRepository) {
         this.structureWriter = structureWriter;
         this.stateRepository = stateRepository;
 
@@ -50,7 +50,7 @@ public class AddStructuresToArchiveTask implements UpdateTask {
 
         // ensure directories exist
         try {
-            Files.createDirectories(motifSearchConfig.getArchivePath());
+            Files.createDirectories(motifSearchConfig.getOriginalStructurePath());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.update;
 
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.persistence.StateRepository;
-import org.rcsb.strucmotif.persistence.StructureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

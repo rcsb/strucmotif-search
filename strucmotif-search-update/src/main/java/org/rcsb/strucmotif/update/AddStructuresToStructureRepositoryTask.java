@@ -3,9 +3,8 @@ package org.rcsb.strucmotif.update;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.RenumberedReader;
+import org.rcsb.strucmotif.io.read.RenumberedStructureReader;
 import org.rcsb.strucmotif.persistence.StateRepository;
-import org.rcsb.strucmotif.persistence.StructureRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +23,12 @@ import java.util.stream.Collectors;
 public class AddStructuresToStructureRepositoryTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToStructureRepositoryTask.class);
     private final MotifSearchConfig motifSearchConfig;
-    private final RenumberedReader renumberedReader;
+    private final RenumberedStructureReader renumberedReader;
     private final StructureRepository structureRepository;
     private final StateRepository stateRepository;
 
     @Autowired
-    public AddStructuresToStructureRepositoryTask(MotifSearchConfig motifSearchConfig, RenumberedReader renumberedReader, StructureRepository structureRepository, StateRepository stateRepository) {
+    public AddStructuresToStructureRepositoryTask(MotifSearchConfig motifSearchConfig, RenumberedStructureReader renumberedReader, StructureRepository structureRepository, StateRepository stateRepository) {
         this.motifSearchConfig = motifSearchConfig;
         this.renumberedReader = renumberedReader;
         this.structureRepository = structureRepository;
@@ -46,7 +45,7 @@ public class AddStructuresToStructureRepositoryTask implements UpdateTask {
         // by traversing the directory of structures, structures that failed upstream operations are ignored (might be
         // present in 'known' identifier list but can legitimately be missing if violating requirements)
         List<Path> paths = delta.stream()
-                .map(id -> motifSearchConfig.getArchivePath().resolve(id.getPdbId() + ".bcif.gz"))
+                .map(id -> motifSearchConfig.getOriginalStructurePath().resolve(id.getPdbId() + ".bcif.gz"))
                 .collect(Collectors.toList());
 
         AtomicInteger counter = new AtomicInteger();

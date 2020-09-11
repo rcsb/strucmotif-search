@@ -37,7 +37,7 @@ public class DeleteStructuresFromArchiveTask implements UpdateTask {
         // for each id: remove reduced file and
         delta.forEach(id -> {
                     try {
-                        Path path = motifSearchConfig.getArchivePath().resolve(id.getPdbId() + ".bcif.gz");
+                        Path path = motifSearchConfig.getOriginalStructurePath().resolve(id.getPdbId() + ".bcif.gz");
                         if (Files.exists(path)) {
                             logger.info("[{}] Removing optimized structure", id.getPdbId());
                             Files.delete(path);

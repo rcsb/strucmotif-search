@@ -19,14 +19,34 @@ import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Path;
 
+/**
+ * This implementation keeps a sparse representation of structure data including:
+ * <ul>
+ *     <li>label_asym_id</li>
+ *     <li>label_seq_id</li>
+ *     <li>label_comp_id</li>
+ *     <li>label_atom_id</li>
+ *     <li>1-digit precision coordinates</li>
+ *     <li>entry identifier and data used for assembly generation</li>
+ * </ul>
+ * <p>This implementation ignores:
+ * <ul>
+ *     <li>models with number unequal to 1</li>
+ *     <li>hydrogen atoms</li>
+ *     <li>non-polymer groups</li>
+ *     <li>2nd and all subsequent alt locs</li>
+ * </ul>
+ */
 @Service
-public class RenumberedWriterImpl implements RenumberedWriter {
+public class RenumberedStructureWriterImpl implements RenumberedStructureWriter {
     private static final CifOptions OPTIONS = CifOptions.builder()
             .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
             .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)
@@ -36,13 +56,13 @@ public class RenumberedWriterImpl implements RenumberedWriter {
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public RenumberedWriterImpl(MotifSearchConfig motifSearchConfig) {
+    public RenumberedStructureWriterImpl(MotifSearchConfig motifSearchConfig) {
         this.motifSearchConfig = motifSearchConfig;
     }
 
     @Override
-    public void write(MmCifFile inputFile) {
-        MmCifBlock block = inputFile.getFirstBlock();
+    public void write(MmCifFile mmCifFile) {
+        MmCifBlock block = mmCifFile.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         Struct struct = block.getStruct();
@@ -127,13 +147,11 @@ public class RenumberedWriterImpl implements RenumberedWriter {
             cartnZ.add(atomSite.getCartnZ().get(row));
         }
         atomSiteBuilder.leaveCategory();
-
         CifFile outputFile = outputBuilder.leaveBlock().leaveFile();
 
         try {
-            CifIO.writeBinary(outputFile,
-                    motifSearchConfig.getArchivePath().resolve(pdbId.toLowerCase() + ".bcif.gz"),
-                    OPTIONS);
+            Path outputPath = motifSearchConfig.getRenumberedStructurePath(new StructureIdentifier(pdbId));
+            CifIO.writeBinary(outputFile, outputPath, OPTIONS);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

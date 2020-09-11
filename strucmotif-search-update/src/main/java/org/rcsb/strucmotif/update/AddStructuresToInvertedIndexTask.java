@@ -6,7 +6,7 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.RenumberedReader;
+import org.rcsb.strucmotif.io.read.RenumberedStructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
@@ -35,12 +35,12 @@ import java.util.stream.Collectors;
 public class AddStructuresToInvertedIndexTask implements UpdateTask {
     private static final Logger logger = LoggerFactory.getLogger(AddStructuresToInvertedIndexTask.class);
     private final InvertedIndex motifLookup;
-    private final RenumberedReader renumberedReader;
+    private final RenumberedStructureReader renumberedReader;
     private final MotifSearchConfig motifSearchConfig;
     private final StateRepository stateRepository;
 
     @Autowired
-    public AddStructuresToInvertedIndexTask(InvertedIndex motifLookup, RenumberedReader renumberedReader, MotifSearchConfig motifSearchConfig, StateRepository stateRepository) {
+    public AddStructuresToInvertedIndexTask(InvertedIndex motifLookup, RenumberedStructureReader renumberedReader, MotifSearchConfig motifSearchConfig, StateRepository stateRepository) {
         this.motifLookup = motifLookup;
         this.renumberedReader = renumberedReader;
         this.motifSearchConfig = motifSearchConfig;
@@ -58,7 +58,7 @@ public class AddStructuresToInvertedIndexTask implements UpdateTask {
         // we assume that the argument list does not contain any identifiers already present in the index
         // work on optimized path so that component index mapping is valid
         List<Path> paths = identifiers.stream()
-                .map(id -> motifSearchConfig.getArchivePath().resolve(id + ".bcif.gz"))
+                .map(id -> motifSearchConfig.getOriginalStructurePath().resolve(id + ".bcif.gz"))
                 .collect(Collectors.toList());
 
         long totalFileCount = paths.size();

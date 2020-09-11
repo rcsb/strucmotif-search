@@ -110,7 +110,8 @@ public class AddStructuresToInvertedIndexTask implements UpdateTask {
         try {
             structure = renumberedReader.readById(structureIdentifier);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] [{}] Source file missing unexpectedly",
+            // can 'safely' happen when obsolete entry was dropped from bcif data but still lingers in list
+            logger.warn("[{}] [{}] Source file missing unexpectedly - obsolete entry?",
                     context.partitionContext,
                     structureContext,
                     e);

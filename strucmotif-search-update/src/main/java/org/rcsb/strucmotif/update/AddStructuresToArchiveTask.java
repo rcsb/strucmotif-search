@@ -80,8 +80,6 @@ public class AddStructuresToArchiveTask implements UpdateTask {
                                 counter.get(),
                                 target,
                                 id, e);
-                        // fail complete update
-//                        throw new UncheckedIOException(e);
                     }
                 });
 

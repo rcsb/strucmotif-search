@@ -4,8 +4,6 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
 
 import java.util.Collection;
 import java.util.Set;
@@ -48,23 +46,17 @@ public enum Motifs {
                     new LabelSelection("B", 1, 10))); // G
 
     private final StructureIdentifier structureIdentifier;
-    private final Structure structure;
     private final Collection<LabelSelection> selection;
     private final PositionSpecificExchange[] positionSpecificExchanges;
 
     Motifs(String pdbId, Collection<LabelSelection> selection, PositionSpecificExchange... positionSpecificExchanges) {
         this.structureIdentifier = new StructureIdentifier(pdbId);
-        this.structure = new AllPurposeReaderImpl().readById(structureIdentifier, selection);
         this.selection = selection;
         this.positionSpecificExchanges = positionSpecificExchanges;
     }
 
     public StructureIdentifier getStructureIdentifier() {
         return structureIdentifier;
-    }
-
-    public Structure getStructure() {
-        return structure;
     }
 
     public Collection<LabelSelection> getSelection() {

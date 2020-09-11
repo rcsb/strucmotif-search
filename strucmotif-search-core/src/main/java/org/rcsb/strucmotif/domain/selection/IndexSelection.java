@@ -29,6 +29,11 @@ public class IndexSelection implements ResidueSelection {
     }
 
     @Override
+    public boolean test(String labelAsymId, int labelSeqId, int index) {
+        return this.index == index;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

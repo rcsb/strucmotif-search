@@ -3,10 +3,10 @@ package org.rcsb.strucmotif.domain.selection;
 import java.util.Objects;
 
 /**
- * Identifies a component unambiguously by label_asym_id, assembly_id, and label_seq_id. Basically the 'natural' way to
+ * Identifies a residue unambiguously by label_asym_id, assembly_id, and label_seq_id. Basically the 'natural' way to
  * reference residues.
  */
-public class LabelSelection implements Selection {
+public class LabelSelection implements ResidueSelection {
     private final String labelAsymId;
     private final int assemblyId;
     private final int labelSeqId;

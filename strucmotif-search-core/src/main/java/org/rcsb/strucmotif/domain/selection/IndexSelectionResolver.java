@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Used to resolve {@link IndexSelection} instances.
+ * Used to bidirectionally map between {@link IndexSelection} and the corresponding {@link Residue}.
  */
 public class IndexSelectionResolver implements SelectionResolver<IndexSelection> {
     private final Map<Residue, IndexSelection> forward;
@@ -28,8 +28,8 @@ public class IndexSelectionResolver implements SelectionResolver<IndexSelection>
     }
 
     @Override
-    public Residue resolve(IndexSelection selector) {
-        return backward.get(selector);
+    public Residue resolve(IndexSelection selection) {
+        return backward.get(selection);
     }
 
     @Override

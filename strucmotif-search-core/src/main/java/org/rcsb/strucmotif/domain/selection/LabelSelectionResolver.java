@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Used to resolve {@link LabelSelection} instances.
+ * Used to bidirectionally map between {@link LabelSelection} and the corresponding {@link Residue}.
  */
 public class LabelSelectionResolver implements SelectionResolver<LabelSelection> {
     private final Map<Residue, LabelSelection> forward;
@@ -31,8 +31,8 @@ public class LabelSelectionResolver implements SelectionResolver<LabelSelection>
     }
 
     @Override
-    public Residue resolve(LabelSelection selector) {
-        return backward.get(selector);
+    public Residue resolve(LabelSelection selection) {
+        return backward.get(selection);
     }
 
     @Override

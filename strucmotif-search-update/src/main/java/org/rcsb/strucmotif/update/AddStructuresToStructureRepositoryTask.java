@@ -56,22 +56,27 @@ public class AddStructuresToStructureRepositoryTask implements UpdateTask {
         paths.parallelStream().forEach(path -> {
             String pdbId = path.toFile().getName().split("\\.")[0].toLowerCase();
             StructureIdentifier structureIdentifier = new StructureIdentifier(pdbId);
-            logger.info("[{} / {}] Persisting coordinates of {}",
-                    counter.incrementAndGet(),
-                    target,
-                    pdbId);
+            int i = counter.incrementAndGet();
 
             try (InputStream inputStream = Files.newInputStream(path)) {
                 Structure structure = renumberedReader.readFromInputStream(inputStream);
                 structureRepository.insert(structure);
                 stateRepository.insertSupported(Set.of(structureIdentifier));
+                logger.info("[{} / {}] Persisted coordinates of {}",
+                        i,
+                        target,
+                        pdbId);
             } catch (UnsupportedOperationException e) {
                 // this isn't bad - alpha only trace or really weird structure
-                logger.warn("Failed due to empty atom_site record (no valid backbone trace) while processing {}",
+                logger.warn("[{} / {}] Failed due to empty atom_site record (no valid backbone trace) while processing {}",
+                        i,
+                        target,
                         pdbId);
             } catch (Exception e) {
                 // this is bad
-                logger.warn("Failed with unexplained reason while processing {}",
+                logger.warn("[{} / {}] Failed with unexplained reason while processing {}",
+                        i,
+                        target,
                         pdbId,
                         e);
             }

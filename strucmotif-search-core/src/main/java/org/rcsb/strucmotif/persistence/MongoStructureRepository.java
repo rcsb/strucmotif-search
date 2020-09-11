@@ -126,7 +126,9 @@ public class MongoStructureRepository implements StructureRepository {
         } catch (MongoBulkWriteException e) {
             if (e.getMessage().contains("duplicate key")) {
                 logger.warn("Rejected update for duplicate key", e);
+                return;
             }
+            throw e;
         }
     }
 

@@ -114,8 +114,7 @@ public class AddStructuresToInvertedIndexTask implements UpdateTask {
                     context.partitionContext,
                     structureContext,
                     e);
-            // fail complete update
-            throw e;
+            return;
         } catch (UnsupportedOperationException e) {
             logger.warn("[{}] [{}] No valid polymer chains",
                     context.partitionContext,

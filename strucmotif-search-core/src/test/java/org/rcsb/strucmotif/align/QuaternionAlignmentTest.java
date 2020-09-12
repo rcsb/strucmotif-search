@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.align;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
@@ -31,7 +32,7 @@ public class QuaternionAlignmentTest {
     @BeforeEach
     public void init() {
         alignmentService = new QuaternionAlignmentService();
-        structureReader = new StructureReaderImpl();
+        structureReader = new StructureReaderImpl(new MotifSearchConfig());
     }
 
     private static int seqId = 1;

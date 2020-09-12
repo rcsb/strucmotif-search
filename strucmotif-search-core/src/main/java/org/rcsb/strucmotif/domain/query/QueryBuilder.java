@@ -13,7 +13,11 @@ import org.rcsb.strucmotif.io.read.StructureReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,10 +50,12 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, Collection<LabelSelection> selection) {
-        InputStream inputStream = motifSearchConfig.getInputStream(new StructureIdentifier(pdbId));
+        InputStream inputStream = getInputStream(new StructureIdentifier(pdbId));
         Structure structure = structureReader.readFromInputStream(inputStream, selection);
         return defineByStructure(structure);
     }
+
+
 
     /**
      * Define a motif based on a stream of structure data and a selection of components.
@@ -60,6 +66,30 @@ public class QueryBuilder {
     public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, Collection<LabelSelection> selection) {
         Structure structure = structureReader.readFromInputStream(inputStream, selection);
         return defineByStructure(structure);
+    }
+
+    /**
+     * Acquire input stream of 'some' structure file. Priority are: 1. 'data-source' 2. 'root-path', and lastly fetched
+     * from 'bcif-fetch-url'.
+     * @param structureIdentifier the structure to load
+     * @return structure data
+     */
+    private InputStream getInputStream(StructureIdentifier structureIdentifier) {
+        try {
+            Path dataSourcePath = motifSearchConfig.getDataSourcePath().resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
+            return Files.newInputStream(dataSourcePath);
+        } catch (IOException e1) {
+            try {
+                Path renumberedPath = motifSearchConfig.getRenumberedStructurePath(structureIdentifier);
+                return Files.newInputStream(renumberedPath);
+            } catch (IOException e2) {
+                try {
+                    return motifSearchConfig.getBcifFetchUrl(structureIdentifier).openStream();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+        }
     }
 
     /**

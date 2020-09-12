@@ -135,8 +135,7 @@ public class TargetStructure {
         }
 
         try {
-            InputStream inputStream = motifSearchConfig.getRenumberedInputStream(structureIdentifier);
-            Structure structure = structureReader.readFromInputStream(inputStream, indexSelections);
+            Structure structure = structureReader.readById(structureIdentifier, indexSelections);
             SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 

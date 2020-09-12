@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io.read;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -26,7 +27,7 @@ public class StructureReaderImplTest {
 
     @BeforeEach
     public void init() {
-        this.structureReader = new StructureReaderImpl();
+        this.structureReader = new StructureReaderImpl(new MotifSearchConfig());
     }
 
     // TODO 4udf seems slow

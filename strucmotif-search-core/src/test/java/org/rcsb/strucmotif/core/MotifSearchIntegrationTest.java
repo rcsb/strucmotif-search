@@ -45,9 +45,7 @@ public class MotifSearchIntegrationTest {
     public void init() {
         // TODO better way?
         InvertedIndex invertedIndex = Mockito.mock(InvertedIndex.class);
-        StructureRepository structureRepository = Mockito.mock(StructureRepository.class);
         when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
-        when(structureRepository.select(any(), any())).thenAnswer(Helpers::mockStructureRepositorySelect);
 
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, structureReader, threadPool, motifSearchConfig);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);

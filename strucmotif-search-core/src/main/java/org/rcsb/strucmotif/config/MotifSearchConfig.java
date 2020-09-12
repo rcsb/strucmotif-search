@@ -5,11 +5,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -48,6 +46,10 @@ public class MotifSearchConfig {
 
     public String getDataSource() {
         return dataSource;
+    }
+
+    public Path getDataSourcePath() {
+        return Paths.get(dataSource);
     }
 
     public void setDataSource(String dataSource) {
@@ -114,44 +116,24 @@ public class MotifSearchConfig {
         return bcifFetchUrl;
     }
 
-    public void setBcifFetchUrl(String bcifFetchUrl) {
-        this.bcifFetchUrl = bcifFetchUrl;
+    public URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {
+        try {
+            return new URL(String.format(bcifFetchUrl, structureIdentifier.getPdbId().toLowerCase()));
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
-    /**
-     * Acquire input stream of 'some' structure file. Priority are: 1. 'data-source' 2. 'root-path', and lastly fetched
-     * from 'bcif-fetch-url'.
-     * @param structureIdentifier the structure to load
-     * @return structure data
-     */
-    public InputStream getInputStream(StructureIdentifier structureIdentifier) {
-        try {
-            Path dataSourcePath = Paths.get(dataSource).resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
-            return Files.newInputStream(dataSourcePath);
-        } catch (IOException e1) {
-            try {
-                Path renumberedPath = getRenumberedStructurePath().resolve(structureIdentifier.getPdbId() + ".bcif.gz");
-                return Files.newInputStream(renumberedPath);
-            } catch (IOException e2) {
-                try {
-                    return new URL(String.format(bcifFetchUrl, structureIdentifier.getPdbId())).openStream();
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
-        }
+    public void setBcifFetchUrl(String bcifFetchUrl) {
+        this.bcifFetchUrl = bcifFetchUrl;
     }
 
     public Path getRenumberedStructurePath() {
         return Paths.get(rootPath).resolve("renumbered");
     }
 
-    public InputStream getRenumberedInputStream(StructureIdentifier structureIdentifier) {
-        try {
-            return Files.newInputStream(getRenumberedStructurePath().resolve(structureIdentifier.getPdbId() + ".bcif.gz"));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    public Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {
+        return getRenumberedStructurePath().resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
     }
 
     public double getSquaredDistanceCutoff() {

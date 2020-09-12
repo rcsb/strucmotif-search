@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.core;
 
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
@@ -13,7 +14,7 @@ import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.rcsb.strucmotif.io.read.SelectionReader;
+import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +36,16 @@ import java.util.stream.Collectors;
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
     private final InvertedIndex invertedIndex;
-    private final SelectionReader selectionReader;
+    private final StructureReader structureReader;
     private final ThreadPool threadPool;
+    private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public TargetAssemblerImpl(InvertedIndex invertedIndex, SelectionReader selectionReader, ThreadPool threadPool) {
+    public TargetAssemblerImpl(InvertedIndex invertedIndex, StructureReader structureReader, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
         this.invertedIndex = invertedIndex;
-        this.selectionReader = selectionReader;
+        this.structureReader = structureReader;
         this.threadPool = threadPool;
+        this.motifSearchConfig = motifSearchConfig;
     }
 
     @Override
@@ -107,7 +110,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // first generation: all the paths are valid
             response.setTargetStructures(data.entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), selectionReader))));
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), structureReader, motifSearchConfig))));
         } else {
             // subsequent generations
             int pathGeneration = response.incrementAndGetPathGeneration();

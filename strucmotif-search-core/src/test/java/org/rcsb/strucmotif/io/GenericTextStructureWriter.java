@@ -53,11 +53,7 @@ public class GenericTextStructureWriter {
                     idBuilder.add(++counter);
                     typeSymbolBuilder.add(atom.getAtomIdentifier().getLabelAtomId().substring(0, 1));
                     labelAtomIdBuilder.add(atom.getAtomIdentifier().getLabelAtomId());
-                    if (atom.getAtomIdentifier().isAlternativeLocation()) {
-                        labelAltIdBuilder.add(atom.getAtomIdentifier().getLabelAltId());
-                    } else {
-                        labelAltIdBuilder.markNextNotPresent();
-                    }
+                    labelAltIdBuilder.markNextNotPresent();
                     labelCompIdBuilder.add(threeLetterCode);
                     labelAsymIdBuilder.add(asymId);
                     labelEntityIdBuilder.add(entityId);

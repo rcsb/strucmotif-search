@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -15,10 +14,8 @@ import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
-import org.rcsb.strucmotif.io.read.RenumberedReader;
-import org.rcsb.strucmotif.io.read.RenumberedReaderImpl;
+import org.rcsb.strucmotif.io.read.StructureReader;
+import org.rcsb.strucmotif.io.read.StructureReaderImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -28,19 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.*;
 
 public class ResidueGraphTest {
-    private AllPurposeReader allPurposeReader;
-    private RenumberedReader renumberedReader;
+    private StructureReader structureReader;
 
     @BeforeEach
     public void init() {
-        allPurposeReader = new AllPurposeReaderImpl();
-        MotifSearchConfig config = new MotifSearchConfig();
-        renumberedReader = new RenumberedReaderImpl(config);
+        structureReader = new StructureReaderImpl();
     }
 
     @Test
-    public void whenProcessing3vvk_then6Valid() {
-        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("3vvk"));
+    public void whenReadingRenumbered3vvk_then6Valid() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
         LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
@@ -63,8 +57,8 @@ public class ResidueGraphTest {
     }
 
     @Test
-    public void whenProcessing1dsd_then8ValidInChainC() {
-        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1dsd"));
+    public void whenReadingRenumbered1dsd_then8ValidInChainC() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
         IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
         LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
@@ -90,8 +84,8 @@ public class ResidueGraphTest {
     }
 
     @Test
-    public void whenAllPurposeReaderProcesses200l_thenCountsMatch() {
-        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("200l"));
+    public void whenReadingOriginal200l_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(5939, residueGraph.residuePairOccurrencesParallel()
@@ -111,8 +105,8 @@ public class ResidueGraphTest {
     }
 
     @Test
-    public void whenAllPurposeReaderProcessesStructureWithAssemblies_thenCountsMatch() {
-        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1acj"));
+    public void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(25230, residueGraph.residuePairOccurrencesParallel()
@@ -132,8 +126,8 @@ public class ResidueGraphTest {
     }
 
     @Test
-    public void whenRenumberedReaderProcesses200l_thenCountsMatch() {
-        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("200l"));
+    public void whenReadingRenumbered200l_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(5947,  residueGraph.residuePairOccurrencesParallel()
@@ -153,8 +147,8 @@ public class ResidueGraphTest {
     }
 
     @Test
-    public void whenRenumberedReaderProcessesStructureWithAssemblies_thenCountsMatch() {
-        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("1acj"));
+    public void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 
         assertEquals(25196, residueGraph.residuePairOccurrencesParallel()
@@ -181,7 +175,7 @@ public class ResidueGraphTest {
 
     @Test
     public void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
-        Structure structure = renumberedReader.readFromInputStream(getRenumberedBcif("4ob8"));
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
         List<ResiduePairDescriptor> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toList());
         ResidueGraph residueGraph = new ResidueGraph(structure, 400);
 

@@ -20,6 +20,7 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +39,7 @@ import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.multiply4d;
 
+@Service
 public class StructureReaderImpl implements StructureReader {
     @Override
     public Structure readFromInputStream(InputStream inputStream, Collection<? extends ResidueSelection> selection) {

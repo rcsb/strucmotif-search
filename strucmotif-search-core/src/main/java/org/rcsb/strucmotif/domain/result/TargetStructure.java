@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.result;
 
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -10,10 +11,12 @@ import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.SelectionReader;
+import org.rcsb.strucmotif.io.read.StructureReader;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -28,21 +31,23 @@ import java.util.stream.Stream;
  * omits stale paths as greedily as possible. Realized with help of a {@link org.rcsb.strucmotif.core.TargetAssembler}.
  * For efficiency, one target structures handles all potential paths in a structure.
  * <p>
- * The constructor and {@link TargetStructure#consume(ResiduePairIdentifier[], Overlap[])} iteratively builds up paths until
- * all paths are either ruled out or sufficient resemblance of the query motif is observed.
+ * The constructor and {@link TargetStructure#consume(ResiduePairIdentifier[], Overlap[])} iteratively builds up paths
+ * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
-    private final SelectionReader selectionReader;
+    private final StructureReader structureReader;
+    private final MotifSearchConfig motifSearchConfig;
     private final StructureIdentifier structureIdentifier;
 
     /*
-    We use some non-final fields to achieve the lazy behavior and probably a rather easy implementation. Tread lightly.
+    We use some non-final fields to achieve the lazy behavior. Tread lightly.
      */
     private List<ResiduePairIdentifier[]> paths;
     private SelectionResolver<LabelSelection> labelSelectionResolver;
 
-    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, SelectionReader selectionReader) {
-        this.selectionReader = selectionReader;
+    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, StructureReader structureReader, MotifSearchConfig motifSearchConfig) {
+        this.structureReader = structureReader;
+        this.motifSearchConfig = motifSearchConfig;
         this.structureIdentifier = structureIdentifier;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
@@ -73,8 +78,8 @@ public class TargetStructure {
     }
 
     /**
-     * Consumes a new 'generation' of residue pair identifiers which potentially resemble valid extensions to the registered
-     * paths.
+     * Consumes a new 'generation' of residue pair identifiers which potentially resemble valid extensions to the
+     * registered paths.
      * @param residuePairIdentifiers all words returned for particular residue pair descriptor
      * @param overlapProfile query motif overlap profile - needed to ensure compatibility
      * @return true if this target still contains at least one valid path
@@ -98,7 +103,8 @@ public class TargetStructure {
                     }
                 }
 
-                // if loop didn't break: residuePairIdentifier is valid extension of this path: propagate the
+                // if loop didn't break: residuePairIdentifier is valid extension of this path: propagate to next
+                // generation
                 ResiduePairIdentifier[] extendedPath = Arrays.copyOf(path, path.length + 1);
                 extendedPath[path.length] = candidateResiduePairIdentifier;
                 extendedPaths.add(extendedPath);
@@ -112,32 +118,32 @@ public class TargetStructure {
 
     /**
      * Traverses all paths of this structure. A path is ordered collection of residues - they are provided in an order
-     * that matches the query motif. This ensures a 1-to-1 mapping to the query. Implicitly, this causes the structure
-     * to be parsed - no judgies ;) Also, this method is supposed to be called once and results to be consumed by the
-     * stream paradigm.
+     * that matches the query motif. This ensures a bidirectional mapping between query and potential hit. Implicitly,
+     * this causes the structure to be parsed. Also, this method is supposed to be called once and results to be
+     * consumed directly.
      * @return a stream of lists containing residues (in correspondence with the query)
      */
     public Stream<List<Residue>> paths() {
         // determine selectors applicable during parsing
-        Set<IndexSelection> indexSelectors = paths.stream()
-                .flatMap(Arrays::stream)
-                .flatMap(residuePairIdentifier -> Stream.of(residuePairIdentifier.getIndexSelection1(), residuePairIdentifier.getIndexSelection2()))
-                .collect(Collectors.toSet());
+        Set<IndexSelection> indexSelections = new HashSet<>();
+        // while traversing
+        for (ResiduePairIdentifier[] path : paths) {
+            for (ResiduePairIdentifier step : path) {
+                indexSelections.add(step.getIndexSelection1());
+                indexSelections.add(step.getIndexSelection2());
+            }
+        }
 
         try {
-            Structure structure = selectionReader.readById(structureIdentifier, indexSelectors);
+            InputStream inputStream = motifSearchConfig.getRenumberedInputStream(structureIdentifier);
+            Structure structure = structureReader.readFromInputStream(inputStream, indexSelections);
             SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 
             return paths.stream()
-                    // map each path to an ordered collection of index selectors
-                    .map(residuePairIdentifiers -> Arrays.stream(residuePairIdentifiers)
-                            .flatMap(residuePairIdentifier -> Stream.of(residuePairIdentifier.getIndexSelection1(), residuePairIdentifier.getIndexSelection2()))
-                            .distinct()
-                            .collect(Collectors.toList()))
-                    // for each set of identifiers: select them
+                    .map(this::mapToIndexSelection)
+                    // select each path
                     .map(path -> path.stream()
-                            // this can be null (theoretically) - change in selection changes behavior: now no exception
                             .map(indexSelectionResolver::resolve)
                             .collect(Collectors.toList()));
         } catch (Exception e) {
@@ -145,5 +151,12 @@ public class TargetStructure {
             // this is caused by entries that were removed from the archive but can be fixed by removing old entries from archive/index/componentDB
             return Stream.empty();
         }
+    }
+
+    private List<IndexSelection> mapToIndexSelection(ResiduePairIdentifier[] identifiers) {
+        return Arrays.stream(identifiers)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

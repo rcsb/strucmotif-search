@@ -4,6 +4,7 @@ import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Residue pair identifiers combine the {@link IndexSelection} of each residue making up this pair.
@@ -39,6 +40,10 @@ public class ResiduePairIdentifier {
 
     public LabelSelection getLabelSelection2() {
         return labelSelection2;
+    }
+
+    public Stream<IndexSelection> indexSelections() {
+        return Stream.of(indexSelection1, indexSelection2);
     }
 
     public boolean providesLabelSelection() {

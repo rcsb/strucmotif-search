@@ -8,8 +8,8 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
+import org.rcsb.strucmotif.io.read.StructureReader;
+import org.rcsb.strucmotif.io.read.StructureReaderImpl;
 
 import java.util.List;
 import java.util.Set;
@@ -19,19 +19,19 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
 public class MotifPrunerImplTest {
-    private AllPurposeReader allPurposeReader;
+    private StructureReader structureReader;
     private MotifPruner motifPruner;
 
     @BeforeEach
     public void init() {
-        allPurposeReader = new AllPurposeReaderImpl();
+        structureReader = new StructureReaderImpl();
         MotifSearchConfig config = new MotifSearchConfig();
         motifPruner = new MotifPrunerImpl(config);
     }
 
     @Test
     public void whenHds_thenPerformNoOperation() {
-        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("4cha"),
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"),
                 Set.of(new LabelSelection("B", 1, 42), // H
                         new LabelSelection("B", 1, 87), // D
                         new LabelSelection("C", 1, 47)));
@@ -48,7 +48,7 @@ public class MotifPrunerImplTest {
 
     @Test
     public void whenEqir_thenPruneOnePairing() {
-        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("1ec6"),
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1ec6"),
                 Set.of(new LabelSelection("D", 1, 11), // E, D14
                         new LabelSelection("D", 1, 37), // Q, D40
                         new LabelSelection("D", 1, 38), // I, D41

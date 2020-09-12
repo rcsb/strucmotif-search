@@ -12,8 +12,8 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
-import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.AllPurposeReaderImpl;
+import org.rcsb.strucmotif.io.read.StructureReader;
+import org.rcsb.strucmotif.io.read.StructureReaderImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -25,13 +25,13 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 import static org.rcsb.strucmotif.domain.Matrix4DTransformation.IDENTITY_MATRIX_4D;
 
 public class QuaternionAlignmentTest {
-    private AlignmentService alignment;
-    private AllPurposeReader allPurposeReader;
+    private AlignmentService alignmentService;
+    private StructureReader structureReader;
 
     @BeforeEach
     public void init() {
-        alignment = new QuaternionAlignmentService();
-        allPurposeReader = new AllPurposeReaderImpl();
+        alignmentService = new QuaternionAlignmentService();
+        structureReader = new StructureReaderImpl();
     }
 
     private static int seqId = 1;
@@ -64,7 +64,7 @@ public class QuaternionAlignmentTest {
                 create("SER", new double[] { -15.029, -11.037, 18.902 }),
                 create("PHE", new double[] { -18.577, -10.001, 17.996 }));
 
-        AlignmentResult alignmentResult = alignment.align(container1, container2, AtomPairingScheme.ALL);
+        AlignmentResult alignmentResult = alignmentService.align(container1, container2, AtomPairingScheme.ALL);
 
         assertEquals(0.719106, alignmentResult.getScore().doubleValue(), Helpers.DELTA);
     }
@@ -75,7 +75,7 @@ public class QuaternionAlignmentTest {
                 create("ASP", new double[] { 9.429, 7.479, 48.266 }),
                 create("SER", new double[] { 5.547, 0.158, 42.050 }));
 
-        AlignmentResult alignment11 = alignment.align(container1, container1, AtomPairingScheme.ALL);
+        AlignmentResult alignment11 = alignmentService.align(container1, container1, AtomPairingScheme.ALL);
 
         double rmsd11 = alignment11.getScore().doubleValue();
         double[] transformation11 = flatten(alignment11.getTransformation().getTransformation());
@@ -95,7 +95,7 @@ public class QuaternionAlignmentTest {
                 create("ASP", new double[] { 4.588, 6.531, -9.119 }),
                 create("SER", new double[] { 12.080, 12.645, -7.073 }));
 
-        AlignmentResult alignment12 = alignment.align(container1, container2, AtomPairingScheme.ALL);
+        AlignmentResult alignment12 = alignmentService.align(container1, container2, AtomPairingScheme.ALL);
 
         double rmsd12 = alignment12.getScore().doubleValue();
         double[] transformation12 = flatten(alignment12.getTransformation().getTransformation());
@@ -115,7 +115,7 @@ public class QuaternionAlignmentTest {
                 create("ASP", new double[] { 7.321, 76.962, 20.326 }),
                 create("SER", new double[] { 6.020, 74.873, 17.386 }));
 
-        AlignmentResult alignment34 = alignment.align(container3, container4, AtomPairingScheme.ALL);
+        AlignmentResult alignment34 = alignmentService.align(container3, container4, AtomPairingScheme.ALL);
 
         double rmsd34 = alignment34.getScore().doubleValue();
         double[] transformation34 = flatten(alignment34.getTransformation().getTransformation());
@@ -128,13 +128,13 @@ public class QuaternionAlignmentTest {
 
     @Test
     public void whenAminopeptidaseExample_thenRmsdMatches() {
-        Structure structure1 = allPurposeReader.readFromInputStream(getOriginalBcif("1lap"),
+        Structure structure1 = structureReader.readFromInputStream(getOriginalBcif("1lap"),
                 List.of(new LabelSelection("A", 1, 250),
                         new LabelSelection("A", 1, 255),
                         new LabelSelection("A", 1, 273),
                         new LabelSelection("A", 1, 332),
                         new LabelSelection("A", 1, 334)));
-        Structure structure2 = allPurposeReader.readFromInputStream(getOriginalBcif("3pei"),
+        Structure structure2 = structureReader.readFromInputStream(getOriginalBcif("3pei"),
                 List.of(new LabelSelection("A", 1, 251),
                         new LabelSelection("A", 1, 256),
                         new LabelSelection("A", 1, 274),
@@ -144,7 +144,7 @@ public class QuaternionAlignmentTest {
         List<Residue> residues1 = structure1.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList());
         List<Residue> residues2 = structure2.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList());
 
-        AlignmentResult result = alignment.align(residues1, residues2, AtomPairingScheme.ALL);
+        AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
         assertEquals(2.211, result.getScore().doubleValue(), Helpers.DELTA);
     }
 

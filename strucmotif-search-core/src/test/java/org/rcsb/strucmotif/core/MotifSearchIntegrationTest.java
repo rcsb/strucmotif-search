@@ -12,11 +12,8 @@ import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.AllPurposeReader;
-import org.rcsb.strucmotif.io.read.SelectionReader;
-import org.rcsb.strucmotif.io.read.SelectionReaderImpl;
+import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
-import org.rcsb.strucmotif.persistence.StructureRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -33,7 +30,7 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 @SpringBootTest
 public class MotifSearchIntegrationTest {
     @Autowired
-    private AllPurposeReader allPurposeReader;
+    private StructureReader structureReader;
     @Autowired
     private MotifPruner motifPruner;
     @Autowired
@@ -52,10 +49,9 @@ public class MotifSearchIntegrationTest {
         when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
         when(structureRepository.select(any(), any())).thenAnswer(Helpers::mockStructureRepositorySelect);
 
-        SelectionReader selectionReader = new SelectionReaderImpl(structureRepository);
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, selectionReader, threadPool);
+        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, structureReader, threadPool, motifSearchConfig);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
-        this.queryBuilder = new QueryBuilder(allPurposeReader, motifPruner, motifSearchRuntime, motifSearchConfig);
+        this.queryBuilder = new QueryBuilder(structureReader, motifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
     /**
@@ -64,7 +60,7 @@ public class MotifSearchIntegrationTest {
      */
     @Test
     public void whenSearchingForEnolaseSuperfamily_thenFindExchanges() {
-        Structure structure = allPurposeReader.readFromInputStream(getOriginalBcif("2mnr"),
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"),
                 Set.of(new LabelSelection("A", 1, 162), // K
                         new LabelSelection("A", 1, 193), // D
                         new LabelSelection("A", 1, 219), // E

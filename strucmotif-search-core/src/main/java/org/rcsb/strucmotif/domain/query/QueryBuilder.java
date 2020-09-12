@@ -9,7 +9,7 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.AllPurposeReader;
+import org.rcsb.strucmotif.io.read.StructureReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,14 +26,14 @@ import java.util.Set;
  */
 @Service
 public class QueryBuilder {
-    private final AllPurposeReader allPurposeReader;
+    private final StructureReader structureReader;
     private final MotifPruner motifPruner;
     private final MotifSearchRuntime motifSearchRuntime;
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public QueryBuilder(AllPurposeReader allPurposeReader, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
-        this.allPurposeReader = allPurposeReader;
+    public QueryBuilder(StructureReader structureReader, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
+        this.structureReader = structureReader;
         this.motifPruner = motifPruner;
         this.motifSearchRuntime = motifSearchRuntime;
         this.motifSearchConfig = motifSearchConfig;
@@ -46,7 +46,8 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, Collection<LabelSelection> selection) {
-        Structure structure = allPurposeReader.readById(new StructureIdentifier(pdbId), selection);
+        InputStream inputStream = motifSearchConfig.getInputStream(new StructureIdentifier(pdbId));
+        Structure structure = structureReader.readFromInputStream(inputStream, selection);
         return defineByStructure(structure);
     }
 
@@ -57,7 +58,7 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, Collection<LabelSelection> selection) {
-        Structure structure = allPurposeReader.readFromInputStream(inputStream, selection);
+        Structure structure = structureReader.readFromInputStream(inputStream, selection);
         return defineByStructure(structure);
     }
 
@@ -88,7 +89,7 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByFile(InputStream inputStream) {
-        Structure structure = allPurposeReader.readFromInputStream(inputStream);
+        Structure structure = structureReader.readFromInputStream(inputStream);
         return defineByStructure(structure);
     }
 

@@ -21,7 +21,7 @@ public class Chain {
      * will require time when the residues are accessed for the first time.
      * @param chainIdentifier its identifier
      * @param residues all residues present in this chain
-     * @param transformation the transformation: neutral to do 'nothing'
+     * @param transformation the transformation: <code>null</code> to do 'nothing'
      */
     Chain(ChainIdentifier chainIdentifier, List<Residue> residues, double[][] transformation) {
         this.chainIdentifier = chainIdentifier;
@@ -42,8 +42,8 @@ public class Chain {
     }
 
     /**
-     * Be lazy: this allows to create chains without instantly transformation all atoms - will be transformed and
-     * instantiated for every access
+     * Be lazy: this allows to create chains without instantly transforming all atoms - will be transformed and
+     * instantiated upon first every access - not thread-safe
      * @return residues in this chain
      */
     public List<Residue> getResidues() {

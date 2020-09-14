@@ -58,7 +58,7 @@ public class ToleranceBenchmark {
     }
 
     private MotifSearchResult run(Motifs motif, int tolerance, MyState state) {
-        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructure(motif.getStructure())
+        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByPdbIdAndSelection(motif.getStructureIdentifier().getPdbId(), motif.getSelection())
                 .backboneDistanceTolerance(tolerance)
                 .sideChainDistanceTolerance(tolerance)
                 .angleTolerance(tolerance)

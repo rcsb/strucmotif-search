@@ -57,7 +57,7 @@ public class MotifSearchBenchmark {
     }
 
     private MotifSearchResult run(Motifs motif, MyState state) {
-        return state.queryBuilder.defineByStructure(motif.getStructure())
+        return state.queryBuilder.defineByPdbIdAndSelection(motif.getStructureIdentifier().getPdbId(), motif.getSelection())
                 .buildParameters()
                 .buildQuery()
                 .run();

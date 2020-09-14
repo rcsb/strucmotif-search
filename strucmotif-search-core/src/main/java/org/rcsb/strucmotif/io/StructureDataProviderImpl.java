@@ -64,7 +64,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                     })
                     .collect(Collectors.toMap(Function.identity(), this::loadIntoByteArray));
         } else {
-            logger.info("Configured to load structure data ad hoc from file-system");
+            logger.info("Configured to load structure data ad hoc from {}", motifSearchConfig.getDataSourcePath());
             cache = null;
         }
 

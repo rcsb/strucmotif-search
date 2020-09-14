@@ -35,7 +35,7 @@ public class Helpers {
     public static final double DELTA = 0.001;
 
     @SuppressWarnings("unchecked")
-    public static Structure mockStructureRepositorySelect(InvocationOnMock invocation) {
+    public static Structure mockStructureDataProviderReadRenumbered(InvocationOnMock invocation) {
         StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
         Collection<IndexSelection> selection = (Collection<IndexSelection>) invocation.getArgument(1, Collection.class);
 

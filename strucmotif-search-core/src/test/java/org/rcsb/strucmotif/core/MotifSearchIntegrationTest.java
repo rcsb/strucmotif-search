@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +47,12 @@ public class MotifSearchIntegrationTest {
         // TODO better way?
         InvertedIndex invertedIndex = Mockito.mock(InvertedIndex.class);
         when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
+        StructureDataProvider structureDataProvider = Mockito.spy(StructureDataProvider.class);
+        when(structureDataProvider.readRenumbered(any(), any())).thenAnswer(Helpers::mockStructureDataProviderReadRenumbered);
 
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, structureReader, threadPool, motifSearchConfig);
+        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, structureDataProvider, threadPool);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
-        this.queryBuilder = new QueryBuilder(structureReader, motifPruner, motifSearchRuntime, motifSearchConfig);
+        this.queryBuilder = new QueryBuilder(structureDataProvider, motifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
     /**

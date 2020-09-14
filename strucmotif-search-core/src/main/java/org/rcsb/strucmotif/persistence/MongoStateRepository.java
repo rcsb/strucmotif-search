@@ -27,7 +27,7 @@ public class MongoStateRepository implements StateRepository {
     // all 'healthy' structures that can appear as search results
     private static final String STRUCTURES_KEY = "structures";
     // all structures registered in the inverted index (this should be equal to 'structures')
-    private static final String INVERTED_INDEX_KEY = "index";
+    private static final String DIRTY_KEY = "dirty";
     private final MongoCollection<DBObject> state;
 
     @Autowired
@@ -36,7 +36,7 @@ public class MongoStateRepository implements StateRepository {
         state = database.getCollection("state", DBObject.class);
 
         // ensure collections exists - otherwise multiple threads might cause 'duplicate key
-        Stream.of(KNOWN_KEY, STRUCTURES_KEY, INVERTED_INDEX_KEY).forEach(key -> {
+        Stream.of(KNOWN_KEY, STRUCTURES_KEY, DIRTY_KEY).forEach(key -> {
             Bson filter = eq("_id", key);
             if (state.countDocuments(filter) == 0) {
                 DBObject update = new BasicDBObjectBuilder()
@@ -59,8 +59,8 @@ public class MongoStateRepository implements StateRepository {
     }
 
     @Override
-    public Collection<StructureIdentifier> selectIndexed() {
-        return select(INVERTED_INDEX_KEY);
+    public Collection<StructureIdentifier> selectDirty() {
+        return select(DIRTY_KEY);
     }
 
     private Collection<StructureIdentifier> select(String key) {
@@ -86,8 +86,8 @@ public class MongoStateRepository implements StateRepository {
     }
 
     @Override
-    public void insertIndexed(Collection<StructureIdentifier> additions) {
-        insert(additions, INVERTED_INDEX_KEY);
+    public void insertDirty(Collection<StructureIdentifier> additions) {
+        insert(additions, DIRTY_KEY);
     }
 
     private void insert(Collection<StructureIdentifier> additions, String key) {
@@ -110,8 +110,8 @@ public class MongoStateRepository implements StateRepository {
     }
 
     @Override
-    public void deleteIndexed(Collection<StructureIdentifier> removals) {
-        delete(removals, INVERTED_INDEX_KEY);
+    public void deleteDirty(Collection<StructureIdentifier> removals) {
+        delete(removals, DIRTY_KEY);
     }
 
     private void delete(Collection<StructureIdentifier> removals, String key) {

@@ -203,4 +203,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     public void writeRenumbered(StructureIdentifier structureIdentifier, MmCifFile mmCifFile) {
         renumberedStructureWriter.write(mmCifFile, getRenumberedStructurePath(structureIdentifier));
     }
+
+    @Override
+    public void removeRenumbered(StructureIdentifier structureIdentifier) {
+        try {
+            Files.delete(getRenumberedStructurePath(structureIdentifier));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 }

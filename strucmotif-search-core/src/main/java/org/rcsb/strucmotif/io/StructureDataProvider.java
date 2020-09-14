@@ -73,4 +73,6 @@ public interface StructureDataProvider {
      * @param mmCifFile the data source
      */
     void writeRenumbered(StructureIdentifier structureIdentifier, MmCifFile mmCifFile);
+
+    void removeRenumbered(StructureIdentifier structureIdentifier);
 }

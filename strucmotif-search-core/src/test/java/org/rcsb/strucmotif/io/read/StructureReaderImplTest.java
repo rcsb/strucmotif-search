@@ -166,10 +166,10 @@ public class StructureReaderImplTest {
     }
 
     @Test
-    public void whenNoModel1InOriginalFile_thenReturnNoChains() {
+    public void whenNoModel1InOriginalFile_thenIgnoreModelInfoAndReturnChains() {
         // multiple NMR models distributed over multiple structures - file will start with model nr 18
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1ezc"));
-        assertEquals(0, chainCount(structure));
+        assertEquals(1, chainCount(structure));
     }
 
     @Test
@@ -184,18 +184,18 @@ public class StructureReaderImplTest {
     public void whenProcessing4chaInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"));
 
-        assertEquals(6, chainCount(structure));
-        assertEquals(477, residueCount(structure));
-        assertEquals(3506, atomCount(structure));
+        assertEquals(11, chainCount(structure));
+        assertEquals(482, residueCount(structure));
+        assertEquals(3511, atomCount(structure));
     }
 
     @Test
     public void whenDuplicatedChainsAndIdentityOperationsInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("3uud"));
 
-        assertEquals(4, chainCount(structure));
-        assertEquals(499, residueCount(structure));
-        assertEquals(4013, atomCount(structure));
+        assertEquals(14, chainCount(structure));
+        assertEquals(509, residueCount(structure));
+        assertEquals(3980, atomCount(structure));
     }
 
     @Test
@@ -209,8 +209,8 @@ public class StructureReaderImplTest {
                 .filter(c -> c.getResidueIdentifier().getLabelSeqId() == 249)
                 .findFirst()
                 .orElseThrow();
-        // should report all atoms in all altlocs
-        assertEquals(15, residue.getAtoms().size());
+        // should report all unique atom names
+        assertEquals(7, residue.getAtoms().size());
         // should report OD only present in hetatm
         assertTrue(residue.getAtoms().stream().anyMatch(atom -> atom.getAtomIdentifier().getLabelAtomId().equals("OD")));
     }
@@ -219,18 +219,18 @@ public class StructureReaderImplTest {
     public void whenProcessing1exrInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1exr"));
 
-        assertEquals(1, chainCount(structure));
-        assertEquals(146, residueCount(structure));
-        assertEquals(1467, atomCount(structure));
+        assertEquals(7, chainCount(structure));
+        assertEquals(152, residueCount(structure));
+        assertEquals(1156, atomCount(structure));
     }
 
     @Test
     public void whenProcessingStructureWithSymmetryInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
 
-        assertEquals(2, chainCount(structure));
-        assertEquals(1056, residueCount(structure));
-        assertEquals(8190, atomCount(structure));
+        assertEquals(6, chainCount(structure));
+        assertEquals(1060, residueCount(structure));
+        assertEquals(8222, atomCount(structure));
     }
 
     @Test

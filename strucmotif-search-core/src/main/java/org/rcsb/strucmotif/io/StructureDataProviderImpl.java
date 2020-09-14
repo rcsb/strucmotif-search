@@ -137,18 +137,14 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     private InputStream getRenumberedInputStream(StructureIdentifier structureIdentifier) {
-        try {
-            if (keepStructuresInMemory) {
-                byte[] bytes = cache.get(structureIdentifier);
-                if (bytes == null) {
-                    throw new IOException("No in-memory structure data for " + structureIdentifier.getPdbId());
-                }
-                return new ByteArrayInputStream(bytes);
-            } else {
+        if (keepStructuresInMemory && cache.containsKey(structureIdentifier)) {
+            return new ByteArrayInputStream(cache.get(structureIdentifier));
+        } else {
+            try {
                 return Files.newInputStream(getRenumberedStructurePath(structureIdentifier));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
     }
 

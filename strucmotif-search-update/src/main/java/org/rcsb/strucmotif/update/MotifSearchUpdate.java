@@ -1,7 +1,17 @@
 package org.rcsb.strucmotif.update;
 
 import com.google.gson.Gson;
+import org.rcsb.cif.CifIO;
+import org.rcsb.cif.schema.StandardSchemata;
+import org.rcsb.cif.schema.mm.MmCifFile;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +27,18 @@ import org.springframework.context.annotation.ComponentScan;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
@@ -34,45 +52,217 @@ public class MotifSearchUpdate implements CommandLineRunner {
         SpringApplication.run(MotifSearchUpdate.class, args);
     }
 
+    private final StateRepository stateRepository;
+    private final StructureDataProvider structureDataProvider;
+    private final InvertedIndex invertedIndex;
+    private final MotifSearchConfig motifSearchConfig;
+
+    @Autowired
+    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig) {
+        this.stateRepository = stateRepository;
+        this.structureDataProvider = structureDataProvider;
+        this.invertedIndex = invertedIndex;
+        this.motifSearchConfig = motifSearchConfig;
+    }
+
     public void run(String[] args) throws IOException {
-        if (args.length < 2) {
+        if (args.length < 1) {
             System.out.println("Too few arguments");
-            System.out.println("Usage: java -Xmx12G -jar update.jar context operation ...");
-            System.out.println("Valid context values: " + Arrays.toString(Context.values()));
+            System.out.println("Usage: java -Xmx12G -jar update.jar operation ...");
             System.out.println("Valid operation values: " + Arrays.toString(Operation.values()));
             System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
             System.out.println("If you want to update entries you have to explicitly remove them first");
-            System.out.println("Example: java -Xmx12G -jar update.jar BCIF ADD 1acj 1exr 4hhb");
+            System.out.println("Example: java -Xmx12G -jar update.jar ADD 1acj 1exr 4hhb");
             return;
         }
 
-        Context context = Context.resolve(args[0]);
-        Operation operation = Operation.resolve(args[1]);
-        String[] ids = new String[args.length - 2];
-        Collection<StructureIdentifier> identifiers;
-        System.arraycopy(args, 2, ids, 0, ids.length);
+        // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
+        Operation operation = Operation.resolve(args[0]);
+        String[] ids = new String[args.length - 1];
+        Collection<StructureIdentifier> requested;
+        System.arraycopy(args, 1, ids, 0, ids.length);
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
-            identifiers = getAllIdentifiers();
+            requested = getAllIdentifiers();
         } else {
-            identifiers = Arrays.stream(ids).map(StructureIdentifier::new).collect(Collectors.toSet());
+            requested = Arrays.stream(ids).map(StructureIdentifier::new).collect(Collectors.toSet());
         }
 
-        logger.info("Starting update - Context: {}, Operation: {}, {} ids ({})",
-                context,
+        // check for sanity of internal state
+        Collection<StructureIdentifier> dirtyStructureIdentifiers = stateRepository.selectDirty();
+        if (dirtyStructureIdentifiers.size() > 0) {
+            logger.warn("Update state is dirty - problematic identifiers:\n{}",
+                    dirtyStructureIdentifiers);
+            logger.warn("This requires manual intervention - perform 'RECOVER' operation and rerun update");
+            throw new IllegalStateException("Update state is dirty - problematic identifiers:\n" + dirtyStructureIdentifiers);
+        }
+
+        logger.info("Starting update - Operation: {}, {} ids ({})",
                 operation,
-                identifiers.size(),
-                identifiers.stream()
+                requested.size(),
+                requested.stream()
                         .limit(5)
                         .map(id -> "\"" + id.getPdbId() + "\"")
-                        .collect(Collectors.joining(", ", "[", "]")));
+                        .collect(Collectors.joining(", ",
+                                "[",
+                                requested.size() > 5 ? ", ...]" : "]")));
 
         switch (operation) {
             case ADD:
-                handleAddOperation(context, identifiers);
+                add(getDeltaPlusIdentifiers(requested));
                 break;
             case REMOVE:
-                handleDeleteOperation(context, identifiers);
+                remove(getDeltaMinusIdentifiers(requested));
                 break;
+            case RECOVER:
+                remove(stateRepository.selectDirty());
+                break;
+        }
+
+        logger.info("Finished update operation");
+    }
+
+    private void add(Collection<StructureIdentifier> identifiers) {
+        long target = identifiers.size();
+        logger.info("{} files to process in total", target);
+
+        Partition<StructureIdentifier> partitions = new Partition<>(identifiers, motifSearchConfig.getChunkSize());
+        logger.info("Formed {} partitions of {} structures",
+                partitions.size(),
+                motifSearchConfig.getChunkSize());
+
+        Context context = new Context();
+
+        // split into partitions and process
+        for (int i = 0; i < partitions.size(); i++) {
+            context.partitionContext = (i + 1) + " / " + partitions.size();
+
+            List<StructureIdentifier> partition = partitions.get(i);
+            logger.info("[{}] Start processing partition", context.partitionContext);
+            stateRepository.insertDirty(partition);
+
+            context.structureCounter = new AtomicInteger();
+            context.buffer = new ConcurrentHashMap<>();
+            partition.parallelStream().forEach(id -> handleStructureIdentifier(id, context));
+
+            persist(partition, context);
+        }
+    }
+
+    static class Context {
+        final Set<StructureIdentifier> processed;
+        String partitionContext;
+        Map<ResiduePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>>> buffer;
+        AtomicInteger structureCounter;
+
+        public Context() {
+            this.processed = Collections.synchronizedSet(new HashSet<>());
+        }
+    }
+
+    private void handleStructureIdentifier(StructureIdentifier structureIdentifier, Context context) {
+        int count = context.structureCounter.incrementAndGet();
+        String structureContext = count + " / " + motifSearchConfig.getChunkSize() + "] [" + structureIdentifier.getPdbId();
+
+        try {
+            // write renumbered structure
+            MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
+            structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
+        } catch (IOException e) {
+            throw new UncheckedIOException("cif parsing failed for " + structureIdentifier, e);
+        }
+
+        // fails when file is missing (should not happen) or does not contain valid polymer chain
+        Structure structure;
+        try {
+            structure = structureDataProvider.readRenumbered(structureIdentifier);
+        } catch (UncheckedIOException e) {
+            // can 'safely' happen when obsolete entry was dropped from bcif data but still lingers in list
+            logger.warn("[{}] [{}] Source file missing unexpectedly - obsolete entry?",
+                    context.partitionContext,
+                    structureContext,
+                    e);
+            return;
+        } catch (UnsupportedOperationException e) {
+            logger.warn("[{}] [{}] No valid polymer chains",
+                    context.partitionContext,
+                    structureContext);
+            return;
+        }
+
+        try {
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
+
+            // extract motifs
+            AtomicInteger structureMotifCounter = new AtomicInteger();
+            residueGraph.residuePairOccurrencesParallel()
+                    .forEach(motifOccurrence -> {
+                        ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
+                        ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
+
+                        Map<StructureIdentifier, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
+                        Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
+                        targetIdentifiers.add(targetIdentifier);
+                        structureMotifCounter.incrementAndGet();
+                    });
+            logger.info("[{}] [{}] Extracted {} residue pairs",
+                    context.partitionContext,
+                    structureContext,
+                    structureMotifCounter.get());
+            context.processed.add(structureIdentifier);
+        } catch (Exception e) {
+            logger.warn("[{}] [{}] Residue graph determination failed",
+                    context.partitionContext,
+                    structureContext,
+                    e);
+            // fail complete update
+            throw e;
+        }
+    }
+
+    private void persist(Collection<StructureIdentifier> requested, Context context) {
+        logger.info("[{}] Persisting {} unique residue pair descriptors",
+                context.partitionContext,
+                context.buffer.size());
+
+        final int bufferTotal = context.buffer.size();
+        AtomicInteger bufferCount = new AtomicInteger();
+        context.buffer.entrySet().parallelStream().forEach(entry -> {
+            ResiduePairDescriptor full = entry.getKey();
+            Map<StructureIdentifier, Collection<ResiduePairIdentifier>> output = entry.getValue();
+
+            if (bufferCount.incrementAndGet() % 100000 == 0) {
+                logger.info("[{}] {} / {}",
+                        context.partitionContext,
+                        bufferCount,
+                        bufferTotal);
+            }
+
+            invertedIndex.insert(full, output);
+
+            // writing takes additional heap - ease burden by dropping processed output bins
+            output.clear();
+        });
+        context.buffer.clear();
+
+        // requested is the user specified collection
+        stateRepository.insertKnown(requested);
+        // processed are those that resemble valid additions to the search space
+        stateRepository.insertSupported(context.processed);
+        stateRepository.deleteDirty(requested);
+        context.processed.clear();
+    }
+
+    private void remove(Collection<StructureIdentifier> identifiers) {
+        for (StructureIdentifier structureIdentifier : identifiers) {
+            logger.info("Removing information for entry: {}", structureIdentifier);
+            structureDataProvider.removeRenumbered(structureIdentifier);
+            invertedIndex.delete(structureIdentifier);
+
+            // update state
+            Set<StructureIdentifier> update = Set.of(structureIdentifier);
+            stateRepository.deleteKnown(update);
+            stateRepository.deleteSupported(update);
+            stateRepository.deleteDirty(update);
         }
     }
 
@@ -112,74 +302,13 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    private final StateRepository stateRepository;
-    private final AddStructuresToArchiveTask addStructuresToArchiveTask;
-    private final AddStructuresToInvertedIndexTask addStructuresToInvertedIndexTask;
-    private final AddStructuresToStructureRepositoryTask addStructuresToStructureRepositoryTask;
-    private final DeleteStructuresFromArchiveTask deleteStructuresFromArchiveTask;
-    private final DeleteStructuresFromInvertedIndexTask deleteStructuresFromInvertedIndexTask;
-    private final DeleteStructuresFromStructureRepositoryTask deleteStructuresFromStructureRepositoryTask;
-
-    @Autowired
-    public MotifSearchUpdate(StateRepository stateRepository, AddStructuresToArchiveTask addStructuresToArchiveTask, AddStructuresToInvertedIndexTask addStructuresToInvertedIndexTask, AddStructuresToStructureRepositoryTask addStructuresToStructureRepositoryTask, DeleteStructuresFromArchiveTask deleteStructuresFromArchiveTask, DeleteStructuresFromInvertedIndexTask deleteStructuresFromInvertedIndexTask, DeleteStructuresFromStructureRepositoryTask deleteStructuresFromStructureRepositoryTask) {
-        this.stateRepository = stateRepository;
-        this.addStructuresToArchiveTask = addStructuresToArchiveTask;
-        this.addStructuresToInvertedIndexTask = addStructuresToInvertedIndexTask;
-        this.addStructuresToStructureRepositoryTask = addStructuresToStructureRepositoryTask;
-        this.deleteStructuresFromArchiveTask = deleteStructuresFromArchiveTask;
-        this.deleteStructuresFromInvertedIndexTask = deleteStructuresFromInvertedIndexTask;
-        this.deleteStructuresFromStructureRepositoryTask = deleteStructuresFromStructureRepositoryTask;
-    }
-
-    public void handleAddOperation(Context context, Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = getKnownIdentifiers(context);
-        Collection<StructureIdentifier> delta = getDeltaPlusIdentifiers(requested, known);
-        switch (context) {
-            case BCIF:
-                addStructuresToArchiveTask.execute(delta);
-                break;
-            case STRUCTURES:
-                addStructuresToStructureRepositoryTask.execute(delta);
-                break;
-            case INDEX:
-                addStructuresToInvertedIndexTask.execute(delta);
-                break;
-            case ALL:
-                addStructuresToArchiveTask.execute(delta);
-                addStructuresToStructureRepositoryTask.execute(delta);
-                addStructuresToInvertedIndexTask.execute(delta);
-                break;
-        }
-    }
-
-    public void handleDeleteOperation(Context context, Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = getKnownIdentifiers(context);
-        Collection<StructureIdentifier> delta = getDeltaMinusIdentifiers(requested, known);
-        switch (context) {
-            case BCIF:
-                deleteStructuresFromArchiveTask.execute(delta);
-                break;
-            case STRUCTURES:
-                deleteStructuresFromStructureRepositoryTask.execute(delta);
-                break;
-            case INDEX:
-                deleteStructuresFromInvertedIndexTask.execute(delta);
-                break;
-            case ALL:
-                deleteStructuresFromArchiveTask.execute(delta);
-                deleteStructuresFromStructureRepositoryTask.execute(delta);
-                deleteStructuresFromInvertedIndexTask.execute(delta);
-                break;
-        }
-    }
-
     /**
      * Determine all IDs that need to be added to the archive.
      * @param requested the requested update
-     * @param known the registered identifiers
      * @return array of IDs that need to be processed for the given context
      */
-    public Collection<StructureIdentifier> getDeltaPlusIdentifiers(Collection<StructureIdentifier> requested, Collection<StructureIdentifier> known) {
+    public Collection<StructureIdentifier> getDeltaPlusIdentifiers(Collection<StructureIdentifier> requested) {
+        Collection<StructureIdentifier> known = stateRepository.selectKnown();
         if (known.isEmpty()) {
             logger.warn("No existing data - starting from scratch");
             return requested;
@@ -193,10 +322,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
     /**
      * Determine all IDs that need to be removed from the archive.
      * @param requested the requested update
-     * @param known the registered identifiers
      * @return array of IDs that need to be remove for the given context
      */
-    public Collection<StructureIdentifier> getDeltaMinusIdentifiers(Collection<StructureIdentifier> requested, Collection<StructureIdentifier> known) {
+    public Collection<StructureIdentifier> getDeltaMinusIdentifiers(Collection<StructureIdentifier> requested) {
+        Collection<StructureIdentifier> known = stateRepository.selectKnown();
         if (known.isEmpty()) {
             logger.warn("No existing data - no need for cleanup of obsolete entries");
             return Collections.emptySet();
@@ -204,18 +333,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
             return known.stream()
                     .filter(requested::contains)
                     .collect(Collectors.toSet());
-        }
-    }
-
-    public Collection<StructureIdentifier> getKnownIdentifiers(Context context) {
-        if (context == Context.BCIF) {
-            return stateRepository.selectKnown();
-        } else if (context == Context.INDEX) {
-            return stateRepository.selectIndexed();
-        } else if (context == Context.STRUCTURES) {
-            return stateRepository.selectSupported();
-        } else {
-            throw new UnsupportedOperationException("Context " + context + " not supported");
         }
     }
 }

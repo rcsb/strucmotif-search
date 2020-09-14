@@ -5,7 +5,8 @@ import java.util.NoSuchElementException;
 
 public enum Operation {
     ADD,
-    REMOVE;
+    REMOVE,
+    RECOVER;
 
     public static Operation resolve(String s) {
         String uc = s.toUpperCase();

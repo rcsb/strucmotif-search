@@ -18,8 +18,6 @@ import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,12 +50,6 @@ public class RenumberedStructureWriterImpl implements RenumberedStructureWriter 
             .encodingStrategyHint("atom_site", "Cartn_z", "delta", 1)
             .gzip(true)
             .build();
-    private final MotifSearchConfig motifSearchConfig;
-
-    @Autowired
-    public RenumberedStructureWriterImpl(MotifSearchConfig motifSearchConfig) {
-        this.motifSearchConfig = motifSearchConfig;
-    }
 
     @Override
     public void write(MmCifFile source, Path destination) {

@@ -1,13 +1,9 @@
 package org.rcsb.strucmotif.config;
 
-import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.UncheckedIOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -26,7 +22,7 @@ public class MotifSearchConfig {
     private int chunkSize = 400;
     private int maxMotifSize = 10;
     private String bcifFetchUrl = "https://models.rcsb.org/%s.bcif";
-
+    private boolean keepStructureInMemory = false;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -112,28 +108,20 @@ public class MotifSearchConfig {
         this.maxMotifSize = maxMotifSize;
     }
 
+    public boolean isKeepStructureInMemory() {
+        return keepStructureInMemory;
+    }
+
+    public void setKeepStructureInMemory(boolean keepStructureInMemory) {
+        this.keepStructureInMemory = keepStructureInMemory;
+    }
+
     public String getBcifFetchUrl() {
         return bcifFetchUrl;
     }
 
-    public URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {
-        try {
-            return new URL(String.format(bcifFetchUrl, structureIdentifier.getPdbId().toLowerCase()));
-        } catch (MalformedURLException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     public void setBcifFetchUrl(String bcifFetchUrl) {
         this.bcifFetchUrl = bcifFetchUrl;
-    }
-
-    public Path getRenumberedStructurePath() {
-        return Paths.get(rootPath).resolve("renumbered");
-    }
-
-    public Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {
-        return getRenumberedStructurePath().resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
     }
 
     public double getSquaredDistanceCutoff() {

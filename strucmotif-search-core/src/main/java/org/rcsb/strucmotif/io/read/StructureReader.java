@@ -28,16 +28,4 @@ public interface StructureReader {
     default Structure readFromInputStream(InputStream inputStream) {
         return readFromInputStream(inputStream, null);
     }
-
-    /**
-     * Read a selected range from a renumbered structure.
-     * @param structureIdentifier the structure to read
-     * @param selection a collection of {@link ResidueSelection} instances - null will return whole structure
-     * @return the corresponding {@link Structure}
-     */
-    Structure readById(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection);
-
-    default Structure readById(StructureIdentifier structureIdentifier) {
-        return readById(structureIdentifier, null);
-    }
 }

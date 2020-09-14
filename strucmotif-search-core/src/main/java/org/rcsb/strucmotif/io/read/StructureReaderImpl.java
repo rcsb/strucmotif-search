@@ -60,19 +60,6 @@ public class StructureReaderImpl implements StructureReader {
         }
     }
 
-    @Override
-    public Structure readById(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection) {
-        return readFromInputStream(getRenumberedInputStream(structureIdentifier), selection);
-    }
-
-    private InputStream getRenumberedInputStream(StructureIdentifier structureIdentifier) {
-        try {
-            return Files.newInputStream(motifSearchConfig.getRenumberedStructurePath(structureIdentifier));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
     static class StructureReaderState {
         private static final Pattern LIST = Pattern.compile(",");
 

@@ -113,6 +113,11 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         }
     }
 
+    private Path getOriginalStructurePath(StructureIdentifier structureIdentifier) {
+        return Paths.get(motifSearchConfig.getDataSource())
+                .resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
+    }
+
     private Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {
         return Paths.get(motifSearchConfig.getRootPath())
                 .resolve("renumbered")
@@ -137,7 +142,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     private InputStream getOriginalStructureInputStream(StructureIdentifier structureIdentifier) {
         try {
-            Path originalPath = Paths.get(motifSearchConfig.getDataSource()).resolve(structureIdentifier.getPdbId() + ".bcif.gz");
+            Path originalPath = getOriginalStructurePath(structureIdentifier);
             if (Files.exists(originalPath)) {
                 return Files.newInputStream(originalPath);
             } else {
@@ -161,6 +166,25 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     @Override
     public Structure readOriginal(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection) {
         return readFromInputStream(getOriginalStructureInputStream(structureIdentifier), selection);
+    }
+
+    @Override
+    public Structure readSome(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection) {
+        try {
+            Path originalPath = getOriginalStructurePath(structureIdentifier);
+            return readFromInputStream(Files.newInputStream(originalPath), selection);
+        } catch (IOException e1) {
+            try {
+                Path renumberedPath = getRenumberedStructurePath(structureIdentifier);
+                return readFromInputStream(Files.newInputStream(renumberedPath));
+            } catch (IOException e2) {
+                try {
+                    return readFromInputStream(getBcifFetchUrl(structureIdentifier).openStream(), selection);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            }
+        }
     }
 
     @Override

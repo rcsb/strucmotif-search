@@ -46,13 +46,25 @@ public interface StructureDataProvider {
     /**
      * Read a selected range from an original structure.
      * @param structureIdentifier the structure to read
-     * @param selection a collection of {@link ResidueSelection} instance - null will return whole structure
+     * @param selection a collection of {@link ResidueSelection} instances - null will return whole structure
      * @return the corresponding {@link Structure}
      */
     Structure readOriginal(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection);
 
     default Structure readOriginal(StructureIdentifier structureIdentifier) {
         return readOriginal(structureIdentifier, null);
+    }
+
+    /**
+     * Try to read 'any' structure data. Priorities are 'data-source', 'root-path', and 'bcif-fetch-url'.
+     * @param structureIdentifier the structure to read
+     * @param selection a collection of {@link ResidueSelection} instances - null will return whole structure
+     * @return the corresponding {@link Structure}
+     */
+    Structure readSome(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection);
+
+    default Structure readSome(StructureIdentifier structureIdentifier) {
+        return readSome(structureIdentifier, null);
     }
 
     /**

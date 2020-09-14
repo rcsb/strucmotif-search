@@ -1,23 +1,19 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.MotifPruner;
+import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.StructureReader;
+import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,14 +26,14 @@ import java.util.Set;
  */
 @Service
 public class QueryBuilder {
-    private final StructureReader structureReader;
+    private final StructureDataProvider structureDataProvider;
     private final MotifPruner motifPruner;
     private final MotifSearchRuntime motifSearchRuntime;
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public QueryBuilder(StructureReader structureReader, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
-        this.structureReader = structureReader;
+    public QueryBuilder(StructureDataProvider structureDataProvider, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
+        this.structureDataProvider = structureDataProvider;
         this.motifPruner = motifPruner;
         this.motifSearchRuntime = motifSearchRuntime;
         this.motifSearchConfig = motifSearchConfig;
@@ -50,8 +46,7 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, Collection<LabelSelection> selection) {
-        InputStream inputStream = getInputStream(new StructureIdentifier(pdbId));
-        Structure structure = structureReader.readFromInputStream(inputStream, selection);
+        Structure structure = structureDataProvider.readSome(new StructureIdentifier(pdbId), selection);
         return defineByStructure(structure);
     }
 
@@ -64,32 +59,8 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, Collection<LabelSelection> selection) {
-        Structure structure = structureReader.readFromInputStream(inputStream, selection);
+        Structure structure = structureDataProvider.readFromInputStream(inputStream, selection);
         return defineByStructure(structure);
-    }
-
-    /**
-     * Acquire input stream of 'some' structure file. Priority are: 1. 'data-source' 2. 'root-path', and lastly fetched
-     * from 'bcif-fetch-url'.
-     * @param structureIdentifier the structure to load
-     * @return structure data
-     */
-    private InputStream getInputStream(StructureIdentifier structureIdentifier) {
-        try {
-            Path dataSourcePath = motifSearchConfig.getDataSourcePath().resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
-            return Files.newInputStream(dataSourcePath);
-        } catch (IOException e1) {
-            try {
-                Path renumberedPath = motifSearchConfig.getRenumberedStructurePath(structureIdentifier);
-                return Files.newInputStream(renumberedPath);
-            } catch (IOException e2) {
-                try {
-                    return motifSearchConfig.getBcifFetchUrl(structureIdentifier).openStream();
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
-                }
-            }
-        }
     }
 
     /**
@@ -119,7 +90,7 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByFile(InputStream inputStream) {
-        Structure structure = structureReader.readFromInputStream(inputStream);
+        Structure structure = structureDataProvider.readFromInputStream(inputStream);
         return defineByStructure(structure);
     }
 

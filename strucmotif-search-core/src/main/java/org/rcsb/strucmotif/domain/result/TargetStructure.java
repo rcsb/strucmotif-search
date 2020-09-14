@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.result;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -11,9 +10,8 @@ import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.StructureReader;
+import org.rcsb.strucmotif.io.StructureDataProvider;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -35,8 +33,7 @@ import java.util.stream.Stream;
  * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
-    private final StructureReader structureReader;
-    private final MotifSearchConfig motifSearchConfig;
+    private final StructureDataProvider structureDataProvider;
     private final StructureIdentifier structureIdentifier;
 
     /*
@@ -45,9 +42,8 @@ public class TargetStructure {
     private List<ResiduePairIdentifier[]> paths;
     private SelectionResolver<LabelSelection> labelSelectionResolver;
 
-    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, StructureReader structureReader, MotifSearchConfig motifSearchConfig) {
-        this.structureReader = structureReader;
-        this.motifSearchConfig = motifSearchConfig;
+    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, StructureDataProvider structureDataProvider) {
+        this.structureDataProvider = structureDataProvider;
         this.structureIdentifier = structureIdentifier;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
@@ -135,7 +131,7 @@ public class TargetStructure {
         }
 
         try {
-            Structure structure = structureReader.readById(structureIdentifier, indexSelections);
+            Structure structure = structureDataProvider.readRenumbered(structureIdentifier, indexSelections);
             SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 

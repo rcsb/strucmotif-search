@@ -79,13 +79,15 @@ public class MotifSearchUpdate implements CommandLineRunner {
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = Operation.resolve(args[0]);
         String[] ids = new String[args.length - 1];
-        Collection<StructureIdentifier> requested;
+        List<StructureIdentifier> requested;
         System.arraycopy(args, 1, ids, 0, ids.length);
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
         } else {
-            requested = Arrays.stream(ids).map(StructureIdentifier::new).collect(Collectors.toSet());
+            requested = Arrays.stream(ids).map(StructureIdentifier::new).collect(Collectors.toList());
         }
+        // shuffle to prevent troublemakers such as ribosome and virus capsids occurring in the same chunk
+        Collections.shuffle(requested);
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {
@@ -268,7 +270,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    public Collection<StructureIdentifier> getAllIdentifiers() throws IOException {
+    public List<StructureIdentifier> getAllIdentifiers() throws IOException {
         logger.info("Retrieving current entry list from {}", RCSB_ENTRY_LIST);
         GetCurrentResponse response;
         try (InputStream inputStream = new URL(RCSB_ENTRY_LIST).openStream()) {
@@ -279,7 +281,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         return Arrays.stream(response.getIdList())
                 .map(String::toLowerCase)
                 .map(StructureIdentifier::new)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
     @SuppressWarnings("unused")

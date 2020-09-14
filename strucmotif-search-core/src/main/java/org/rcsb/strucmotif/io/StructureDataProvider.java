@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.schema.mm.MmCifFile;
-import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.ResidueSelection;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -74,5 +73,16 @@ public interface StructureDataProvider {
      */
     void writeRenumbered(StructureIdentifier structureIdentifier, MmCifFile mmCifFile);
 
+    /**
+     * Drop information on a renumbered structure.
+     * @param structureIdentifier the structure identifier to remove
+     */
     void removeRenumbered(StructureIdentifier structureIdentifier);
+
+    /**
+     * Acquire the input stream of an original structure.
+     * @param structureIdentifier the structure identifier to read
+     * @return the corresponding input stream
+     */
+    InputStream getOriginalInputStream(StructureIdentifier structureIdentifier);
 }

@@ -136,7 +136,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 .resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
     }
 
-    private InputStream getRenumberedStructureInputStream(StructureIdentifier structureIdentifier) {
+    private InputStream getRenumberedInputStream(StructureIdentifier structureIdentifier) {
         try {
             if (keepStructuresInMemory) {
                 byte[] bytes = cache.get(structureIdentifier);
@@ -152,7 +152,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         }
     }
 
-    private InputStream getOriginalStructureInputStream(StructureIdentifier structureIdentifier) {
+    @Override
+    public InputStream getOriginalInputStream(StructureIdentifier structureIdentifier) {
         try {
             Path originalPath = getOriginalStructurePath(structureIdentifier);
             if (Files.exists(originalPath)) {
@@ -172,12 +173,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     @Override
     public Structure readRenumbered(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection) {
-        return readFromInputStream(getRenumberedStructureInputStream(structureIdentifier), selection);
+        return readFromInputStream(getRenumberedInputStream(structureIdentifier), selection);
     }
 
     @Override
     public Structure readOriginal(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection) {
-        return readFromInputStream(getOriginalStructureInputStream(structureIdentifier), selection);
+        return readFromInputStream(getOriginalInputStream(structureIdentifier), selection);
     }
 
     @Override

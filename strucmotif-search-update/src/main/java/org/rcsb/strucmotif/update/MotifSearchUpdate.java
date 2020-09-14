@@ -88,12 +88,14 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         // check for sanity of internal state
-        Collection<StructureIdentifier> dirtyStructureIdentifiers = stateRepository.selectDirty();
-        if (dirtyStructureIdentifiers.size() > 0) {
-            logger.warn("Update state is dirty - problematic identifiers:\n{}",
-                    dirtyStructureIdentifiers);
-            logger.warn("This requires manual intervention - perform 'RECOVER' operation and rerun update");
-            throw new IllegalStateException("Update state is dirty - problematic identifiers:\n" + dirtyStructureIdentifiers);
+        if (operation != Operation.RECOVER) {
+            Collection<StructureIdentifier> dirtyStructureIdentifiers = stateRepository.selectDirty();
+            if (dirtyStructureIdentifiers.size() > 0) {
+                logger.warn("Update state is dirty - problematic identifiers:\n{}",
+                        dirtyStructureIdentifiers);
+                logger.warn("This requires manual intervention - perform 'RECOVER' operation and rerun update");
+                throw new IllegalStateException("Update state is dirty - problematic identifiers:\n" + dirtyStructureIdentifiers);
+            }
         }
 
         logger.info("Starting update - Operation: {}, {} ids ({})",

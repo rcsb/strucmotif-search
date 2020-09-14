@@ -22,7 +22,7 @@ public class MotifSearchConfig {
     private int chunkSize = 400;
     private int maxMotifSize = 10;
     private String bcifFetchUrl = "https://models.rcsb.org/%s.bcif";
-    private boolean keepStructureInMemory = false;
+    private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -108,12 +108,12 @@ public class MotifSearchConfig {
         this.maxMotifSize = maxMotifSize;
     }
 
-    public boolean isKeepStructureInMemory() {
-        return keepStructureInMemory;
+    public InMemoryStrategy getInMemoryStrategy() {
+        return inMemoryStrategy;
     }
 
-    public void setKeepStructureInMemory(boolean keepStructureInMemory) {
-        this.keepStructureInMemory = keepStructureInMemory;
+    public void setInMemoryStrategy(InMemoryStrategy inMemoryStrategy) {
+        this.inMemoryStrategy = inMemoryStrategy;
     }
 
     public String getBcifFetchUrl() {

@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.schema.mm.MmCifFile;
+import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.ResidueSelection;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,9 +48,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.renumberedStructureWriter = renumberedStructureWriter;
         this.motifSearchConfig = motifSearchConfig;
 
-        this.keepStructuresInMemory = motifSearchConfig.isKeepStructureInMemory();
+        this.keepStructuresInMemory = motifSearchConfig.getInMemoryStrategy() != InMemoryStrategy.OFF;
         if (keepStructuresInMemory) {
-            logger.info("Configured to keep structure data in memory");
+            logger.info("Configured to keep structure data in memory - mode: {}", motifSearchConfig.getInMemoryStrategy());
             Collection<StructureIdentifier> structureIdentifiers = stateRepository.selectSupported();
             int target = structureIdentifiers.size();
             logger.info("{} valid structures", target);
@@ -64,7 +66,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                     })
                     .collect(Collectors.toMap(Function.identity(), this::loadIntoByteArray));
         } else {
-            logger.info("Configured to load structure data ad hoc from {}", motifSearchConfig.getDataSourcePath());
+            logger.info("Configured to load structure data ad hoc from {}", motifSearchConfig.getRootPath());
             cache = null;
         }
 
@@ -82,7 +84,17 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     private byte[] loadIntoByteArray(StructureIdentifier structureIdentifier) {
         try {
-            InputStream inputStream = new GZIPInputStream(Files.newInputStream(getRenumberedStructurePath(structureIdentifier)), BUFFER_SIZE);
+            InputStream inputStream;
+            switch (motifSearchConfig.getInMemoryStrategy()) {
+                case GZIPPED:
+                    inputStream = new BufferedInputStream(Files.newInputStream(getRenumberedStructurePath(structureIdentifier)), BUFFER_SIZE);
+                    break;
+                case PLAIN:
+                    inputStream = new GZIPInputStream(Files.newInputStream(getRenumberedStructurePath(structureIdentifier)), BUFFER_SIZE);
+                    break;
+                default:
+                    throw new IllegalStateException("Invalid argument: " + motifSearchConfig.getInMemoryStrategy());
+            }
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             int bytesRead;
@@ -101,7 +113,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             logger.warn("No structure data exists for {} - path: {}",
                     structureIdentifier,
                     getRenumberedStructurePath(structureIdentifier));
-            return null;
+            return new byte[0];
         }
     }
 

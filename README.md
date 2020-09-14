@@ -61,13 +61,15 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | -----------  | ------ | ------- |
 | `strucmotif.distance-cutoff` | Maximum distance between alpha carbons that will be indexed | `20 Å` |
 | `strucmotif.root-path` | Path where optimized BinaryCIF files will be written | `/opt/data/` |
-| `strucmotif.data-source` | Path to local CIF archive | fetch from RCSB PDB |
+| `strucmotif.data-source` | Path to local CIF archive | fetch by `bcif-fetch-url` |
 | `strucmotif.number-threads` | Number of worker threads | available processors |
 | `strucmotif.db-connection-uri` | Set the MongoDB connection URI (including host, username and password) | use localhost |
-| `strucmotif.max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `strucmotif.max-results` | Maximum number of results that will be returned | `10000` |
 | `strucmotif.decimal-places-rmsd` | Number of decimal places reported for RMSD values | `2` |
 | `strucmotif.decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `strucmotif.chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
+| `strucmotif.max-motif-size` | Maximum number of residues that may define a motif | `10` |
+| `strucmotif.bcif-fetch-url` | URL template for BinaryCIF download | RCSB PDB |
+| `strucmotif.in-memory-strategy` | Keep complete archive in memory? | `off` |
 
 Configure by placing your `application.properties` on the classpath.

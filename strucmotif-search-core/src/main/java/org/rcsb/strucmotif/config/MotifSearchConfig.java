@@ -127,5 +127,4 @@ public class MotifSearchConfig {
     public double getSquaredDistanceCutoff() {
         return distanceCutoff * distanceCutoff;
     }
-
 }

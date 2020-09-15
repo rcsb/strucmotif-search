@@ -2,25 +2,17 @@ package org.rcsb.strucmotif.benchmark;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
-import org.openjdk.jmh.annotations.Scope;
-import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.Motifs;
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.structure.Structure;
 
 public class MotifSearchBenchmark {
-    @State(Scope.Benchmark)
-    public static class MyState {
-        public QueryBuilder queryBuilder = MotifSearch.newQuery();
-    }
-
     @Benchmark
     public void searchForCatalyticTriad(Blackhole blackhole, MyState state) {
         // catalytic activity - the trivial case
@@ -57,7 +49,8 @@ public class MotifSearchBenchmark {
     }
 
     private MotifSearchResult run(Motifs motif, MyState state) {
-        return state.queryBuilder.defineByPdbIdAndSelection(motif.getStructureIdentifier().getPdbId(), motif.getSelection())
+        Structure structure = state.structureMap.get(motif);
+        return state.queryBuilder.defineByStructure(structure)
                 .buildParameters()
                 .buildQuery()
                 .run();

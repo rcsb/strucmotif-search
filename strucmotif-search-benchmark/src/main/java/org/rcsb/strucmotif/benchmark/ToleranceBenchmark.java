@@ -11,21 +11,16 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.structure.Structure;
 
 @State(Scope.Benchmark)
 public class ToleranceBenchmark {
     @Param({"1", "2", "3"})
     public int tolerance;
-
-    @State(Scope.Benchmark)
-    public static class MyState {
-        public QueryBuilder queryBuilder = MotifSearch.newQuery();
-    }
 
     @Benchmark
     public void searchForSerineProtease(Blackhole blackhole, MyState state) {
@@ -58,7 +53,8 @@ public class ToleranceBenchmark {
     }
 
     private MotifSearchResult run(Motifs motif, int tolerance, MyState state) {
-        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByPdbIdAndSelection(motif.getStructureIdentifier().getPdbId(), motif.getSelection())
+        Structure structure = state.structureMap.get(motif);
+        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructure(structure)
                 .backboneDistanceTolerance(tolerance)
                 .sideChainDistanceTolerance(tolerance)
                 .angleTolerance(tolerance)

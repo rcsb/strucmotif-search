@@ -11,17 +11,58 @@ import java.nio.file.Paths;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "strucmotif")
 public class MotifSearchConfig {
+    /**
+     * The maximum distance in Å between alpha carbon atoms of residue pairs. All pairs below will be added the inverted
+     * index and can appear as search results. 20 is really generous, lower values ease storage requirements and improve
+     * speed of update operations.
+     */
     private double distanceCutoff = 20;
+    /**
+     * The root directory where optimized BinaryCIF data will be written.
+     */
     private String rootPath = "/opt/data/";
+    /**
+     * Optional path to a local collection of structure data. This will be used during update operations. If not set or
+     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>.
+     */
     private String dataSource = "/opt/pdb/";
+    /**
+     * How many threads should be used during multi-threaded operations (update, path assembly, structure reading).
+     */
     private int numberThreads = Runtime.getRuntime().availableProcessors();
+    /**
+     * Connection to a MongoDB server. Supports authentication and parameters.
+     */
     private String dbConnectionUri = "mongodb://localhost:27017/?";
+    /**
+     * Hard limit on the number of results returned. Will stop jobs when this number of hits has been accepted. Acts as
+     * a safeguard against too simple queries that will return an overwhelming number of results.
+     */
     private int maxResults = 10000;
+    /**
+     * How many decimal places to report for RMSD values.
+     */
     private int decimalPlacesRmsd = 2;
+    /**
+     * How many decimal places to report for entries of transformation matrices.
+     */
     private int decimalPlacesMatrix = 3;
+    /**
+     * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
+     * speed substantially. A value of 400 works good with 12GB of heap, the higher the faster.
+     */
     private int chunkSize = 400;
+    /**
+     * The maximum motif size, any larger user input will be rejected.
+     */
     private int maxMotifSize = 10;
+    /**
+     * The URL where BinaryCIF data will be fetched from if not present locally.
+     */
     private String bcifFetchUrl = "https://models.rcsb.org/%s.bcif";
+    /**
+     * Keep structure data in memory? See {@link InMemoryStrategy} for details.
+     */
     private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
 
     public double getDistanceCutoff() {

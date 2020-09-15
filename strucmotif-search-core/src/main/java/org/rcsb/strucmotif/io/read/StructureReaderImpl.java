@@ -7,7 +7,6 @@ import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Matrix4DTransformation;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
@@ -20,13 +19,11 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -43,13 +40,6 @@ import static org.rcsb.strucmotif.math.Algebra.multiply4d;
 
 @Service
 public class StructureReaderImpl implements StructureReader {
-    private final MotifSearchConfig motifSearchConfig;
-
-    @Autowired
-    public StructureReaderImpl(MotifSearchConfig motifSearchConfig) {
-        this.motifSearchConfig = motifSearchConfig;
-    }
-
     @Override
     public Structure readFromInputStream(InputStream inputStream, Collection<? extends ResidueSelection> selection) {
         try {

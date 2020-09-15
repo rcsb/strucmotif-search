@@ -70,15 +70,15 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByStructure(Structure structure) {
-        long componentCount = structure.getChains()
+        long residueCount = structure.getChains()
                 .stream()
                 .map(Chain::getResidues)
                 .mapToLong(Collection::size)
                 .sum();
 
-        if (componentCount > motifSearchConfig.getMaxMotifSize()) {
+        if (residueCount > motifSearchConfig.getMaxMotifSize()) {
             throw new IllegalArgumentException("maximum motif size is " + motifSearchConfig.getMaxMotifSize() + " - " +
-                    "file contains " + componentCount + " components and may be plain structure data");
+                    "file contains " + residueCount + " residues");
         }
 
         return new MandatoryBuilder(structure);

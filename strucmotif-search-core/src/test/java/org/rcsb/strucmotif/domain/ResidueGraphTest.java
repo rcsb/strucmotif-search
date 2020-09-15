@@ -32,7 +32,7 @@ public class ResidueGraphTest {
     @BeforeEach
     public void init() {
         motifSearchConfig = new MotifSearchConfig();
-        structureReader = new StructureReaderImpl(motifSearchConfig);
+        structureReader = new StructureReaderImpl();
     }
 
     @Test

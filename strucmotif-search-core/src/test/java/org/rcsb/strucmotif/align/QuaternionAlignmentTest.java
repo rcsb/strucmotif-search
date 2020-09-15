@@ -32,7 +32,7 @@ public class QuaternionAlignmentTest {
     @BeforeEach
     public void init() {
         alignmentService = new QuaternionAlignmentService();
-        structureReader = new StructureReaderImpl(new MotifSearchConfig());
+        structureReader = new StructureReaderImpl();
     }
 
     private static int seqId = 1;

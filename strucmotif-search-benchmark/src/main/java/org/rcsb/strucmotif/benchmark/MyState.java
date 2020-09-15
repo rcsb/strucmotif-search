@@ -5,7 +5,6 @@ import org.openjdk.jmh.annotations.State;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.StructureReaderImpl;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 @State(Scope.Benchmark)
 public class MyState {
     private final MotifSearchConfig config = new MotifSearchConfig();
-    private final StructureReaderImpl structureReader = new StructureReaderImpl(config);
+    private final StructureReaderImpl structureReader = new StructureReaderImpl();
     public final QueryBuilder queryBuilder = MotifSearch.newQuery();
     public final Map<Motifs, Structure> structureMap;
 

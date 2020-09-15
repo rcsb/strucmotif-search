@@ -27,7 +27,7 @@ public class StructureReaderImplTest {
 
     @BeforeEach
     public void init() {
-        this.structureReader = new StructureReaderImpl(new MotifSearchConfig());
+        this.structureReader = new StructureReaderImpl();
     }
 
     // TODO 4udf seems slow

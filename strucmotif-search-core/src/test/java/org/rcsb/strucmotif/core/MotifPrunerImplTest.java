@@ -25,7 +25,7 @@ public class MotifPrunerImplTest {
     @BeforeEach
     public void init() {
         MotifSearchConfig config = new MotifSearchConfig();
-        structureReader = new StructureReaderImpl(config);
+        structureReader = new StructureReaderImpl();
         motifPruner = new MotifPrunerImpl(config);
     }
 

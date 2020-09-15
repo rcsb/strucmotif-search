@@ -185,7 +185,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         } catch (IOException e1) {
             try {
                 Path renumberedPath = getRenumberedStructurePath(structureIdentifier);
-                return readFromInputStream(Files.newInputStream(renumberedPath));
+                return readFromInputStream(Files.newInputStream(renumberedPath), selection);
             } catch (IOException e2) {
                 try {
                     return readFromInputStream(getBcifFetchUrl(structureIdentifier).openStream(), selection);

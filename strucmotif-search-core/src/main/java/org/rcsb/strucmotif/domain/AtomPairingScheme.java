@@ -17,6 +17,11 @@ public enum AtomPairingScheme implements Predicate<String> {
     ALPHA_CARBON(s -> s.equals("CA") ||
             s.equals("C4'")),
     /**
+     * Use beta carbons only.
+     */
+    BETA_CARBON(s -> s.equals("CB") ||
+            s.equals("C1'")),
+    /**
      * Use backbone atoms only.
      */
     BACKBONE(s -> s.equals("N") || s.equals("CA") || s.equals("C") || s.equals("O") ||
@@ -24,7 +29,12 @@ public enum AtomPairingScheme implements Predicate<String> {
     /**
      * Use side-chain atoms only.
      */
-    SIDE_CHAIN(BACKBONE.predicate.negate());
+    SIDE_CHAIN(BACKBONE.predicate.negate()),
+    /**
+     * Use pseudo-atoms defined by {@link org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor}.
+     */
+    PSEUDO_ATOMS(s -> s.equals("CA") || s.equals("CB") ||
+            s.equals("C4'") || s.equals("C1'"));
 
     private final Predicate<String> predicate;
 

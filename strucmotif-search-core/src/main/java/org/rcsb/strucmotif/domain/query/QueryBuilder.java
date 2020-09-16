@@ -185,6 +185,16 @@ public class QueryBuilder {
         }
 
         /**
+         * Stop after a certain number of accepted hits.
+         * @param limit the maximum number of hits below the RMSD threshold
+         * @return this builder
+         */
+        public MandatoryBuilder limitResults(int limit) {
+            this.limit = limit;
+            return this;
+        }
+
+        /**
          * Creates a {@link Parameters} instance based on all values. Proceeds to the next step.
          * @return the optional argument step
          */
@@ -197,16 +207,6 @@ public class QueryBuilder {
                     atomPairingScheme,
                     limit);
             return new OptionalStepBuilder(structure, parameters);
-        }
-
-        /**
-         * Stop after a certain number of accepted hits.
-         * @param limit the maximum number of hits below the RMSD threshold
-         * @return this builder
-         */
-        public MandatoryBuilder limitResults(int limit) {
-            this.limit = limit;
-            return this;
         }
     }
 

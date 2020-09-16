@@ -14,11 +14,13 @@ public enum AtomPairingScheme implements Predicate<String> {
     /**
      * Use alpha carbons only.
      */
-    ALPHA_CARBON(s -> s.equals("CA")),
+    ALPHA_CARBON(s -> s.equals("CA") ||
+            s.equals("C4'")),
     /**
      * Use backbone atoms only.
      */
-    BACKBONE(s -> s.equals("N") || s.equals("CA") || s.equals("C") || s.equals("O")),
+    BACKBONE(s -> s.equals("N") || s.equals("CA") || s.equals("C") || s.equals("O") ||
+            s.equals("P") || s.equals("OP1") || s.equals("OP2") || s.equals("C2'") || s.equals("C3'") || s.equals("O3'") || s.equals("C4'") || s.equals("O4'") || s.equals("C5'") || s.equals("O5'")),
     /**
      * Use side-chain atoms only.
      */

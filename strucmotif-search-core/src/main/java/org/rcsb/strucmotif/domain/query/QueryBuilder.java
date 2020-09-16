@@ -1,8 +1,10 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
+import org.rcsb.strucmotif.core.NoOperationMotifPruner;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
@@ -27,14 +29,16 @@ import java.util.Set;
 @Service
 public class QueryBuilder {
     private final StructureDataProvider structureDataProvider;
-    private final MotifPruner motifPruner;
+    private final KruskalMotifPruner kruskalMotifPruner;
+    private final NoOperationMotifPruner noOperationMotifPruner;
     private final MotifSearchRuntime motifSearchRuntime;
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public QueryBuilder(StructureDataProvider structureDataProvider, MotifPruner motifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
+    public QueryBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
         this.structureDataProvider = structureDataProvider;
-        this.motifPruner = motifPruner;
+        this.kruskalMotifPruner = kruskalMotifPruner;
+        this.noOperationMotifPruner = noOperationMotifPruner;
         this.motifSearchRuntime = motifSearchRuntime;
         this.motifSearchConfig = motifSearchConfig;
     }
@@ -116,7 +120,7 @@ public class QueryBuilder {
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
             this.rmsdCutoff = Parameters.DEFAULT_RMSD_CUTOFF;
             // defines the 'default' motif pruning strategy
-            this.motifPruner = QueryBuilder.this.motifPruner;
+            this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
             // defines how to superimpose and score hits
             this.atomPairingScheme = AtomPairingScheme.ALL;
             this.limit = Integer.MAX_VALUE;
@@ -166,11 +170,30 @@ public class QueryBuilder {
 
         /**
          * Specify the motif pruning strategy.
-         * @param motifPruner the strategy to prune motifs
+         * @param motifPruner the implementation to prune motifs
          * @return this builder
          */
         public MandatoryBuilder motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
+            return this;
+        }
+
+        /**
+         * Specify the motif pruning strategy.
+         * @param motifPruningStrategy the strategy to prune motifs
+         * @return this builder
+         */
+        public MandatoryBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
+            switch (motifPruningStrategy) {
+                case KRUSKAL:
+                    this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
+                    break;
+                case NONE:
+                    this.motifPruner = QueryBuilder.this.noOperationMotifPruner;
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unhandled case: " + motifPruningStrategy);
+            }
             return this;
         }
 

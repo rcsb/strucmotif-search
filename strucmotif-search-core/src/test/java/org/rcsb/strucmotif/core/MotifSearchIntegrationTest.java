@@ -33,7 +33,9 @@ public class MotifSearchIntegrationTest {
     @Autowired
     private StructureReader structureReader;
     @Autowired
-    private MotifPruner motifPruner;
+    private KruskalMotifPruner kruskalMotifPruner;
+    @Autowired
+    private NoOperationMotifPruner noOperationMotifPruner;
     @Autowired
     private AlignmentService alignmentService;
     @Autowired
@@ -52,7 +54,7 @@ public class MotifSearchIntegrationTest {
 
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, structureDataProvider, threadPool);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
-        this.queryBuilder = new QueryBuilder(structureDataProvider, motifPruner, motifSearchRuntime, motifSearchConfig);
+        this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
     /**

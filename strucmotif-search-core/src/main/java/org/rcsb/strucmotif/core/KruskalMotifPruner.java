@@ -22,11 +22,11 @@ import java.util.stream.Collectors;
  * Uses Kruskal's algorithm to determine tree.
  */
 @Service
-public class MotifPrunerImpl implements MotifPruner {
+public class KruskalMotifPruner implements MotifPruner {
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public MotifPrunerImpl(MotifSearchConfig motifSearchConfig) {
+    public KruskalMotifPruner(MotifSearchConfig motifSearchConfig) {
         this.motifSearchConfig = motifSearchConfig;
     }
 

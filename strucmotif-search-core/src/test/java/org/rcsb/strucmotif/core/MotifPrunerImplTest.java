@@ -26,7 +26,7 @@ public class MotifPrunerImplTest {
     public void init() {
         MotifSearchConfig config = new MotifSearchConfig();
         structureReader = new StructureReaderImpl();
-        motifPruner = new MotifPrunerImpl(config);
+        motifPruner = new KruskalMotifPruner(config);
     }
 
     @Test

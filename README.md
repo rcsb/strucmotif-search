@@ -25,7 +25,7 @@ class Demo {
                 Set.of(new LabelSelection("B", 1, 42), // HIS
                        new LabelSelection("B", 1, 87), // ASP
                        new LabelSelection("C", 1, 47))) // SER
-            // parameters are considered mandatory arguments - we use defaults
+            // parameters are considered mandatory arguments - use defaults
             .buildParameters()
             // several additional arguments can be provided to customize the query further
             .buildQuery()
@@ -59,17 +59,17 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 ## Configuration
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
-| `distance-cutoff` | Maximum distance between alpha carbons that will be indexed | `20 Å` |
-| `root-path` | Path where optimized BinaryCIF files will be written | `/opt/data/` |
+| `bcif-fetch-url` | URL template for BinaryCIF download | RCSB PDB |
+| `chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 | `data-source` | Path to local CIF archive | bcif-fetch-url |
-| `number-threads` | Number of worker threads | available processors |
 | `db-connection-uri` | Set the MongoDB connection URI (including host, username and password) | use localhost |
-| `max-results` | Maximum number of results that will be returned | `10000` |
 | `decimal-places-rmsd` | Number of decimal places reported for RMSD values | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
-| `chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
-| `max-motif-size` | Maximum number of residues that may define a motif | `10` |
-| `bcif-fetch-url` | URL template for BinaryCIF download | RCSB PDB |
+| `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `20` |
 | `in-memory-strategy` | Keep complete archive in memory? | `off` |
+| `max-results` | Maximum number of results that will be returned | `10000` |
+| `max-motif-size` | Maximum number of residues that may define a motif | `10` |
+| `number-threads` | Number of worker threads | available processors |
+| `root-path` | Path where optimized BinaryCIF files will be written | `/opt/data/` |
 
 Configure by placing your `application.properties` on the classpath.

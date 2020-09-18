@@ -31,10 +31,6 @@ public class MotifSearchConfig {
      */
     private int numberThreads = Runtime.getRuntime().availableProcessors();
     /**
-     * Connection to a MongoDB server. Supports authentication and parameters.
-     */
-    private String dbConnectionUri = "mongodb://localhost:27017/?";
-    /**
      * Hard limit on the number of results returned. Will stop jobs when this number of hits has been accepted. Acts as
      * a safeguard against too simple queries that will return an overwhelming number of results.
      */
@@ -99,14 +95,6 @@ public class MotifSearchConfig {
 
     public void setNumberThreads(int numberThreads) {
         this.numberThreads = numberThreads;
-    }
-
-    public String getDbConnectionUri() {
-        return dbConnectionUri;
-    }
-
-    public void setDbConnectionUri(String dbConnectionUri) {
-        this.dbConnectionUri = dbConnectionUri;
     }
 
     public int getMaxResults() {

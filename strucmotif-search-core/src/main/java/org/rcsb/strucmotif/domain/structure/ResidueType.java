@@ -43,7 +43,7 @@ public enum ResidueType {
     // stuff to ignore for hashCode creation
     UNKNOWN_AMINO_ACID("UNK", "X", null),
     UNKNOWN_NUCLEOTIDE("N", "Z", null),
-    UNKNOWN_COMPONENT("?", "?", null);
+    UNKNOWN_COMPONENT("?", "U", null);
 
     // used to retrieve the correct entity from the label_comp_id field
     private final String threeLetterCode;

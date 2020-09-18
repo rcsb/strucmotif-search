@@ -209,9 +209,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     @Override
-    public void removeRenumbered(StructureIdentifier structureIdentifier) {
+    public void deleteRenumbered(StructureIdentifier structureIdentifier) {
         try {
-            Files.delete(getRenumberedStructurePath(structureIdentifier));
+            Path renumberedPath = getRenumberedStructurePath(structureIdentifier);
+            if (Files.exists(renumberedPath)) {
+                Files.delete(getRenumberedStructurePath(structureIdentifier));
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

@@ -259,7 +259,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
     private void remove(Collection<StructureIdentifier> identifiers) {
         for (StructureIdentifier structureIdentifier : identifiers) {
             logger.info("Removing information for entry: {}", structureIdentifier);
-            structureDataProvider.removeRenumbered(structureIdentifier);
+            structureDataProvider.deleteRenumbered(structureIdentifier);
             invertedIndex.delete(structureIdentifier);
 
             // update state

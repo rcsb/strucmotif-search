@@ -77,7 +77,7 @@ public interface StructureDataProvider {
      * Drop information on a renumbered structure.
      * @param structureIdentifier the structure identifier to remove
      */
-    void removeRenumbered(StructureIdentifier structureIdentifier);
+    void deleteRenumbered(StructureIdentifier structureIdentifier);
 
     /**
      * Acquire the input stream of an original structure.

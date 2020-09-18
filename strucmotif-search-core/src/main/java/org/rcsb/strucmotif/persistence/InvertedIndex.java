@@ -29,8 +29,8 @@ public interface InvertedIndex {
     Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor);
 
     /**
-     * Removes all information on a structure from the index.
-     * @param structureIdentifier what to remove
+     * Removes all information on a set of structures from the index.
+     * @param structureIdentifiers what to remove
      */
-    void delete(StructureIdentifier structureIdentifier);
+    void delete(Collection<StructureIdentifier> structureIdentifiers);
 }

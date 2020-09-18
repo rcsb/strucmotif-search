@@ -6,8 +6,7 @@ structure-defining patterns. This implementation traverses the whole PDB archive
 returning all highly similar occurrences of the query motif within a second.
 
 ## Getting started
-strucmotif-search is distributed by maven and supports Java 11+ and requires access to a MongoDB server. To get started, 
-append your `pom.xml` by:
+strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
 ```xml
 <dependency>
   <groupId>org.rcsb</groupId>
@@ -62,7 +61,6 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | `bcif-fetch-url` | URL template for BinaryCIF download | RCSB PDB |
 | `chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 | `data-source` | Path to local CIF archive | bcif-fetch-url |
-| `db-connection-uri` | Set the MongoDB connection URI (including host, username and password) | use localhost |
 | `decimal-places-rmsd` | Number of decimal places reported for RMSD values | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `20` |
@@ -70,6 +68,6 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | `max-results` | Maximum number of results that will be returned | `10000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
-| `root-path` | Path where optimized BinaryCIF files will be written | `/opt/data/` |
+| `root-path` | Path where data files will be written | `/opt/data/` |
 
 Configure by placing your `application.properties` on the classpath.

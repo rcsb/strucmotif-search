@@ -232,7 +232,8 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         }
     }
 
-    private int[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
+    // this has to return Integer[] and cannot be primitive array
+    private Integer[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
         IndexSelection identifier1 = residuePairIdentifier.getIndexSelection1();
         int assemblyId1 = identifier1.getAssemblyId();
         int seqId1 = identifier1.getIndex();
@@ -241,9 +242,9 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         int seqId2 = identifier2.getIndex();
 
         if (assemblyId1 == 1 && assemblyId2 == 1) {
-            return new int[] { seqId1, seqId2 };
+            return new Integer[] { seqId1, seqId2 };
         } else {
-            return new int[] { seqId1, seqId2, assemblyId1, assemblyId2 };
+            return new Integer[] { seqId1, seqId2, assemblyId1, assemblyId2 };
         }
     }
 }

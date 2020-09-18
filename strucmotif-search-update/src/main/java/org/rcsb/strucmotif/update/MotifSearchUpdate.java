@@ -258,16 +258,19 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     private void remove(Collection<StructureIdentifier> identifiers) {
         for (StructureIdentifier structureIdentifier : identifiers) {
-            logger.info("Removing information for entry: {}", structureIdentifier);
+            logger.info("Removing renumbered structure for entry: {}", structureIdentifier);
             structureDataProvider.deleteRenumbered(structureIdentifier);
-            invertedIndex.delete(structureIdentifier);
 
-            // update state
+            // update state for known & supported
             Set<StructureIdentifier> update = Set.of(structureIdentifier);
             stateRepository.deleteKnown(update);
             stateRepository.deleteSupported(update);
-            stateRepository.deleteDirty(update);
         }
+
+        // inverted index is expensive and should be done as batch
+        invertedIndex.delete(identifiers);
+        stateRepository.deleteDirty(identifiers);
+        logger.info("Finished removal operation");
     }
 
     public List<StructureIdentifier> getAllIdentifiers() throws IOException {

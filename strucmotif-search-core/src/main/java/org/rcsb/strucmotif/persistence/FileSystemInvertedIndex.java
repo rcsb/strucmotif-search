@@ -215,6 +215,8 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         try {
             List<String> oneLetterCodes = Stream.of(ResidueType.values())
                     .map(ResidueType::getOneLetterCode)
+                    // has to be sorted to honor the implicit contract on when identifiers are flipped
+                    .sorted()
                     .collect(Collectors.toList());
 
             // create all combinations of one-letter-codes

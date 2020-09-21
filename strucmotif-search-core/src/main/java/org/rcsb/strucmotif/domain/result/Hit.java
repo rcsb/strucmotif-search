@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 /**
  * Represents a hit. Tries to be sparse with the provided information but captures everything needed to 'recreate' this
- * hit (i.e. structure identifiers, component identifiers, and transformation).
+ * hit (i.e. structure identifiers, residue identifiers, and transformation).
  */
 public class Hit {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");

@@ -3,7 +3,7 @@ package org.rcsb.strucmotif.domain.identifier;
 import java.util.Objects;
 
 /**
- * An unique identifier for atoms.
+ * A unique identifier for atoms.
  */
 public class AtomIdentifier {
     private final String labelAtomId;

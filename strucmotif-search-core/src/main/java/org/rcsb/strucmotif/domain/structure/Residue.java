@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 /**
- * A component in a chain. Basically either an amino acid or nucleotide (represented by a subclass). Just like a
+ * A residue in a chain. Basically either an amino acid or nucleotide (represented by a subclass). Just like a
  * {@link Chain}, the corresponding {@link Atom} instances are constructed lazily until they are requested for the first
  * time.
  */
@@ -20,9 +20,9 @@ public class Residue {
     private final List<Atom> atoms;
 
     /**
-     * Construct a new component.
+     * Construct a new residue.
      * @param residueIdentifier its identifier
-     * @param atoms all atoms in this component
+     * @param atoms all atoms in this residue
      * @param transformation the transformation (may be identity/neutral)
      */
     Residue(ResidueIdentifier residueIdentifier, List<Atom> atoms, double[][] transformation) {
@@ -101,7 +101,7 @@ public class Residue {
     }
 
     /**
-     * All atoms associated to this component.
+     * All atoms associated to this residue.
      * @return a list of atoms
      */
     public List<Atom> getAtoms() {

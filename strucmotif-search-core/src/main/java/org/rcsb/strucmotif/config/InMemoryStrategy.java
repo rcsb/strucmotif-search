@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.config;
 
+/**
+ * Keep structure data for whole archive in memory?
+ */
 public enum InMemoryStrategy {
     /**
      * Disable, BinaryCIF will be read from disk.

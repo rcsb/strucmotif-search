@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.domain.structure;
 
 /**
- * Registry of known components. Provides mapping between enum representation and one- and three-letter codes as well as
+ * Registry of known residues. Provides mapping between enum representation and one- and three-letter codes as well as
  * polymer type.
  */
 public enum ResidueType {
@@ -58,7 +58,7 @@ public enum ResidueType {
     }
 
     /**
-     * The (up to) three-letter code of this component. Matches labelCompId.
+     * The (up to) three-letter code of this residue. Matches labelCompId.
      * @return a String
      */
     public String getThreeLetterCode() {
@@ -66,7 +66,7 @@ public enum ResidueType {
     }
 
     /**
-     * The one-letter code of this component. May be 'artificial'/nonstandard. Used e.g. to name inverted index files.
+     * The one-letter code of this residue. May be 'artificial'/nonstandard. Used e.g. to name inverted index files.
      * @return a String
      */
     public String getOneLetterCode() {
@@ -74,7 +74,7 @@ public enum ResidueType {
     }
 
     /**
-     * The polymer type of this component.
+     * The polymer type of this residue.
      * @return amino acid or nucleotide
      */
     public PolymerType getPolymerType() {

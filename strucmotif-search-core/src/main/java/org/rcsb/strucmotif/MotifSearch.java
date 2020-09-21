@@ -3,8 +3,7 @@ package org.rcsb.strucmotif;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 
 /**
- * The entry point to perform motif searches. Handles configuration, sets up dependency injection and exposes
- * configuration.
+ * The entry point to perform motif searches.
  */
 public class MotifSearch {
     private final QueryBuilder queryBuilder;

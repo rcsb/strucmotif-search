@@ -31,7 +31,7 @@ public class AminoAcid extends Residue {
     AminoAcid(ResidueIdentifier residueIdentifier, List<Atom> atoms, double[][] transformation) {
         super(residueIdentifier, atoms, transformation);
         this.ca = findAtomUnsafe("CA");
-//      // will be null if glycine and no virtual CB created before (i.e. currently being center or used to create assembly)
+        // will be null if glycine and no virtual CB created before (i.e. currently being center or used to create assembly)
         this.cb = findAtomUnsafe("CB");
     }
 

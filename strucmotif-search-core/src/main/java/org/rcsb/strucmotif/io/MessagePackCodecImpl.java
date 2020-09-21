@@ -16,11 +16,6 @@ import java.util.Map;
 @Service
 public class MessagePackCodecImpl implements MessagePackCodec {
     @Override
-    public byte[] encodeArray(Object[] array) {
-        return encodeInternal(array);
-    }
-
-    @Override
     public byte[] encode(Map<String, Object> input) {
         return encodeInternal(input);
     }
@@ -167,14 +162,6 @@ public class MessagePackCodecImpl implements MessagePackCodec {
         for (; inIx < length; ++inIx) {
             stream.write(data.charAt(inIx));
         }
-    }
-
-    /* decoding */
-    @Override
-    public Object[] decodeArray(InputStream inputStream) throws IOException {
-        Object[] array = (Object[]) decodeInternal(inputStream);
-        inputStream.close();
-        return array;
     }
 
     @SuppressWarnings("unchecked")

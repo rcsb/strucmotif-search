@@ -58,7 +58,7 @@ public class ResiduePairOccurrence {
      * @param exchanges map of position-specific exchanges - may be empty
      * @return stream of all {@link ResiduePairDescriptor} instances formed
      */
-    public Stream<ResiduePairDescriptor> getResiduePairDescriptorsByTolerance(Parameters parameters, Map<LabelSelection, Set<ResidueType>> exchanges) {
+    public Stream<ResiduePairDescriptor> residuePairDescriptorsByTolerance(Parameters parameters, Map<LabelSelection, Set<ResidueType>> exchanges) {
         // we assign current component type for components without exchanges
         Set<ResidueType> residueTypes1 = exchanges.getOrDefault(residuePairIdentifier.getLabelSelection1(), Set.of(residuePairDescriptor.getResidueType1()));
         Set<ResidueType> residueTypes2 = exchanges.getOrDefault(residuePairIdentifier.getLabelSelection2(), Set.of(residuePairDescriptor.getResidueType2()));

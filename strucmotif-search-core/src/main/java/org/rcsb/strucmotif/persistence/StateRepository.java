@@ -8,7 +8,6 @@ import java.util.Collection;
  * The state of the application consists of three lists of {@link StructureIdentifier} instances:
  * <ul>
  *     <li><b>known:</b> entries that have been processed (might become invalid if e.g. alpha carbon trace)</li>
- *     <li><b>indexed:</b> all entries registered in the inverted index</li>
  *     <li><b>supported:</b> all valid entries that encompass the search space</li>
  *     <li><b>dirty:</b> all identifiers that could cause a corrupted state (if update fails during inverted index writing) - useful to recover</li>
  * </ul>

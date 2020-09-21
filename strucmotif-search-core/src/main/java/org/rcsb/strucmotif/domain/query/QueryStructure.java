@@ -28,7 +28,7 @@ public class QueryStructure {
     QueryStructure(Structure structure, List<ResiduePairOccurrence> residuePairOccurrences) {
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {
-            throw new IllegalArgumentException("did not find any residue pairs below 20 A in structure");
+            throw new IllegalArgumentException("did not find any residue pairs in structure");
         }
 
         // sort occurrences to ensure that no dangling words are encountered during path assembly

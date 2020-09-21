@@ -14,6 +14,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * Align 2 sets of residues by a quaternion-based characteristic polynomial. Finds a rigid transformation that will move
+ * the 2nd argument.
+ */
 @Service
 public class QuaternionAlignmentService implements AlignmentService {
     private static final double[][] IDENTITY_MATRIX_3D = new double[][] {
@@ -26,10 +30,10 @@ public class QuaternionAlignmentService implements AlignmentService {
     public AlignmentResult align(List<Residue> reference, List<Residue> candidate, AtomPairingScheme atomPairingScheme) {
         // validate parameters
         if (reference.size() != candidate.size()) {
-            throw new IllegalArgumentException("cannot align containers of unequal size - " + reference.size() + " vs " + candidate.size() +
-                    " : " + reference + " vs " + candidate);
+            throw new IllegalArgumentException("cannot align containers of unequal size - " + reference.size() + " vs "
+                    + candidate.size() + " : " + reference + " vs " + candidate);
         }
-        Objects.requireNonNull(atomPairingScheme, "pairing scheme cannot be null - use AtomPairingScheme.ALL instead");
+        Objects.requireNonNull(atomPairingScheme, "pairing scheme cannot be null");
 
         // find compatible combinations between reference and candidate atoms
         AtomCorrespondence atomCorrespondence = new AtomCorrespondence(reference, candidate, atomPairingScheme);
@@ -37,50 +41,49 @@ public class QuaternionAlignmentService implements AlignmentService {
     }
 
     /**
-     * Aligns 2 lists of 3D vectors by quaternion-based characteristic polynomial. (Like any class and function in this
-     * library...) this is not intended for generic use and has no safety nets. Both lists of reference and candidate
+     * Aligns 2 lists of 3D vectors by quaternion-based characteristic polynomial. Both lists of reference and candidate
      * points are expected to be equal of size. Furthermore, centroids have to be computed externally and points must be
      * centered.
      *
-     * code from: https://theobald.brandeis.edu/qcp/qcprot.c
+     * <p>base on code from: https://theobald.brandeis.edu/qcp/qcprot.c
      *
-     * Douglas L. Theobald (2005)
+     * <p>Douglas L. Theobald (2005)
      * "Rapid calculation of RMSD using a quaternion-based characteristic
      * polynomial."
      * Acta Crystallographica A 61(4):478-480.
      *
-     * Pu Liu, Dmitris K. Agrafiotis, and Douglas L. Theobald (2009)
+     * <p>Pu Liu, Dmitris K. Agrafiotis, and Douglas L. Theobald (2009)
      * "Fast determination of the optimal rotational matrix for macromolecular
      * superpositions."
      * Journal of Computational Chemistry 31(7):1561-1563.
      *
-     *  Copyright (c) 2009-2016 Pu Liu and Douglas L. Theobald
-     *  All rights reserved.
+     * <p>Copyright (c) 2009-2016 Pu Liu and Douglas L. Theobald
+     * All rights reserved.
      *
-     *  Redistribution and use in source and binary forms, with or without modification, are permitted
-     *  provided that the following conditions are met:
-     *  <ul>
-     *  <li>Redistributions of source code must retain the above copyright notice, this list of
-     *    conditions and the following disclaimer.</li>
-     *  <li>Redistributions in binary form must reproduce the above copyright notice, this list
-     *    of conditions and the following disclaimer in the documentation and/or other materials
-     *    provided with the distribution.</li>
-     *  <li>Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to
-     *    endorse or promote products derived from this software without specific prior written
-     *    permission.</li>
-     *  </ul>
+     * <p>Redistribution and use in source and binary forms, with or without modification, are permitted
+     * provided that the following conditions are met:
+     * <ul>
+     * <li>Redistributions of source code must retain the above copyright notice, this list of
+     *   conditions and the following disclaimer.</li>
+     * <li>Redistributions in binary form must reproduce the above copyright notice, this list
+     *   of conditions and the following disclaimer in the documentation and/or other materials
+     *   provided with the distribution.</li>
+     * <li>Neither the name of the <ORGANIZATION> nor the names of its contributors may be used to
+     *   endorse or promote products derived from this software without specific prior written
+     *   permission.</li>
+     * </ul>
      *
-     *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-     *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-     *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-     *  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-     *  HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-     *  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-     *  LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-     *  DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-     *  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-     *  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-     *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+     * <p>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+     * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+     * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+     * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+     * HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+     * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+     * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+     * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+     * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+     * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+     * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
      *
      * @param atomCorrespondence the paired/mapped atoms
      * @return an object describing the transformation

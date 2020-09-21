@@ -5,10 +5,10 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import java.util.List;
 
 /**
- * 'Root' of the data structure of 3D structure data. Hierarchy is {@link Structure} &gt; {@link Chain} &gt; {@link Residue}
- * &gt; {@link Atom}. However, this is not a typical data structure to represent structure data. It is somewhat unsafe to
- * use. Construction may also be not trivial, therefore constructors are package-private and everything is wrapped by
- * {@link StructureFactory}.
+ * 'Root' of the data structure of 3D structure data. Hierarchy is {@link Structure} &gt; {@link Chain} &gt;
+ * {@link Residue} &gt; {@link Atom}. However, this is not a typical data structure to represent structure data. It is
+ * somewhat unsafe to use. Construction may also be not trivial, therefore constructors are package-private and
+ * everything is wrapped by {@link StructureFactory}.
  */
 public class Structure {
     private final StructureIdentifier structureIdentifier;

@@ -30,6 +30,16 @@ public class HitScorerImpl implements HitScorer {
     }
 
     @Override
+    public double getRmsdCutoff() {
+        return rmsdCutoff;
+    }
+
+    @Override
+    public AtomPairingScheme getAtomPairingScheme() {
+        return atomPairingScheme;
+    }
+
+    @Override
     public Hit score(TargetStructure targetStructure, List<Residue> targetResidues) {
         AlignmentResult alignmentResult = alignment.align(queryResidues, targetResidues, atomPairingScheme);
 

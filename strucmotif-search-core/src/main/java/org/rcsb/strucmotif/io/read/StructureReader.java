@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.read;
 
-import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.ResidueSelection;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;

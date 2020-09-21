@@ -28,9 +28,9 @@ public class StructureFactory {
 
     /**
      * Construct a new chain. Lazily, applies a given transformation on the chain. This makes creation lightweight but
-     * will require time when the components are accessed for the first time.
+     * will require time when the residues are accessed for the first time.
      * @param chainIdentifier its identifier
-     * @param residues all components present in this chain
+     * @param residues all residues present in this chain
      * @param transformation the transformation: neutral to do 'nothing'
      * @return the constructed Chain instance
      */

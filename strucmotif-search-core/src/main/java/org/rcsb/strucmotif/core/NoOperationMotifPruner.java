@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Don't prune query motif. Merely extract all {@link ResiduePairOccurrence} instances.
+ */
 @Service
 public class NoOperationMotifPruner implements MotifPruner {
     private final MotifSearchConfig motifSearchConfig;

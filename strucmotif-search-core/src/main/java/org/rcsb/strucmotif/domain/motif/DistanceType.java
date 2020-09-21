@@ -46,7 +46,7 @@ public enum DistanceType {
     D37,
     D38,
     D39,
-    D40;
+    D40; // this is the hard-limit for the distance between pairs
 
     public static final int BIN_SIZE = 1;
 

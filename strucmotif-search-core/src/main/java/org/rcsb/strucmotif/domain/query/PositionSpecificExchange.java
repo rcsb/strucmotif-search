@@ -52,7 +52,7 @@ public class PositionSpecificExchange {
     }
 
     /**
-     * The set of allowed component types at that position. Must explicitly include the original component type if that
+     * The set of allowed component types at that position. Must explicitly include the original residue type if that
      * should still be allowed.
      * @return all types that can occur at this position
      */

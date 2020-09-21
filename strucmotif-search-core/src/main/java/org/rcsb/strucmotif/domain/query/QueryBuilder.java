@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
+import org.rcsb.strucmotif.config.MotifPruningStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;

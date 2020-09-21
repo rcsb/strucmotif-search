@@ -26,11 +26,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-/**
- * Assembles the set of target structures to evaluate by focusing on the paths through targets. Basically, this is
- * subgraph isomorphism: the query is a graph and we want to find all target structures which contain this query as a
- * subgraph.
- */
 @Service
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
@@ -63,7 +58,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             Map<StructureIdentifier, ResiduePairIdentifier[]> residuePairIdentifiers;
             // asked to honor entry-level white- or blacklist
             if (whitelist || blacklist) {
-                residuePairIdentifiers = residuePairOccurrence.getResiduePairDescriptorsByTolerance(parameters, exchanges)
+                residuePairIdentifiers = residuePairOccurrence.residuePairDescriptorsByTolerance(parameters, exchanges)
                         .flatMap(invertedIndex::select)
                         // if there is a whitelist, this entry has to occur therein
                         .filter(pair -> !whitelist || query.getWhitelist().contains(pair.getFirst()))
@@ -72,7 +67,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                         .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat));
             } else {
                 // standard mode: accepted everybody
-                residuePairIdentifiers = residuePairOccurrence.getResiduePairDescriptorsByTolerance(parameters, exchanges)
+                residuePairIdentifiers = residuePairOccurrence.residuePairDescriptorsByTolerance(parameters, exchanges)
                         .flatMap(invertedIndex::select)
                         .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat));
             }

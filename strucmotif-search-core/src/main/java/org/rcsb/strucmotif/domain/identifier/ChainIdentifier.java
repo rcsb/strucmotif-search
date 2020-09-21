@@ -3,8 +3,8 @@ package org.rcsb.strucmotif.domain.identifier;
 import java.util.Objects;
 
 /**
- * An unique identifier for chains. Keeps track if this chain was created by applying a transformation (during
- * bioassembly handling).
+ * A unique identifier for chains. Keeps track if this chain was created by applying a transformation (during generation
+ * of bioassemblies).
  */
 public class ChainIdentifier {
     private final String labelAsymId;

@@ -19,17 +19,20 @@ public class Hit {
     private final LabelSelection[] selection;
     private final ResidueType[] residueTypes;
     private final double rootMeanSquareDeviation;
+    private final int descriptorScore;
     private final double[] transformation;
 
     public Hit(StructureIdentifier structureIdentifier,
                LabelSelection[] selection,
                ResidueType[] residueTypes,
                double rootMeanSquareDeviation,
+               int descriptorScore,
                double[] transformation) {
         this.structureIdentifier = structureIdentifier;
         this.selection = selection;
         this.residueTypes = residueTypes;
         this.rootMeanSquareDeviation = rootMeanSquareDeviation;
+        this.descriptorScore = descriptorScore;
         this.transformation = transformation;
     }
 
@@ -47,6 +50,10 @@ public class Hit {
 
     public double getRootMeanSquareDeviation() {
         return rootMeanSquareDeviation;
+    }
+
+    public int getDescriptorScore() {
+        return descriptorScore;
     }
 
     public double[] getTransformation() {

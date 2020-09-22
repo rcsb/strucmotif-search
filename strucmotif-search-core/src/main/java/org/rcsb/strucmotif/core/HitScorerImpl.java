@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.core;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
@@ -40,8 +41,8 @@ public class HitScorerImpl implements HitScorer {
     }
 
     @Override
-    public Hit score(TargetStructure targetStructure, List<Residue> targetResidues) {
-        AlignmentResult alignmentResult = alignment.align(queryResidues, targetResidues, atomPairingScheme);
+    public Hit score(TargetStructure targetStructure, Pair<List<Residue>, Integer> targetResidues) {
+        AlignmentResult alignmentResult = alignment.align(queryResidues, targetResidues.getFirst(), atomPairingScheme);
 
         // filtered hits are reported as null, this feels hacky but should save some time
         if (rmsdCutoff < alignmentResult.getScore().doubleValue()) {
@@ -74,6 +75,7 @@ public class HitScorerImpl implements HitScorer {
                 selection,
                 residueTypes,
                 alignmentResult.getScore().doubleValue(),
+                targetResidues.getSecond(),
                 transformation);
     }
 }

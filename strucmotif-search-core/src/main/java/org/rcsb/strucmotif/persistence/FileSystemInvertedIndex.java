@@ -82,13 +82,13 @@ public class FileSystemInvertedIndex implements InvertedIndex {
             InputStream inputStream = getInputStream(residuePairDescriptor);
 
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            return getPairs(inputStream, residuePairDescriptor.isFlipped());
+            return getPairs(inputStream, residuePairDescriptor);
         } catch (IOException e) {
             return Stream.empty();
         }
     }
 
-    private Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> getPairs(InputStream inputStream, boolean flipped) throws IOException {
+    private Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> getPairs(InputStream inputStream, ResiduePairDescriptor residuePairDescriptor) throws IOException {
         return getData(inputStream)
                 .map(entry -> {
                     String id = entry.getKey();
@@ -96,13 +96,13 @@ public class FileSystemInvertedIndex implements InvertedIndex {
                     Object[] array = (Object[]) entry.getValue();
                     ResiduePairIdentifier[] value = new ResiduePairIdentifier[array.length];
                     for (int i = 0; i < array.length; i++) {
-                        value[i] = createResiduePairIdentifier(array[i], flipped);
+                        value[i] = createResiduePairIdentifier(array[i], residuePairDescriptor);
                     }
                     return new Pair<>(key, value);
                 });
     }
 
-    private ResiduePairIdentifier createResiduePairIdentifier(Object raw, boolean flipped) {
+    private ResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
         Object[] line = (Object[]) raw;
         int seq1 = (int) line[0];
         int seq2 = (int) line[1];
@@ -118,10 +118,10 @@ public class FileSystemInvertedIndex implements InvertedIndex {
             indexSelection2 = new IndexSelection(assembly2, seq2);
         }
 
-        if (flipped) {
-            return new ResiduePairIdentifier(indexSelection2, indexSelection1);
+        if (residuePairDescriptor.isFlipped()) {
+            return new ResiduePairIdentifier(indexSelection2, indexSelection1, residuePairDescriptor);
         } else {
-            return new ResiduePairIdentifier(indexSelection1, indexSelection2);
+            return new ResiduePairIdentifier(indexSelection1, indexSelection2, residuePairDescriptor);
         }
     }
 

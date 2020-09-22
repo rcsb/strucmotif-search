@@ -39,9 +39,9 @@ public class ResiduePairDescriptor {
         this.sideChainDistance = sideChainDistance;
         this.angle = angle;
         if (reference != null) {
-            this.score = Math.abs(backboneDistance.getIntRepresentation() - reference.getBackboneDistance().getIntRepresentation()) +
-                    Math.abs(sideChainDistance.getIntRepresentation() - reference.getSideChainDistance().getIntRepresentation()) +
-                    Math.abs(angle.getIntRepresentation() - reference.getAngle().getIntRepresentation());
+            this.score = Math.abs(backboneDistance.ordinal() - reference.getBackboneDistance().ordinal()) +
+                    Math.abs(sideChainDistance.ordinal()- reference.getSideChainDistance().ordinal()) +
+                    Math.abs(angle.ordinal() - reference.getAngle().ordinal());
         } else {
             this.score = -1;
         }

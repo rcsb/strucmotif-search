@@ -182,7 +182,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         DistanceType d1 = DistanceType.ofIntRepresentation(Integer.parseInt(split[1]));
         DistanceType d2 = DistanceType.ofIntRepresentation(Integer.parseInt(split[2]));
         AngleType a = AngleType.ofIntRepresentation(Integer.parseInt(split[3]));
-        return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a);
+        return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a, null);
     }
 
     private void delete(ResiduePairDescriptor residuePairDescriptor, Collection<String> removals) {

@@ -174,7 +174,8 @@ public class ResidueGraphTest {
             ResidueType.ARGININE,
             DistanceType.D15,
             DistanceType.D14,
-            AngleType.A80);
+            AngleType.A80,
+            null);
 
     @Test
     public void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {

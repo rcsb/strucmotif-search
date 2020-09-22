@@ -36,12 +36,14 @@ public class InvertedIndexImplTest {
             ResidueType.ARGININE,
             DistanceType.D15,
             DistanceType.D14,
-            AngleType.A80);
+            AngleType.A80,
+            null);
     private static final ResiduePairDescriptor BIN_WITH_ASSEMBLY = new ResiduePairDescriptor(ResidueType.ALANINE,
             ResidueType.VALINE,
             DistanceType.D20,
             DistanceType.D20,
-            AngleType.A100);
+            AngleType.A100,
+            null);
 
     @Test
     public void whenAccessingSpecificBin_thenObserveAssemblies() {

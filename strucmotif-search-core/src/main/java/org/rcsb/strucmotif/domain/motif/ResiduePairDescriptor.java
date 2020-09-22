@@ -13,6 +13,7 @@ public class ResiduePairDescriptor {
     private final DistanceType backboneDistance;
     private final DistanceType sideChainDistance;
     private final AngleType angle;
+    private final int score;
     private final boolean flipped;
 
     /**
@@ -21,13 +22,15 @@ public class ResiduePairDescriptor {
      * @param residueType2 the second type
      * @param backboneDistance the backbone distance
      * @param sideChainDistance the side-chain distance
+     * @param reference the original descriptor which will be used to compute the distance of this descriptor - can be null
      * @param angle the angle
      */
     public ResiduePairDescriptor(ResidueType residueType1,
                                  ResidueType residueType2,
                                  DistanceType backboneDistance,
                                  DistanceType sideChainDistance,
-                                 AngleType angle) {
+                                 AngleType angle,
+                                 ResiduePairDescriptor reference) {
         // determine if need to implicitly flip
         this.flipped = residueType1.getOneLetterCode().compareTo(residueType2.getOneLetterCode()) > 0;
         this.residueType1 = flipped ? residueType2 : residueType1;
@@ -35,6 +38,13 @@ public class ResiduePairDescriptor {
         this.backboneDistance = backboneDistance;
         this.sideChainDistance = sideChainDistance;
         this.angle = angle;
+        if (reference != null) {
+            this.score = Math.abs(backboneDistance.getIntRepresentation() - reference.getBackboneDistance().getIntRepresentation()) +
+                    Math.abs(sideChainDistance.getIntRepresentation() - reference.getSideChainDistance().getIntRepresentation()) +
+                    Math.abs(angle.getIntRepresentation() - reference.getAngle().getIntRepresentation());
+        } else {
+            this.score = -1;
+        }
     }
 
     public ResidueType getResidueType1() {
@@ -55,6 +65,15 @@ public class ResiduePairDescriptor {
 
     public AngleType getAngle() {
         return angle;
+    }
+
+    /**
+     * Distance to the original descriptor during a structural motif search. Each difference in backbone, side-chain, or
+     * angle type increases this score by 1. Thus, 0 indicates perfect agreement with the descriptor in the query motif.
+     * @return an integer, <code>-1</code> if not set
+     */
+    public int getScore() {
+        return score;
     }
 
     @Override

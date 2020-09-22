@@ -163,7 +163,8 @@ public class Helpers {
                             residuePairDescriptor.getResidueType2(),
                             DistanceType.values()[ii],
                             DistanceType.values()[ij],
-                            AngleType.values()[ik]));
+                            AngleType.values()[ik],
+                            residuePairDescriptor));
                 }
             }
         }

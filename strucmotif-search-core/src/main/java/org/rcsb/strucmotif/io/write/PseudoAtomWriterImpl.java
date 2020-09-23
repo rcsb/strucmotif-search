@@ -38,17 +38,26 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
 
                 for (Residue residue : chain.getResidues()) {
                     ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
-                    Object[] atomData = new Object[] {
-                            chainId,
-                            residueIdentifier.getLabelSeqId(),
-                            residueIdentifier.getResidueType().getOneLetterCode(),
-                            (int) Math.round(residue.getBackboneCoordinates()[0] * 1000),
-                            (int) Math.round(residue.getBackboneCoordinates()[1] * 1000),
-                            (int) Math.round(residue.getBackboneCoordinates()[2] * 1000),
-                            (int) Math.round(residue.getSideChainCoordinates()[0] * 1000),
-                            (int) Math.round(residue.getSideChainCoordinates()[1] * 1000),
-                            (int) Math.round(residue.getSideChainCoordinates()[2] * 1000)
-                    };
+                    Object[] atomData;
+                    if (residue.getBackboneCoordinates() == null || residue.getSideChainCoordinates() == null) {
+                        atomData = new Object[] {
+                                chainId,
+                                residueIdentifier.getLabelSeqId(),
+                                residueIdentifier.getResidueType().getOneLetterCode()
+                        };
+                    } else {
+                        atomData = new Object[] {
+                                chainId,
+                                residueIdentifier.getLabelSeqId(),
+                                residueIdentifier.getResidueType().getOneLetterCode(),
+                                (int) Math.round(residue.getBackboneCoordinates()[0] * 1000),
+                                (int) Math.round(residue.getBackboneCoordinates()[1] * 1000),
+                                (int) Math.round(residue.getBackboneCoordinates()[2] * 1000),
+                                (int) Math.round(residue.getSideChainCoordinates()[0] * 1000),
+                                (int) Math.round(residue.getSideChainCoordinates()[1] * 1000),
+                                (int) Math.round(residue.getSideChainCoordinates()[2] * 1000)
+                        };
+                    }
 
                     assemblySpecificState.consume(residueIdentifier.getIndex(), atomData);
                 }

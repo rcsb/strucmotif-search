@@ -59,6 +59,7 @@ public class PseudoAtomReaderImpl implements PseudoAtomReader {
                         String bbName = residueType.getPolymerType() == PolymerType.AMINO_ACID ? "CA" : "C4'";
                         String scName = residueType.getPolymerType() == PolymerType.AMINO_ACID ? "CB" : "C1'";
 
+                        // this will throw NPE if residues with missing CA/CB are requested
                         double[] bbCoords = new double[] {
                                 (int) residueData[3] * 0.001,
                                 (int) residueData[4] * 0.001,

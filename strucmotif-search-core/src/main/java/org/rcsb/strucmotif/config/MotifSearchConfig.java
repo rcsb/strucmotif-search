@@ -56,10 +56,6 @@ public class MotifSearchConfig {
      * The URL where BinaryCIF data will be fetched from if not present locally.
      */
     private String bcifFetchUrl = "https://models.rcsb.org/%s.bcif";
-    /**
-     * Keep structure data in memory? See {@link InMemoryStrategy} for details.
-     */
-    private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -135,14 +131,6 @@ public class MotifSearchConfig {
 
     public void setMaxMotifSize(int maxMotifSize) {
         this.maxMotifSize = maxMotifSize;
-    }
-
-    public InMemoryStrategy getInMemoryStrategy() {
-        return inMemoryStrategy;
-    }
-
-    public void setInMemoryStrategy(InMemoryStrategy inMemoryStrategy) {
-        this.inMemoryStrategy = inMemoryStrategy;
     }
 
     public String getBcifFetchUrl() {

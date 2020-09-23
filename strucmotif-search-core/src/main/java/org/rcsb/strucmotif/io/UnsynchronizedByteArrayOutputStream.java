@@ -9,7 +9,7 @@ import java.util.Objects;
  * http://javatechniques.com/blog/faster-deep-copies-of-java-objects/
  * https://github.com/haraldk/TwelveMonkeys/blob/master/common/common-io/src/main/java/com/twelvemonkeys/io/FastByteArrayOutputStream.java
  */
-class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputStream {
+public class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputStream {
     private static final int DEFAULT_BUFFER_SIZE = 65536;
     /**
      * The maximum size of array to allocate.

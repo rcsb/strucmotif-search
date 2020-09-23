@@ -7,7 +7,7 @@ import java.io.OutputStream;
 /**
  * An optimized {@link DataOutputStream} without synchronization in its write methods.
  */
-class UnsynchronizedDataOutputStream extends DataOutputStream {
+public class UnsynchronizedDataOutputStream extends DataOutputStream {
     UnsynchronizedDataOutputStream(OutputStream out) {
         super(out);
     }

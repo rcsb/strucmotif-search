@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.persistence;
 
+import org.rcsb.cif.binary.codec.MessagePackCodec;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
@@ -9,7 +10,6 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.rcsb.strucmotif.io.MessagePackCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,11 +41,9 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
     private final Path basePath;
-    private final MessagePackCodec messagePackCodec;
 
-    public FileSystemInvertedIndex(MotifSearchConfig motifSearchConfig, MessagePackCodec messagePackCodec) {
+    public FileSystemInvertedIndex(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve("index");
-        this.messagePackCodec = messagePackCodec;
 
         ensureDirectoriesExist();
     }
@@ -67,7 +65,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
             map.forEach(data::put);
 
             // serialize message
-            byte[] bytes = messagePackCodec.encode(data);
+            byte[] bytes = MessagePackCodec.encode(data);
             Path path = getPath(residuePairDescriptor);
 
             Files.write(path, bytes);
@@ -126,7 +124,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     }
 
     private Stream<Map.Entry<String, Object>> getData(InputStream inputStream) throws IOException {
-        return messagePackCodec.decode(inputStream).entrySet().stream();
+        return MessagePackCodec.decode(inputStream).entrySet().stream();
     }
 
     protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
@@ -142,7 +140,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
 
     private Map<String, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
         try {
-            return messagePackCodec.decode(getInputStream(residuePairDescriptor));
+            return MessagePackCodec.decode(getInputStream(residuePairDescriptor));
         } catch (IOException e) {
             return Collections.emptyMap();
         }
@@ -202,7 +200,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             // serialize message
-            byte[] bytes = messagePackCodec.encode(filteredMap);
+            byte[] bytes = MessagePackCodec.encode(filteredMap);
             Path path = getPath(residuePairDescriptor);
 
             Files.write(path, bytes);

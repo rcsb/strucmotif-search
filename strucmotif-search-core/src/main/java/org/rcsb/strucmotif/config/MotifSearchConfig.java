@@ -47,7 +47,12 @@ public class MotifSearchConfig {
      * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
      * speed substantially. A value of 400 works good with 12GB of heap, the higher the faster.
      */
-    private int chunkSize = 400;
+    private int updateChunkSize = 400;
+    /**
+     * The chunk size that will be used to write structure data. Smaller values result in better performance but also
+     * will create more files.
+     */
+    private int structureChunkSize = 100;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -117,12 +122,20 @@ public class MotifSearchConfig {
         this.decimalPlacesMatrix = decimalPlacesMatrix;
     }
 
-    public int getChunkSize() {
-        return chunkSize;
+    public int getUpdateChunkSize() {
+        return updateChunkSize;
     }
 
-    public void setChunkSize(int chunkSize) {
-        this.chunkSize = chunkSize;
+    public void setUpdateChunkSize(int updateChunkSize) {
+        this.updateChunkSize = updateChunkSize;
+    }
+
+    public int getStructureChunkSize() {
+        return structureChunkSize;
+    }
+
+    public void setStructureChunkSize(int structureChunkSize) {
+        this.structureChunkSize = structureChunkSize;
     }
 
     public int getMaxMotifSize() {

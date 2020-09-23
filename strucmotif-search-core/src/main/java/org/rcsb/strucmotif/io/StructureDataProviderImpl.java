@@ -6,6 +6,8 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.ResidueSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.StructureReader;
+import org.rcsb.strucmotif.io.write.PseudoAtomWriter;
+import org.rcsb.strucmotif.io.write.PseudoAtomWriterImpl;
 import org.rcsb.strucmotif.io.write.RenumberedStructureWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final MotifSearchConfig motifSearchConfig;
 
     @Autowired
-    public StructureDataProviderImpl(StructureReader structureReader, RenumberedStructureWriter renumberedStructureWriter, MotifSearchConfig motifSearchConfig) {
+    public StructureDataProviderImpl(StructureReader structureReader,
+                                     RenumberedStructureWriter renumberedStructureWriter,
+                                     MotifSearchConfig motifSearchConfig) {
         this.structureReader = structureReader;
         this.renumberedStructureWriter = renumberedStructureWriter;
         this.motifSearchConfig = motifSearchConfig;

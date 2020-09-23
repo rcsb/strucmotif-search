@@ -129,10 +129,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
         long target = identifiers.size();
         logger.info("{} files to process in total", target);
 
-        Partition<StructureIdentifier> partitions = new Partition<>(identifiers, motifSearchConfig.getChunkSize());
+        Partition<StructureIdentifier> partitions = new Partition<>(identifiers, motifSearchConfig.getUpdateChunkSize());
         logger.info("Formed {} partitions of {} structures",
                 partitions.size(),
-                motifSearchConfig.getChunkSize());
+                motifSearchConfig.getUpdateChunkSize());
 
         Context context = new Context();
 
@@ -165,7 +165,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     private void handleStructureIdentifier(StructureIdentifier structureIdentifier, Context context) {
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + motifSearchConfig.getChunkSize() + "] [" + structureIdentifier.getPdbId();
+        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier.getPdbId();
 
         try {
             // write renumbered structure

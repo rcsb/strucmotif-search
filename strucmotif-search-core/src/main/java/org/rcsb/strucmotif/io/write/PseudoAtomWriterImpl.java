@@ -28,9 +28,8 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
     @Override
     public void write(Structure structure, Path destination) {
         try {
-            Files.createDirectories(destination);
+            // maps between assembly_id and corresponding state
             Map<Integer, State> stateMap = new HashMap<>();
-
             for (Chain chain : structure.getChains()) {
                 ChainIdentifier chainIdentifier = chain.getChainIdentifier();
                 String chainId = chainIdentifier.getLabelAsymId();

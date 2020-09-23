@@ -23,7 +23,7 @@ public class UnsynchronizedByteArrayOutputStream extends ByteArrayOutputStream {
      * Creates a new {@code ByteArrayOutputStream}. The buffer capacity is
      * initially 65536 bytes, though its size increases if necessary.
      */
-    UnsynchronizedByteArrayOutputStream() {
+    public UnsynchronizedByteArrayOutputStream() {
         super(DEFAULT_BUFFER_SIZE);
     }
 

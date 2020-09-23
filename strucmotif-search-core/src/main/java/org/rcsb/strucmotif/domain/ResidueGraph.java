@@ -169,7 +169,7 @@ public class ResidueGraph {
      * @param residue2 second
      * @return the distance
      */
-    public double getInteractionAnchorDistance(Residue residue1, Residue residue2) {
+    public double getSideChainDistance(Residue residue1, Residue residue2) {
         try {
             return sideChainDistances.get(residue1).get(residue2);
         } catch (NullPointerException e1) {
@@ -256,7 +256,7 @@ public class ResidueGraph {
 
         // determine values
         DistanceType backboneDistance = DistanceType.ofDistance(getBackboneDistance(residue1, residue2));
-        DistanceType sideChainDistance = DistanceType.ofDistance(getInteractionAnchorDistance(residue1, residue2));
+        DistanceType sideChainDistance = DistanceType.ofDistance(getSideChainDistance(residue1, residue2));
         AngleType angle = AngleType.ofAngle(getAngle(residue1, residue2));
 
         ResiduePairDescriptor residuePairDescriptor = new ResiduePairDescriptor(residueType1,

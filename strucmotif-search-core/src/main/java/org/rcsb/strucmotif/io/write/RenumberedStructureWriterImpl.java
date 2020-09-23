@@ -31,7 +31,7 @@ import java.nio.file.Path;
  *     <li>label_seq_id</li>
  *     <li>label_comp_id</li>
  *     <li>label_atom_id</li>
- *     <li>1-digit precision coordinates</li>
+ *     <li>3-digit precision coordinates</li>
  *     <li>entry identifier and data used for assembly generation</li>
  * </ul>
  * <p>This implementation ignores:
@@ -45,9 +45,6 @@ import java.nio.file.Path;
 @Service
 public class RenumberedStructureWriterImpl implements RenumberedStructureWriter {
     private static final CifOptions OPTIONS = CifOptions.builder()
-            .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
-            .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)
-            .encodingStrategyHint("atom_site", "Cartn_z", "delta", 1)
             .gzip(true)
             .build();
 

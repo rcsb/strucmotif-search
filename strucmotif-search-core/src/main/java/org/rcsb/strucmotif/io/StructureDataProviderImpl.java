@@ -185,10 +185,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     @Override
     public void deleteChunked(StructureIdentifier structureIdentifier) {
         try {
-            Files.walk(getChunkedStructureDirectory(structureIdentifier))
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(File::delete);
+            Path chunkedPath = getChunkedStructureDirectory(structureIdentifier);
+            if (Files.exists(chunkedPath)) {
+                Files.walk(chunkedPath)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

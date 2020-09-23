@@ -39,14 +39,8 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
                 for (Residue residue : chain.getResidues()) {
                     ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
                     Object[] atomData;
-                    if (residue.getBackboneCoordinates() == null || residue.getSideChainCoordinates() == null) {
-                        atomData = new Object[] {
-                                chainId,
-                                residueIdentifier.getLabelSeqId(),
-                                residueIdentifier.getResidueType().getOneLetterCode()
-                        };
-                    } else {
-                        atomData = new Object[] {
+                    try {
+                        atomData = new Object[]{
                                 chainId,
                                 residueIdentifier.getLabelSeqId(),
                                 residueIdentifier.getResidueType().getOneLetterCode(),
@@ -56,6 +50,12 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
                                 (int) Math.round(residue.getSideChainCoordinates()[0] * 1000),
                                 (int) Math.round(residue.getSideChainCoordinates()[1] * 1000),
                                 (int) Math.round(residue.getSideChainCoordinates()[2] * 1000)
+                        };
+                    } catch (NullPointerException e) {
+                        atomData = new Object[] {
+                                chainId,
+                                residueIdentifier.getLabelSeqId(),
+                                residueIdentifier.getResidueType().getOneLetterCode()
                         };
                     }
 

@@ -20,8 +20,8 @@ public interface HitScorer {
     Hit score(TargetStructure targetStructure, List<Residue> targetResidues);
 
     /**
-     * The value above which {@link this#score(TargetStructure, List)} will return <code>null</code> rather than a
-     * result instance. By contract, this will be used to filter away hits that aren't desired in the result set.
+     * The value above which null will be returned rather than a result instance. By contract, this will be used to
+     * filter away hits that aren't desired in the result set.
      * @return the RMSD threshold for filtering
      */
     double getRmsdCutoff();

@@ -171,7 +171,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
-            // write chunked
         } catch (IOException e) {
             throw new UncheckedIOException("cif parsing failed for " + structureIdentifier, e);
         }

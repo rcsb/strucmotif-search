@@ -110,10 +110,10 @@ public class FileSystemInvertedIndex implements InvertedIndex {
             indexSelection1 = new IndexSelection(seq1);
             indexSelection2 = new IndexSelection(seq2);
         } else {
-            int assembly1 = (int) line[2];
-            int assembly2 = (int) line[3];
-            indexSelection1 = new IndexSelection(assembly1, seq1);
-            indexSelection2 = new IndexSelection(assembly2, seq2);
+            String structOperId1 = (String) line[2];
+            String structOperId2 = (String) line[3];
+            indexSelection1 = new IndexSelection(structOperId1, seq1);
+            indexSelection2 = new IndexSelection(structOperId2, seq2);
         }
 
         if (flipped) {
@@ -233,18 +233,19 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     }
 
     // this has to return Integer[] and cannot be primitive array
-    private Integer[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
+    private Object[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
         IndexSelection identifier1 = residuePairIdentifier.getIndexSelection1();
-        int assemblyId1 = identifier1.getAssemblyId();
+        String structOperId1 = identifier1.getStructOperId();
         int seqId1 = identifier1.getIndex();
         IndexSelection identifier2 = residuePairIdentifier.getIndexSelection2();
-        int assemblyId2 = identifier2.getAssemblyId();
+        String structOperId2 = identifier2.getStructOperId();
         int seqId2 = identifier2.getIndex();
 
-        if (assemblyId1 == 1 && assemblyId2 == 1) {
-            return new Integer[] { seqId1, seqId2 };
+        // implicitly: don't write struct_oper_id if identity
+        if ("1".equals(structOperId1) && "1".equals(structOperId2)) {
+            return new Object[] { seqId1, seqId2 };
         } else {
-            return new Integer[] { seqId1, seqId2, assemblyId1, assemblyId2 };
+            return new Object[] { seqId1, seqId2, structOperId1, structOperId2 };
         }
     }
 }

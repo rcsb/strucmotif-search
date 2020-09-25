@@ -18,9 +18,9 @@ public class IndexSelectionResolver implements SelectionResolver<IndexSelection>
         this.forward = new HashMap<>();
         this.backward = new HashMap<>();
         for (Chain chain : structure.getChains()) {
-            int assemblyId = chain.getChainIdentifier().getAssemblyId();
+            String structOperId = chain.getChainIdentifier().getStructOperId();
             for (Residue residue : chain.getResidues()) {
-                IndexSelection selector = new IndexSelection(assemblyId, residue.getResidueIdentifier().getIndex());
+                IndexSelection selector = new IndexSelection(structOperId, residue.getResidueIdentifier().getIndex());
                 forward.put(residue, selector);
                 backward.put(selector, residue);
             }

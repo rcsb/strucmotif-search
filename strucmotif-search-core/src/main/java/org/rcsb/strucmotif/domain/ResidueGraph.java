@@ -43,11 +43,11 @@ public class ResidueGraph {
         int size = 0;
         for (int chainId1 = 0; chainId1 < structure.getChains().size(); chainId1++) {
             Chain chain1 = structure.getChains().get(chainId1);
-            int assemblyId1 = chain1.getChainIdentifier().getAssemblyId();
+            String assemblyId1 = chain1.getChainIdentifier().getStructOperId();
             String labelAsymId1 = chain1.getChainIdentifier().getLabelAsymId();
 
             // dominant chain has to be original
-            if (!chain1.getChainIdentifier().isOriginal()) {
+            if (!chain1.isNeutral()) {
                 continue;
             }
 
@@ -69,7 +69,7 @@ public class ResidueGraph {
 
                     for (int chainId2 = chainId1; chainId2 < structure.getChains().size(); chainId2++) {
                         Chain chain2 = structure.getChains().get(chainId2);
-                        int assemblyId2 = chain2.getChainIdentifier().getAssemblyId();
+                        String assemblyId2 = chain2.getChainIdentifier().getStructOperId();
                         String labelAsymId2 = chain2.getChainIdentifier().getLabelAsymId();
 
                         for (int residueId2 = 0; residueId2 < chain2.getResidues().size(); residueId2++) {

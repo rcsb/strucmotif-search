@@ -15,6 +15,7 @@ public class Chain {
     private final List<Residue> residues;
     private final List<Residue> transformedResidues;
     private final double[][] transformation;
+    private final boolean neutral;
 
     /**
      * Construct a new chain. Lazily, applies a given transformation on the chain. This makes creation lightweight but
@@ -27,7 +28,7 @@ public class Chain {
         this.chainIdentifier = chainIdentifier;
         this.residues = residues;
 
-        boolean neutral = Arrays.deepEquals(Matrix4DTransformation.IDENTITY_MATRIX_4D, transformation);
+        this.neutral = Arrays.deepEquals(Matrix4DTransformation.IDENTITY_MATRIX_4D, transformation);
         this.transformedResidues = neutral ? residues : new ArrayList<>(residues.size());
         this.transformation = transformation;
 
@@ -57,6 +58,14 @@ public class Chain {
         }
 
         return transformedResidues;
+    }
+
+    /**
+     * Report if this chain was created by transforming original coordinates.
+     * @return <code>true</code> if 'original' chain
+     */
+    public boolean isNeutral() {
+        return neutral;
     }
 
     @Override

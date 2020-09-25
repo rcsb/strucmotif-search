@@ -23,25 +23,25 @@ public enum Overlap {
      */
     public static Overlap ofResiduePairIdentifiers(ResiduePairIdentifier residuePairIdentifier1, ResiduePairIdentifier residuePairIdentifier2) {
         IndexSelection indexSelection1Left = residuePairIdentifier1.getIndexSelection1();
-        int indexSelection1LeftAssemblyId = indexSelection1Left.getAssemblyId();
+        String indexSelection1LeftStructOperId = indexSelection1Left.getStructOperId();
         int indexSelection1LeftIndex = indexSelection1Left.getIndex();
         IndexSelection indexSelection1Right = residuePairIdentifier1.getIndexSelection2();
-        int indexSelection1RightAssemblyId = indexSelection1Right.getAssemblyId();
+        String indexSelection1RightStructOperId = indexSelection1Right.getStructOperId();
         int indexSelection1RightIndex = indexSelection1Right.getIndex();
         IndexSelection indexSelection2Left = residuePairIdentifier2.getIndexSelection1();
-        int indexSelection2LeftAssemblyId = indexSelection2Left.getAssemblyId();
+        String indexSelection2LeftStructOperId = indexSelection2Left.getStructOperId();
         int indexSelection2LeftIndex = indexSelection2Left.getIndex();
         IndexSelection indexSelection2Right = residuePairIdentifier2.getIndexSelection2();
-        int indexSelection2RightAssemblyId = indexSelection2Right.getAssemblyId();
+        String indexSelection2RightStructOperId = indexSelection2Right.getStructOperId();
         int indexSelection2RightIndex = indexSelection2Right.getIndex();
 
-        boolean equal1Left2Left = indexSelection1LeftAssemblyId == indexSelection2LeftAssemblyId &&
+        boolean equal1Left2Left = indexSelection1LeftStructOperId.equals(indexSelection2LeftStructOperId) &&
                 indexSelection1LeftIndex == indexSelection2LeftIndex;
-        boolean equal1Left2Right = indexSelection1LeftAssemblyId == indexSelection2RightAssemblyId &&
+        boolean equal1Left2Right = indexSelection1LeftStructOperId.equals(indexSelection2RightStructOperId) &&
                 indexSelection1LeftIndex == indexSelection2RightIndex;
-        boolean equal2Left1Right = indexSelection1RightAssemblyId == indexSelection2LeftAssemblyId &&
+        boolean equal2Left1Right = indexSelection1RightStructOperId.equals(indexSelection2LeftStructOperId) &&
                 indexSelection1RightIndex == indexSelection2LeftIndex;
-        boolean equal2Left2Right = indexSelection1RightAssemblyId == indexSelection2RightAssemblyId &&
+        boolean equal2Left2Right = indexSelection1RightStructOperId.equals(indexSelection2RightStructOperId) &&
                 indexSelection1RightIndex == indexSelection2RightIndex;
 
         if (!equal1Left2Left && !equal1Left2Right && !equal2Left1Right && !equal2Left2Right) {

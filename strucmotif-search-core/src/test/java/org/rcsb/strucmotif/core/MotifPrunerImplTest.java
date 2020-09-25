@@ -32,9 +32,9 @@ public class MotifPrunerImplTest {
     @Test
     public void whenHds_thenPerformNoOperation() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"),
-                Set.of(new LabelSelection("B", 1, 42), // H
-                        new LabelSelection("B", 1, 87), // D
-                        new LabelSelection("C", 1, 47)));
+                Set.of(new LabelSelection("B", "1", 42), // H
+                        new LabelSelection("B", "1", 87), // D
+                        new LabelSelection("C", "1", 47)));
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(structure);
 
@@ -49,10 +49,10 @@ public class MotifPrunerImplTest {
     @Test
     public void whenEqir_thenPruneOnePairing() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1ec6"),
-                Set.of(new LabelSelection("D", 1, 11), // E, D14
-                        new LabelSelection("D", 1, 37), // Q, D40
-                        new LabelSelection("D", 1, 38), // I, D41
-                        new LabelSelection("D", 1, 51))); // R, D54
+                Set.of(new LabelSelection("D", "1", 11), // E, D14
+                        new LabelSelection("D", "1", 37), // Q, D40
+                        new LabelSelection("D", "1", 38), // I, D41
+                        new LabelSelection("D", "1", 51))); // R, D54
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(structure);
 

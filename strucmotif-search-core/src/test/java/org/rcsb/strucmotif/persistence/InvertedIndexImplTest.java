@@ -49,7 +49,7 @@ public class InvertedIndexImplTest {
                 .map(Pair::getSecond)
                 .flatMap(Arrays::stream)
                 .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
-                .anyMatch(indexSelector -> indexSelector.getAssemblyId() > 1));
+                .anyMatch(indexSelector -> !indexSelector.getStructOperId().equals("1")));
     }
 
     private static <T> T[] concat(T[] first, T[] second) {
@@ -69,7 +69,7 @@ public class InvertedIndexImplTest {
                 .stream()
                 .flatMap(Arrays::stream)
                 .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
-                .anyMatch(indexSelector -> indexSelector.getAssemblyId() > 1));
+                .anyMatch(indexSelector -> !indexSelector.getStructOperId().equals("1")));
 
         // assert that every occurrence has two identifiers
         assertTrue(map.values()

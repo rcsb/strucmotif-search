@@ -43,7 +43,7 @@ public class GenericTextStructureWriter {
 
         int counter = 0;
         for (Chain chain : structure.getChains()) {
-            String asymId = chain.getChainIdentifier().getLabelAsymId() + chain.getChainIdentifier().getAssemblyId();
+            String asymId = chain.getChainIdentifier().getLabelAsymId() + chain.getChainIdentifier().getStructOperId();
             String entityId = String.valueOf(structure.getChains().indexOf(chain) + 1);
             for (Residue residue : chain.getResidues()) {
                 String threeLetterCode = residue.getResidueIdentifier().getResidueType().getThreeLetterCode();

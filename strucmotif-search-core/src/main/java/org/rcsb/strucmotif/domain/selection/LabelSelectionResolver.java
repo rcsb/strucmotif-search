@@ -21,9 +21,9 @@ public class LabelSelectionResolver implements SelectionResolver<LabelSelection>
         for (Chain chain : structure.getChains()) {
             ChainIdentifier chainIdentifier = chain.getChainIdentifier();
             String labelAsymId = chainIdentifier.getLabelAsymId();
-            int assemblyId = chainIdentifier.getAssemblyId();
+            String structOperId = chainIdentifier.getStructOperId();
             for (Residue residue : chain.getResidues()) {
-                LabelSelection selector = new LabelSelection(labelAsymId, assemblyId, residue.getResidueIdentifier().getLabelSeqId());
+                LabelSelection selector = new LabelSelection(labelAsymId, structOperId, residue.getResidueIdentifier().getLabelSeqId());
                 forward.put(residue, selector);
                 backward.put(selector, residue);
             }

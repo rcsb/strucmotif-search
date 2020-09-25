@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.align;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
@@ -130,17 +129,17 @@ public class QuaternionAlignmentTest {
     @Test
     public void whenAminopeptidaseExample_thenRmsdMatches() {
         Structure structure1 = structureReader.readFromInputStream(getOriginalBcif("1lap"),
-                List.of(new LabelSelection("A", 1, 250),
-                        new LabelSelection("A", 1, 255),
-                        new LabelSelection("A", 1, 273),
-                        new LabelSelection("A", 1, 332),
-                        new LabelSelection("A", 1, 334)));
+                List.of(new LabelSelection("A", "1", 250),
+                        new LabelSelection("A", "1", 255),
+                        new LabelSelection("A", "1", 273),
+                        new LabelSelection("A", "1", 332),
+                        new LabelSelection("A", "1", 334)));
         Structure structure2 = structureReader.readFromInputStream(getOriginalBcif("3pei"),
-                List.of(new LabelSelection("A", 1, 251),
-                        new LabelSelection("A", 1, 256),
-                        new LabelSelection("A", 1, 274),
-                        new LabelSelection("A", 1, 333),
-                        new LabelSelection("A", 1, 335)));
+                List.of(new LabelSelection("A", "1", 251),
+                        new LabelSelection("A", "1", 256),
+                        new LabelSelection("A", "1", 274),
+                        new LabelSelection("A", "1", 333),
+                        new LabelSelection("A", "1", 335)));
 
         List<Residue> residues1 = structure1.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList());
         List<Residue> residues2 = structure2.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList());

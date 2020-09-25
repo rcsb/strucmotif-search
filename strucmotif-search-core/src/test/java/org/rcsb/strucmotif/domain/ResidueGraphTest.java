@@ -97,7 +97,7 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getAssemblyId(), lookupTargetIdentifier.getIndexSelection2().getAssemblyId()))
+                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
                 .distinct()
                 .count());
         assertEquals(162, residueGraph.residuePairOccurrencesParallel()
@@ -118,7 +118,7 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getAssemblyId(), lookupTargetIdentifier.getIndexSelection2().getAssemblyId()))
+                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
                 .distinct()
                 .count());
         assertEquals(528, residueGraph.residuePairOccurrencesParallel()
@@ -139,7 +139,7 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getAssemblyId(), lookupTargetIdentifier.getIndexSelection2().getAssemblyId()))
+                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
                 .distinct()
                 .count());
         assertEquals(162, residueGraph.residuePairOccurrencesParallel()
@@ -160,7 +160,7 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getAssemblyId(), lookupTargetIdentifier.getIndexSelection2().getAssemblyId()))
+                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
                 .distinct()
                 .count());
         assertEquals(528, residueGraph.residuePairOccurrencesParallel()
@@ -189,8 +189,8 @@ public class ResidueGraphTest {
         assertFalse(identifiers.isEmpty());
         assertTrue(identifiers.stream()
                 .flatMap(pair -> Stream.of(pair.getIndexSelection1(), pair.getIndexSelection2()))
-                .map(IndexSelection::getAssemblyId)
-                .anyMatch(id -> id > 1));
+                .map(IndexSelection::getStructOperId)
+                .anyMatch(id -> !id.equals("1")));
     }
 
     @Test

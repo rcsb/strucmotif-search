@@ -48,13 +48,13 @@ public class Helpers {
 
         int aIndex = 0;
         for (IndexSelection indexSelection : selection) {
-            String key = structureIdentifier.getPdbId() + ":" + indexSelection.getAssemblyId() + ":" + indexSelection.getIndex();
+            String key = structureIdentifier.getPdbId() + ":" + indexSelection.getStructOperId() + ":" + indexSelection.getIndex();
             String res = structureData.get(key);
 
             String[] split = res.split(", ");
             String chainId = split[0];
             int seqId = Integer.parseInt(split[1]);
-            ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, indexSelection.getAssemblyId());
+            ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, indexSelection.getStructOperId());
             ResidueType residueType = ResidueType.ofOneLetterCode(split[2]);
             ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, seqId, indexSelection.getIndex());
             List<Atom> atoms = new ArrayList<>();
@@ -101,14 +101,14 @@ public class Helpers {
             String[] innerSplit = outerSplit[i].split(",");
             int index1 = Integer.parseInt(innerSplit[0]);
             int index2 = Integer.parseInt(innerSplit[1]);
-            int assemblyId1 = 1;
-            int assemblyId2 = 1;
+            String structOperId1 = "1";
+            String structOperId2 = "1";
             if (innerSplit.length == 4) {
-                assemblyId1 = Integer.parseInt(innerSplit[2]);
-                assemblyId2 = Integer.parseInt(innerSplit[3]);
+                structOperId1 = innerSplit[2];
+                structOperId2 = innerSplit[3];
             }
-            IndexSelection indexSelection1 = new IndexSelection(assemblyId1, index1);
-            IndexSelection indexSelection2 = new IndexSelection(assemblyId2, index2);
+            IndexSelection indexSelection1 = new IndexSelection(structOperId1, index1);
+            IndexSelection indexSelection2 = new IndexSelection(structOperId2, index2);
             if (flipped) {
                 value[i - 1] = new ResiduePairIdentifier(indexSelection2, indexSelection1);
             } else {

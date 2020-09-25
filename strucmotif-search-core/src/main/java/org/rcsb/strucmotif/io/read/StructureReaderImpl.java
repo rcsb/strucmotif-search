@@ -27,6 +27,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +70,7 @@ public class StructureReaderImpl implements StructureReader {
         private final double[] cartnZ;
 
         // used during scoring of hits: obtain specific set of entities
-        private final Set<Integer> selectedAssemblies;
+        private final Set<String> selectedAssemblies;
         private final Collection<? extends ResidueSelection> selection;
 
         // the 'state'
@@ -109,7 +110,7 @@ public class StructureReaderImpl implements StructureReader {
                 this.residueBuffer = new ArrayList<>(100);
             } else {
                 this.selectedAssemblies = selection.stream()
-                        .map(ResidueSelection::getAssemblyId)
+                        .map(ResidueSelection::getStructOperId)
                         .collect(Collectors.toSet());
                 this.atomBuffer = new ArrayList<>(20);
                 this.residueBuffer = new ArrayList<>(selection.size());
@@ -226,15 +227,15 @@ public class StructureReaderImpl implements StructureReader {
          */
         private List<Residue> addChain() {
             if (residueBuffer.size() > 0) {
-                chains.add(new Pair<>(new ChainIdentifier(currentChain, 1), residueBuffer));
+                chains.add(new Pair<>(new ChainIdentifier(currentChain, "1"), residueBuffer));
                 return new ArrayList<>();
             }
             return residueBuffer;
         }
 
         private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
-        private List<double[][]> getTransformations(Map<String, double[][]> transformations, String operations) {
-            List<double[][]> composedTransformations = new ArrayList<>();
+        private Map<String, double[][]> getTransformations(Map<String, double[][]> transformations, String operations) {
+            Map<String, double[][]> composedTransformations = new LinkedHashMap<>();
 
             String[] split = OPERATION_PATTERN.split(operations);
             if (split.length > 1) {
@@ -242,13 +243,13 @@ public class StructureReaderImpl implements StructureReader {
                 List<String> ids2 = extractTransformationIds(split[1]);
                 for (String id1 : ids1) {
                     for (String id2 : ids2) {
-                        composedTransformations.add(multiply4d(transformations.get(id1), transformations.get(id2)));
+                        composedTransformations.put(id1 + "x" + id2, multiply4d(transformations.get(id1), transformations.get(id2)));
                     }
                 }
             } else {
                 List<String> ids = extractTransformationIds(operations);
                 for (String id : ids) {
-                    composedTransformations.add(transformations.get(id));
+                    composedTransformations.put(id, transformations.get(id));
                 }
             }
 
@@ -302,21 +303,19 @@ public class StructureReaderImpl implements StructureReader {
             Set<String> coveredAsymIds = new HashSet<>();
             if (pdbxStructAssemblyGen.isDefined() && pdbxStructAssemblyGen.getRowCount() > 0) {
                 for (int row = 0; row < pdbxStructAssemblyGen.getRowCount(); row++) {
-                    int assemblyId = 0;
                     String operExpression = pdbxStructAssemblyGen.getOperExpression().get(row);
                     List<String> asymIds = LIST.splitAsStream(pdbxStructAssemblyGen.getAsymIdList().get(row))
                             .collect(Collectors.toList());
 
-                    List<double[][]> transformations = getTransformations(matrices, operExpression);
-                    for (double[][] transformation : transformations) {
-                        assemblyId++;
-
+                    Map<String, double[][]> transformations = getTransformations(matrices, operExpression);
+                    for (Map.Entry<String, double[][]> transformation : transformations.entrySet()) {
                         for (String asymId : asymIds) {
                             if (row > 0 && coveredAsymIds.contains(asymId)) {
                                 continue;
                             }
 
-                            if (selectedAssemblies != null && selectedAssemblies.size() > 0 && !selectedAssemblies.contains(assemblyId)) {
+                            String operKey = transformation.getKey();
+                            if (selectedAssemblies != null && selectedAssemblies.size() > 0 && !selectedAssemblies.contains(operKey)) {
                                 continue;
                             }
 
@@ -331,9 +330,9 @@ public class StructureReaderImpl implements StructureReader {
                             Pair<ChainIdentifier, List<Residue>> originalChain = originalChainOptional.get();
 
                             chains.add(StructureFactory.createChain(new ChainIdentifier(originalChain.getFirst().getLabelAsymId(),
-                                            assemblyId),
+                                            operKey),
                                     originalChain.getSecond(),
-                                    transformation));
+                                    transformation.getValue()));
                             coveredAsymIds.add(asymId);
                         }
                     }

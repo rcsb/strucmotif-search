@@ -3,19 +3,19 @@ package org.rcsb.strucmotif.domain.selection;
 import java.util.Objects;
 
 /**
- * Identifies a residue unambiguously by assembly_id, and component index (in and only in the reduced/optimized
+ * Identifies a residue unambiguously by struct_oper_id, and component index (in and only in the reduced/optimized
  * archive representation). A highly specific way to reference residues used internally by the inverted index.
  */
 public class IndexSelection implements ResidueSelection {
-    private final int assemblyId;
+    private final String structOperId;
     private final int index;
 
     public IndexSelection(int index) {
-        this(1, index);
+        this("1", index);
     }
 
-    public IndexSelection(int assemblyId, int index) {
-        this.assemblyId = assemblyId;
+    public IndexSelection(String structOperId, int index) {
+        this.structOperId = structOperId;
         this.index = index;
     }
 
@@ -24,8 +24,8 @@ public class IndexSelection implements ResidueSelection {
     }
 
     @Override
-    public int getAssemblyId() {
-        return assemblyId;
+    public String getStructOperId() {
+        return structOperId;
     }
 
     @Override
@@ -39,16 +39,16 @@ public class IndexSelection implements ResidueSelection {
         if (o == null || getClass() != o.getClass()) return false;
         IndexSelection that = (IndexSelection) o;
         return index == that.index &&
-                assemblyId == that.assemblyId;
+                Objects.equals(structOperId, that.structOperId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(index, assemblyId);
+        return Objects.hash(structOperId, index);
     }
 
     @Override
     public String toString() {
-        return  assemblyId + "-" + index;
+        return structOperId + "-" + index;
     }
 }

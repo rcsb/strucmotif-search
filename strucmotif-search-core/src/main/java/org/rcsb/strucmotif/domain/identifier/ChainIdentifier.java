@@ -8,29 +8,25 @@ import java.util.Objects;
  */
 public class ChainIdentifier {
     private final String labelAsymId;
-    private final int assemblyId;
+    private final String structOperId;
 
-    public ChainIdentifier(String labelAsymId, int assemblyId) {
+    public ChainIdentifier(String labelAsymId, String structOperId) {
         this.labelAsymId = labelAsymId;
-        this.assemblyId = assemblyId;
+        this.structOperId = structOperId;
     }
 
     public String getLabelAsymId() {
         return labelAsymId;
     }
 
-    public int getAssemblyId() {
-        return assemblyId;
-    }
-
-    public boolean isOriginal() {
-        return assemblyId == 1;
+    public String getStructOperId() {
+        return structOperId;
     }
 
     @Override
     public String toString() {
         // label_asym_id are always String, assemblyIds are always int, concat is safe
-        return labelAsymId + assemblyId;
+        return labelAsymId + "_" + structOperId;
     }
 
     @Override
@@ -38,12 +34,12 @@ public class ChainIdentifier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChainIdentifier that = (ChainIdentifier) o;
-        return assemblyId == that.assemblyId &&
-                Objects.equals(labelAsymId, that.labelAsymId);
+        return Objects.equals(labelAsymId, that.labelAsymId) &&
+                Objects.equals(structOperId, that.structOperId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(labelAsymId, assemblyId);
+        return Objects.hash(labelAsymId, structOperId);
     }
 }

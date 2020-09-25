@@ -64,20 +64,20 @@ public class MotifSearchIntegrationTest {
     @Test
     public void whenSearchingForEnolaseSuperfamily_thenFindExchanges() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"),
-                Set.of(new LabelSelection("A", 1, 162), // K
-                        new LabelSelection("A", 1, 193), // D
-                        new LabelSelection("A", 1, 219), // E
-                        new LabelSelection("A", 1, 245), // E
-                        new LabelSelection("A", 1, 295))); // H
+                Set.of(new LabelSelection("A", "1", 162), // K
+                        new LabelSelection("A", "1", 193), // D
+                        new LabelSelection("A", "1", 219), // E
+                        new LabelSelection("A", "1", 245), // E
+                        new LabelSelection("A", "1", 295))); // H
 
         QueryBuilder.OptionalStepBuilder buildParameters = queryBuilder.defineByStructure(structure)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
                 .buildParameters()
-                .addPositionSpecificExchange(new LabelSelection("A", 1, 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
-                .addPositionSpecificExchange(new LabelSelection("A", 1, 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
-                .addPositionSpecificExchange(new LabelSelection("A", 1, 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
 
         MotifSearchResult response = buildParameters.buildQuery().run();
 

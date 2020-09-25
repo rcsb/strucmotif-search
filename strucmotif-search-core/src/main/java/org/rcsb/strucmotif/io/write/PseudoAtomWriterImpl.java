@@ -29,12 +29,12 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
     public void write(Structure structure, Path destination) {
         try {
             // maps between assembly_id and corresponding state
-            Map<Integer, State> stateMap = new HashMap<>();
+            Map<String, State> stateMap = new HashMap<>();
             for (Chain chain : structure.getChains()) {
                 ChainIdentifier chainIdentifier = chain.getChainIdentifier();
                 String chainId = chainIdentifier.getLabelAsymId();
-                int assemblyId = chainIdentifier.getAssemblyId();
-                State assemblySpecificState = stateMap.computeIfAbsent(assemblyId, k -> new State(destination, assemblyId));
+                String structOperId = chainIdentifier.getStructOperId();
+                State assemblySpecificState = stateMap.computeIfAbsent(structOperId, k -> new State(destination, structOperId));
 
                 for (Residue residue : chain.getResidues()) {
                     ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
@@ -73,14 +73,14 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
 
     class State {
         final Path structurePath;
-        final int assemblyId;
+        final String structOperId;
         final Map<String, Object> data;
         int chunkIndex;
         int residueIndex;
 
-        State(Path structurePath, int assemblyId) {
+        State(Path structurePath, String structOperId) {
             this.structurePath = structurePath;
-            this.assemblyId = assemblyId;
+            this.structOperId = structOperId;
             this.data = new LinkedHashMap<>();
             this.residueIndex = 0;
         }
@@ -95,7 +95,7 @@ public class PseudoAtomWriterImpl implements PseudoAtomWriter {
 
         void flush() throws IOException {
             byte[] bytes = MessagePackCodec.encode(data);
-            Files.write(structurePath.resolve(assemblyId + "-" + chunkIndex + ".msg"), bytes);
+            Files.write(structurePath.resolve(structOperId + "-" + chunkIndex + ".msg"), bytes);
             chunkIndex++;
             data.clear();
         }

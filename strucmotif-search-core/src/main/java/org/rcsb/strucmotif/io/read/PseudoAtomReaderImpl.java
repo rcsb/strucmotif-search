@@ -52,7 +52,7 @@ public class PseudoAtomReaderImpl implements PseudoAtomReader {
                         Object[] residueData = (Object[]) data.get(String.valueOf(indexSelection.getIndex()));
                         String chainId = (String) residueData[0];
                         int seqId = (int) residueData[1];
-                        ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, indexSelection.getAssemblyId());
+                        ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, indexSelection.getStructOperId());
                         ResidueType residueType = ResidueType.ofOneLetterCode((String) residueData[2]);
                         ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, seqId, indexSelection.getIndex());
 
@@ -98,6 +98,6 @@ public class PseudoAtomReaderImpl implements PseudoAtomReader {
     }
 
     private String mapToBin(IndexSelection indexSelection) {
-        return indexSelection.getAssemblyId() + "-" + ((int) (indexSelection.getIndex() * invertedChunkSize)) + ".msg";
+        return indexSelection.getStructOperId() + "-" + ((int) (indexSelection.getIndex() * invertedChunkSize)) + ".msg";
     }
 }

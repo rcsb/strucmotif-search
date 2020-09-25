@@ -49,10 +49,10 @@ public class MotifSearchConfig {
      */
     private int updateChunkSize = 400;
     /**
-     * The chunk size that will be used to write structure data. Smaller values result in better performance but also
-     * will create more files.
+     * The number of residues that will be written into 1 structure file. Smaller values result in better performance
+     * but also will create more files.
      */
-    private int structureChunkSize = 100;
+    private int structureChunkSize = 250;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */

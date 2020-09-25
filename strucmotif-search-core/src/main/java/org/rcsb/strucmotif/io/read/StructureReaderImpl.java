@@ -203,7 +203,7 @@ public class StructureReaderImpl implements StructureReader {
             addResidue();
             addChain();
 
-            return StructureFactory.createStructure(structureIdentifier, buildAssembly(chains));
+            return StructureFactory.createStructure(structureIdentifier, buildAssemblies(chains));
         }
 
         /**
@@ -278,11 +278,11 @@ public class StructureReaderImpl implements StructureReader {
         }
 
         /**
-         * Construct bioassembly from parsed chains and registered operations.
+         * Construct bioassemblies from parsed chains and registered operations.
          * @param asymChains 'raw' chains - mere mapping between identifiers and all components
          * @return all constructed chains
          */
-        private List<Chain> buildAssembly(List<Pair<ChainIdentifier, List<Residue>>> asymChains) {
+        private List<Chain> buildAssemblies(List<Pair<ChainIdentifier, List<Residue>>> asymChains) {
             List<Chain> chains = new ArrayList<>();
             Map<String, double[][]> matrices = IntStream.range(0, pdbxStructOperList.getRowCount())
                     .boxed()

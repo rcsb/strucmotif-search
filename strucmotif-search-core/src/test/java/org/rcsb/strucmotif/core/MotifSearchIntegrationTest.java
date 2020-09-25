@@ -84,7 +84,7 @@ public class MotifSearchIntegrationTest {
         List<String> observedExchanges = response.getHits()
                 .stream()
                 .map(Hit::getResidueTypes)
-                .map(a -> Arrays.stream(a).map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
+                .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
                 .collect(Collectors.toList());
 

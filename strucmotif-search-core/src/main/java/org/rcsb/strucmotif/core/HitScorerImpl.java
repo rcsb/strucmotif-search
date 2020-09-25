@@ -11,6 +11,7 @@ import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -52,12 +53,11 @@ public class HitScorerImpl implements HitScorer {
         SelectionResolver<LabelSelection> labelSelectionResolver = targetStructure.getLabelSelectionResolver();
         List<Residue> originalCandidate = alignmentResult.getOriginalCandidate();
 
-        LabelSelection[] selection = new LabelSelection[originalCandidate.size()];
-        ResidueType[] residueTypes = new ResidueType[originalCandidate.size()];
-        for (int i = 0; i < originalCandidate.size(); i++) {
-            Residue originalResidue = originalCandidate.get(i);
-            selection[i] = labelSelectionResolver.resolve(originalResidue);
-            residueTypes[i] = originalResidue.getResidueIdentifier().getResidueType();
+        List<LabelSelection> selection = new ArrayList<>();
+        List<ResidueType> residueTypes = new ArrayList<>();
+        for (Residue originalResidue : originalCandidate) {
+            selection.add(labelSelectionResolver.resolve(originalResidue));
+            residueTypes.add(originalResidue.getResidueIdentifier().getResidueType());
         }
 
         // flatten transformation into 1d array

@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -16,14 +17,14 @@ import java.util.stream.Collectors;
 public class Hit {
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("0.00");
     private final StructureIdentifier structureIdentifier;
-    private final LabelSelection[] selection;
-    private final ResidueType[] residueTypes;
+    private final List<LabelSelection> selection;
+    private final List<ResidueType> residueTypes;
     private final double rootMeanSquareDeviation;
     private final double[] transformation;
 
     public Hit(StructureIdentifier structureIdentifier,
-               LabelSelection[] selection,
-               ResidueType[] residueTypes,
+               List<LabelSelection> selection,
+               List<ResidueType> residueTypes,
                double rootMeanSquareDeviation,
                double[] transformation) {
         this.structureIdentifier = structureIdentifier;
@@ -37,11 +38,11 @@ public class Hit {
         return structureIdentifier;
     }
 
-    public LabelSelection[] getSelection() {
+    public List<LabelSelection> getSelection() {
         return selection;
     }
 
-    public ResidueType[] getResidueTypes() {
+    public List<ResidueType> getResidueTypes() {
         return residueTypes;
     }
 
@@ -60,7 +61,7 @@ public class Hit {
         Hit hit = (Hit) o;
         return Double.compare(hit.rootMeanSquareDeviation, rootMeanSquareDeviation) == 0 &&
                 Objects.equals(structureIdentifier, hit.structureIdentifier) &&
-                Arrays.equals(selection, hit.selection);
+                Objects.equals(selection, hit.selection);
     }
 
     @Override
@@ -72,8 +73,8 @@ public class Hit {
     @Override
     public String toString() {
         return structureIdentifier + " " +
-                Arrays.toString(selection) + " (" +
-                Arrays.stream(residueTypes).map(ResidueType::getThreeLetterCode).collect(Collectors.toList()) + ") " +
+                selection + " (" +
+                residueTypes.stream().map(ResidueType::getThreeLetterCode).collect(Collectors.toList()) + ") " +
                 DECIMAL_FORMAT.format(rootMeanSquareDeviation);
     }
 }

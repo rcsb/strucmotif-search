@@ -48,6 +48,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.pseudoAtomWriter = pseudoAtomWriter;
         this.motifSearchConfig = motifSearchConfig;
 
+        logger.info("Initializing structure data provider with structure chunk size: {}",
+                motifSearchConfig.getStructureChunkSize());
+
         boolean dataSourceHealthy;
         try {
             dataSourceHealthy = Files.list(Paths.get(motifSearchConfig.getDataSource()))
@@ -58,6 +61,10 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         logger.info("BinaryCIF data source at {} looks healthy: {}",
                 motifSearchConfig.getDataSource(),
                 dataSourceHealthy);
+        if (!dataSourceHealthy) {
+            logger.info("Will fetch structure data from {}",
+                    motifSearchConfig.getBcifFetchUrl());
+        }
     }
 
     private URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {

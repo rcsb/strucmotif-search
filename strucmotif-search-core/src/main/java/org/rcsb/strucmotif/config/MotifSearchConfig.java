@@ -49,11 +49,6 @@ public class MotifSearchConfig {
      */
     private int updateChunkSize = 400;
     /**
-     * The number of residues that will be written into 1 structure file. Smaller values result in better performance
-     * but also will create more files.
-     */
-    private int structureChunkSize = 250;
-    /**
      * The maximum motif size, any larger user input will be rejected.
      */
     private int maxMotifSize = 10;
@@ -128,14 +123,6 @@ public class MotifSearchConfig {
 
     public void setUpdateChunkSize(int updateChunkSize) {
         this.updateChunkSize = updateChunkSize;
-    }
-
-    public int getStructureChunkSize() {
-        return structureChunkSize;
-    }
-
-    public void setStructureChunkSize(int structureChunkSize) {
-        this.structureChunkSize = structureChunkSize;
     }
 
     public int getMaxMotifSize() {

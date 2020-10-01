@@ -108,10 +108,6 @@ public class Helpers {
             }
             IndexSelection indexSelection1 = new IndexSelection(structOperId1, index1);
             IndexSelection indexSelection2 = new IndexSelection(structOperId2, index2);
-            if (flipped) {
-                value[i - 1] = new ResiduePairIdentifier(indexSelection2, indexSelection1);
-            IndexSelection indexSelection1 = new IndexSelection(assemblyId1, index1);
-            IndexSelection indexSelection2 = new IndexSelection(assemblyId2, index2);
             if (residuePairDescriptor.isFlipped()) {
                 value[i - 1] = new ResiduePairIdentifier(indexSelection2, indexSelection1, residuePairDescriptor);
             } else {

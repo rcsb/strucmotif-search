@@ -14,16 +14,22 @@ public class ResiduePairIdentifier {
     private final IndexSelection indexSelection2;
     private final LabelSelection labelSelection1;
     private final LabelSelection labelSelection2;
+    private final int score;
 
-    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2) {
-        this(indexSelection1, indexSelection2, null, null);
+    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, ResiduePairDescriptor original) {
+        this(indexSelection1, indexSelection2, null, null, original);
     }
 
     public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2) {
+        this(indexSelection1, indexSelection2, labelSelection1, labelSelection2, null);
+    }
+
+    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2, ResiduePairDescriptor original) {
         this.indexSelection1 = indexSelection1;
         this.indexSelection2 = indexSelection2;
         this.labelSelection1 = labelSelection1;
         this.labelSelection2 = labelSelection2;
+        this.score = original != null ? original.getScore() : -1;
     }
 
     public IndexSelection getIndexSelection1() {
@@ -42,12 +48,20 @@ public class ResiduePairIdentifier {
         return labelSelection2;
     }
 
+    public int getScore() {
+        return score;
+    }
+
     public Stream<IndexSelection> indexSelections() {
         return Stream.of(indexSelection1, indexSelection2);
     }
 
     public boolean providesLabelSelection() {
         return labelSelection1 != null && labelSelection2 != null;
+    }
+
+    public boolean providesScore() {
+        return score != -1;
     }
 
     @Override

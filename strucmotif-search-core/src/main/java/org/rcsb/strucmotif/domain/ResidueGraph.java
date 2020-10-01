@@ -263,7 +263,8 @@ public class ResidueGraph {
                 residueType2,
                 backboneDistance,
                 sideChainDistance,
-                angle);
+                angle,
+                null);
         // IndexSelection is needed to build and match to lookup
         // LabelSelection is needed to be able to map position-specific exchanges accurately
         ResiduePairIdentifier residuePairIdentifier = new ResiduePairIdentifier(indexSelectionResolver.get(residue1),

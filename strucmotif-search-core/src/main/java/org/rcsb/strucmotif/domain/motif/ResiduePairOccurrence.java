@@ -107,7 +107,9 @@ public class ResiduePairOccurrence {
                                     residueType2,
                                     DistanceType.values()[ii],
                                     DistanceType.values()[ij],
-                                    AngleType.values()[ik]);
+                                    AngleType.values()[ik],
+                                    // track how different any tolerate deviation of this descriptor is from the original definition
+                                    residuePairDescriptor);
                             combinations.add(derivedResiduePairDescriptor);
                         }
                     }

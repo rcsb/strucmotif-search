@@ -80,13 +80,13 @@ public class FileSystemInvertedIndex implements InvertedIndex {
             InputStream inputStream = getInputStream(residuePairDescriptor);
 
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            return getPairs(inputStream, residuePairDescriptor.isFlipped());
+            return getPairs(inputStream, residuePairDescriptor);
         } catch (IOException e) {
             return Stream.empty();
         }
     }
 
-    private Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> getPairs(InputStream inputStream, boolean flipped) throws IOException {
+    private Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> getPairs(InputStream inputStream, ResiduePairDescriptor residuePairDescriptor) throws IOException {
         return getData(inputStream)
                 .map(entry -> {
                     String id = entry.getKey();
@@ -94,13 +94,13 @@ public class FileSystemInvertedIndex implements InvertedIndex {
                     Object[] array = (Object[]) entry.getValue();
                     ResiduePairIdentifier[] value = new ResiduePairIdentifier[array.length];
                     for (int i = 0; i < array.length; i++) {
-                        value[i] = createResiduePairIdentifier(array[i], flipped);
+                        value[i] = createResiduePairIdentifier(array[i], residuePairDescriptor);
                     }
                     return new Pair<>(key, value);
                 });
     }
 
-    private ResiduePairIdentifier createResiduePairIdentifier(Object raw, boolean flipped) {
+    private ResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
         Object[] line = (Object[]) raw;
         int seq1 = (int) line[0];
         int seq2 = (int) line[1];
@@ -116,10 +116,10 @@ public class FileSystemInvertedIndex implements InvertedIndex {
             indexSelection2 = new IndexSelection(structOperId2, seq2);
         }
 
-        if (flipped) {
-            return new ResiduePairIdentifier(indexSelection2, indexSelection1);
+        if (residuePairDescriptor.isFlipped()) {
+            return new ResiduePairIdentifier(indexSelection2, indexSelection1, residuePairDescriptor);
         } else {
-            return new ResiduePairIdentifier(indexSelection1, indexSelection2);
+            return new ResiduePairIdentifier(indexSelection1, indexSelection2, residuePairDescriptor);
         }
     }
 
@@ -180,7 +180,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         DistanceType d1 = DistanceType.ofIntRepresentation(Integer.parseInt(split[1]));
         DistanceType d2 = DistanceType.ofIntRepresentation(Integer.parseInt(split[2]));
         AngleType a = AngleType.ofIntRepresentation(Integer.parseInt(split[3]));
-        return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a);
+        return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a, null);
     }
 
     private void delete(ResiduePairDescriptor residuePairDescriptor, Collection<String> removals) {

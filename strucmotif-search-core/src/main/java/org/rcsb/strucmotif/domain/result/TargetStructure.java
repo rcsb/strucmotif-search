@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.result;
 
+import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -119,7 +120,7 @@ public class TargetStructure {
      * consumed directly.
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<List<Residue>> paths() {
+    public Stream<Pair<List<Residue>, Integer>> paths() {
         // determine selectors applicable during parsing
         Set<IndexSelection> indexSelections = new HashSet<>();
         // while traversing
@@ -136,11 +137,7 @@ public class TargetStructure {
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 
             return paths.stream()
-                    .map(this::mapToIndexSelection)
-                    // select each path
-                    .map(path -> path.stream()
-                            .map(indexSelectionResolver::resolve)
-                            .collect(Collectors.toList()));
+                    .map(path -> mapToResidues(path, indexSelectionResolver));
         } catch (Exception e) {
             // rarely happens when the index references a file not present in the selection-db
             // this is caused by entries that were removed from the archive but can be fixed by removing old entries from archive/index/componentDB
@@ -148,10 +145,16 @@ public class TargetStructure {
         }
     }
 
-    private List<IndexSelection> mapToIndexSelection(ResiduePairIdentifier[] identifiers) {
-        return Arrays.stream(identifiers)
+    private Pair<List<Residue>, Integer> mapToResidues(ResiduePairIdentifier[] identifiers, SelectionResolver<IndexSelection> indexSelectionSelectionResolver) {
+        int score = 0;
+        for (ResiduePairIdentifier identifier : identifiers) {
+            score += identifier.getScore();
+        }
+        return new Pair<>(Arrays.stream(identifiers)
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
-                .collect(Collectors.toList());
+                .map(indexSelectionSelectionResolver::resolve)
+                .collect(Collectors.toList()),
+                score);
     }
 }

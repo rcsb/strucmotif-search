@@ -80,20 +80,19 @@ public class Helpers {
 
     public static Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> mockInvertedIndexSelect(InvocationOnMock invocation) {
         ResiduePairDescriptor residuePairDescriptor = invocation.getArgument(0, ResiduePairDescriptor.class);
-        boolean flipped = residuePairDescriptor.isFlipped();
 
         try {
             InputStream inputStream = getResource("index/" + residuePairDescriptor.toString() + ".data");
             return new BufferedReader(new InputStreamReader(inputStream))
                     .lines()
-                    .map(line -> handleLine(line, flipped));
+                    .map(line -> handleLine(line, residuePairDescriptor));
         } catch (NullPointerException e) {
             // allowed to happen when empty bins are requested during operations with tolerance
             return Stream.empty();
         }
     }
 
-    private static Pair<StructureIdentifier, ResiduePairIdentifier[]> handleLine(String line, boolean flipped) {
+    private static Pair<StructureIdentifier, ResiduePairIdentifier[]> handleLine(String line, ResiduePairDescriptor residuePairDescriptor) {
         String[] outerSplit = line.split(":");
         StructureIdentifier key = new StructureIdentifier(outerSplit[0]);
         ResiduePairIdentifier[] value = new ResiduePairIdentifier[outerSplit.length - 1];
@@ -111,8 +110,12 @@ public class Helpers {
             IndexSelection indexSelection2 = new IndexSelection(structOperId2, index2);
             if (flipped) {
                 value[i - 1] = new ResiduePairIdentifier(indexSelection2, indexSelection1);
+            IndexSelection indexSelection1 = new IndexSelection(assemblyId1, index1);
+            IndexSelection indexSelection2 = new IndexSelection(assemblyId2, index2);
+            if (residuePairDescriptor.isFlipped()) {
+                value[i - 1] = new ResiduePairIdentifier(indexSelection2, indexSelection1, residuePairDescriptor);
             } else {
-                value[i - 1] = new ResiduePairIdentifier(indexSelection1, indexSelection2);
+                value[i - 1] = new ResiduePairIdentifier(indexSelection1, indexSelection2, residuePairDescriptor);
             }
         }
         return new Pair<>(key, value);
@@ -163,7 +166,8 @@ public class Helpers {
                             residuePairDescriptor.getResidueType2(),
                             DistanceType.values()[ii],
                             DistanceType.values()[ij],
-                            AngleType.values()[ik]));
+                            AngleType.values()[ik],
+                            residuePairDescriptor));
                 }
             }
         }

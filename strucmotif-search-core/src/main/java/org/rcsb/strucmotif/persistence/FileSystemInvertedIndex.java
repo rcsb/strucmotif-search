@@ -135,7 +135,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     private Path getPath(ResiduePairDescriptor residuePairDescriptor) {
         String bin = residuePairDescriptor.toString();
         String uberbin = bin.substring(0, 2);
-        return basePath.resolve(uberbin).resolve(bin + ".lu");
+        return basePath.resolve(uberbin).resolve(bin + ".msg");
     }
 
     private Map<String, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {

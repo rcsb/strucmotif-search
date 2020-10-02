@@ -60,8 +60,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             // get all valid targets
             targetAssembler.assemble(result);
 
-            HitScorer hitScorer = new HitScorerImpl(queryStructure, parameters.getRmsdCutoff(), parameters.getAtomPairingScheme(), alignment);
-            List<Hit> hits = scoreHits(parameters, result, hitScorer);
+            HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(queryStructure, parameters.getRmsdCutoff(), parameters.getAtomPairingScheme(), alignment);
+            List<TransformedHitO> hits = scoreHits(parameters, result, hitScorer);
             logger.info("Accepted {} hits in {} ms",
                     hits.size(),
                     result.getTimings().getStructuresTime());
@@ -80,35 +80,18 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     }
 
     private List<Hit> scoreHits(Parameters parameters, MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-        boolean honorLimit = parameters.hasLimit() || motifSearchConfig.getMaxResults() > 0;
         result.getTimings().structuresStart();
-        List<Hit> hits = honorLimit ?
-                scoreHitsLimited(result, hitScorer, Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults())) :
-                scoreHitsUnlimited(result, hitScorer);
-        result.getTimings().structuresStop();
-        return hits;
-    }
-
-    private List<Hit> scoreHitsLimited(MotifSearchResult result, HitScorer hitScorer, int limit) throws ExecutionException, InterruptedException {
-        return threadPool.submit(() -> result.getTargetStructures()
+        int limit = Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults());
+        List<Hit> hits = threadPool.submit(() -> result.getTargetStructures()
                 .values()
                 .parallelStream()
                 .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))
-                // hits filtered by high RMSD value are reported as null
+                // hits filtered by by threshold are reported as null
                 .filter(Objects::nonNull)
                 .limit(limit)
                 .collect(Collectors.toList()))
                 .get();
-    }
-
-    private List<Hit> scoreHitsUnlimited(MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
-        return threadPool.submit(() -> result.getTargetStructures()
-                .values()
-                .parallelStream()
-                .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))
-                // hits filtered by high RMSD value are reported as null
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList()))
-                .get();
+        result.getTimings().structuresStop();
+        return hits;
     }
 }

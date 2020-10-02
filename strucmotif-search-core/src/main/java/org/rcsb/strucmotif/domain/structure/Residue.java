@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import org.rcsb.strucmotif.domain.Matrix4DTransformation;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
 import org.rcsb.strucmotif.math.Algebra;
 
@@ -28,7 +28,7 @@ public class Residue {
     Residue(ResidueIdentifier residueIdentifier, List<Atom> atoms, double[][] transformation) {
         this.residueIdentifier = residueIdentifier;
 
-        boolean neutral = Arrays.deepEquals(Matrix4DTransformation.IDENTITY_MATRIX_4D, transformation);
+        boolean neutral = Arrays.deepEquals(Transformation.IDENTITY_MATRIX_4D, transformation);
         if (neutral) {
             this.atoms = atoms;
         } else {

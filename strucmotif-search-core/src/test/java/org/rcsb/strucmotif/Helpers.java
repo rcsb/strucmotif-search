@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif;
 
 import org.mockito.invocation.InvocationOnMock;
-import org.rcsb.strucmotif.domain.Matrix4DTransformation;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
@@ -67,13 +67,13 @@ public class Helpers {
                 };
                 atoms.add(StructureFactory.createAtom(new AtomIdentifier(name, ++aIndex), coord));
             }
-            Residue residue = StructureFactory.createResidue(residueIdentifier, atoms, Matrix4DTransformation.IDENTITY_MATRIX_4D);
+            Residue residue = StructureFactory.createResidue(residueIdentifier, atoms, Transformation.IDENTITY_MATRIX_4D);
             tmp.computeIfAbsent(chainIdentifier, c -> new ArrayList<>()).add(residue);
         }
 
         List<Chain> chains = tmp.entrySet()
                 .stream()
-                .map(entry -> StructureFactory.createChain(entry.getKey(), entry.getValue(), Matrix4DTransformation.IDENTITY_MATRIX_4D))
+                .map(entry -> StructureFactory.createChain(entry.getKey(), entry.getValue(), Transformation.IDENTITY_MATRIX_4D))
                 .collect(Collectors.toList());
         return StructureFactory.createStructure(structureIdentifier, chains);
     }

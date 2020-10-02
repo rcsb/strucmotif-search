@@ -56,6 +56,10 @@ public class MotifSearchConfig {
      * The URL where BinaryCIF data will be fetched from if not present locally.
      */
     private String bcifFetchUrl = "https://models.rcsb.org/%s.bcif";
+    /**
+     * What precision to use to write renumbered structure data.
+     */
+    private int renumberedCoordinatePrecision = 1;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -75,10 +79,6 @@ public class MotifSearchConfig {
 
     public String getDataSource() {
         return dataSource;
-    }
-
-    public Path getDataSourcePath() {
-        return Paths.get(dataSource);
     }
 
     public void setDataSource(String dataSource) {
@@ -143,5 +143,13 @@ public class MotifSearchConfig {
 
     public double getSquaredDistanceCutoff() {
         return distanceCutoff * distanceCutoff;
+    }
+
+    public int getRenumberedCoordinatePrecision() {
+        return renumberedCoordinatePrecision;
+    }
+
+    public void setRenumberedCoordinatePrecision(int renumberedCoordinatePrecision) {
+        this.renumberedCoordinatePrecision = renumberedCoordinatePrecision;
     }
 }

@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain;
 
+import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.domain.structure.Residue;
 
 import java.util.List;
@@ -8,13 +9,13 @@ public class AlignmentResultImpl implements AlignmentResult {
     private final List<Residue> originalReference;
     private final List<Residue> originalCandidate;
     private final Transformation transformation;
-    private final RootMeanSquareDeviation score;
+    private final RootMeanSquareDeviation rootMeanSquareDeviation;
 
-    public AlignmentResultImpl(List<Residue> originalReference, List<Residue> originalCandidate, Transformation transformation, RootMeanSquareDeviation score) {
+    public AlignmentResultImpl(List<Residue> originalReference, List<Residue> originalCandidate, Transformation transformation, RootMeanSquareDeviation rootMeanSquareDeviation) {
         this.originalReference = originalReference;
         this.originalCandidate = originalCandidate;
         this.transformation = transformation;
-        this.score = score;
+        this.rootMeanSquareDeviation = rootMeanSquareDeviation;
     }
 
     @Override
@@ -38,7 +39,7 @@ public class AlignmentResultImpl implements AlignmentResult {
     }
 
     @Override
-    public RootMeanSquareDeviation getScore() {
-        return score;
+    public RootMeanSquareDeviation getRootMeanSquareDeviation() {
+        return rootMeanSquareDeviation;
     }
 }

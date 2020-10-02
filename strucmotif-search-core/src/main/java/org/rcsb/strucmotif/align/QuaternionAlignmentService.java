@@ -4,10 +4,10 @@ import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AlignmentResultImpl;
 import org.rcsb.strucmotif.domain.AtomCorrespondence;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
-import org.rcsb.strucmotif.domain.Matrix4DTransformation;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -127,7 +127,7 @@ public class QuaternionAlignmentService implements AlignmentService {
         List<double[]> candidatePoints = atomCorrespondence.getCenteredCandidate();
         double[] candidateCentroid = atomCorrespondence.getCandidateCentroid();
 
-        Pair<Matrix4DTransformation, Double> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
+        Pair<Transformation, Double> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
 
         return new AlignmentResultImpl(atomCorrespondence.getOriginalReference(),
                 atomCorrespondence.getOriginalCandidate(),
@@ -136,7 +136,7 @@ public class QuaternionAlignmentService implements AlignmentService {
     }
 
     @SuppressWarnings("Duplicates")
-    public static Pair<Matrix4DTransformation, Double> align(List<double[]> referencePoints, double[] referenceCentroid, List<double[]> candidatePoints, double[] candidateCentroid) {
+    public static Pair<Transformation, Double> align(List<double[]> referencePoints, double[] referenceCentroid, List<double[]> candidatePoints, double[] candidateCentroid) {
         double[][] rot = new double[3][3];
 
         // inner product
@@ -344,6 +344,6 @@ public class QuaternionAlignmentService implements AlignmentService {
         }
 
         double[] translation = Algebra.subtract3d(referenceCentroid, Algebra.multiply3d(Algebra.transpose3d(rot), candidateCentroid));
-        return new Pair<>(new Matrix4DTransformation(translation, rot), rms);
+        return new Pair<>(new Transformation(translation, rot), rms);
     }
 }

@@ -7,7 +7,7 @@ import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
-import org.rcsb.strucmotif.domain.Matrix4DTransformation;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
@@ -215,7 +215,7 @@ public class StructureReaderImpl implements StructureReader {
             if (atomBuffer.size() > 0) {
                 residueBuffer.add(StructureFactory.createResidue(currentResidueIdentifier,
                         atomBuffer,
-                        Matrix4DTransformation.IDENTITY_MATRIX_4D));
+                        Transformation.IDENTITY_MATRIX_4D));
                 return new ArrayList<>();
             }
             return atomBuffer;
@@ -340,7 +340,7 @@ public class StructureReaderImpl implements StructureReader {
             } else {
                 // nothing defined explicitly
                 chains = asymChains.stream()
-                        .map(pair -> StructureFactory.createChain(pair.getFirst(), pair.getSecond(), Matrix4DTransformation.IDENTITY_MATRIX_4D))
+                        .map(pair -> StructureFactory.createChain(pair.getFirst(), pair.getSecond(), Transformation.IDENTITY_MATRIX_4D))
                         .collect(Collectors.toList());
             }
 

@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.ResidueSelection;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -44,14 +43,6 @@ public interface StructureDataProvider {
     }
 
     /**
-     * Read a selected range from a chunked structure (CA, CB, C4', C1' only).
-     * @param structureIdentifier the structure to read
-     * @param selection a collection of {@link IndexSelection} instances - must not be null
-     * @return the corresponding {@link Structure}
-     */
-    Structure readChunked(StructureIdentifier structureIdentifier, Collection<IndexSelection> selection);
-
-    /**
      * Read a selected range from an original structure.
      * @param structureIdentifier the structure to read
      * @param selection a collection of {@link ResidueSelection} instances - null will return whole structure
@@ -83,23 +74,10 @@ public interface StructureDataProvider {
     void writeRenumbered(StructureIdentifier structureIdentifier, MmCifFile mmCifFile);
 
     /**
-     * Write a chunked structure.
-     * @param structureIdentifier the structure identifier to write
-     * @param structure the data
-     */
-    void writeChunked(StructureIdentifier structureIdentifier, Structure structure);
-
-    /**
      * Drop information on a renumbered structure.
      * @param structureIdentifier the structure identifier to remove
      */
     void deleteRenumbered(StructureIdentifier structureIdentifier);
-
-    /**
-     * Drop information on a chunked structure.
-     * @param structureIdentifier the structure identifier to remove
-     */
-    void deleteChunked(StructureIdentifier structureIdentifier);
 
     /**
      * Acquire the input stream of an original structure.

@@ -66,8 +66,8 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | `max-results` | Maximum number of results that will be returned | `10000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
+| `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
 | `root-path` | Path where data files will be written | `/opt/data/` |
-| `structure-chunk-size` | Structures are split into small chunks for faster reads | `100` |
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 
 Configure by placing your `application.properties` on the classpath.

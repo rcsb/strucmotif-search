@@ -18,6 +18,7 @@ import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import java.nio.file.Path;
  *     <li>label_seq_id</li>
  *     <li>label_comp_id</li>
  *     <li>label_atom_id</li>
- *     <li>3-digit precision coordinates</li>
+ *     <li>coordinates</li>
  *     <li>entry identifier and data used for assembly generation</li>
  * </ul>
  * <p>This implementation ignores:
@@ -44,9 +45,17 @@ import java.nio.file.Path;
  */
 @Service
 public class RenumberedStructureWriterImpl implements RenumberedStructureWriter {
-    private static final CifOptions OPTIONS = CifOptions.builder()
-            .gzip(true)
-            .build();
+    private final CifOptions options;
+
+    public RenumberedStructureWriterImpl(MotifSearchConfig motifSearchConfig) {
+        int precision = motifSearchConfig.getRenumberedCoordinatePrecision();
+        this.options = CifOptions.builder()
+                .encodingStrategyHint("atom_site", "Cartn_x", "delta", precision)
+                .encodingStrategyHint("atom_site", "Cartn_y", "delta", precision)
+                .encodingStrategyHint("atom_site", "Cartn_z", "delta", precision)
+                .gzip(true)
+                .build();
+    }
 
     @Override
     public void write(MmCifFile source, Path destination) {
@@ -138,7 +147,7 @@ public class RenumberedStructureWriterImpl implements RenumberedStructureWriter 
         CifFile outputFile = outputBuilder.leaveBlock().leaveFile();
 
         try {
-            CifIO.writeBinary(outputFile, destination, OPTIONS);
+            CifIO.writeBinary(outputFile, destination, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

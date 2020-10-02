@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
@@ -15,7 +14,7 @@ public interface HitScorer {
     /**
      * Scores this collection of residues (a.k.a. a path through the structure).
      * @param targetStructure the parent container - needed to infer some entry-level information such as id
-     * @param targetResidues the residues to align
+     * @param targetResidues the residues to compares
      * @return a {@link Hit} instance - <code>null</code> if filtered for high RMSD
      */
     Hit score(TargetStructure targetStructure, Pair<List<Residue>, Integer> targetResidues);
@@ -27,11 +26,5 @@ public interface HitScorer {
      * filter away hits that aren't desired in the result set.
      * @return the RMSD threshold for filtering
      */
-    double getRmsdCutoff();
-
-    /**
-     * How is atom correspondence determined?
-     * @return an {@link AtomPairingScheme}
-     */
-    AtomPairingScheme getAtomPairingScheme();
+    double getScoreCutoff();
 }

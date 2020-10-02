@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import org.rcsb.strucmotif.domain.Matrix4DTransformation;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class Chain {
         this.chainIdentifier = chainIdentifier;
         this.residues = residues;
 
-        this.neutral = Arrays.deepEquals(Matrix4DTransformation.IDENTITY_MATRIX_4D, transformation);
+        this.neutral = Arrays.deepEquals(Transformation.IDENTITY_MATRIX_4D, transformation);
         this.transformedResidues = neutral ? residues : new ArrayList<>(residues.size());
         this.transformation = transformation;
 

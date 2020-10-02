@@ -7,7 +7,6 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
-import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -82,7 +81,7 @@ public class MotifSearchIntegrationTest {
 
         List<String> observedExchanges = response.getHits()
                 .stream()
-                .map(Hit::getResidueTypes)
+                .map(TransformedHitO::getResidueTypes)
                 .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
                 .collect(Collectors.toList());

@@ -17,8 +17,11 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.io.read.StructureReaderImpl;
+import org.rcsb.strucmotif.math.Algebra;
 
+import java.io.InputStream;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,6 +36,24 @@ public class ResidueGraphTest {
     public void init() {
         motifSearchConfig = new MotifSearchConfig();
         structureReader = new StructureReaderImpl();
+    }
+
+    @Test
+    public void whenResidueOrderSwapped_thenDescriptorSame() {
+        List<String> perms = List.of("456", "465", "546", "564", "645", "654");
+        Set<String> expectedDescriptors = Set.of("5-7-8", "4-5-7", "4-5-2");
+        for (String perm : perms) {
+            InputStream resource = getResource("cif/1acj-" + perm + ".cif");
+            Structure structure = structureReader.readFromInputStream(resource);
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
+            Set<String> descriptors = residueGraph.residuePairOccurrencesSequential()
+                    .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                    .map(desc -> desc.getBackboneDistance().ordinal() + "-" + desc.getSideChainDistance().ordinal() + "-" + desc.getAngle().ordinal())
+                    .collect(Collectors.toSet());
+            for (String desc : descriptors) {
+                assertTrue(expectedDescriptors.contains(desc), "descriptor definition not symmetric");
+            }
+        }
     }
 
     @Test
@@ -197,28 +218,39 @@ public class ResidueGraphTest {
     @Test
     public void whenFlippedDirectory_thenAngle180() {
         // pointing away
-        double angle1 = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double [] { -1, 0, 0 });
-        assertEquals(180, angle1, 0.001);
+        double angle = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double [] { -1, 0, 0 });
+        assertEquals(180, angle, 0.001);
     }
 
     @Test
     public void whenIdentical_thenAngle0() {
         // same
-        double angle2 = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double[] { 1, 0, 0 });
-        assertEquals(0, angle2, 0.001);
+        double angle = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double[] { 1, 0, 0 });
+        assertEquals(0, angle, 0.001);
     }
 
     @Test
     public void whenOrthogonalInXy_thenAngle90() {
         // right 1
-        double angle3 = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double[] { 0, 1, 0 });
-        assertEquals(90, angle3, 0.001);
+        double angle = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double[] { 0, 1, 0 });
+        assertEquals(90, angle, 0.001);
     }
 
     @Test
     public void whenOrthogonalInXz_thenAngle90() {
         // right 2
-        double angle4 = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double[] { 0, 0, 1 });
-        assertEquals(90, angle4, 0.001);
+        double angle = ResidueGraph.angle(new double[] { 1, 0, 0 }, new double[] { 0, 0, 1 });
+        assertEquals(90, angle, 0.001);
+    }
+
+    @Test
+    public void whenOrderSwapped_thenAngleSame() {
+        for (int i = 0; i < 10; i++) {
+            double[] v1 = Algebra.normalize3d(new double[] { Math.random(), Math.random(), Math.random() });
+            double[] v2 = Algebra.normalize3d(new double[] { Math.random(), Math.random(), Math.random() });
+            double a1 = ResidueGraph.angle(v1, v2);
+            double a2 = ResidueGraph.angle(v2, v1);
+            assertEquals(a1, a2, 0.001, "order of angle calculation must not matter");
+        }
     }
 }

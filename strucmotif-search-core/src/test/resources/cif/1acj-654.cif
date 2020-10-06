@@ -1,0 +1,50 @@
+data_1ACJ
+#
+_entry.id   1ACJ
+#
+loop_
+_atom_site.group_PDB
+_atom_site.id
+_atom_site.type_symbol
+_atom_site.label_atom_id
+_atom_site.label_alt_id
+_atom_site.label_comp_id
+_atom_site.label_asym_id
+_atom_site.label_entity_id
+_atom_site.label_seq_id
+_atom_site.pdbx_PDB_ins_code
+_atom_site.Cartn_x
+_atom_site.Cartn_y
+_atom_site.Cartn_z
+_atom_site.occupancy
+_atom_site.B_iso_or_equiv
+_atom_site.pdbx_formal_charge
+_atom_site.auth_seq_id
+_atom_site.auth_comp_id
+_atom_site.auth_asym_id
+_atom_site.auth_atom_id
+_atom_site.pdbx_PDB_model_num
+ATOM   16   N N   . LEU A 1 4   ? -10.253 87.138 39.444 1.00 36.79 ? 6   LEU A N   1
+ATOM   17   C CA  . LEU A 1 4   ? -10.748 86.426 40.612 1.00 32.75 ? 6   LEU A CA  1
+ATOM   18   C C   . LEU A 1 4   ? -11.840 85.431 40.295 1.00 33.35 ? 6   LEU A C   1
+ATOM   19   O O   . LEU A 1 4   ? -12.296 84.700 41.162 1.00 35.53 ? 6   LEU A O   1
+ATOM   20   C CB  . LEU A 1 4   ? -11.321 87.429 41.633 1.00 28.61 ? 6   LEU A CB  1
+ATOM   21   C CG  . LEU A 1 4   ? -10.276 87.885 42.667 1.00 29.95 ? 6   LEU A CG  1
+ATOM   22   C CD1 . LEU A 1 4   ? -9.060  88.579 42.040 1.00 28.52 ? 6   LEU A CD1 1
+ATOM   23   C CD2 . LEU A 1 4   ? -10.937 88.762 43.732 1.00 28.46 ? 6   LEU A CD2 1
+ATOM   7    N N   . GLU A 1 5   ? -9.920  87.515 36.768 1.00 54.99 ? 5   GLU A N   1
+ATOM   8    C CA  . GLU A 1 5   ? -8.763  87.673 37.662 1.00 47.42 ? 5   GLU A CA  1
+ATOM   9    C C   . GLU A 1 5   ? -9.082  86.841 38.872 1.00 43.05 ? 5   GLU A C   1
+ATOM   10   O O   . GLU A 1 5   ? -8.332  85.956 39.236 1.00 44.40 ? 5   GLU A O   1
+ATOM   11   C CB  . GLU A 1 5   ? -8.315  89.106 38.012 1.00 47.14 ? 5   GLU A CB  1
+ATOM   12   C CG  . GLU A 1 5   ? -7.047  89.190 38.917 1.00 51.13 ? 5   GLU A CG  1
+ATOM   13   C CD  . GLU A 1 5   ? -5.714  88.670 38.353 1.00 52.76 ? 5   GLU A CD  1
+ATOM   14   O OE1 . GLU A 1 5   ? -5.502  88.765 37.150 1.00 54.93 ? 5   GLU A OE1 1
+ATOM   15   O OE2 . GLU A 1 5   ? -4.880  88.179 39.122 1.00 56.48 ? 5   GLU A OE2 1
+ATOM   1    N N   . SER A 1 6   ? -12.503 89.084 35.130 1.00 66.28 ? 4   SER A N   1
+ATOM   2    C CA  . SER A 1 6   ? -12.189 87.877 35.866 1.00 63.52 ? 4   SER A CA  1
+ATOM   3    C C   . SER A 1 6   ? -11.066 88.196 36.842 1.00 59.52 ? 4   SER A C   1
+ATOM   4    O O   . SER A 1 6   ? -11.260 89.101 37.633 1.00 57.70 ? 4   SER A O   1
+ATOM   5    C CB  . SER A 1 6   ? -12.025 86.720 34.856 1.00 67.07 ? 4   SER A CB  1
+ATOM   6    O OG  . SER A 1 6   ? -13.195 86.792 34.018 1.00 70.02 ? 4   SER A OG  1
+#

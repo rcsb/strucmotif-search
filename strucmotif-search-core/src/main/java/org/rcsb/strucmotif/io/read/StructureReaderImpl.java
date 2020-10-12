@@ -352,11 +352,14 @@ public class StructureReaderImpl implements StructureReader {
             if (selection == null) {
                 return raw;
             } else {
+                // must be correct struct_oper_id
+                Collection<? extends ResidueSelection> subselection = selection.stream()
+                        .filter(s -> s.getStructOperId().equals(chainIdentifier.getStructOperId()))
+                        .collect(Collectors.toList());
                 return raw.stream()
-                        .filter(residue -> selection.stream()
-                                // must be correct struct_oper_id
-                                .anyMatch(s -> s.getStructOperId().equals(chainIdentifier.getStructOperId()) &&
-                                        s.test(chainIdentifier.getLabelAsymId(),
+                        // must match residue-specific props (label_asym_id, label_seq_id, index)
+                        .filter(residue -> subselection.stream()
+                                .anyMatch(s -> s.test(chainIdentifier.getLabelAsymId(),
                                                 residue.getResidueIdentifier().getLabelSeqId(),
                                                 residue.getResidueIdentifier().getIndex())))
                         .collect(Collectors.toList());

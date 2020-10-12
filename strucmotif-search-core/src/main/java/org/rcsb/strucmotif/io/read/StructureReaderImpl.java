@@ -204,7 +204,7 @@ public class StructureReaderImpl implements StructureReader {
             addResidue();
             addChain();
 
-            return StructureFactory.createStructure(structureIdentifier, buildAssemblies(chains));
+            return StructureFactory.createStructure(structureIdentifier, buildAssemblies(chains, selection));
         }
 
         /**
@@ -281,9 +281,10 @@ public class StructureReaderImpl implements StructureReader {
         /**
          * Construct bioassemblies from parsed chains and registered operations.
          * @param asymChains 'raw' chains - mere mapping between identifiers and all components
+         * @param selection nullable selection of residues - need this to omit duplicates when residues in non-identity chains are selected
          * @return all constructed chains
          */
-        private List<Chain> buildAssemblies(List<Pair<ChainIdentifier, List<Residue>>> asymChains) {
+        private List<Chain> buildAssemblies(List<Pair<ChainIdentifier, List<Residue>>> asymChains, Collection<? extends ResidueSelection> selection) {
             List<Chain> chains = new ArrayList<>();
             Map<String, double[][]> matrices = IntStream.range(0, pdbxStructOperList.getRowCount())
                     .boxed()
@@ -329,9 +330,9 @@ public class StructureReaderImpl implements StructureReader {
                             }
                             Pair<ChainIdentifier, List<Residue>> originalChain = originalChainOptional.get();
 
-                            chains.add(StructureFactory.createChain(new ChainIdentifier(originalChain.getFirst().getLabelAsymId(),
-                                            operKey),
-                                    originalChain.getSecond(),
+                            ChainIdentifier chainIdentifier = new ChainIdentifier(originalChain.getFirst().getLabelAsymId(), operKey);
+                            chains.add(StructureFactory.createChain(chainIdentifier,
+                                    filter(chainIdentifier, originalChain.getSecond(), selection),
                                     transformation.getValue()));
                             coveredAsymIds.add(asymId);
                         }
@@ -345,6 +346,21 @@ public class StructureReaderImpl implements StructureReader {
             }
 
             return chains;
+        }
+
+        private List<Residue> filter(ChainIdentifier chainIdentifier, List<Residue> raw, Collection<? extends ResidueSelection> selection) {
+            if (selection == null) {
+                return raw;
+            } else {
+                return raw.stream()
+                        .filter(residue -> selection.stream()
+                                // must be correct struct_oper_id
+                                .anyMatch(s -> s.getStructOperId().equals(chainIdentifier.getStructOperId()) &&
+                                        s.test(chainIdentifier.getLabelAsymId(),
+                                                residue.getResidueIdentifier().getLabelSeqId(),
+                                                residue.getResidueIdentifier().getIndex())))
+                        .collect(Collectors.toList());
+            }
         }
     }
 }

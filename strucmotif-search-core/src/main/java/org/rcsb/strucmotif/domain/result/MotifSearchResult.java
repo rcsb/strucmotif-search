@@ -20,7 +20,7 @@ public class MotifSearchResult {
     private int pathGeneration;
     private Map<StructureIdentifier, TargetStructure> targetStructures;
 
-    private List<Hit> hits;
+    private List<SimpleHit> hits;
     private int numberOfPaths;
     private int numberOfTargetStructures;
 
@@ -47,11 +47,11 @@ public class MotifSearchResult {
         this.targetStructures = targetStructures;
     }
 
-    public void setHits(List<Hit> hits) {
+    public void setHits(List<SimpleHit> hits) {
         this.hits = hits;
     }
 
-    public List<Hit> getHits() {
+    public List<SimpleHit> getHits() {
         return hits;
     }
 

@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.motif;
 
+import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.util.Objects;
@@ -13,7 +14,7 @@ public class ResiduePairDescriptor {
     private final DistanceType backboneDistance;
     private final DistanceType sideChainDistance;
     private final AngleType angle;
-    private final int score;
+    private final GeometricDescriptorScore score;
     private final boolean flipped;
 
     /**
@@ -39,11 +40,11 @@ public class ResiduePairDescriptor {
         this.sideChainDistance = sideChainDistance;
         this.angle = angle;
         if (reference != null) {
-            this.score = Math.abs(backboneDistance.ordinal() - reference.getBackboneDistance().ordinal()) +
-                    Math.abs(sideChainDistance.ordinal()- reference.getSideChainDistance().ordinal()) +
-                    Math.abs(angle.ordinal() - reference.getAngle().ordinal());
+            this.score = new GeometricDescriptorScore(Math.abs(backboneDistance.ordinal() - reference.getBackboneDistance().ordinal()),
+                    Math.abs(sideChainDistance.ordinal()- reference.getSideChainDistance().ordinal()),
+                    Math.abs(angle.ordinal() - reference.getAngle().ordinal()));
         } else {
-            this.score = -1;
+            this.score = null;
         }
     }
 
@@ -68,11 +69,10 @@ public class ResiduePairDescriptor {
     }
 
     /**
-     * Distance to the original descriptor during a structural motif search. Each difference in backbone, side-chain, or
-     * angle type increases this score by 1. Thus, 0 indicates perfect agreement with the descriptor in the query motif.
-     * @return an integer, <code>-1</code> if not set
+     * Reports the score of this particular descriptor.
+     * @return a {@link GeometricDescriptorScore} instance
      */
-    public int getScore() {
+    public GeometricDescriptorScore getScore() {
         return score;
     }
 

@@ -10,7 +10,7 @@ public class Parameters {
     private final int backboneDistanceTolerance;
     private final int sideChainDistanceTolerance;
     private final int angleTolerance;
-    private final double rmsdCutoff;
+    private final double scoreCutoff;
     private final MotifPruner motifPruner;
     private final AtomPairingScheme atomPairingScheme;
     private final int limit;
@@ -19,11 +19,11 @@ public class Parameters {
     static final int DEFAULT_ANGLE_TOLERANCE = 1;
     static final double DEFAULT_RMSD_CUTOFF = 2.0;
 
-    Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, double rmsdCutoff, MotifPruner motifPruner, AtomPairingScheme atomPairingScheme, int resultLimit) {
+    Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, double scoreCutoff, MotifPruner motifPruner, AtomPairingScheme atomPairingScheme, int resultLimit) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
-        this.rmsdCutoff = rmsdCutoff == 0 ? Double.MAX_VALUE : rmsdCutoff;
+        this.scoreCutoff = scoreCutoff == 0 ? Double.MAX_VALUE : scoreCutoff;
         this.motifPruner = motifPruner;
         this.atomPairingScheme = atomPairingScheme;
         this.limit = resultLimit == 0 ? Integer.MAX_VALUE : resultLimit;
@@ -54,11 +54,11 @@ public class Parameters {
     }
 
     /**
-     * At which RMSD are hits filtered?
-     * @return the cutoff value in Angstrom
+     * At which score are hits filtered?
+     * @return the cutoff value
      */
-    public double getRmsdCutoff() {
-        return rmsdCutoff;
+    public double getScoreCutoff() {
+        return scoreCutoff;
     }
 
     /**

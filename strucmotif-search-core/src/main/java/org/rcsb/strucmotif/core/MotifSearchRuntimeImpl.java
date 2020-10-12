@@ -8,6 +8,9 @@ import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.result.SimpleHit;
+import org.rcsb.strucmotif.domain.result.TargetStructure;
+import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +25,18 @@ import java.util.stream.Collectors;
 public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchRuntimeImpl.class);
     private final TargetAssembler targetAssembler;
-    private final AlignmentService alignment;
+    private final AlignmentService alignmentService;
     private final ThreadPool threadPool;
     private final MotifSearchConfig motifSearchConfig;
+    private final StructureDataProvider structureDataProvider;
 
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, AlignmentService alignmentService, ThreadPool threadPool, MotifSearchConfig motifSearchConfig) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, AlignmentService alignmentService, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, StructureDataProvider structureDataProvider) {
         this.targetAssembler = targetAssembler;
-        this.alignment = alignmentService;
+        this.alignmentService = alignmentService;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
+        this.structureDataProvider = structureDataProvider;
     }
 
     @Override
@@ -60,8 +65,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             // get all valid targets
             targetAssembler.assemble(result);
 
-            HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(queryStructure, parameters.getRmsdCutoff(), parameters.getAtomPairingScheme(), alignment);
-            List<Hit> hits = scoreHits(parameters, result, hitScorer);
+            HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(queryStructure, parameters.getAtomPairingScheme(), alignmentService, structureDataProvider);
+            List<SimpleHit> hits = scoreHits(parameters, result, hitScorer);
             logger.info("Accepted {} hits in {} ms",
                     hits.size(),
                     result.getTimings().getStructuresTime());
@@ -79,14 +84,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
     }
 
-    private List<Hit> scoreHits(Parameters parameters, MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
+    private List<SimpleHit> scoreHits(Parameters parameters, MotifSearchResult result, HitScorer hitScorer) throws ExecutionException, InterruptedException {
         result.getTimings().structuresStart();
         int limit = Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults());
-        List<Hit> hits = threadPool.submit(() -> result.getTargetStructures()
+        List<SimpleHit> hits = threadPool.submit(() -> result.getTargetStructures()
                 .values()
                 .parallelStream()
-                .flatMap(targetStructure -> targetStructure.paths().map(path -> hitScorer.score(targetStructure, path)))
-                // hits filtered by by threshold are reported as null
+                .flatMap(TargetStructure::paths)
+                // filtered hits will appear as null
                 .filter(Objects::nonNull)
                 .limit(limit)
                 .collect(Collectors.toList()))

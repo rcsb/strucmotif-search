@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.motif;
 
+import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
@@ -14,7 +15,7 @@ public class ResiduePairIdentifier {
     private final IndexSelection indexSelection2;
     private final LabelSelection labelSelection1;
     private final LabelSelection labelSelection2;
-    private final int score;
+    private final GeometricDescriptorScore score;
 
     public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, ResiduePairDescriptor original) {
         this(indexSelection1, indexSelection2, null, null, original);
@@ -24,12 +25,12 @@ public class ResiduePairIdentifier {
         this(indexSelection1, indexSelection2, labelSelection1, labelSelection2, null);
     }
 
-    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2, ResiduePairDescriptor original) {
+    private ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2, ResiduePairDescriptor original) {
         this.indexSelection1 = indexSelection1;
         this.indexSelection2 = indexSelection2;
         this.labelSelection1 = labelSelection1;
         this.labelSelection2 = labelSelection2;
-        this.score = original != null ? original.getScore() : -1;
+        this.score = original != null ? original.getScore() : null;
     }
 
     public IndexSelection getIndexSelection1() {
@@ -48,7 +49,7 @@ public class ResiduePairIdentifier {
         return labelSelection2;
     }
 
-    public int getScore() {
+    public GeometricDescriptorScore getScore() {
         return score;
     }
 
@@ -61,7 +62,7 @@ public class ResiduePairIdentifier {
     }
 
     public boolean providesScore() {
-        return score != -1;
+        return score != null;
     }
 
     @Override

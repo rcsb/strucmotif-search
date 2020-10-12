@@ -1,23 +1,17 @@
 package org.rcsb.strucmotif.domain.result;
 
-import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
-import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
-import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
-import org.rcsb.strucmotif.domain.selection.SelectionResolver;
-import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.persistence.SelectionMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,18 +28,19 @@ import java.util.stream.Stream;
  * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
-    private final StructureDataProvider structureDataProvider;
+    private final SelectionMapper<IndexSelection, LabelSelection> selectionMapper;
     private final StructureIdentifier structureIdentifier;
+    private final double scoreCutoff;
 
     /*
     We use some non-final fields to achieve the lazy behavior. Tread lightly.
      */
     private List<ResiduePairIdentifier[]> paths;
-    private SelectionResolver<LabelSelection> labelSelectionResolver;
 
-    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, StructureDataProvider structureDataProvider) {
-        this.structureDataProvider = structureDataProvider;
+    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, SelectionMapper<IndexSelection, LabelSelection> selectionMapper, double scoreCutoff) {
+        this.selectionMapper = selectionMapper;
         this.structureIdentifier = structureIdentifier;
+        this.scoreCutoff = scoreCutoff;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
         this.paths = new ArrayList<>(residuePairIdentifiers.length);
@@ -68,10 +63,6 @@ public class TargetStructure {
      */
     public StructureIdentifier getStructureIdentifier() {
         return structureIdentifier;
-    }
-
-    public SelectionResolver<LabelSelection> getLabelSelectionResolver() {
-        return labelSelectionResolver;
     }
 
     /**
@@ -120,24 +111,10 @@ public class TargetStructure {
      * consumed directly.
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<Pair<List<Residue>, Integer>> paths() {
-        // determine selectors applicable during parsing
-        Set<IndexSelection> indexSelections = new HashSet<>();
-        // while traversing
-        for (ResiduePairIdentifier[] path : paths) {
-            for (ResiduePairIdentifier step : path) {
-                indexSelections.add(step.getIndexSelection1());
-                indexSelections.add(step.getIndexSelection2());
-            }
-        }
-
+    public Stream<SimpleHit> paths() {
         try {
-            Structure structure = structureDataProvider.readRenumbered(structureIdentifier, indexSelections);
-            SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
-            this.labelSelectionResolver = new LabelSelectionResolver(structure);
-
             return paths.stream()
-                    .map(path -> mapToResidues(path, indexSelectionResolver));
+                    .map(this::createSimpleHit);
         } catch (Exception e) {
             // rarely happens when the index references a file not present in the selection-db
             // this is caused by entries that were removed from the archive but can be fixed by removing old entries from archive/index/componentDB
@@ -145,16 +122,25 @@ public class TargetStructure {
         }
     }
 
-    private Pair<List<Residue>, Integer> mapToResidues(ResiduePairIdentifier[] identifiers, SelectionResolver<IndexSelection> indexSelectionSelectionResolver) {
-        int score = 0;
+    private SimpleHit createSimpleHit(ResiduePairIdentifier[] identifiers) {
+        int[] partial = new int[] { 0, 0, 0 };
         for (ResiduePairIdentifier identifier : identifiers) {
-            score += identifier.getScore();
+            partial[0] += identifier.getScore().getBackboneScore();
+            partial[1] += identifier.getScore().getSideChainScore();
+            partial[2] += identifier.getScore().getAngleScore();
         }
-        return new Pair<>(Arrays.stream(identifiers)
+        GeometricDescriptorScore score = new GeometricDescriptorScore(partial[0], partial[1], partial[2]);
+        // TODO revisit this later
+        if (score.value() > scoreCutoff) {
+            return null;
+        }
+
+        List<IndexSelection> indexSelections = Arrays.stream(identifiers)
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
-                .map(indexSelectionSelectionResolver::resolve)
-                .collect(Collectors.toList()),
+                .collect(Collectors.toList());
+        return new SimpleHit(structureIdentifier,
+                selectionMapper.select(structureIdentifier, indexSelections),
                 score);
     }
 }

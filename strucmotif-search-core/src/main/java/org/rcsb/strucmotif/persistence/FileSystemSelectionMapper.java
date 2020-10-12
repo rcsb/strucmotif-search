@@ -10,6 +10,7 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.springframework.stereotype.Service;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Service
 public class FileSystemSelectionMapper implements SelectionMapper<IndexSelection, LabelSelection> {
     private final Path basePath;
 

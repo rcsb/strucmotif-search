@@ -11,10 +11,11 @@ import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
+import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.SelectionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,13 @@ import java.util.stream.Collectors;
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
     private final InvertedIndex invertedIndex;
-    private final StructureDataProvider structureDataProvider;
+    private final SelectionMapper<IndexSelection, LabelSelection> selectionMapper;
     private final ThreadPool threadPool;
 
     @Autowired
-    public TargetAssemblerImpl(InvertedIndex invertedIndex, StructureDataProvider structureDataProvider, ThreadPool threadPool) {
+    public TargetAssemblerImpl(InvertedIndex invertedIndex, SelectionMapper<IndexSelection, LabelSelection> selectionMapper, ThreadPool threadPool) {
         this.invertedIndex = invertedIndex;
-        this.structureDataProvider = structureDataProvider;
+        this.selectionMapper = selectionMapper;
         this.threadPool = threadPool;
     }
 
@@ -97,12 +98,13 @@ public class TargetAssemblerImpl implements TargetAssembler {
     private void consume(MotifSearchResult response, Map<StructureIdentifier, ResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
         Map<StructureIdentifier, TargetStructure> targetStructures = response.getTargetStructures();
         QueryStructure queryStructure = response.getQuery().getQueryStructure();
+        double scoreCutoff = response.getQuery().getParameters().getScoreCutoff();
 
         if (targetStructures == null) {
             // first generation: all the paths are valid
             response.setTargetStructures(data.entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), structureDataProvider))));
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), selectionMapper, scoreCutoff))));
         } else {
             // subsequent generations
             int pathGeneration = response.incrementAndGetPathGeneration();

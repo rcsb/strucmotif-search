@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io.read;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -13,9 +14,11 @@ import org.rcsb.strucmotif.io.GenericTextStructureWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
@@ -29,6 +32,22 @@ public class StructureReaderImplTest {
     }
 
     // TODO 4udf seems slow
+
+    @Test
+    public void whenAssemblySelection_thenReturnNoDuplicates() {
+        // e.g. for 3vk6 (A_2-61, A_1-80, A_1-85) will return 6 residues
+        Collection<LabelSelection> selection = List.of(new LabelSelection("A", "2", 61),
+                new LabelSelection("A", "1", 80),
+                new LabelSelection("A", "1", 85));
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vk6"), selection);
+        List<Residue> residues = structure.getChains()
+                .stream()
+                .map(Chain::getResidues)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        assertTrue(residues.size() < 4, "contains duplicates");
+        assertEquals(3, residues.size());
+    }
 
     @Test
     public void whenMicroheterogeneityAtSequenceLevelInRenumberedFile_thenReportCorrectResidueType() {

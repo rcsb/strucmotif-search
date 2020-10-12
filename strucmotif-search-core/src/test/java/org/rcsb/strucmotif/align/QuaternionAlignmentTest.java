@@ -69,7 +69,7 @@ public class QuaternionAlignmentTest {
 
         AlignmentResult alignmentResult = alignmentService.align(container1, container2, AtomPairingScheme.ALL);
 
-        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation().doubleValue(), Helpers.DELTA);
+        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation().value(), Helpers.DELTA);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class QuaternionAlignmentTest {
 
         AlignmentResult alignment11 = alignmentService.align(container1, container1, AtomPairingScheme.ALL);
 
-        double rmsd11 = alignment11.getRootMeanSquareDeviation().doubleValue();
+        double rmsd11 = alignment11.getRootMeanSquareDeviation().value();
         double[] transformation11 = flatten(alignment11.getTransformation().getTransformationMatrix());
         assertArrayEquals(new double[] { 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -100,7 +100,7 @@ public class QuaternionAlignmentTest {
 
         AlignmentResult alignment12 = alignmentService.align(container1, container2, AtomPairingScheme.ALL);
 
-        double rmsd12 = alignment12.getRootMeanSquareDeviation().doubleValue();
+        double rmsd12 = alignment12.getRootMeanSquareDeviation().value();
         double[] transformation12 = flatten(alignment12.getTransformation().getTransformationMatrix());
         assertArrayEquals(new double[] { -0.0400830537616845, -0.7695568423369796, 0.6373190843003801, 20.360654211896712,
                 -0.997265515423408, 0.07044448040859017, 0.022339805891020748, 11.603075263299026,
@@ -120,7 +120,7 @@ public class QuaternionAlignmentTest {
 
         AlignmentResult alignment34 = alignmentService.align(container3, container4, AtomPairingScheme.ALL);
 
-        double rmsd34 = alignment34.getRootMeanSquareDeviation().doubleValue();
+        double rmsd34 = alignment34.getRootMeanSquareDeviation().value();
         double[] transformation34 = flatten(alignment34.getTransformation().getTransformationMatrix());
         assertArrayEquals(new double[] { 0.9999999693395323, 2.476156855096834E-4, 2.7214443547168843E-6, -0.018765917915588126,
                 -2.4761583288007705E-4, 0.9999999678697555, 5.428524155062786E-5, 4.2976537221761646E-4,
@@ -148,7 +148,7 @@ public class QuaternionAlignmentTest {
         List<Residue> residues2 = structure2.getChains().stream().map(Chain::getResidues).flatMap(Collection::stream).collect(Collectors.toList());
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(2.211, result.getRootMeanSquareDeviation().doubleValue(), Helpers.DELTA);
+        assertEquals(2.211, result.getRootMeanSquareDeviation().value(), Helpers.DELTA);
     }
 
     private double[] flatten(double[][] transformation) {

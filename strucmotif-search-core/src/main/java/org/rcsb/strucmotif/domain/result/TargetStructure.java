@@ -132,7 +132,7 @@ public class TargetStructure {
         }
 
         try {
-            Structure structure = structureDataProvider.readChunked(structureIdentifier, indexSelections);
+            Structure structure = structureDataProvider.readRenumbered(structureIdentifier, indexSelections);
             SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
             this.labelSelectionResolver = new LabelSelectionResolver(structure);
 

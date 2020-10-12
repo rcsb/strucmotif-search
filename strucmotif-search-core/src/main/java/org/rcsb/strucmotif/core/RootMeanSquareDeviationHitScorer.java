@@ -63,7 +63,7 @@ public class RootMeanSquareDeviationHitScorer implements HitScorer {
 
         SimpleHit simpleHit = new SimpleHit(targetStructure.getStructureIdentifier(),
                 selection,
-                targetResidues.getSecond());
+                null); // TODO impl
         return new TransformedHit(simpleHit,
                 residueTypes,
                 alignmentResult.getRootMeanSquareDeviation(),

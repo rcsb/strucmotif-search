@@ -179,9 +179,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
         Structure structure;
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
-
-            // write chunked structure
-            structureDataProvider.writeChunked(structureIdentifier, structure);
         } catch (UncheckedIOException e) {
             // can 'safely' happen when obsolete entry was dropped from bcif data but still lingers in list
             logger.warn("[{}] [{}] Source file missing unexpectedly - obsolete entry?",
@@ -263,8 +260,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
         for (StructureIdentifier structureIdentifier : identifiers) {
             logger.info("Removing renumbered structure for entry: {}", structureIdentifier);
             structureDataProvider.deleteRenumbered(structureIdentifier);
-            logger.info("Removing chunked structure for entry: {}", structureIdentifier);
-            structureDataProvider.deleteChunked(structureIdentifier);
 
             // update state for known & supported
             Set<StructureIdentifier> update = Set.of(structureIdentifier);

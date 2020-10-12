@@ -61,7 +61,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             targetAssembler.assemble(result);
 
             HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(queryStructure, parameters.getRmsdCutoff(), parameters.getAtomPairingScheme(), alignment);
-            List<TransformedHitO> hits = scoreHits(parameters, result, hitScorer);
+            List<Hit> hits = scoreHits(parameters, result, hitScorer);
             logger.info("Accepted {} hits in {} ms",
                     hits.size(),
                     result.getTimings().getStructuresTime());

@@ -32,8 +32,7 @@ public class QuaternionAlignmentTest {
 
     @BeforeEach
     public void init() {
-        StructureDataProvider structureDataProvider = Mockito.mock(StructureDataProvider.class);
-        alignmentService = new QuaternionAlignmentService(structureDataProvider);
+        alignmentService = new QuaternionAlignmentService();
         structureReader = new StructureReaderImpl();
     }
 

@@ -1,8 +1,8 @@
 package org.rcsb.strucmotif;
 
 import org.mockito.invocation.InvocationOnMock;
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.selection.IndexSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -24,6 +25,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,30 +35,52 @@ import java.util.stream.Stream;
 
 public class Helpers {
     public static final double DELTA = 0.001;
+    private static final Map<String, String> structureData;
+    private static final Map<StructureIdentifier, Map<IndexSelection, LabelSelection>> mappingData;
+
+    static {
+        structureData = new BufferedReader(new InputStreamReader(getResource("structures.data")))
+                .lines()
+                // 1ll1:A_1-59[A, 59, H, N, 347, -46, 299, ...
+                .map(line -> line.replace("]", "").split("\\["))
+                .collect(Collectors.toMap(split -> split[0], split -> split[1]));
+        mappingData = new HashMap<>();
+        new BufferedReader(new InputStreamReader(getResource("mapping.data")))
+                .lines()
+                // 1mns,1-192,A_1-193
+                .map(line -> line.split(","))
+                .forEach(split -> {
+                    StructureIdentifier structureIdentifier = new StructureIdentifier(split[0]);
+                    Map<IndexSelection, LabelSelection> bin = mappingData.computeIfAbsent(structureIdentifier, k -> new HashMap<>());
+                    String[] split1 = split[1].split("-");
+                    String[] split2 = split[2].split("[-_]");
+                    bin.put(new IndexSelection(split1[0], Integer.parseInt(split1[1])),
+                            new LabelSelection(split2[0], split2[1], Integer.parseInt(split2[2])));
+                });
+    }
 
     @SuppressWarnings("unchecked")
     public static Structure mockStructureDataProviderReadRenumbered(InvocationOnMock invocation) {
         StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
-        Collection<IndexSelection> selection = (Collection<IndexSelection>) invocation.getArgument(1, Collection.class);
-
-        Map<String, String> structureData = new BufferedReader(new InputStreamReader(getResource("structures.data")))
-                .lines()
-                .map(line -> line.replace("]", "").split("\\["))
-                .collect(Collectors.toMap(split -> split[0], split -> split[1]));
+        Collection<LabelSelection> selection = (Collection<LabelSelection>) invocation.getArgument(1, Collection.class);
 
         Map<ChainIdentifier, List<Residue>> tmp = new LinkedHashMap<>();
 
+        int rIndex = 0;
         int aIndex = 0;
-        for (IndexSelection indexSelection : selection) {
-            String key = structureIdentifier.getPdbId() + ":" + indexSelection.getStructOperId() + ":" + indexSelection.getIndex();
+        for (LabelSelection labelSelection : selection) {
+            String key = structureIdentifier.getPdbId() + ":" +
+                    labelSelection.getLabelAsymId() + "_" +
+                    labelSelection.getStructOperId() + "-" +
+                    labelSelection.getLabelSeqId();
             String res = structureData.get(key);
 
             String[] split = res.split(", ");
             String chainId = split[0];
             int seqId = Integer.parseInt(split[1]);
-            ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, indexSelection.getStructOperId());
+            ChainIdentifier chainIdentifier = new ChainIdentifier(chainId, labelSelection.getStructOperId());
             ResidueType residueType = ResidueType.ofOneLetterCode(split[2]);
-            ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, seqId, indexSelection.getIndex());
+            ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, seqId, ++rIndex);
             List<Atom> atoms = new ArrayList<>();
             for (int i = 3; i < split.length; i = i + 4) {
                 String name = split[i];
@@ -169,5 +193,14 @@ public class Helpers {
         }
 
         return combinations.stream();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static List<LabelSelection> mockSelectionMapperSelect(InvocationOnMock invocation) {
+        StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
+        Collection<IndexSelection> selection = (Collection<IndexSelection>) invocation.getArgument(1, Collection.class);
+        return selection.stream()
+                .map(is -> mappingData.get(structureIdentifier).get(is))
+                .collect(Collectors.toList());
     }
 }

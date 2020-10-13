@@ -4,21 +4,15 @@ import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AlignmentResultImpl;
 import org.rcsb.strucmotif.domain.AtomCorrespondence;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
-import org.rcsb.strucmotif.domain.selection.LabelSelection;
-import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
-import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.math.Algebra;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Align 2 sets of residues by a quaternion-based characteristic polynomial. Finds a rigid transformation that will move
@@ -31,25 +25,6 @@ public class QuaternionAlignmentService implements AlignmentService {
             { 0, 1, 0 },
             { 0, 0, 1 }
     };
-    private final StructureDataProvider structureDataProvider;
-
-    public QuaternionAlignmentService(StructureDataProvider structureDataProvider) {
-        this.structureDataProvider = structureDataProvider;
-    }
-
-    @Override
-    public AlignmentResult align(StructureIdentifier referenceStructureIdentifier,
-                                 List<LabelSelection> referenceSelection,
-                                 StructureIdentifier candidateStructureIdentifier,
-                                 List<LabelSelection> candidateSelection,
-                                 AtomPairingScheme atomPairingScheme) {
-        Structure referenceStructure = structureDataProvider.readRenumbered(referenceStructureIdentifier, referenceSelection);
-        List<Residue> reference = extractResidues(referenceStructure, referenceSelection);
-        Structure candidateStructure = structureDataProvider.readRenumbered(candidateStructureIdentifier, candidateSelection);
-        List<Residue> candidate = extractResidues(candidateStructure, candidateSelection);
-
-        return align(reference, candidate, atomPairingScheme);
-    }
 
     @Override
     public AlignmentResult align(List<Residue> reference, List<Residue> candidate, AtomPairingScheme atomPairingScheme) {
@@ -64,13 +39,6 @@ public class QuaternionAlignmentService implements AlignmentService {
         // find compatible combinations between reference and candidate atoms
         AtomCorrespondence atomCorrespondence = new AtomCorrespondence(reference, candidate, atomPairingScheme);
         return align(atomCorrespondence);
-    }
-
-    private List<Residue> extractResidues(Structure structure, List<LabelSelection> selection) {
-        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
-        return selection.stream()
-                .map(labelSelectionResolver::resolve)
-                .collect(Collectors.toList());
     }
 
     /**

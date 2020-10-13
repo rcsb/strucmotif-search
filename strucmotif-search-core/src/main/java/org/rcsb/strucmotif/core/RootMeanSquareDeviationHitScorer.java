@@ -4,7 +4,6 @@ import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
-import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.SimpleHit;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
 import org.rcsb.strucmotif.domain.structure.Chain;
@@ -25,8 +24,12 @@ public class RootMeanSquareDeviationHitScorer implements HitScorer {
     private final AlignmentService alignmentService;
     private final StructureDataProvider structureDataProvider;
 
-    public RootMeanSquareDeviationHitScorer(QueryStructure queryStructure, AtomPairingScheme atomPairingScheme, AlignmentService alignmentService, StructureDataProvider structureDataProvider) {
-        this.queryResidues = queryStructure.getResidues();
+    public RootMeanSquareDeviationHitScorer(Structure structure, AtomPairingScheme atomPairingScheme, AlignmentService alignmentService, StructureDataProvider structureDataProvider) {
+        this.queryResidues = structure.getChains()
+                .stream()
+                .map(Chain::getResidues)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
         this.atomPairingScheme = atomPairingScheme;
         this.alignmentService = alignmentService;
         this.structureDataProvider = structureDataProvider;

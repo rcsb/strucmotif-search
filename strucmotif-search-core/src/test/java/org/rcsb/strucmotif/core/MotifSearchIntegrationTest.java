@@ -6,16 +6,18 @@ import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
-import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
+import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.SelectionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -37,23 +39,26 @@ public class MotifSearchIntegrationTest {
     @Autowired
     private NoOperationMotifPruner noOperationMotifPruner;
     @Autowired
-    private AlignmentService alignmentService;
-    @Autowired
     private ThreadPool threadPool;
     @Autowired
     private MotifSearchConfig motifSearchConfig;
+    @Autowired
+    private AlignmentService alignmentService;
+    private StructureDataProvider structureDataProvider;
     private QueryBuilder queryBuilder;
 
+    @SuppressWarnings("unchecked")
     @BeforeEach
     public void init() {
-        // TODO better way?
         InvertedIndex invertedIndex = Mockito.mock(InvertedIndex.class);
         when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
-        StructureDataProvider structureDataProvider = Mockito.mock(StructureDataProvider.class);
+        SelectionMapper<IndexSelection, LabelSelection> selectionMapper = (SelectionMapper<IndexSelection, LabelSelection>) Mockito.mock(SelectionMapper.class);
+        when(selectionMapper.select(any(), any())).thenAnswer(Helpers::mockSelectionMapperSelect);
+        this.structureDataProvider = Mockito.mock(StructureDataProvider.class);
         when(structureDataProvider.readRenumbered(any(), any())).thenAnswer(Helpers::mockStructureDataProviderReadRenumbered);
 
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, structureDataProvider, threadPool);
-        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, alignmentService, threadPool, motifSearchConfig);
+        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, selectionMapper, threadPool);
+        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
@@ -79,17 +84,17 @@ public class MotifSearchIntegrationTest {
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
 
+        HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(structure, AtomPairingScheme.ALL, alignmentService, structureDataProvider);
         MotifSearchResult response = buildParameters.buildQuery().run();
 
-        // TODO
-//        List<String> observedExchanges = response.getHits()
-//                .stream()
-//                .map(TransformedHit.class::cast)
-//                .map(Hit::getResidueTypes)
-//                .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
-//                .filter(identifiers -> !"DEKEH".equals(identifiers))
-//                .collect(Collectors.toList());
+        List<String> observedExchanges = response.getHits()
+                .stream()
+                .map(hitScorer::score)
+                .map(TransformedHit::getResidueTypes)
+                .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
+                .filter(identifiers -> !"DEKEH".equals(identifiers))
+                .collect(Collectors.toList());
 
-//        assertFalse(observedExchanges.isEmpty(), "didn't observe exchange");
+        assertFalse(observedExchanges.isEmpty(), "didn't observe exchange");
     }
 }

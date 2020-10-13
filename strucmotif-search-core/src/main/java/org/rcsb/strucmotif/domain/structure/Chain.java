@@ -62,7 +62,7 @@ public class Chain {
 
     /**
      * Report if this chain was created by transforming original coordinates.
-     * @return <code>true</code> if mo 'original' chain
+     * @return <code>true</code> if no 'original' chain
      */
     public boolean isTransformed() {
         return !neutral;

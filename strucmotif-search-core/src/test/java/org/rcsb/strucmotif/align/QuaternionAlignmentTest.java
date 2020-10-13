@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.align;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.domain.AlignmentResult;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
@@ -13,7 +12,6 @@ import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureFactory;
-import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.io.read.StructureReaderImpl;
 

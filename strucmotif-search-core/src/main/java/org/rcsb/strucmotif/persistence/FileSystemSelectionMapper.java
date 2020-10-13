@@ -66,7 +66,7 @@ public class FileSystemSelectionMapper implements SelectionMapper<IndexSelection
 
         for (Chain chain : structure.getChains()) {
             // transformed chains are just redundant mappings
-            if (!chain.isNeutral()) {
+            if (chain.isTransformed()) {
                 continue;
             }
 

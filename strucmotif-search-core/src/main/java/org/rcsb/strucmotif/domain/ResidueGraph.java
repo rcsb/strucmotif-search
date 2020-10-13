@@ -47,7 +47,7 @@ public class ResidueGraph {
             String labelAsymId1 = chain1.getChainIdentifier().getLabelAsymId();
 
             // dominant chain has to be original
-            if (!chain1.isNeutral()) {
+            if (chain1.isTransformed()) {
                 continue;
             }
 

@@ -4,9 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "strucmotif")

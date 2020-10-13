@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;

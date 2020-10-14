@@ -11,11 +11,9 @@ import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
-import org.rcsb.strucmotif.persistence.SelectionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,13 +29,11 @@ import java.util.stream.Collectors;
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
     private final InvertedIndex invertedIndex;
-    private final SelectionMapper<IndexSelection, LabelSelection> selectionMapper;
     private final ThreadPool threadPool;
 
     @Autowired
-    public TargetAssemblerImpl(InvertedIndex invertedIndex, SelectionMapper<IndexSelection, LabelSelection> selectionMapper, ThreadPool threadPool) {
+    public TargetAssemblerImpl(InvertedIndex invertedIndex, ThreadPool threadPool) {
         this.invertedIndex = invertedIndex;
-        this.selectionMapper = selectionMapper;
         this.threadPool = threadPool;
     }
 
@@ -104,7 +100,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // first generation: all the paths are valid
             response.setTargetStructures(data.entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), selectionMapper, scoreCutoff))));
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), scoreCutoff))));
         } else {
             // subsequent generations
             int pathGeneration = response.incrementAndGetPathGeneration();

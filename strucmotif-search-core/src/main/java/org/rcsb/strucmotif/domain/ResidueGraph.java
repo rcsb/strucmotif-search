@@ -5,7 +5,6 @@ import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -28,11 +27,9 @@ public class ResidueGraph {
     private final Map<Residue, Map<Residue, Double>> sideChainDistances;
     private final Map<Residue, Map<Residue, Double>> angles;
     private final int numberOfPairings;
-    private final Map<Residue, IndexSelection> indexSelectionResolver;
     private final Map<Residue, LabelSelection> labelSelectionResolver;
 
     public ResidueGraph(Structure structure, double squaredCutoff) {
-        this.indexSelectionResolver = new HashMap<>();
         this.labelSelectionResolver = new HashMap<>();
 
         this.backboneDistances = new LinkedHashMap<>();
@@ -64,7 +61,6 @@ public class ResidueGraph {
                     }
 
                     double[] normalVector1 = normalVectorLookup.computeIfAbsent(residue1, e -> normalVector(backboneCoordinates1, sideChainCoordinates1));
-                    indexSelectionResolver.put(residue1, new IndexSelection(assemblyId1, residue1.getResidueIdentifier().getIndex()));
                     labelSelectionResolver.put(residue1, new LabelSelection(labelAsymId1, assemblyId1, residue1.getResidueIdentifier().getLabelSeqId()));
 
                     for (int chainId2 = chainId1; chainId2 < structure.getChains().size(); chainId2++) {
@@ -107,7 +103,6 @@ public class ResidueGraph {
 
                                     // compute angle between amino acid planes
                                     double[] normalVector2 = normalVectorLookup.computeIfAbsent(residue2, e -> normalVector(backboneCoordinates2, sideChainCoordinates2));
-                                    indexSelectionResolver.put(residue2, new IndexSelection(assemblyId2, residue2.getResidueIdentifier().getIndex()));
                                     labelSelectionResolver.put(residue2, new LabelSelection(labelAsymId2, assemblyId2, residue2.getResidueIdentifier().getLabelSeqId()));
 
                                     Map<Residue, Double> innerAngleMap = angles.computeIfAbsent(residue1, key -> new HashMap<>());
@@ -267,9 +262,7 @@ public class ResidueGraph {
                 null);
         // IndexSelection is needed to build and match to lookup
         // LabelSelection is needed to be able to map position-specific exchanges accurately
-        ResiduePairIdentifier residuePairIdentifier = new ResiduePairIdentifier(indexSelectionResolver.get(residue1),
-                indexSelectionResolver.get(residue2),
-                labelSelectionResolver.get(residue1),
+        ResiduePairIdentifier residuePairIdentifier = new ResiduePairIdentifier(labelSelectionResolver.get(residue1),
                 labelSelectionResolver.get(residue2));
         return new ResiduePairOccurrence(residuePairDescriptor, residuePairIdentifier);
     }

@@ -1,44 +1,27 @@
 package org.rcsb.strucmotif.domain.motif;
 
 import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * Residue pair identifiers combine the {@link IndexSelection} of each residue making up this pair.
+ * Residue pair identifiers combine the {@link LabelSelection} of each residue making up this pair.
  */
 public class ResiduePairIdentifier {
-    private final IndexSelection indexSelection1;
-    private final IndexSelection indexSelection2;
     private final LabelSelection labelSelection1;
     private final LabelSelection labelSelection2;
     private final GeometricDescriptorScore score;
 
-    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, ResiduePairDescriptor original) {
-        this(indexSelection1, indexSelection2, null, null, original);
+    public ResiduePairIdentifier(LabelSelection labelSelection1, LabelSelection labelSelection2) {
+        this(labelSelection1, labelSelection2, null);
     }
 
-    public ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2) {
-        this(indexSelection1, indexSelection2, labelSelection1, labelSelection2, null);
-    }
-
-    private ResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2, LabelSelection labelSelection1, LabelSelection labelSelection2, ResiduePairDescriptor original) {
-        this.indexSelection1 = indexSelection1;
-        this.indexSelection2 = indexSelection2;
+    public ResiduePairIdentifier(LabelSelection labelSelection1, LabelSelection labelSelection2, ResiduePairDescriptor original) {
         this.labelSelection1 = labelSelection1;
         this.labelSelection2 = labelSelection2;
         this.score = original != null ? original.getScore() : null;
-    }
-
-    public IndexSelection getIndexSelection1() {
-        return indexSelection1;
-    }
-
-    public IndexSelection getIndexSelection2() {
-        return indexSelection2;
     }
 
     public LabelSelection getLabelSelection1() {
@@ -53,12 +36,8 @@ public class ResiduePairIdentifier {
         return score;
     }
 
-    public Stream<IndexSelection> indexSelections() {
-        return Stream.of(indexSelection1, indexSelection2);
-    }
-
-    public boolean providesLabelSelection() {
-        return labelSelection1 != null && labelSelection2 != null;
+    public Stream<LabelSelection> labelSelections() {
+        return Stream.of(labelSelection1, labelSelection2);
     }
 
     public boolean providesScore() {
@@ -70,17 +49,17 @@ public class ResiduePairIdentifier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ResiduePairIdentifier that = (ResiduePairIdentifier) o;
-        return Objects.equals(indexSelection1, that.indexSelection1) &&
-                Objects.equals(indexSelection2, that.indexSelection2);
+        return Objects.equals(labelSelection1, that.labelSelection1) &&
+                Objects.equals(labelSelection2, that.labelSelection2);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(indexSelection1, indexSelection2);
+        return Objects.hash(labelSelection1, labelSelection2);
     }
 
     @Override
     public String toString() {
-        return indexSelection1 + "+" + indexSelection2;
+        return labelSelection1 + "+" + labelSelection2;
     }
 }

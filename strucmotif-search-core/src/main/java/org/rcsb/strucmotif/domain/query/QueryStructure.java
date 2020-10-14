@@ -3,8 +3,8 @@ package org.rcsb.strucmotif.domain.query;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
-import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.SelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -45,15 +45,15 @@ public class QueryStructure {
 
         // explode query into motifs and get entities by that - this provides the correct order of entities so that the
         // alignment routine does not have to care about finding correspondence
-        List<IndexSelection> residueIdentifiers = residuePairIdentifiers.stream()
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1(), lookupTargetIdentifier.getIndexSelection2()))
+        List<LabelSelection> residueIdentifiers = residuePairIdentifiers.stream()
+                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getLabelSelection1(), lookupTargetIdentifier.getLabelSelection2()))
                 .distinct()
                 .collect(Collectors.toList());
 
         // we do this to ensure correct ordering
-        SelectionResolver<IndexSelection> indexSelectionResolver = new IndexSelectionResolver(structure);
+        SelectionResolver<LabelSelection> labelSelectionResolver = new LabelSelectionResolver(structure);
         this.residues = residueIdentifiers.stream()
-                .map(indexSelectionResolver::resolve)
+                .map(labelSelectionResolver::resolve)
                 .collect(Collectors.toList());
     }
 
@@ -92,10 +92,10 @@ public class QueryStructure {
      * @return true if describing an overlapping selection
      */
     private boolean match(ResiduePairIdentifier sortedWordResiduePairIdentifier, ResiduePairIdentifier candidateIdentifier) {
-        return sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection1()) ||
-                sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection2()) ||
-                sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection1()) ||
-                sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection2());
+        return sortedWordResiduePairIdentifier.getLabelSelection1().equals(candidateIdentifier.getLabelSelection1()) ||
+                sortedWordResiduePairIdentifier.getLabelSelection1().equals(candidateIdentifier.getLabelSelection2()) ||
+                sortedWordResiduePairIdentifier.getLabelSelection2().equals(candidateIdentifier.getLabelSelection1()) ||
+                sortedWordResiduePairIdentifier.getLabelSelection2().equals(candidateIdentifier.getLabelSelection2());
     }
 
     /**

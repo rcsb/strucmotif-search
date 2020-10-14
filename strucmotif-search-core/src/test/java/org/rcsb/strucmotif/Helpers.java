@@ -11,7 +11,6 @@ import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
@@ -25,7 +24,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +34,6 @@ import java.util.stream.Stream;
 public class Helpers {
     public static final double DELTA = 0.001;
     private static final Map<String, String> structureData;
-    private static final Map<StructureIdentifier, Map<IndexSelection, LabelSelection>> mappingData;
 
     static {
         structureData = new BufferedReader(new InputStreamReader(getResource("structures.data")))
@@ -44,19 +41,6 @@ public class Helpers {
                 // 1ll1:A_1-59[A, 59, H, N, 347, -46, 299, ...
                 .map(line -> line.replace("]", "").split("\\["))
                 .collect(Collectors.toMap(split -> split[0], split -> split[1]));
-        mappingData = new HashMap<>();
-        new BufferedReader(new InputStreamReader(getResource("mapping.data")))
-                .lines()
-                // 1mns,1-192,A_1-193
-                .map(line -> line.split(","))
-                .forEach(split -> {
-                    StructureIdentifier structureIdentifier = new StructureIdentifier(split[0]);
-                    Map<IndexSelection, LabelSelection> bin = mappingData.computeIfAbsent(structureIdentifier, k -> new HashMap<>());
-                    String[] split1 = split[1].split("-");
-                    String[] split2 = split[2].split("[-_]");
-                    bin.put(new IndexSelection(split1[0], Integer.parseInt(split1[1])),
-                            new LabelSelection(split2[0], split2[1], Integer.parseInt(split2[2])));
-                });
     }
 
     @SuppressWarnings("unchecked")
@@ -122,16 +106,18 @@ public class Helpers {
         ResiduePairIdentifier[] value = new ResiduePairIdentifier[outerSplit.length - 1];
         for (int i = 1; i < outerSplit.length; i++) {
             String[] innerSplit = outerSplit[i].split(",");
-            int index1 = Integer.parseInt(innerSplit[0]);
-            int index2 = Integer.parseInt(innerSplit[1]);
+            String asym1 = innerSplit[0];
+            int index1 = Integer.parseInt(innerSplit[1]);
+            String asym2 = innerSplit[2];
+            int index2 = Integer.parseInt(innerSplit[3]);
             String structOperId1 = "1";
             String structOperId2 = "1";
-            if (innerSplit.length == 4) {
-                structOperId1 = innerSplit[2];
-                structOperId2 = innerSplit[3];
+            if (innerSplit.length == 6) {
+                structOperId1 = innerSplit[4];
+                structOperId2 = innerSplit[5];
             }
-            IndexSelection indexSelection1 = new IndexSelection(structOperId1, index1);
-            IndexSelection indexSelection2 = new IndexSelection(structOperId2, index2);
+            LabelSelection indexSelection1 = new LabelSelection(asym1, structOperId1, index1);
+            LabelSelection indexSelection2 = new LabelSelection(asym2, structOperId2, index2);
             if (residuePairDescriptor.isFlipped()) {
                 value[i - 1] = new ResiduePairIdentifier(indexSelection2, indexSelection1, residuePairDescriptor);
             } else {
@@ -193,14 +179,5 @@ public class Helpers {
         }
 
         return combinations.stream();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<LabelSelection> mockSelectionMapperSelect(InvocationOnMock invocation) {
-        StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
-        Collection<IndexSelection> selection = (Collection<IndexSelection>) invocation.getArgument(1, Collection.class);
-        return selection.stream()
-                .map(is -> mappingData.get(structureIdentifier).get(is))
-                .collect(Collectors.toList());
     }
 }

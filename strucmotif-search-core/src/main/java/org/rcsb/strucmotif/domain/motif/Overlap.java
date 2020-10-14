@@ -1,10 +1,10 @@
 package org.rcsb.strucmotif.domain.motif;
 
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 /**
  * Describes the overlap between two {@link ResiduePairIdentifier} instances. Done by determining whether
- * {@link IndexSelection} instances equal. Can be no overlap or both overlapping. Interesting case is when 1 pair
+ * {@link LabelSelection} instances equal. Can be no overlap or both overlapping. Interesting case is when 1 pair
  * overlaps. Can be LEFT_LEFT (left/first identifier of first word paired to left/first of second word) and so on.
  */
 public enum Overlap {
@@ -22,27 +22,15 @@ public enum Overlap {
      * @return a description of the observed overlap
      */
     public static Overlap ofResiduePairIdentifiers(ResiduePairIdentifier residuePairIdentifier1, ResiduePairIdentifier residuePairIdentifier2) {
-        IndexSelection indexSelection1Left = residuePairIdentifier1.getIndexSelection1();
-        String indexSelection1LeftStructOperId = indexSelection1Left.getStructOperId();
-        int indexSelection1LeftIndex = indexSelection1Left.getIndex();
-        IndexSelection indexSelection1Right = residuePairIdentifier1.getIndexSelection2();
-        String indexSelection1RightStructOperId = indexSelection1Right.getStructOperId();
-        int indexSelection1RightIndex = indexSelection1Right.getIndex();
-        IndexSelection indexSelection2Left = residuePairIdentifier2.getIndexSelection1();
-        String indexSelection2LeftStructOperId = indexSelection2Left.getStructOperId();
-        int indexSelection2LeftIndex = indexSelection2Left.getIndex();
-        IndexSelection indexSelection2Right = residuePairIdentifier2.getIndexSelection2();
-        String indexSelection2RightStructOperId = indexSelection2Right.getStructOperId();
-        int indexSelection2RightIndex = indexSelection2Right.getIndex();
+        LabelSelection indexSelection1Left = residuePairIdentifier1.getLabelSelection1();
+        LabelSelection indexSelection1Right = residuePairIdentifier1.getLabelSelection2();
+        LabelSelection indexSelection2Left = residuePairIdentifier2.getLabelSelection1();
+        LabelSelection indexSelection2Right = residuePairIdentifier2.getLabelSelection2();
 
-        boolean equal1Left2Left = indexSelection1LeftStructOperId.equals(indexSelection2LeftStructOperId) &&
-                indexSelection1LeftIndex == indexSelection2LeftIndex;
-        boolean equal1Left2Right = indexSelection1LeftStructOperId.equals(indexSelection2RightStructOperId) &&
-                indexSelection1LeftIndex == indexSelection2RightIndex;
-        boolean equal2Left1Right = indexSelection1RightStructOperId.equals(indexSelection2LeftStructOperId) &&
-                indexSelection1RightIndex == indexSelection2LeftIndex;
-        boolean equal2Left2Right = indexSelection1RightStructOperId.equals(indexSelection2RightStructOperId) &&
-                indexSelection1RightIndex == indexSelection2RightIndex;
+        boolean equal1Left2Left = indexSelection1Left.equals(indexSelection2Left);
+        boolean equal1Left2Right = indexSelection1Left.equals(indexSelection2Right);
+        boolean equal2Left1Right = indexSelection1Right.equals(indexSelection2Left);
+        boolean equal2Left2Right = indexSelection1Right.equals(indexSelection2Right);
 
         if (!equal1Left2Left && !equal1Left2Right && !equal2Left1Right && !equal2Left2Right) {
             return NONE;

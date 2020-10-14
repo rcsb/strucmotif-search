@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -50,7 +49,7 @@ public class InvertedIndexImplTest {
         assertTrue(invertedIndex.select(BIN_WITH_ASSEMBLY)
                 .map(Pair::getSecond)
                 .flatMap(Arrays::stream)
-                .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
                 .anyMatch(indexSelector -> !indexSelector.getStructOperId().equals("1")));
     }
 
@@ -70,7 +69,7 @@ public class InvertedIndexImplTest {
         assertTrue(map.values()
                 .stream()
                 .flatMap(Arrays::stream)
-                .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
                 .anyMatch(indexSelector -> !indexSelector.getStructOperId().equals("1")));
 
         // assert that every occurrence has two identifiers

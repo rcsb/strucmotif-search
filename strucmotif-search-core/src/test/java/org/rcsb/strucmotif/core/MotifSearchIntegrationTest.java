@@ -10,14 +10,12 @@ import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
-import org.rcsb.strucmotif.persistence.SelectionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -47,17 +45,14 @@ public class MotifSearchIntegrationTest {
     private StructureDataProvider structureDataProvider;
     private QueryBuilder queryBuilder;
 
-    @SuppressWarnings("unchecked")
     @BeforeEach
     public void init() {
         InvertedIndex invertedIndex = Mockito.mock(InvertedIndex.class);
         when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
-        SelectionMapper<IndexSelection, LabelSelection> selectionMapper = (SelectionMapper<IndexSelection, LabelSelection>) Mockito.mock(SelectionMapper.class);
-        when(selectionMapper.select(any(), any())).thenAnswer(Helpers::mockSelectionMapperSelect);
         this.structureDataProvider = Mockito.mock(StructureDataProvider.class);
         when(structureDataProvider.readRenumbered(any(), any())).thenAnswer(Helpers::mockStructureDataProviderReadRenumbered);
 
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, selectionMapper, threadPool);
+        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }

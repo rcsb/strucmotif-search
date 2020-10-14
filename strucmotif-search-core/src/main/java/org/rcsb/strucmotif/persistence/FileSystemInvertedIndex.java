@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,24 +102,26 @@ public class FileSystemInvertedIndex implements InvertedIndex {
 
     private ResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
         Object[] line = (Object[]) raw;
-        int seq1 = (int) line[0];
-        int seq2 = (int) line[1];
-        IndexSelection indexSelection1;
-        IndexSelection indexSelection2;
-        if (line.length == 2) {
-            indexSelection1 = new IndexSelection(seq1);
-            indexSelection2 = new IndexSelection(seq2);
+        String labelAsymId1 = (String) line[0];
+        int seq1 = (int) line[1];
+        String labelAsymId2 = (String) line[2];
+        int seq2 = (int) line[3];
+        String structOperId1;
+        String structOperId2;
+        if (line.length == 4) {
+            structOperId1 = "1";
+            structOperId2 = "1";
         } else {
-            String structOperId1 = (String) line[2];
-            String structOperId2 = (String) line[3];
-            indexSelection1 = new IndexSelection(structOperId1, seq1);
-            indexSelection2 = new IndexSelection(structOperId2, seq2);
+            structOperId1 = (String) line[4];
+            structOperId2 = (String) line[5];
         }
+        LabelSelection labelSelection1 = new LabelSelection(labelAsymId1, structOperId1, seq1);
+        LabelSelection labelSelection2 = new LabelSelection(labelAsymId2, structOperId2, seq2);
 
         if (residuePairDescriptor.isFlipped()) {
-            return new ResiduePairIdentifier(indexSelection2, indexSelection1, residuePairDescriptor);
+            return new ResiduePairIdentifier(labelSelection2, labelSelection1, residuePairDescriptor);
         } else {
-            return new ResiduePairIdentifier(indexSelection1, indexSelection2, residuePairDescriptor);
+            return new ResiduePairIdentifier(labelSelection1, labelSelection2, residuePairDescriptor);
         }
     }
 
@@ -232,20 +234,21 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         }
     }
 
-    // this has to return Integer[] and cannot be primitive array
     private Object[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
-        IndexSelection identifier1 = residuePairIdentifier.getIndexSelection1();
+        LabelSelection identifier1 = residuePairIdentifier.getLabelSelection1();
         String structOperId1 = identifier1.getStructOperId();
-        int seqId1 = identifier1.getIndex();
-        IndexSelection identifier2 = residuePairIdentifier.getIndexSelection2();
+        String asymId1 = identifier1.getLabelAsymId();
+        int seqId1 = identifier1.getLabelSeqId();
+        LabelSelection identifier2 = residuePairIdentifier.getLabelSelection2();
         String structOperId2 = identifier2.getStructOperId();
-        int seqId2 = identifier2.getIndex();
+        String asymId2 = identifier2.getLabelAsymId();
+        int seqId2 = identifier2.getLabelSeqId();
 
         // implicitly: don't write struct_oper_id if identity
         if ("1".equals(structOperId1) && "1".equals(structOperId2)) {
-            return new Object[] { seqId1, seqId2 };
+            return new Object[] { asymId1, seqId1, asymId2, seqId2 };
         } else {
-            return new Object[] { seqId1, seqId2, structOperId1, structOperId2 };
+            return new Object[] { asymId1, seqId1, asymId2, seqId2, structOperId1, structOperId2 };
         }
     }
 }

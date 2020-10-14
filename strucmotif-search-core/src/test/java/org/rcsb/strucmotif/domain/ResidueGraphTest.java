@@ -8,8 +8,6 @@ import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
-import org.rcsb.strucmotif.domain.selection.IndexSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -23,7 +21,6 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.*;
@@ -59,16 +56,11 @@ public class ResidueGraphTest {
     @Test
     public void whenReadingRenumbered3vvk_then6Valid() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
-        IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
-        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
-                // mapping shenanigans to determine label selection
-                .map(indexSelectionResolver::resolve)
-                .map(labelSelectionResolver::resolve)
+                .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 .map(LabelSelection::getLabelAsymId)
                 .distinct()
@@ -83,16 +75,12 @@ public class ResidueGraphTest {
     @Test
     public void whenReadingRenumbered1dsd_then8ValidInChainC() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
-        IndexSelectionResolver indexSelectionResolver = new IndexSelectionResolver(structure);
         LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
         ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(wordIdentifier -> Stream.of(wordIdentifier.getIndexSelection1(), wordIdentifier.getIndexSelection2()))
-                // mapping shenanigans to determine label selection
-                .map(indexSelectionResolver::resolve)
-                .map(labelSelectionResolver::resolve)
+                .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 // keep only freakish chain
                 .filter(labelSelection -> labelSelection.getLabelAsymId().equals("C"))
@@ -118,12 +106,14 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(162, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getIndex(), lookupTargetIdentifier.getIndexSelection2().getIndex()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
     }
@@ -139,12 +129,14 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(528, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getIndex(), lookupTargetIdentifier.getIndexSelection2().getIndex()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
     }
@@ -160,12 +152,14 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(162, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getIndex(), lookupTargetIdentifier.getIndexSelection2().getIndex()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
     }
@@ -181,12 +175,14 @@ public class ResidueGraphTest {
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getStructOperId(), lookupTargetIdentifier.getIndexSelection2().getStructOperId()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(528, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getIndexSelection1().getIndex(), lookupTargetIdentifier.getIndexSelection2().getIndex()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
     }
@@ -210,8 +206,8 @@ public class ResidueGraphTest {
                 .collect(Collectors.toList());
         assertFalse(identifiers.isEmpty());
         assertTrue(identifiers.stream()
-                .flatMap(pair -> Stream.of(pair.getIndexSelection1(), pair.getIndexSelection2()))
-                .map(IndexSelection::getStructOperId)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
                 .anyMatch(id -> !id.equals("1")));
     }
 

@@ -4,10 +4,8 @@ import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
-import org.rcsb.strucmotif.domain.selection.IndexSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.persistence.SelectionMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +26,6 @@ import java.util.stream.Stream;
  * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
-    private final SelectionMapper<IndexSelection, LabelSelection> selectionMapper;
     private final StructureIdentifier structureIdentifier;
     private final double scoreCutoff;
 
@@ -37,8 +34,7 @@ public class TargetStructure {
      */
     private List<ResiduePairIdentifier[]> paths;
 
-    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, SelectionMapper<IndexSelection, LabelSelection> selectionMapper, double scoreCutoff) {
-        this.selectionMapper = selectionMapper;
+    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, double scoreCutoff) {
         this.structureIdentifier = structureIdentifier;
         this.scoreCutoff = scoreCutoff;
         // each target identifier is the first step of a potential path in this target structure
@@ -135,12 +131,12 @@ public class TargetStructure {
             return null;
         }
 
-        List<IndexSelection> indexSelections = Arrays.stream(identifiers)
-                .flatMap(ResiduePairIdentifier::indexSelections)
+        List<LabelSelection> labelSelections = Arrays.stream(identifiers)
+                .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 .collect(Collectors.toList());
         return new SimpleHit(structureIdentifier,
-                selectionMapper.select(structureIdentifier, indexSelections),
+                labelSelections,
                 score);
     }
 }

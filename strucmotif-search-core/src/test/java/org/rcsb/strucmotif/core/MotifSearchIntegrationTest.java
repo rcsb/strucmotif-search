@@ -7,6 +7,8 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
@@ -15,10 +17,13 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
-import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.FileSystemInvertedIndex;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,10 +52,28 @@ public class MotifSearchIntegrationTest {
 
     @BeforeEach
     public void init() {
-        InvertedIndex invertedIndex = Mockito.mock(InvertedIndex.class);
-        when(invertedIndex.select(any())).thenAnswer(Helpers::mockInvertedIndexSelect);
-        this.structureDataProvider = Mockito.mock(StructureDataProvider.class);
-        when(structureDataProvider.readRenumbered(any(), any())).thenAnswer(Helpers::mockStructureDataProviderReadRenumbered);
+        FileSystemInvertedIndex invertedIndex = new FileSystemInvertedIndex(new MotifSearchConfig()) {
+            @Override
+            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
+                // null is okay here
+                InputStream inputStream = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream("index/" + residuePairDescriptor.toString() + ".msg");
+                if (inputStream == null) {
+                    throw new IOException();
+                }
+                return inputStream;
+            }
+        };
+
+        structureDataProvider = Mockito.mock(StructureDataProvider.class);
+        when(structureDataProvider.readRenumbered(any(), any())).thenAnswer(invocation -> {
+            StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
+            @SuppressWarnings("unchecked")
+            Collection<LabelSelection> selection = (Collection<LabelSelection>) invocation.getArgument(1, Collection.class);
+
+            InputStream inputStream = Helpers.getResource("renum/" + structureIdentifier.getPdbId() + ".bcif.gz");
+            return structureReader.readFromInputStream(inputStream, selection);
+        });
 
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig);

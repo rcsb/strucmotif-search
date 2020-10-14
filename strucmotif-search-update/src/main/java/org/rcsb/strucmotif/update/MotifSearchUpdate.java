@@ -9,9 +9,12 @@ import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.selection.IndexSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.SelectionMapper;
 import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,13 +59,15 @@ public class MotifSearchUpdate implements CommandLineRunner {
     private final StructureDataProvider structureDataProvider;
     private final InvertedIndex invertedIndex;
     private final MotifSearchConfig motifSearchConfig;
+    private final SelectionMapper<IndexSelection, LabelSelection> selectionMapper;
 
     @Autowired
-    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig) {
+    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig, SelectionMapper<IndexSelection, LabelSelection> selectionMapper) {
         this.stateRepository = stateRepository;
         this.structureDataProvider = structureDataProvider;
         this.invertedIndex = invertedIndex;
         this.motifSearchConfig = motifSearchConfig;
+        this.selectionMapper = selectionMapper;
     }
 
     public void run(String[] args) throws IOException {
@@ -179,6 +184,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         Structure structure;
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
+            selectionMapper.insert(structure);
         } catch (UncheckedIOException e) {
             // can 'safely' happen when obsolete entry was dropped from bcif data but still lingers in list
             logger.warn("[{}] [{}] Source file missing unexpectedly - obsolete entry?",
@@ -260,6 +266,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         for (StructureIdentifier structureIdentifier : identifiers) {
             logger.info("Removing renumbered structure for entry: {}", structureIdentifier);
             structureDataProvider.deleteRenumbered(structureIdentifier);
+            selectionMapper.delete(structureIdentifier);
 
             // update state for known & supported
             Set<StructureIdentifier> update = Set.of(structureIdentifier);

@@ -19,12 +19,14 @@ import java.util.stream.Collectors;
  * Scores hits by computing the RMSD with respect to the reference motif.
  */
 public class RootMeanSquareDeviationHitScorer implements HitScorer {
+    private final Structure queryStructure;
     private final List<Residue> queryResidues;
     private final AtomPairingScheme atomPairingScheme;
     private final AlignmentService alignmentService;
     private final StructureDataProvider structureDataProvider;
 
     public RootMeanSquareDeviationHitScorer(Structure queryStructure, AtomPairingScheme atomPairingScheme, AlignmentService alignmentService, StructureDataProvider structureDataProvider) {
+        this.queryStructure = queryStructure;
         this.queryResidues = queryStructure.getChains()
                 .stream()
                 .map(Chain::getResidues)
@@ -35,8 +37,14 @@ public class RootMeanSquareDeviationHitScorer implements HitScorer {
         this.structureDataProvider = structureDataProvider;
     }
 
+    @Override
     public AtomPairingScheme getAtomPairingScheme() {
         return atomPairingScheme;
+    }
+
+    @Override
+    public Structure getQueryStructure() {
+        return queryStructure;
     }
 
     @Override

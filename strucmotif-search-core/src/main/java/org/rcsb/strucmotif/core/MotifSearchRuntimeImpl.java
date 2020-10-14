@@ -70,6 +70,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             result.setHits(hits);
             result.getTimings().queryStop();
 
+            result.initializeHitScorer();
+
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);

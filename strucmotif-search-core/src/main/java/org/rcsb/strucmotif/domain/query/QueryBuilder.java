@@ -109,7 +109,7 @@ public class QueryBuilder {
         private int backboneDistanceTolerance;
         private int sideChainDistanceTolerance;
         private int angleTolerance;
-        private double rmsdCutoff;
+        private double scoreCutoff;
         private MotifPruner motifPruner;
         private AtomPairingScheme atomPairingScheme;
         private int limit;
@@ -119,7 +119,7 @@ public class QueryBuilder {
             this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
-            this.rmsdCutoff = Parameters.DEFAULT_RMSD_CUTOFF;
+            this.scoreCutoff = Parameters.DEFAULT_SCORE_CUTOFF;
             // defines the 'default' motif pruning strategy
             this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
             // defines how to superimpose and score hits
@@ -158,14 +158,14 @@ public class QueryBuilder {
         }
 
         /**
-         * When to filter hits by RMSD (use 0 or some high value to don't filter at all). This is valuable to ease the
-         * memory consumption (eliminated hits are not stored) and network traffic (eliminated hits are not propagated
-         * to the result list or some front-end). Default: 2.0 A.
-         * @param rmsdCutoff the RMSD cutoff above which hits are filtered as early as possible
+         * When to filter hits by some score (use 0 or some high value to don't filter at all). This is valuable to ease
+         * the memory consumption (eliminated hits are not stored) and network traffic (eliminated hits are not
+         * propagated to the result list or some front-end). Default: 3.0.
+         * @param scoreCutoff the score cutoff above which hits are filtered
          * @return this builder
          */
-        public MandatoryBuilder rmsdCutoff(double rmsdCutoff) {
-            this.rmsdCutoff = rmsdCutoff;
+        public MandatoryBuilder scoreCutoff(double scoreCutoff) {
+            this.scoreCutoff = scoreCutoff;
             return this;
         }
 
@@ -226,7 +226,7 @@ public class QueryBuilder {
             Parameters parameters = new Parameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
-                    rmsdCutoff,
+                    scoreCutoff,
                     motifPruner,
                     atomPairingScheme,
                     limit);

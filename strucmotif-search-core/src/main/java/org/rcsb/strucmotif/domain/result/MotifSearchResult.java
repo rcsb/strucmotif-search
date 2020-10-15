@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.result;
 
-import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.core.HitScorer;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
@@ -77,17 +76,5 @@ public class MotifSearchResult {
     public int incrementAndGetPathGeneration() {
         pathGeneration++;
         return pathGeneration;
-    }
-
-    public void initializeHitScorer() {
-        this.hitScorer = MotifSearch.newHitScorer(query.getQueryStructure().getStructure(), query.getParameters().getAtomPairingScheme());
-    }
-
-    public HitScorer getHitScorer() {
-        return hitScorer;
-    }
-
-    public TransformedHit scoreHit(SimpleHit simpleHit) {
-        return hitScorer.score(simpleHit);
     }
 }

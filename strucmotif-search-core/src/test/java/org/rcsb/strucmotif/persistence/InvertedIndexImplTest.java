@@ -35,10 +35,10 @@ public class InvertedIndexImplTest {
         };
     }
 
-    private static final ResiduePairDescriptor BIN_WITH_ASSEMBLY = new ResiduePairDescriptor(ResidueType.ARGININE,
-            ResidueType.ARGININE,
-            DistanceType.D15,
-            DistanceType.D14,
+    private static final ResiduePairDescriptor BIN_WITH_ASSEMBLY = new ResiduePairDescriptor(ResidueType.ASPARTIC_ACID,
+            ResidueType.LYSINE,
+            DistanceType.D6,
+            DistanceType.D7,
             AngleType.A80,
             null);
 

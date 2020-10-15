@@ -243,13 +243,13 @@ public class FileSystemInvertedIndex implements InvertedIndex {
 
     private Object[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
         LabelSelection identifier1 = residuePairIdentifier.getLabelSelection1();
-        String structOperId1 = identifier1.getStructOperId();
-        String asymId1 = identifier1.getLabelAsymId();
         int seqId1 = identifier1.getLabelSeqId();
+        String asymId1 = identifier1.getLabelAsymId();
+        String structOperId1 = identifier1.getStructOperId();
         LabelSelection identifier2 = residuePairIdentifier.getLabelSelection2();
-        String structOperId2 = identifier2.getStructOperId();
-        String asymId2 = identifier2.getLabelAsymId();
         int seqId2 = identifier2.getLabelSeqId();
+        String asymId2 = identifier2.getLabelAsymId();
+        String structOperId2 = identifier2.getStructOperId();
 
         // implicitly: don't write struct_oper_id if identity
         if ("1".equals(structOperId1) && "1".equals(structOperId2)) {

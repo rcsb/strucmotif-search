@@ -111,7 +111,6 @@ public class QueryBuilder {
         private int angleTolerance;
         private double scoreCutoff;
         private MotifPruner motifPruner;
-        private AtomPairingScheme atomPairingScheme;
         private int limit;
 
         MandatoryBuilder(Structure structure) {
@@ -119,11 +118,9 @@ public class QueryBuilder {
             this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
-            this.scoreCutoff = Parameters.DEFAULT_SCORE_CUTOFF;
+            this.scoreCutoff = Double.MAX_VALUE;
             // defines the 'default' motif pruning strategy
             this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
-            // defines how to superimpose and score hits
-            this.atomPairingScheme = AtomPairingScheme.ALL;
             this.limit = Integer.MAX_VALUE;
         }
 
@@ -199,16 +196,6 @@ public class QueryBuilder {
         }
 
         /**
-         * Specify the atom pairing strategy.
-         * @param atomPairingScheme the strategy to pair atoms during alignment/scoring
-         * @return this builder
-         */
-        public MandatoryBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
-            this.atomPairingScheme = atomPairingScheme;
-            return this;
-        }
-
-        /**
          * Stop after a certain number of accepted hits.
          * @param limit the maximum number of hits below the RMSD threshold
          * @return this builder
@@ -228,7 +215,6 @@ public class QueryBuilder {
                     angleTolerance,
                     scoreCutoff,
                     motifPruner,
-                    atomPairingScheme,
                     limit);
             return new OptionalStepBuilder(structure, parameters);
         }

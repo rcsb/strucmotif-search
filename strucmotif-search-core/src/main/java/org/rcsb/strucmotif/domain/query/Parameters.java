@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.core.MotifPruner;
-import org.rcsb.strucmotif.domain.AtomPairingScheme;
 
 /**
  * Immutable instance capturing all parameters of a given search job.
@@ -12,20 +11,17 @@ public class Parameters {
     private final int angleTolerance;
     private final double scoreCutoff;
     private final MotifPruner motifPruner;
-    private final AtomPairingScheme atomPairingScheme;
     private final int limit;
     static final int DEFAULT_BACKBONE_DISTANCE_TOLERANCE = 1;
     static final int DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE = 1;
     static final int DEFAULT_ANGLE_TOLERANCE = 1;
-    static final double DEFAULT_SCORE_CUTOFF = 3.0;
 
-    Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, double scoreCutoff, MotifPruner motifPruner, AtomPairingScheme atomPairingScheme, int resultLimit) {
+    Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, double scoreCutoff, MotifPruner motifPruner, int resultLimit) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
         this.scoreCutoff = scoreCutoff == 0 ? Double.MAX_VALUE : scoreCutoff;
         this.motifPruner = motifPruner;
-        this.atomPairingScheme = atomPairingScheme;
         this.limit = resultLimit == 0 ? Integer.MAX_VALUE : resultLimit;
     }
 
@@ -67,14 +63,6 @@ public class Parameters {
      */
     public MotifPruner getMotifPruner() {
         return motifPruner;
-    }
-
-    /**
-     * The atom pairing strategy applied.
-     * @return atom pairing scheme
-     */
-    public AtomPairingScheme getAtomPairingScheme() {
-        return atomPairingScheme;
     }
 
     public int getLimit() {

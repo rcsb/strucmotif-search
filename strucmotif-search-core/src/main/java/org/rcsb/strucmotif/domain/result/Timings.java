@@ -8,7 +8,7 @@ package org.rcsb.strucmotif.domain.result;
 public class Timings {
     private final Timer query;
     private final Timer paths;
-    private final Timer structures;
+    private final Timer scoreHits;
 
     /**
      * Constructs a new timer instance. Immediately starts the query timer.
@@ -16,7 +16,7 @@ public class Timings {
     public Timings() {
         this.query = new Timer();
         this.paths = new Timer();
-        this.structures = new Timer();
+        this.scoreHits = new Timer();
         this.query.start();
     }
 
@@ -43,25 +43,25 @@ public class Timings {
     }
 
     /**
-     * Start the structure parsing timer.
+     * Start the hit scoring timer.
      */
-    public void structuresStart() {
-        structures.start();
+    public void scoreHitsStart() {
+        scoreHits.start();
     }
 
     /**
-     * Stop the structure parsing timer.
+     * Stop the hit scoring timer.
      */
-    public void structuresStop() {
-        this.structures.stop();
+    public void scoreHitsStop() {
+        this.scoreHits.stop();
     }
 
     /**
-     * Get the structure parsing time in ms.
+     * Get the hit scoring time in ms.
      * @return a long
      */
-    public long getStructuresTime() {
-        return structures.getMillisecondTime();
+    public long getScoreHitsTime() {
+        return scoreHits.getMillisecondTime();
     }
 
     /**

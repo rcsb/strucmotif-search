@@ -6,7 +6,6 @@ import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
-import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;

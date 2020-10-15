@@ -60,7 +60,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             List<SimpleHit> hits = scoreHits(parameters, result);
             logger.info("Accepted {} hits in {} ms",
                     hits.size(),
-                    result.getTimings().getStructuresTime());
+                    result.getTimings().getScoreHitsTime());
 
             // dereference target structure map
             result.getTargetStructures().clear();
@@ -76,7 +76,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     }
 
     private List<SimpleHit> scoreHits(Parameters parameters, MotifSearchResult result) throws ExecutionException, InterruptedException {
-        result.getTimings().structuresStart();
+        result.getTimings().scoreHitsStart();
         int limit = Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults());
         List<SimpleHit> hits = threadPool.submit(() -> result.getTargetStructures()
                 .values()
@@ -87,7 +87,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 .limit(limit)
                 .collect(Collectors.toList()))
                 .get();
-        result.getTimings().structuresStop();
+        result.getTimings().scoreHitsStop();
         return hits;
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -83,8 +82,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 .values()
                 .parallelStream()
                 .flatMap(TargetStructure::paths)
-                // filtered hits will appear as null
-                .filter(Objects::nonNull)
+                // filtered hits if desired
+                .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() < parameters.getScoreCutoff())
                 .limit(limit)
                 .collect(Collectors.toList()))
                 .get();

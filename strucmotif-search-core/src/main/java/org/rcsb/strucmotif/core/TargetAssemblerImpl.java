@@ -100,7 +100,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // first generation: all the paths are valid
             response.setTargetStructures(data.entrySet()
                     .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue(), scoreCutoff))));
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue()))));
         } else {
             // subsequent generations
             int pathGeneration = response.incrementAndGetPathGeneration();

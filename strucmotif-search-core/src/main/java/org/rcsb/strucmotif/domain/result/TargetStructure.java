@@ -27,16 +27,11 @@ import java.util.stream.Stream;
  */
 public class TargetStructure {
     private final StructureIdentifier structureIdentifier;
-    private final double scoreCutoff;
-
-    /*
-    We use some non-final fields to achieve the lazy behavior. Tread lightly.
-     */
+    // non-final fields to achieve the lazy behavior - tread lightly
     private List<ResiduePairIdentifier[]> paths;
 
-    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers, double scoreCutoff) {
+    public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers) {
         this.structureIdentifier = structureIdentifier;
-        this.scoreCutoff = scoreCutoff;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
         this.paths = new ArrayList<>(residuePairIdentifiers.length);
@@ -125,11 +120,9 @@ public class TargetStructure {
             partial[1] += identifier.getScore().getSideChainScore();
             partial[2] += identifier.getScore().getAngleScore();
         }
-        GeometricDescriptorScore score = new GeometricDescriptorScore(partial[0], partial[1], partial[2]);
-        // TODO revisit this later
-        if (score.value() > scoreCutoff) {
-            return null;
-        }
+        GeometricDescriptorScore score = new GeometricDescriptorScore(partial[0] / (double) identifiers.length,
+                partial[1] / (double) identifiers.length,
+                partial[2] / (double) identifiers.length);
 
         List<LabelSelection> labelSelections = Arrays.stream(identifiers)
                 .flatMap(ResiduePairIdentifier::labelSelections)

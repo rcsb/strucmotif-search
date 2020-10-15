@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class MotifSearchConfig {
     /**
      * The maximum distance in Å between alpha carbon atoms of residue pairs. All pairs below will be added the inverted
-     * index and can appear as search results. 20 is really generous, lower values ease storage requirements and improve
+     * index and can appear as search results. 18 is really generous, lower values ease storage requirements and improve
      * speed of update operations.
      */
     private double distanceCutoff = 20;
@@ -56,7 +56,7 @@ public class MotifSearchConfig {
     /**
      * What precision to use to write renumbered structure data.
      */
-    private int renumberedCoordinatePrecision = 1;
+    private int renumberedCoordinatePrecision = 3;
 
     public double getDistanceCutoff() {
         return distanceCutoff;

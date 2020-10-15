@@ -60,7 +60,7 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | -----------  | ------ | ------- |
 | `bcif-fetch-url` | URL template for BinaryCIF download | RCSB PDB |
 | `data-source` | Path to local CIF archive | bcif-fetch-url |
-| `decimal-places-rmsd` | Number of decimal places reported for RMSD values | `2` |
+| `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `20` |
 | `max-results` | Maximum number of results that will be returned | `10000` |

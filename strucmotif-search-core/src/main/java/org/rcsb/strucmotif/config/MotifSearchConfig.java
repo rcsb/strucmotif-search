@@ -33,9 +33,9 @@ public class MotifSearchConfig {
      */
     private int maxResults = 10000;
     /**
-     * How many decimal places to report for RMSD values.
+     * How many decimal places to report for scores.
      */
-    private int decimalPlacesRmsd = 2;
+    private int decimalPlacesScore = 2;
     /**
      * How many decimal places to report for entries of transformation matrices.
      */
@@ -98,12 +98,12 @@ public class MotifSearchConfig {
         this.maxResults = maxResults;
     }
 
-    public int getDecimalPlacesRmsd() {
-        return decimalPlacesRmsd;
+    public int getDecimalPlacesScore() {
+        return decimalPlacesScore;
     }
 
-    public void setDecimalPlacesRmsd(int decimalPlacesRmsd) {
-        this.decimalPlacesRmsd = decimalPlacesRmsd;
+    public void setDecimalPlacesScore(int decimalPlacesScore) {
+        this.decimalPlacesScore = decimalPlacesScore;
     }
 
     public int getDecimalPlacesMatrix() {

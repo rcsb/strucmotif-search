@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif;
 
 import org.rcsb.strucmotif.align.AlignmentService;
-import org.rcsb.strucmotif.core.HitScorer;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;

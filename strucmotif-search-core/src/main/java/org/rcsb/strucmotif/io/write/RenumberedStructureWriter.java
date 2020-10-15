@@ -7,7 +7,7 @@ import java.nio.file.Path;
 /**
  * The contract to write renumbered structure data. Renumbering refers to enforcing a 'consistent' numbering of residues
  * that will allows to access each {@link org.rcsb.strucmotif.domain.structure.Residue} by a
- * {@link org.rcsb.strucmotif.domain.selection.IndexSelection}.
+ * {@link org.rcsb.strucmotif.domain.selection.LabelSelection}.
  */
 public interface RenumberedStructureWriter {
     /**

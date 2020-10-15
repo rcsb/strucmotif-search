@@ -3,9 +3,8 @@ package org.rcsb.strucmotif.domain.selection;
 import org.rcsb.strucmotif.domain.structure.Residue;
 
 /**
- * A selection resolver is a bidirectional map that provides the mapping between a selection ({@link LabelSelection} or
- * {@link IndexSelection}) and a {@link Residue}. Effectively, this can be used to select residues from structures. It
- * is especially efficient for 'small' structures such as motif definitions or target structures.
+ * A selection resolver is a bidirectional map that provides the mapping between a selection ({@link LabelSelection} and
+ * a {@link Residue}. Effectively, this can be used to select residues from structures.
  * @param <S> the compatible {@link ResidueSelection} implementation of this resolver
  */
 public interface SelectionResolver<S extends ResidueSelection> {

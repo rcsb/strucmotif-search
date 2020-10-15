@@ -102,18 +102,25 @@ public class FileSystemInvertedIndex implements InvertedIndex {
 
     private ResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
         Object[] line = (Object[]) raw;
-        String labelAsymId1 = (String) line[0];
-        int seq1 = (int) line[1];
-        String labelAsymId2 = (String) line[2];
-        int seq2 = (int) line[3];
+        boolean hasAssemblyInfo = line.length > 4;
+        boolean hasUniqueAsymIds = line.length == 4 || line.length == 6;
+        int seq1 = (int) line[0];
+        int seq2 = (int) line[1];
+        String labelAsymId1 = (String) line[2];
+        String labelAsymId2 = hasUniqueAsymIds ? (String) line[3] : labelAsymId1;
         String structOperId1;
         String structOperId2;
-        if (line.length == 4) {
+        if (hasAssemblyInfo) {
+            if (hasUniqueAsymIds) {
+                structOperId1 = (String) line[4];
+                structOperId2 = (String) line[5];
+            } else {
+                structOperId1 = (String) line[3];
+                structOperId2 = (String) line[4];
+            }
+        } else {
             structOperId1 = "1";
             structOperId2 = "1";
-        } else {
-            structOperId1 = (String) line[4];
-            structOperId2 = (String) line[5];
         }
         LabelSelection labelSelection1 = new LabelSelection(labelAsymId1, structOperId1, seq1);
         LabelSelection labelSelection2 = new LabelSelection(labelAsymId2, structOperId2, seq2);
@@ -246,9 +253,23 @@ public class FileSystemInvertedIndex implements InvertedIndex {
 
         // implicitly: don't write struct_oper_id if identity
         if ("1".equals(structOperId1) && "1".equals(structOperId2)) {
-            return new Object[] { asymId1, seqId1, asymId2, seqId2 };
+            // implicitly: collapse same asym_ids
+            if (asymId1.equals(asymId2)) {
+                // length 3
+                return new Object[] { seqId1, seqId2, asymId1 };
+            } else {
+                // length 4
+                return new Object[] { seqId1, seqId2, asymId1, asymId2 };
+            }
         } else {
-            return new Object[] { asymId1, seqId1, asymId2, seqId2, structOperId1, structOperId2 };
+            // implicitly: collapse same asym_ids
+            if (asymId1.equals(asymId2)) {
+                // length 5
+                return new Object[] { seqId1, seqId2, asymId1, structOperId1, structOperId2 };
+            } else {
+                // length 6
+                return new Object[] { seqId1, seqId2, asymId1, asymId2, structOperId1, structOperId2 };
+            }
         }
     }
 }

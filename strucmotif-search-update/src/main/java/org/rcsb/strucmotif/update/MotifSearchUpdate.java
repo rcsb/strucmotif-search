@@ -268,8 +268,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         // inverted index is expensive and should be done as batch
-        invertedIndex.delete(identifiers);
-        stateRepository.deleteDirty(identifiers);
+        if (identifiers.size() > 0) {
+            invertedIndex.delete(identifiers);
+            stateRepository.deleteDirty(identifiers);
+        }
         logger.info("Finished removal operation");
     }
 

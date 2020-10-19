@@ -56,7 +56,7 @@ public class MotifSearchConfig {
     /**
      * What precision to use to write renumbered structure data.
      */
-    private int renumberedCoordinatePrecision = 3;
+    private int renumberedCoordinatePrecision = 1;
 
     public double getDistanceCutoff() {
         return distanceCutoff;

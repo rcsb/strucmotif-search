@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
+import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Chain;
@@ -109,6 +110,8 @@ public class QueryBuilder {
         private int sideChainDistanceTolerance;
         private int angleTolerance;
         private double scoreCutoff;
+        private ScoringStrategy scoringStrategy;
+        private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
         private int limit;
 
@@ -118,6 +121,8 @@ public class QueryBuilder {
             this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
             this.scoreCutoff = Double.MAX_VALUE;
+            this.scoringStrategy = ScoringStrategy.DESCRIPTOR;
+            this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
             this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
@@ -162,6 +167,27 @@ public class QueryBuilder {
          */
         public MandatoryBuilder scoreCutoff(double scoreCutoff) {
             this.scoreCutoff = scoreCutoff;
+            return this;
+        }
+
+        /**
+         * Score hits based on geometric descriptors (fast and hits can still be scored by alignment when needed) or
+         * score all hits by alignment ('slow' but more detailed results).
+         * @param scoringStrategy the scoring strategy
+         * @return this builder
+         */
+        public MandatoryBuilder scoringStrategy(ScoringStrategy scoringStrategy) {
+            this.scoringStrategy = scoringStrategy;
+            return this;
+        }
+
+        /**
+         * Controls which atoms will be considered for alignment. Only relevant when scoring scheme is alignment-based.
+         * @param atomPairingScheme how to pair atoms for alignment routine
+         * @return this builder
+         */
+        public MandatoryBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
+            this.atomPairingScheme = atomPairingScheme;
             return this;
         }
 
@@ -213,6 +239,8 @@ public class QueryBuilder {
                     sideChainDistanceTolerance,
                     angleTolerance,
                     scoreCutoff,
+                    scoringStrategy,
+                    atomPairingScheme,
                     motifPruner,
                     limit);
             return new OptionalStepBuilder(structure, parameters);

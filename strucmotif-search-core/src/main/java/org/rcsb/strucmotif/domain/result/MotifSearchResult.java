@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.result;
 
-import org.rcsb.strucmotif.core.HitScorer;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 
@@ -24,7 +23,6 @@ public class MotifSearchResult {
     private List<SimpleHit> hits;
     private int numberOfPaths;
     private int numberOfTargetStructures;
-    private HitScorer hitScorer;
 
     public MotifSearchResult(MotifSearchQuery query) {
         this.query = query;

@@ -110,6 +110,7 @@ public class QueryBuilder {
         private int sideChainDistanceTolerance;
         private int angleTolerance;
         private double scoreCutoff;
+        private double rmsdCutoff;
         private ScoringStrategy scoringStrategy;
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
@@ -121,6 +122,7 @@ public class QueryBuilder {
             this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
             this.scoreCutoff = Double.MAX_VALUE;
+            this.rmsdCutoff = Double.MAX_VALUE;
             this.scoringStrategy = ScoringStrategy.DESCRIPTOR;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
@@ -161,12 +163,22 @@ public class QueryBuilder {
         /**
          * When to filter hits by some score (use 0 or some high value to don't filter at all). This is valuable to ease
          * the memory consumption (eliminated hits are not stored) and network traffic (eliminated hits are not
-         * propagated to the result list or some front-end). Default: 3.0.
+         * propagated to the result list or some front-end).
          * @param scoreCutoff the score cutoff above which hits are filtered
          * @return this builder
          */
         public MandatoryBuilder scoreCutoff(double scoreCutoff) {
             this.scoreCutoff = scoreCutoff;
+            return this;
+        }
+
+        /**
+         * Filter hits based on RMSD. Only relevant when scoring strategy involves alignment.
+         * @param rmsdCutoff the RMSD cutoff above which hits are filtered
+         * @return this builder
+         */
+        public MandatoryBuilder rmsdCutoff(double rmsdCutoff) {
+            this.rmsdCutoff = rmsdCutoff;
             return this;
         }
 
@@ -239,6 +251,7 @@ public class QueryBuilder {
                     sideChainDistanceTolerance,
                     angleTolerance,
                     scoreCutoff,
+                    rmsdCutoff,
                     scoringStrategy,
                     atomPairingScheme,
                     motifPruner,

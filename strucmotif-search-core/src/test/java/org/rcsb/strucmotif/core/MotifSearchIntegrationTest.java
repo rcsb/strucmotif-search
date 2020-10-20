@@ -6,10 +6,10 @@ import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
+import org.rcsb.strucmotif.domain.query.ScoringStrategy;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
@@ -47,7 +47,6 @@ public class MotifSearchIntegrationTest {
     private MotifSearchConfig motifSearchConfig;
     @Autowired
     private AlignmentService alignmentService;
-    private StructureDataProvider structureDataProvider;
     private QueryBuilder queryBuilder;
 
     @BeforeEach
@@ -65,7 +64,7 @@ public class MotifSearchIntegrationTest {
             }
         };
 
-        structureDataProvider = Mockito.mock(StructureDataProvider.class);
+        StructureDataProvider structureDataProvider = Mockito.mock(StructureDataProvider.class);
         when(structureDataProvider.readRenumbered(any(), any())).thenAnswer(invocation -> {
             StructureIdentifier structureIdentifier = invocation.getArgument(0, StructureIdentifier.class);
             @SuppressWarnings("unchecked")
@@ -76,7 +75,7 @@ public class MotifSearchIntegrationTest {
         });
 
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
-        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig);
+        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
@@ -97,17 +96,16 @@ public class MotifSearchIntegrationTest {
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
+                .scoringStrategy(ScoringStrategy.ALIGNMENT)
                 .buildParameters()
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
 
-        HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(structure, AtomPairingScheme.ALL, alignmentService, structureDataProvider);
         MotifSearchResult response = buildParameters.buildQuery().run();
-
         List<String> observedExchanges = response.getHits()
                 .stream()
-                .map(hitScorer::score)
+                .map(TransformedHit.class::cast)
                 .map(TransformedHit::getResidueTypes)
                 .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))

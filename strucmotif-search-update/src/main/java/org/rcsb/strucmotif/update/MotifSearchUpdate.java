@@ -125,7 +125,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         logger.info("Finished update operation");
     }
 
-    private void add(Collection<StructureIdentifier> identifiers) {
+    public void add(Collection<StructureIdentifier> identifiers) {
         long target = identifiers.size();
         logger.info("{} files to process in total", target);
 
@@ -256,7 +256,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         context.processed.clear();
     }
 
-    private void remove(Collection<StructureIdentifier> identifiers) {
+    public void remove(Collection<StructureIdentifier> identifiers) {
         for (StructureIdentifier structureIdentifier : identifiers) {
             logger.info("Removing renumbered structure for entry: {}", structureIdentifier);
             structureDataProvider.deleteRenumbered(structureIdentifier);

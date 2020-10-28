@@ -86,8 +86,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
         } else {
             requested = Arrays.stream(ids).map(StructureIdentifier::new).collect(Collectors.toList());
         }
-        // shuffle to prevent troublemakers such as ribosome and virus capsids occurring in the same chunk
-        Collections.shuffle(requested);
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {

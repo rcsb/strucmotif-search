@@ -3,11 +3,11 @@ package org.rcsb.strucmotif.update;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Partitions a collection into (roughly) equal-sized chunks. Will retain the order (if any) of the original collection
- * by converting all elements into a list of lists.
+ * Partitions a collection into (roughly) equal-sized chunks. Will shuffle the original collection.
  *
  * code from: https://e.printstacktrace.blog/divide-a-list-to-lists-of-n-size-in-Java-8/
  * @param <T> type of the original collection
@@ -18,6 +18,8 @@ public class Partition<T> extends AbstractList<List<T>> {
 
     public Partition(Collection<T> list, int chunkSize) {
         this.list = new ArrayList<>(list);
+        // shuffle to prevent troublemakers such as ribosome and virus capsids occurring in the same chunk
+        Collections.shuffle(this.list);
         this.chunkSize = chunkSize;
     }
 

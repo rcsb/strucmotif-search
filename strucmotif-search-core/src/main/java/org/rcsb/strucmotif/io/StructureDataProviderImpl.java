@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -52,7 +53,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         boolean dataSourceHealthy;
         try {
             dataSourceHealthy = Files.list(Paths.get(motifSearchConfig.getDataSource()))
-                    .anyMatch(path -> path.toFile().getName().endsWith(".bcif.gz"));
+                    .map(Path::toFile)
+                    .map(File::getName)
+                    .anyMatch(name -> name.endsWith(".bcif.gz") || name.endsWith(".bcif") || name.endsWith(".cif.gz") || name.endsWith(".cif"));
         } catch (IOException e) {
             dataSourceHealthy = false;
         }
@@ -74,7 +77,19 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     private Path getOriginalStructurePath(StructureIdentifier structureIdentifier) {
-        return dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
+        Path bcifGz = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
+        Path bcif = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif");
+        Path cifGz = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".cif.gz");
+        Path cif = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".cif");
+        if (Files.exists(bcifGz)) {
+            return bcifGz;
+        } else if (Files.exists(bcif)) {
+            return bcif;
+        } else if (Files.exists(cifGz)) {
+            return cifGz;
+        } else {
+            return cif;
+        }
     }
 
     private Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {

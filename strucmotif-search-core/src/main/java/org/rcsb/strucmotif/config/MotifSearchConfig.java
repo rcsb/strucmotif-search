@@ -63,7 +63,7 @@ public class MotifSearchConfig {
     /**
      * Gzip renumbered files? Yields smaller files that are slower to read.
      */
-    private boolean renumberedGzip;
+    private boolean renumberedGzip = true;
 
     public double getDistanceCutoff() {
         return distanceCutoff;

@@ -30,6 +30,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final MotifSearchConfig motifSearchConfig;
     private final String dataSource;
     private final Path renumberedPath;
+    private final String extension;
 
     @Autowired
     public StructureDataProviderImpl(StructureReader structureReader,
@@ -41,6 +42,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.dataSource = motifSearchConfig.getDataSource();
         this.renumberedPath = Paths.get(motifSearchConfig.getRootPath())
                 .resolve("renumbered");
+        this.extension = motifSearchConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
 
         // ensure directories exist
         try {
@@ -56,20 +58,31 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 motifSearchConfig.isRenumberedGzip());
     }
 
+    private String prepareUri(String raw, StructureIdentifier structureIdentifier) {
+        String pdbId = structureIdentifier.getPdbId().toLowerCase();
+        String PDBID = pdbId.toUpperCase();
+        String middle = pdbId.substring(1, 3);
+        String MIDDLE = middle.toUpperCase();
+        return raw.replace("{middle}", middle)
+                .replace("{MIDDLE}", MIDDLE)
+                .replace("{id}", pdbId)
+                .replace("{ID}", PDBID);
+    }
+
     private URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {
         try {
-            return new URL(String.format(motifSearchConfig.getBcifFetchUrl(), structureIdentifier.getPdbId().toLowerCase()));
+            return new URL(prepareUri(motifSearchConfig.getBcifFetchUrl(), structureIdentifier));
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
         }
     }
 
     private Path getOriginalStructurePath(StructureIdentifier structureIdentifier) {
-        return dataSource
+        return Paths.get(prepareUri(motifSearchConfig.getDataSource(), structureIdentifier));
     }
 
     private Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {
-        return renumberedPath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
+        return renumberedPath.resolve(structureIdentifier.getPdbId().toLowerCase() + extension);
     }
 
     private InputStream getRenumberedInputStream(StructureIdentifier structureIdentifier) {

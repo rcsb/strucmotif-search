@@ -67,6 +67,7 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
 | `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
+| `renumbered-gzip` | Gzip BinaryCIF files? | `true` |
 | `root-path` | Path where data files will be written | `/opt/data/` |
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 

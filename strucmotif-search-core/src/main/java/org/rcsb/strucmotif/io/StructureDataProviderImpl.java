@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -29,7 +28,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final StructureReader structureReader;
     private final RenumberedStructureWriter renumberedStructureWriter;
     private final MotifSearchConfig motifSearchConfig;
-    private final Path dataSourcePath;
+    private final String dataSource;
     private final Path renumberedPath;
 
     @Autowired
@@ -39,7 +38,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.structureReader = structureReader;
         this.renumberedStructureWriter = renumberedStructureWriter;
         this.motifSearchConfig = motifSearchConfig;
-        this.dataSourcePath = Paths.get(motifSearchConfig.getDataSource());
+        this.dataSource = motifSearchConfig.getDataSource();
         this.renumberedPath = Paths.get(motifSearchConfig.getRootPath())
                 .resolve("renumbered");
 
@@ -50,9 +49,11 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             throw new UncheckedIOException(e);
         }
 
-        logger.info("BinaryCIF data source is {} - BCIF fetch URL: {}",
+        logger.info("BinaryCIF data source is {} - BCIF fetch URL: {} - precision: {} - gzipping: {}",
                 motifSearchConfig.getDataSource(),
-                motifSearchConfig.getBcifFetchUrl());
+                motifSearchConfig.getBcifFetchUrl(),
+                motifSearchConfig.getRenumberedCoordinatePrecision(),
+                motifSearchConfig.isRenumberedGzip());
     }
 
     private URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {
@@ -64,19 +65,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     private Path getOriginalStructurePath(StructureIdentifier structureIdentifier) {
-        Path bcifGz = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif.gz");
-        Path bcif = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".bcif");
-        Path cifGz = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".cif.gz");
-        Path cif = dataSourcePath.resolve(structureIdentifier.getPdbId().toLowerCase() + ".cif");
-        if (Files.exists(bcifGz)) {
-            return bcifGz;
-        } else if (Files.exists(bcif)) {
-            return bcif;
-        } else if (Files.exists(cifGz)) {
-            return cifGz;
-        } else {
-            return cif;
-        }
+        return dataSource
     }
 
     private Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {

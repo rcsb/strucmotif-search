@@ -20,9 +20,10 @@ public class MotifSearchConfig {
     private String rootPath = "/opt/data/";
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
-     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>.
+     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
+     * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
      */
-    private String dataSource = "/opt/pdb/";
+    private String dataSource = "/opt/pdb/{middle}/{id}.bcif.gz";
     /**
      * How many threads should be used during multi-threaded operations (update, path assembly, structure reading).
      */
@@ -50,13 +51,19 @@ public class MotifSearchConfig {
      */
     private int maxMotifSize = 10;
     /**
-     * The URL where BinaryCIF data will be fetched from if not present locally.
+     * The URL where BinaryCIF data will be fetched from if not present locally. <code>{id}</code> refers to the
+     * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
      */
-    private String bcifFetchUrl = "https://models.rcsb.org/%s.bcif";
+    private String bcifFetchUrl = "https://models.rcsb.org/{id}.bcif";
     /**
      * What precision to use to write renumbered structure data.
      */
     private int renumberedCoordinatePrecision = 1;
+
+    /**
+     * Gzip renumbered files? Yields smaller files that are slower to read.
+     */
+    private boolean renumberedGzip;
 
     public double getDistanceCutoff() {
         return distanceCutoff;
@@ -148,5 +155,13 @@ public class MotifSearchConfig {
 
     public void setRenumberedCoordinatePrecision(int renumberedCoordinatePrecision) {
         this.renumberedCoordinatePrecision = renumberedCoordinatePrecision;
+    }
+
+    public boolean isRenumberedGzip() {
+        return renumberedGzip;
+    }
+
+    public void setRenumberedGzip(boolean renumberedGzip) {
+        this.renumberedGzip = renumberedGzip;
     }
 }

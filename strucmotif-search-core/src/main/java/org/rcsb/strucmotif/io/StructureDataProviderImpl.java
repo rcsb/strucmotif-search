@@ -50,22 +50,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             throw new UncheckedIOException(e);
         }
 
-        boolean dataSourceHealthy;
-        try {
-            dataSourceHealthy = Files.list(Paths.get(motifSearchConfig.getDataSource()))
-                    .map(Path::toFile)
-                    .map(File::getName)
-                    .anyMatch(name -> name.endsWith(".bcif.gz") || name.endsWith(".bcif") || name.endsWith(".cif.gz") || name.endsWith(".cif"));
-        } catch (IOException e) {
-            dataSourceHealthy = false;
-        }
-        logger.info("BinaryCIF data source at {} looks healthy: {}",
+        logger.info("BinaryCIF data source is {} - BCIF fetch URL: {}",
                 motifSearchConfig.getDataSource(),
-                dataSourceHealthy);
-        if (!dataSourceHealthy) {
-            logger.info("Will fetch structure data from {}",
-                    motifSearchConfig.getBcifFetchUrl());
-        }
+                motifSearchConfig.getBcifFetchUrl());
     }
 
     private URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {

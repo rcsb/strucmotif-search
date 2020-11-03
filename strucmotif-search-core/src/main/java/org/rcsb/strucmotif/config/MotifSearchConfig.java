@@ -59,11 +59,22 @@ public class MotifSearchConfig {
      * What precision to use to write renumbered structure data.
      */
     private int renumberedCoordinatePrecision = 1;
-
     /**
      * Gzip renumbered files? Yields smaller files that are slower to read.
      */
     private boolean renumberedGzip = true;
+    /**
+     * List of all identifiers ever registered.
+     */
+    public static final String STATE_KNOWN_LIST = "known.list";
+    /**
+     * List of all identifiers supported ('known' minus non-polymer structures and alpha carbon traces).
+     */
+    public static final String STATE_SUPPORTED_LIST = "supported.list";
+    /**
+     * List of all identifiers needed to recover if update operation fails.
+     */
+    public static final String STATE_DIRTY_LIST = "dirty.list";
 
     public double getDistanceCutoff() {
         return distanceCutoff;

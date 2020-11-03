@@ -43,7 +43,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     private final Path basePath;
 
     public FileSystemInvertedIndex(MotifSearchConfig motifSearchConfig) {
-        this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve("index");
+        this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
 
         ensureDirectoriesExist();
     }

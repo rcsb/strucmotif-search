@@ -46,7 +46,6 @@ import java.util.stream.Collectors;
 @EntityScan("org.rcsb.strucmotif")
 public class MotifSearchUpdate implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchUpdate.class);
-    private static final String RCSB_ENTRY_LIST = "http://www.rcsb.org/pdb/json/getCurrent";
 
     public static void main(String[] args) {
         SpringApplication.run(MotifSearchUpdate.class, args);
@@ -274,9 +273,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
     }
 
     public List<StructureIdentifier> getAllIdentifiers() throws IOException {
-        logger.info("Retrieving current entry list from {}", RCSB_ENTRY_LIST);
+        logger.info("Retrieving current entry list from {}", MotifSearchConfig.RCSB_ENTRY_LIST);
         GetCurrentResponse response;
-        try (InputStream inputStream = new URL(RCSB_ENTRY_LIST).openStream()) {
+        try (InputStream inputStream = new URL(MotifSearchConfig.RCSB_ENTRY_LIST).openStream()) {
             try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
                 response = new Gson().fromJson(inputStreamReader, GetCurrentResponse.class);
             }

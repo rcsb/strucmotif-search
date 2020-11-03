@@ -75,6 +75,18 @@ public class MotifSearchConfig {
      * List of all identifiers needed to recover if update operation fails.
      */
     public static final String STATE_DIRTY_LIST = "dirty.list";
+    /**
+     * Name of the renumbered directory.
+     */
+    public static final String RENUMBERED_DIRECTORY = "renumbered";
+    /**
+     * Name of the inverted index directory.
+     */
+    public static final String INDEX_DIRECTORY = "index";
+    /**
+     * RCSB URL that reports currently identifiers in archive.
+     */
+    public static final String RCSB_ENTRY_LIST = "http://www.rcsb.org/pdb/json/getCurrent";
 
     public double getDistanceCutoff() {
         return distanceCutoff;

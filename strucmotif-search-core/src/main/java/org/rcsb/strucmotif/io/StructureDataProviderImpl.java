@@ -40,8 +40,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.renumberedStructureWriter = renumberedStructureWriter;
         this.motifSearchConfig = motifSearchConfig;
         this.dataSource = motifSearchConfig.getDataSource();
-        this.renumberedPath = Paths.get(motifSearchConfig.getRootPath())
-                .resolve("renumbered");
+        this.renumberedPath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.RENUMBERED_DIRECTORY);
         this.extension = motifSearchConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
 
         // ensure directories exist
@@ -78,7 +77,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     private Path getOriginalStructurePath(StructureIdentifier structureIdentifier) {
-        return Paths.get(prepareUri(motifSearchConfig.getDataSource(), structureIdentifier));
+        return Paths.get(prepareUri(dataSource, structureIdentifier));
     }
 
     private Path getRenumberedStructurePath(StructureIdentifier structureIdentifier) {

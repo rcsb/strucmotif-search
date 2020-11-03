@@ -23,9 +23,9 @@ public class FileSystemStateRepository implements StateRepository {
 
     public FileSystemStateRepository(MotifSearchConfig motifSearchConfig) {
         Path rootPath = Paths.get(motifSearchConfig.getRootPath());
-        this.knownPath = rootPath.resolve("known.list");
-        this.supportedPath = rootPath.resolve("supported.list");
-        this.dirtyPath = rootPath.resolve("dirty.list");
+        this.knownPath = rootPath.resolve(MotifSearchConfig.STATE_KNOWN_LIST);
+        this.supportedPath = rootPath.resolve(MotifSearchConfig.STATE_SUPPORTED_LIST);
+        this.dirtyPath = rootPath.resolve(MotifSearchConfig.STATE_DIRTY_LIST);
     }
 
     @Override

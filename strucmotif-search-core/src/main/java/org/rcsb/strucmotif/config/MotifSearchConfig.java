@@ -68,10 +68,6 @@ public class MotifSearchConfig {
      */
     public static final String STATE_KNOWN_LIST = "known.list";
     /**
-     * List of all identifiers supported ('known' minus non-polymer structures and alpha carbon traces).
-     */
-    public static final String STATE_SUPPORTED_LIST = "supported.list";
-    /**
      * List of all identifiers needed to recover if update operation fails.
      */
     public static final String STATE_DIRTY_LIST = "dirty.list";

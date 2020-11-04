@@ -1,30 +1,24 @@
 package org.rcsb.strucmotif.persistence;
 
+import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.Revision;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 
 import java.util.Collection;
 
 /**
- * The state of the application consists of three lists of {@link StructureIdentifier} instances:
+ * The state of the application consists of two lists of {@link StructureIdentifier} instances:
  * <ul>
  *     <li><b>known:</b> entries that have been processed (might become invalid if e.g. alpha carbon trace)</li>
- *     <li><b>supported:</b> all valid entries that encompass the search space</li>
  *     <li><b>dirty:</b> all identifiers that could cause a corrupted state (if update fails during inverted index writing) - useful to recover</li>
  * </ul>
  */
 public interface StateRepository {
     /**
-     * Returns all registered ids.
-     * @return a collection of ids
+     * Returns all registered revisions.
+     * @return a collection of ids and their corresponding revision
      */
-    Collection<StructureIdentifier> selectKnown();
-
-    /**
-     * Returns all ids that substitute the search space. Like 'known' but excluding ids that cannot be supported (e.g.
-     * due to missing side-chain coordinates).
-     * @return a collection of ids
-     */
-    Collection<StructureIdentifier> selectSupported();
+    Collection<Pair<StructureIdentifier, Revision>> selectKnown();
 
     /**
      * The set of currently 'dirty' ids. Will be populated when update starts and emptied upon successful completion.
@@ -37,13 +31,7 @@ public interface StateRepository {
      * Insert into 'known' collection.
      * @param additions a collection of ids
      */
-    void insertKnown(Collection<StructureIdentifier> additions);
-
-    /**
-     * Insert into 'supported' collection.
-     * @param additions a collection of ids
-     */
-    void insertSupported(Collection<StructureIdentifier> additions);
+    void insertKnown(Collection<Pair<StructureIdentifier, Revision>> additions)
 
     /**
      * Insert into 'dirty' collection.
@@ -56,12 +44,6 @@ public interface StateRepository {
      * @param removals a collection of ids
      */
     void deleteKnown(Collection<StructureIdentifier> removals);
-
-    /**
-     * Remove from 'supported' collection.
-     * @param removals a collection of ids
-     */
-    void deleteSupported(Collection<StructureIdentifier> removals);
 
     /**
      * Remove from 'dirty' collection.

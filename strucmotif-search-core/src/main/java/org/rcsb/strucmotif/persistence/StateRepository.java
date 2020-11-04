@@ -31,7 +31,7 @@ public interface StateRepository {
      * Insert into 'known' collection.
      * @param additions a collection of ids
      */
-    void insertKnown(Collection<Pair<StructureIdentifier, Revision>> additions)
+    void insertKnown(Collection<Pair<StructureIdentifier, Revision>> additions);
 
     /**
      * Insert into 'dirty' collection.

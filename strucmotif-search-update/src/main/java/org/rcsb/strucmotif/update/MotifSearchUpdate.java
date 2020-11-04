@@ -4,8 +4,11 @@ import com.google.gson.Gson;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
+import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.ResidueGraph;
+import org.rcsb.strucmotif.domain.Revision;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -145,12 +148,12 @@ public class MotifSearchUpdate implements CommandLineRunner {
             context.buffer = new ConcurrentHashMap<>();
             partition.parallelStream().forEach(id -> handleStructureIdentifier(id, context));
 
-            persist(partition, context);
+            persist(context);
         }
     }
 
     static class Context {
-        final Set<StructureIdentifier> processed;
+        final Set<Pair<StructureIdentifier, Revision>> processed;
         String partitionContext;
         Map<ResiduePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>>> buffer;
         AtomicInteger structureCounter;
@@ -167,7 +170,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
         try {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
+            Revision revision = getRevision(mmCifFile);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
+            context.processed.add(new Pair<>(structureIdentifier, revision));
         } catch (IOException e) {
             throw new UncheckedIOException("cif parsing failed for " + structureIdentifier, e);
         }
@@ -209,7 +214,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
                     context.partitionContext,
                     structureContext,
                     structureMotifCounter.get());
-            context.processed.add(structureIdentifier);
         } catch (Exception e) {
             logger.warn("[{}] [{}] Residue graph determination failed",
                     context.partitionContext,
@@ -220,7 +224,12 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    private void persist(Collection<StructureIdentifier> requested, Context context) {
+    private Revision getRevision(MmCifFile mmCifFile) {
+        PdbxAuditRevisionHistory pdbxAuditRevisionHistory = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory();
+        return new Revision(pdbxAuditRevisionHistory.getMajorRevision().get(0), pdbxAuditRevisionHistory.getMinorRevision().get(0));
+    }
+
+    private void persist(Context context) {
         logger.info("[{}] Persisting {} unique residue pair descriptors",
                 context.partitionContext,
                 context.buffer.size());
@@ -245,11 +254,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
         });
         context.buffer.clear();
 
-        // requested is the user specified collection
-        stateRepository.insertKnown(requested);
-        // processed are those that resemble valid additions to the search space
-        stateRepository.insertSupported(context.processed);
-        stateRepository.deleteDirty(requested);
+        // processed contains all StructureIdentifiers + corresponding revision
+        stateRepository.insertKnown(context.processed);
+        stateRepository.deleteDirty(context.processed.stream().map(Pair::getFirst).collect(Collectors.toSet()));
         context.processed.clear();
     }
 
@@ -261,7 +268,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // update state for known & supported
             Set<StructureIdentifier> update = Set.of(structureIdentifier);
             stateRepository.deleteKnown(update);
-            stateRepository.deleteSupported(update);
         }
 
         // inverted index is expensive and should be done as batch
@@ -314,7 +320,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @return array of IDs that need to be processed for the given context
      */
     public Collection<StructureIdentifier> getDeltaPlusIdentifiers(Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = stateRepository.selectKnown();
+        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(Pair::getFirst).collect(Collectors.toSet());
         if (known.isEmpty()) {
             logger.warn("No existing data - starting from scratch");
             return requested;
@@ -331,7 +337,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @return array of IDs that need to be remove for the given context
      */
     public Collection<StructureIdentifier> getDeltaMinusIdentifiers(Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = stateRepository.selectKnown();
+        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(Pair::getFirst).collect(Collectors.toSet());
         if (known.isEmpty()) {
             logger.warn("No existing data - no need for cleanup of obsolete entries");
             return Collections.emptySet();

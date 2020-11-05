@@ -154,6 +154,9 @@ public class ResidueGrid {
 
             for (Residue residue : residues) {
                 double[] coords = residue.getBackboneCoordinates();
+                if (coords == null) {
+                    System.out.println();
+                }
                 if (coords[0] > xmax) {
                     xmax = coords[0];
                 } else if (coords[0] < xmin) {

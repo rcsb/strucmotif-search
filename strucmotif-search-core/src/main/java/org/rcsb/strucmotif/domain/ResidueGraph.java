@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain;
 
+import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -11,9 +12,13 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.*;
@@ -35,90 +40,72 @@ public class ResidueGraph {
         this.backboneDistances = new LinkedHashMap<>();
         this.sideChainDistances = new LinkedHashMap<>();
         this.angles = new LinkedHashMap<>();
+
+        // temporary collection of residues in 'original' chains (i.e. not transformed as the result of a bioassembly)
+        Map<Residue, Chain> originalResidues = new HashMap<>();
+        Map<Residue, Chain> transformedResidues = new HashMap<>();
         Map<Residue, double[]> normalVectorLookup = new HashMap<>();
+        for (Chain chain : structure.getChains()) {
+            ChainIdentifier chainIdentifier = chain.getChainIdentifier();
+            String labelAsymId = chainIdentifier.getLabelAsymId();
+            String structOperId = chainIdentifier.getStructOperId();
+            for (Residue residue : chain.getResidues()) {
+                if (chain.isTransformed()) {
+                    transformedResidues.put(residue, chain);
+                } else {
+                    originalResidues.put(residue, chain);
+                }
+
+                double[] backboneCoordinates = residue.getBackboneCoordinates();
+                double[] sideChainCoordinates = residue.getSideChainCoordinates();
+                // nothing to do if either representative is missing - this also implicitly omits stuff which is neither amino acid nor nucleotide
+                if (backboneCoordinates == null || sideChainCoordinates == null) {
+                    continue;
+                }
+
+                normalVectorLookup.put(residue, normalVector(backboneCoordinates, sideChainCoordinates));
+                labelSelectionResolver.put(residue, new LabelSelection(labelAsymId, structOperId, residue.getResidueIdentifier().getLabelSeqId()));
+            }
+        }
+
+        // temporary ResidueGrid to efficient distance calculation
+        ResidueGrid residueGrid = new ResidueGrid(structure, squaredCutoff);
 
         int size = 0;
-        for (int chainId1 = 0; chainId1 < structure.getChains().size(); chainId1++) {
-            Chain chain1 = structure.getChains().get(chainId1);
-            String assemblyId1 = chain1.getChainIdentifier().getStructOperId();
-            String labelAsymId1 = chain1.getChainIdentifier().getLabelAsymId();
-
-            // dominant chain has to be original
-            if (chain1.isTransformed()) {
+        for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
+            // avoid symmetry/duplicates
+            if (residueContact.getI() >= residueContact.getJ()) {
                 continue;
             }
 
-            for (int residueId1 = 0; residueId1 < chain1.getResidues().size(); residueId1++) {
-                Residue residue1 = chain1.getResidues().get(residueId1);
-
-                try {
-                    double[] backboneCoordinates1 = residue1.getBackboneCoordinates();
-                    double[] sideChainCoordinates1 = residue1.getSideChainCoordinates();
-
-                    // nothing to do if either representative is missing - this also implicitly omits stuff which is neither amino acid nor nucleotide
-                    if (backboneCoordinates1 == null || sideChainCoordinates1 == null) {
-                        continue;
-                    }
-
-                    double[] normalVector1 = normalVectorLookup.computeIfAbsent(residue1, e -> normalVector(backboneCoordinates1, sideChainCoordinates1));
-                    labelSelectionResolver.put(residue1, new LabelSelection(labelAsymId1, assemblyId1, residue1.getResidueIdentifier().getLabelSeqId()));
-
-                    for (int chainId2 = chainId1; chainId2 < structure.getChains().size(); chainId2++) {
-                        Chain chain2 = structure.getChains().get(chainId2);
-                        String assemblyId2 = chain2.getChainIdentifier().getStructOperId();
-                        String labelAsymId2 = chain2.getChainIdentifier().getLabelAsymId();
-
-                        for (int residueId2 = 0; residueId2 < chain2.getResidues().size(); residueId2++) {
-                            if (chain1.equals(chain2) && residueId2 <= residueId1) {
-                                continue;
-                            }
-
-                            Residue residue2 = chain2.getResidues().get(residueId2);
-
-                            try {
-                                double[] backboneCoordinates2 = residue2.getBackboneCoordinates();
-                                double[] sideChainCoordinates2 = residue2.getSideChainCoordinates();
-
-                                if (backboneCoordinates2 == null || sideChainCoordinates2 == null) {
-                                    continue;
-                                }
-
-                                // additional safety net for duplicated keys and distance 0
-                                /*
-                                 get ready to get (judge)mental: we consider components equal if their identifier matches -
-                                 however for this scenario we want components in assemblies to pass - therefore, we additionally
-                                 check for agreement at atom level
-                                 */
-                                if (residue1.equals(residue2)) {
-                                    continue;
-                                }
-
-                                double squaredDistance = distanceSquared3d(backboneCoordinates1, backboneCoordinates2);
-                                if (squaredDistance < squaredCutoff) {
-                                    Map<Residue, Double> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residue1, key -> new HashMap<>());
-                                    innerPolymerAnchorMap.put(residue2, Math.sqrt(squaredDistance));
-
-                                    Map<Residue, Double> innerInteractionCenterMap = sideChainDistances.computeIfAbsent(residue1, key -> new HashMap<>());
-                                    innerInteractionCenterMap.put(residue2, distance3d(sideChainCoordinates1, sideChainCoordinates2));
-
-                                    // compute angle between amino acid planes
-                                    double[] normalVector2 = normalVectorLookup.computeIfAbsent(residue2, e -> normalVector(backboneCoordinates2, sideChainCoordinates2));
-                                    labelSelectionResolver.put(residue2, new LabelSelection(labelAsymId2, assemblyId2, residue2.getResidueIdentifier().getLabelSeqId()));
-
-                                    Map<Residue, Double> innerAngleMap = angles.computeIfAbsent(residue1, key -> new HashMap<>());
-                                    innerAngleMap.put(residue2, angle(normalVector1, normalVector2));
-
-                                    size++;
-                                }
-                            } catch (Exception e) {
-                                // happens when atoms are missing
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    // happens when atoms are missing
-                }
+            Residue residue1 = residueGrid.getResidue(residueContact.getI());
+            // 'dominant' residue has to be original by contract
+            if (!originalResidues.containsKey(residue1)) {
+                continue;
             }
+
+            double distance = residueContact.getDistance();
+            Residue residue2 = residueGrid.getResidue(residueContact.getJ());
+            double[] normalVector1 = normalVectorLookup.get(residue1);
+            double[] normalVector2 = normalVectorLookup.get(residue2);
+
+            // ensure that side-chain atoms are available
+            double[] sideChainCoordinates1 = residue1.getSideChainCoordinates();
+            double[] sideChainCoordinates2 = residue2.getSideChainCoordinates();
+            if (sideChainCoordinates1 == null || sideChainCoordinates2 == null) {
+                continue;
+            }
+
+            Map<Residue, Double> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residue1, key -> new HashMap<>());
+            innerPolymerAnchorMap.put(residue2, distance);
+
+            Map<Residue, Double> innerInteractionCenterMap = sideChainDistances.computeIfAbsent(residue1, key -> new HashMap<>());
+            innerInteractionCenterMap.put(residue2, distance3d(sideChainCoordinates1, sideChainCoordinates2));
+
+            Map<Residue, Double> innerAngleMap = angles.computeIfAbsent(residue1, key -> new HashMap<>());
+            innerAngleMap.put(residue2, angle(normalVector1, normalVector2));
+
+            size++;
         }
         this.numberOfPairings = size;
     }

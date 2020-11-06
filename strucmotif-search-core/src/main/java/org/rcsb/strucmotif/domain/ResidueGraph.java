@@ -12,13 +12,11 @@ import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.*;
@@ -42,18 +40,15 @@ public class ResidueGraph {
         this.angles = new LinkedHashMap<>();
 
         // temporary collection of residues in 'original' chains (i.e. not transformed as the result of a bioassembly)
-        Map<Residue, Chain> originalResidues = new HashMap<>();
-        Map<Residue, Chain> transformedResidues = new HashMap<>();
+        Set<Residue> originalResidues = new HashSet<>();
         Map<Residue, double[]> normalVectorLookup = new HashMap<>();
         for (Chain chain : structure.getChains()) {
             ChainIdentifier chainIdentifier = chain.getChainIdentifier();
             String labelAsymId = chainIdentifier.getLabelAsymId();
             String structOperId = chainIdentifier.getStructOperId();
             for (Residue residue : chain.getResidues()) {
-                if (chain.isTransformed()) {
-                    transformedResidues.put(residue, chain);
-                } else {
-                    originalResidues.put(residue, chain);
+                if (!chain.isTransformed()) {
+                    originalResidues.add(residue);
                 }
 
                 double[] backboneCoordinates = residue.getBackboneCoordinates();
@@ -80,7 +75,7 @@ public class ResidueGraph {
 
             Residue residue1 = residueGrid.getResidue(residueContact.getI());
             // 'dominant' residue has to be original by contract
-            if (!originalResidues.containsKey(residue1)) {
+            if (!originalResidues.contains(residue1)) {
                 continue;
             }
 

@@ -25,7 +25,6 @@ public class ResidueGrid {
     private final double squaredCutoff;
     private final int cellSize;
 
-    private final Structure structure;
     private final List<Residue> residues;
     private final BoundingBox boundingBox;
     private final int[] intBounds;
@@ -35,13 +34,14 @@ public class ResidueGrid {
         this.squaredCutoff = squaredCutoff;
         this.cellSize = (int) Math.floor(Math.sqrt(squaredCutoff) * SCALE);
 
-        this.structure = structure;
         this.residues = structure.getChains()
                 .stream()
                 .map(Chain::getResidues)
                 .flatMap(Collection::stream)
+                // explicitly force CA/CB to be present - otherwise useless anyway
+                .filter(residue -> residue.getBackboneCoordinates() != null && residue.getSideChainCoordinates() != null)
                 .collect(Collectors.toList());
-        this.boundingBox = new BoundingBox(structure);
+        this.boundingBox = new BoundingBox();
 
         this.intBounds = boundingBox.getIntBounds();
         this.gridCells = new ResidueGridCell
@@ -58,11 +58,10 @@ public class ResidueGrid {
      */
     private void fillGrid() {
         int i = 0;
-        for (Chain chain : structure.getChains()) {
-            for (Residue residue : chain.getResidues()) {
-                assignCoordsToGridCell(residue.getBackboneCoordinates(), i);
-                i++;
-            }
+        for (Residue residue : residues) {
+            double[] backboneCoordinates = residue.getBackboneCoordinates();
+            assignCoordsToGridCell(backboneCoordinates, i);
+            i++;
         }
     }
 
@@ -107,7 +106,6 @@ public class ResidueGrid {
                     contacts.addAll(thisCell.getContactsWithinGridCell());
 
                     // distances of points from this box to all neighbouring boxes: 26 iterations (26 neighbouring boxes)
-                    // TODO can these simple direction (i.e. only 0 and +1)
                     for (int x = xind - 1; x <= xind + 1; x++) {
                         for (int y = yind - 1; y <= yind + 1; y++) {
                             for (int z = zind - 1; z <= zind + 1; z++) {
@@ -144,7 +142,7 @@ public class ResidueGrid {
         final double zmin;
         final double zmax;
 
-        public BoundingBox(Structure structure) {
+        public BoundingBox() {
             double xmin = Double.MAX_VALUE;
             double xmax = -Double.MAX_VALUE;
             double ymin = Double.MAX_VALUE;
@@ -154,9 +152,7 @@ public class ResidueGrid {
 
             for (Residue residue : residues) {
                 double[] coords = residue.getBackboneCoordinates();
-                if (coords == null) {
-                    System.out.println();
-                }
+
                 if (coords[0] > xmax) {
                     xmax = coords[0];
                 } else if (coords[0] < xmin) {
@@ -233,7 +229,7 @@ public class ResidueGrid {
         }
     }
 
-    class ResidueContact {
+    static class ResidueContact {
         private final int i;
         private final int j;
         private final double distance;

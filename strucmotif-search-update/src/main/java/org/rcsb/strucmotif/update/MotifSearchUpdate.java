@@ -226,7 +226,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     private Revision getRevision(MmCifFile mmCifFile) {
         PdbxAuditRevisionHistory pdbxAuditRevisionHistory = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory();
-        return new Revision(pdbxAuditRevisionHistory.getMajorRevision().get(0), pdbxAuditRevisionHistory.getMinorRevision().get(0));
+        int last = pdbxAuditRevisionHistory.getRowCount() - 1;
+        return new Revision(pdbxAuditRevisionHistory.getMajorRevision().get(last), pdbxAuditRevisionHistory.getMinorRevision().get(last));
     }
 
     private void persist(Context context) {

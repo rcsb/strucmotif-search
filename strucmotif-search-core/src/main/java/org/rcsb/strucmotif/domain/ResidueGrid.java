@@ -155,19 +155,22 @@ public class ResidueGrid {
 
                 if (coords[0] > xmax) {
                     xmax = coords[0];
-                } else if (coords[0] < xmin) {
+                }
+                if (coords[0] < xmin) {
                     xmin = coords[0];
                 }
 
                 if (coords[1] > ymax) {
                     ymax = coords[1];
-                } else if (coords[1] < ymin) {
+                }
+                if (coords[1] < ymin) {
                     ymin = coords[1];
                 }
 
                 if (coords[2] > zmax) {
                     zmax = coords[2];
-                } else if (coords[2] < zmin) {
+                }
+                if (coords[2] < zmin) {
                     zmin = coords[2];
                 }
             }

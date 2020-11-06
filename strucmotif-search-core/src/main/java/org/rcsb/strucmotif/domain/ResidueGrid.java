@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * classes, removed support for 2nd set of atoms, only consider alpha carbons (and equivalents) for computation.
  *
  * see: https://github.com/biojava/biojava/blob/master/biojava-structure/src/main/java/org/biojava/nbio/structure/contact/Grid.java
- * original author: Jose M. Duarte <jose.duarte@rcsb.org>
+ * original author: Jose M. Duarte &lt;jose.duarte@rcsb.org&gt;
  */
 public class ResidueGrid {
     /**

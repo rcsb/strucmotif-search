@@ -1,3 +1,5 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.rcsb/strucmotif-search/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.rcsb/strucmotif-search)
+[![Build Status](https://travis-ci.com/rcsb/strucmotif-search.svg?branch=master)](https://travis-ci.com/rcsb/strucmotif-search)
 [![Changelog](https://img.shields.io/badge/changelog--lightgrey.svg?style=flat)](https://github.com/rcsb/strucmotif-search/blob/master/CHANGELOG.md)
 
 # Structural Motif Search
@@ -19,20 +21,20 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 ```java
 class Demo {
     public static void main(String[] args) {
+        // the entry point for all things motif search - #newQuery() starts building a new query
         MotifSearch.newQuery()
-            .defineByPdbIdAndSelection("4cha",
-                Set.of(new LabelSelection("B", "1", 42), // HIS
-                       new LabelSelection("B", "1", 87), // ASP
-                       new LabelSelection("C", "1", 47))) // SER
-            // parameters are considered mandatory arguments - use defaults
-            .buildParameters()
-            // several additional arguments can be provided to customize the query further
-            .buildQuery()
-            // execute query
-            .run()
-            .getHits()
-            // a collection of hits is returned
-            .forEach(System.out::println);
+                // several ways can be used to define the query motif - e.g., specify a PDB entry id
+                .defineByPdbIdAndSelection("4cha",
+                        // and a collection of sequence positions to extract residues to use as motif
+                        Set.of(new LabelSelection("B", "1", 42), // HIS
+                               new LabelSelection("B", "1", 87), // ASP
+                               new LabelSelection("C", "1", 47))) // SER
+                // parameters are considered mandatory arguments
+                .buildParameters()
+                // retrieve container with complete query
+                .buildQuery()
+                // execute query
+                .run();
     }
 }
 ```

@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.7.3
+strucmotif-search 0.7.11
 -------------
 ### General
 - let's consider this the first version ready to be 'productionized'

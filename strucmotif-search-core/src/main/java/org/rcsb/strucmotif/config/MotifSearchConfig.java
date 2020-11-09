@@ -13,7 +13,7 @@ public class MotifSearchConfig {
      * index and can appear as search results. 18 is really generous, lower values ease storage requirements and improve
      * speed of update operations.
      */
-    private double distanceCutoff = 20;
+    private double distanceCutoff = 15;
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */

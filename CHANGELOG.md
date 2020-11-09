@@ -1,10 +1,10 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.7.10
+strucmotif-search 0.8.0
 -------------
 ### General
-- let's consider this the first version ready to be 'productionized'
+- let's consider this the first public release
 
 strucmotif-search 0.0.1
 -------------

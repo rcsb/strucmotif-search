@@ -11,7 +11,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>...</version>
+  <version>0.8.0</version>
 </dependency>
 ```
 
@@ -72,3 +72,9 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 
 Configure by placing your `application.properties` on the classpath.
+
+## Availability
+Structural motif searching is available as part of the RCSB advanced search: coming soon
+
+## Publication
+Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. coming soon

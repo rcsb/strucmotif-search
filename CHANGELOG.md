@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.8.0
+strucmotif-search 0.8.1
 -------------
 ### General
 - let's consider this the first public release

@@ -13,7 +13,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.8.0</version>
+  <version>0.8.1</version>
 </dependency>
 ```
 
@@ -23,9 +23,9 @@ class Demo {
     public static void main(String[] args) {
         // the entry point for all things motif search - #newQuery() starts building a new query
         MotifSearch.newQuery()
-                // several ways can be used to define the query motif - e.g., specify a PDB entry id
+                // several ways can be used to define the query motif - e.g., specify an entry id
                 .defineByPdbIdAndSelection("4cha",
-                        // and a collection of sequence positions to extract residues to use as motif
+                        // and a collection of sequence positions to extract residues
                         Set.of(new LabelSelection("B", "1", 42), // HIS
                                new LabelSelection("B", "1", 87), // ASP
                                new LabelSelection("C", "1", 47))) // SER

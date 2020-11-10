@@ -4,7 +4,7 @@
 
     <groupId>org.rcsb</groupId>
     <artifactId>strucmotif-search</artifactId>
-    <version>0.7.11-SNAPSHOT</version>
+    <version>0.8.0</version>
     <modules>
         <module>strucmotif-search-core</module>
         <module>strucmotif-search-benchmark</module>
@@ -40,7 +40,7 @@
         <connection>scm:git:git://github.com/rcsb/strucmotif-search.git</connection>
         <developerConnection>scm:git:https://github.com/rcsb/strucmotif-search.git</developerConnection>
         <url>http://github.com/rcsb/strucmotif-search</url>
-        <tag>HEAD</tag>
+        <tag>strucmotif-search-0.8.0</tag>
     </scm>
 
     <dependencies>

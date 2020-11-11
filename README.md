@@ -3,9 +3,39 @@
 [![Changelog](https://img.shields.io/badge/changelog--lightgrey.svg?style=flat)](https://github.com/rcsb/strucmotif-search/blob/master/CHANGELOG.md)
 
 # Structural Motif Search
-Structural motifs are small sets of amino acids in spatial proximity that constitute e.g. active sites or 
-structure-defining patterns. This implementation traverses the whole PDB archive (>160k structures) and aims at 
-returning all highly similar occurrences of the query motif within a second.
+Biochemical and biological functions of proteins are the product of both the overall fold
+of the polypeptide chain, and, typically, structural motifs made up of smaller numbers
+of amino acids constituting a catalytic center or a binding site that may be remote from
+one another in amino acid sequence. Detection of such structural motifs can provide valuable
+insights into the function(s) of previously uncharacterized proteins.
+
+![alt motifs](https://raw.githubusercontent.com/rcsb/strucmotif-search/master/motifs.png)
+
+Technically, this remains an extremely challenging problem because of the size of the Protein
+Data Bank (PDB) archive. We have developed a new approach that uses an inverted index strategy
+capable of analyzing >170,000 PDB structures with unmatched speed. The efficiency of our 
+inverted index method depends critically on identifying the small number of structures 
+containing the query motif and ignoring most of the structures that are irrelevant. Our 
+approach enables real-time retrieval and superposition of structural motifs, either extracted
+from a reference structure or uploaded by the user.
+
+## Performance
+Current benchmark times to search in `160,467` structures as of `2/17/20`.
+
+| Motif | Hits | Time | Units |
+| --- | --- | --- | --- |
+| Serine Protease (HDS) | 3,498 | 0.92 | s/op |
+| Aminopeptidase (KDDDE) | 350 | 0.46 | s/op |
+| Zinc Fingers (CCH) | 1,056 | 0.13 | s/op |
+| Enolase Superfamily (KDEEH) | 288 | 0.36 | s/op |
+| Enolase Superfamily (KDEEH, exchanges) | 308 | 0.87 | s/op |
+| RNA G-Quadruplex (GGGG) | 84 | 1.10 | s/op | 
+
+## Features
+- nucleotide support
+- inter-chain & assembly support
+- position-specific exchanges
+- modified residues
 
 ## Getting started
 strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
@@ -38,24 +68,6 @@ class Demo {
     }
 }
 ```
-
-## Performance
-Current benchmark times to search in `160,467` structures as of `2/17/20`.
-
-| Motif | Hits | Time | Units |
-| --- | --- | --- | --- |
-| Serine Protease (HDS) | 3,498 | 0.92 | s/op |
-| Aminopeptidase (KDDDE) | 350 | 0.46 | s/op |
-| Zinc Fingers (CCH) | 1,056 | 0.13 | s/op |
-| Enolase Superfamily (KDEEH) | 288 | 0.36 | s/op |
-| Enolase Superfamily (KDEEH, exchanges) | 308 | 0.87 | s/op |
-| RNA G-Quadruplex (GGGG) | 84 | 1.10 | s/op | 
-
-## Features
-- nucleotide support
-- inter-chain & assembly support
-- position-specific exchanges
-- modified residues
 
 ## Configuration
 | Property     | Action | Default Value/Behavior |

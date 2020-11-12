@@ -6,6 +6,7 @@ import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.Revision;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -58,16 +60,18 @@ public class MotifSearchUpdate implements CommandLineRunner {
     private final StructureDataProvider structureDataProvider;
     private final InvertedIndex invertedIndex;
     private final MotifSearchConfig motifSearchConfig;
+    private final ThreadPool threadPool;
 
     @Autowired
-    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig) {
+    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig, ThreadPool threadPool) {
         this.stateRepository = stateRepository;
         this.structureDataProvider = structureDataProvider;
         this.invertedIndex = invertedIndex;
         this.motifSearchConfig = motifSearchConfig;
+        this.threadPool = threadPool;
     }
 
-    public void run(String[] args) throws IOException {
+    public void run(String[] args) throws Exception {
         if (args.length < 1) {
             System.out.println("Too few arguments");
             System.out.println("Usage: java -Xmx12G -jar update.jar operation ...");
@@ -125,7 +129,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         logger.info("Finished update operation");
     }
 
-    public void add(Collection<StructureIdentifier> identifiers) {
+    public void add(Collection<StructureIdentifier> identifiers) throws ExecutionException, InterruptedException {
         long target = identifiers.size();
         logger.info("{} files to process in total", target);
 
@@ -146,7 +150,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
             context.structureCounter = new AtomicInteger();
             context.buffer = new ConcurrentHashMap<>();
-            partition.parallelStream().forEach(id -> handleStructureIdentifier(id, context));
+            threadPool.submit(() -> {
+                partition.parallelStream().forEach(id -> handleStructureIdentifier(id, context));
+                return null;
+            }).get();
 
             persist(context);
         }
@@ -200,16 +207,19 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
-            residueGraph.residuePairOccurrencesParallel()
-                    .forEach(motifOccurrence -> {
-                        ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
-                        ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
+            threadPool.submit(() -> {
+                residueGraph.residuePairOccurrencesParallel()
+                        .forEach(motifOccurrence -> {
+                            ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
+                            ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
 
-                        Map<StructureIdentifier, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
-                        Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
-                        targetIdentifiers.add(targetIdentifier);
-                        structureMotifCounter.incrementAndGet();
-                    });
+                            Map<StructureIdentifier, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
+                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
+                            targetIdentifiers.add(targetIdentifier);
+                            structureMotifCounter.incrementAndGet();
+                        });
+                return null;
+            }).get();
             logger.info("[{}] [{}] Extracted {} residue pairs",
                     context.partitionContext,
                     structureContext,
@@ -220,7 +230,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                     structureContext,
                     e);
             // fail complete update
-            throw e;
+            throw new RuntimeException(e);
         }
     }
 
@@ -230,29 +240,33 @@ public class MotifSearchUpdate implements CommandLineRunner {
         return new Revision(pdbxAuditRevisionHistory.getMajorRevision().get(last), pdbxAuditRevisionHistory.getMinorRevision().get(last));
     }
 
-    private void persist(Context context) {
+    private void persist(Context context) throws ExecutionException, InterruptedException {
         logger.info("[{}] Persisting {} unique residue pair descriptors",
                 context.partitionContext,
                 context.buffer.size());
 
         final int bufferTotal = context.buffer.size();
         AtomicInteger bufferCount = new AtomicInteger();
-        context.buffer.entrySet().parallelStream().forEach(entry -> {
-            ResiduePairDescriptor full = entry.getKey();
-            Map<StructureIdentifier, Collection<ResiduePairIdentifier>> output = entry.getValue();
+        threadPool.submit(() -> {
+            context.buffer.entrySet().parallelStream().forEach(entry -> {
+                ResiduePairDescriptor full = entry.getKey();
+                Map<StructureIdentifier, Collection<ResiduePairIdentifier>> output = entry.getValue();
 
-            if (bufferCount.incrementAndGet() % 100000 == 0) {
-                logger.info("[{}] {} / {}",
-                        context.partitionContext,
-                        bufferCount,
-                        bufferTotal);
-            }
+                if (bufferCount.incrementAndGet() % 100000 == 0) {
+                    logger.info("[{}] {} / {}",
+                            context.partitionContext,
+                            bufferCount,
+                            bufferTotal);
+                }
 
-            invertedIndex.insert(full, output);
+                invertedIndex.insert(full, output);
 
-            // writing takes additional heap - ease burden by dropping processed output bins
-            output.clear();
-        });
+                // writing takes additional heap - ease burden by dropping processed output bins
+                output.clear();
+            });
+            return null;
+        }).get();
+
         context.buffer.clear();
 
         // processed contains all StructureIdentifiers + corresponding revision

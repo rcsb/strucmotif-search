@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.8.2
+-------------
+### General
+- number-threads now affects update routine
+
 strucmotif-search 0.8.1
 -------------
 ### General

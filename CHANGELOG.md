@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.8.4
+-------------
+### Bug fixes
+- fix state parsing
+
 strucmotif-search 0.8.3
 -------------
 ### Bug fixes

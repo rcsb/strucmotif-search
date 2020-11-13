@@ -43,7 +43,11 @@ public class FileSystemStateRepository implements StateRepository {
 
     @Override
     public Collection<StructureIdentifier> selectDirty() {
-        return select(dirtyPath);
+        if (Files.exists(dirtyPath)) {
+            return select(dirtyPath);
+        } else {
+            return Collections.emptySet();
+        }
     }
 
     private Set<StructureIdentifier> select(Path source) {
@@ -97,7 +101,15 @@ public class FileSystemStateRepository implements StateRepository {
 
     @Override
     public void deleteDirty(Collection<StructureIdentifier> removals) {
-        delete(removals, dirtyPath);
+        if (Files.exists(dirtyPath)) {
+            delete(removals, dirtyPath);
+        } else {
+            try {
+                Files.createFile(dirtyPath);
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
     }
 
     private void delete(Collection<StructureIdentifier> removals, Path destination) {

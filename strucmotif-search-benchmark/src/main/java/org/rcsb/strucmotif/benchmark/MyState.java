@@ -5,6 +5,7 @@ import org.openjdk.jmh.annotations.State;
 import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.read.StructureReaderImpl;
@@ -32,11 +33,22 @@ public class MyState {
 
     private Structure createStructure(Motifs motif) {
         try {
-            URL url = new URL(String.format(config.getBcifFetchUrl(), motif.getStructureIdentifier().getPdbId()));
+            URL url = new URL(prepareUri(config.getCifFetchUrl(), motif.getStructureIdentifier()));
             InputStream inputStream = url.openStream();
             return structureReader.readFromInputStream(inputStream, motif.getSelection());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private String prepareUri(String raw, StructureIdentifier structureIdentifier) {
+        String pdbId = structureIdentifier.getPdbId().toLowerCase();
+        String PDBID = pdbId.toUpperCase();
+        String middle = pdbId.substring(1, 3);
+        String MIDDLE = middle.toUpperCase();
+        return raw.replace("{middle}", middle)
+                .replace("{MIDDLE}", MIDDLE)
+                .replace("{id}", pdbId)
+                .replace("{ID}", PDBID);
     }
 }

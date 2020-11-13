@@ -1,6 +1,12 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.0
+-------------
+### Bug fixes
+- fix tests
+- rename bcif-fetch-url to cif-fetch-url
+
 strucmotif-search 0.8.4
 -------------
 ### Bug fixes

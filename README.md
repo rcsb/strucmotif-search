@@ -43,7 +43,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.8.4</version>
+  <version>0.9.0</version>
 </dependency>
 ```
 
@@ -72,7 +72,7 @@ class Demo {
 ## Configuration
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
-| `bcif-fetch-url` | URL template for BinaryCIF download | RCSB PDB |
+| `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
 | `data-source` | Path to local CIF archive | bcif-fetch-url |
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |

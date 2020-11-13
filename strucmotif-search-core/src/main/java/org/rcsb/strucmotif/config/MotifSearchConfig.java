@@ -51,10 +51,10 @@ public class MotifSearchConfig {
      */
     private int maxMotifSize = 10;
     /**
-     * The URL where BinaryCIF data will be fetched from if not present locally. <code>{id}</code> refers to the
+     * The URL where (Binary)CIF data will be fetched from if not present locally. <code>{id}</code> refers to the
      * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
      */
-    private String bcifFetchUrl = "https://models.rcsb.org/{id}.bcif";
+    private String cifFetchUrl = "https://models.rcsb.org/{id}.bcif";
     /**
      * What precision to use to write renumbered structure data.
      */
@@ -156,12 +156,12 @@ public class MotifSearchConfig {
         this.maxMotifSize = maxMotifSize;
     }
 
-    public String getBcifFetchUrl() {
-        return bcifFetchUrl;
+    public String getCifFetchUrl() {
+        return cifFetchUrl;
     }
 
-    public void setBcifFetchUrl(String bcifFetchUrl) {
-        this.bcifFetchUrl = bcifFetchUrl;
+    public void setCifFetchUrl(String cifFetchUrl) {
+        this.cifFetchUrl = cifFetchUrl;
     }
 
     public double getSquaredDistanceCutoff() {

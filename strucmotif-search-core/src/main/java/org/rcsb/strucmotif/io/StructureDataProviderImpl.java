@@ -50,9 +50,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             throw new UncheckedIOException(e);
         }
 
-        logger.info("BinaryCIF data source is {} - BCIF fetch URL: {} - precision: {} - gzipping: {}",
+        logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {} - gzipping: {}",
                 motifSearchConfig.getDataSource(),
-                motifSearchConfig.getBcifFetchUrl(),
+                motifSearchConfig.getCifFetchUrl(),
                 motifSearchConfig.getRenumberedCoordinatePrecision(),
                 motifSearchConfig.isRenumberedGzip());
     }
@@ -68,9 +68,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 .replace("{ID}", PDBID);
     }
 
-    private URL getBcifFetchUrl(StructureIdentifier structureIdentifier) {
+    private URL getCifFetchUrl(StructureIdentifier structureIdentifier) {
         try {
-            return new URL(prepareUri(motifSearchConfig.getBcifFetchUrl(), structureIdentifier));
+            return new URL(prepareUri(motifSearchConfig.getCifFetchUrl(), structureIdentifier));
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
         }
@@ -99,7 +99,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             if (Files.exists(originalPath)) {
                 return Files.newInputStream(originalPath);
             } else {
-                return getBcifFetchUrl(structureIdentifier).openStream();
+                return getCifFetchUrl(structureIdentifier).openStream();
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -132,7 +132,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 return readFromInputStream(Files.newInputStream(renumberedPath), selection);
             } catch (IOException e2) {
                 try {
-                    return readFromInputStream(getBcifFetchUrl(structureIdentifier).openStream(), selection);
+                    return readFromInputStream(getCifFetchUrl(structureIdentifier).openStream(), selection);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 }

@@ -73,7 +73,7 @@ class Demo {
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
-| `data-source` | Path to local CIF archive | bcif-fetch-url |
+| `data-source` | Path to local CIF archive | cif-fetch-url |
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |

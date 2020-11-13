@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.8.3
+-------------
+### Bug fixes
+- allow missing dirty.list if empty
+
 strucmotif-search 0.8.2
 -------------
 ### General

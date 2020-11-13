@@ -119,7 +119,7 @@ public class FileSystemStateRepository implements StateRepository {
         try {
             String output = Files.lines(destination)
                     .filter(line -> identifiers.stream().noneMatch(line::startsWith))
-                    .collect(Collectors.joining("\n"));
+                    .collect(Collectors.joining("\n", "", "\n"));
             Files.write(destination, output.getBytes());
         } catch (IOException e) {
             throw new UncheckedIOException(e);

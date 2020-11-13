@@ -26,12 +26,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.*;
 
 public class ResidueGraphTest {
+    private static final double TEST_DISTANCE_CUTOFF = 20;
     private StructureReader structureReader;
     private MotifSearchConfig motifSearchConfig;
 
     @BeforeEach
     public void init() {
         motifSearchConfig = new MotifSearchConfig();
+        motifSearchConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
         structureReader = new StructureReaderImpl();
     }
 

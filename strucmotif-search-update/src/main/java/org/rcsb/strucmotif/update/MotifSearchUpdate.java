@@ -99,8 +99,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
             if (dirtyStructureIdentifiers.size() > 0) {
                 logger.warn("Update state is dirty - problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
-                logger.warn("This requires manual intervention - perform 'RECOVER' operation and rerun update");
-                throw new IllegalStateException("Update state is dirty - problematic identifiers:\n" + dirtyStructureIdentifiers);
+                logger.info("Recovering from dirty state");
+                remove(stateRepository.selectDirty());
             }
         }
 
@@ -146,7 +146,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
             List<StructureIdentifier> partition = partitions.get(i);
             logger.info("[{}] Start processing partition", context.partitionContext);
-            stateRepository.insertDirty(partition);
 
             context.structureCounter = new AtomicInteger();
             context.buffer = new ConcurrentHashMap<>();
@@ -155,6 +154,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 return null;
             }).get();
 
+            // mark as dirty only around index update
+            stateRepository.insertDirty(partition);
             persist(context);
         }
     }

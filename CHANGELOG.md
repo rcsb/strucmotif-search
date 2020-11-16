@@ -1,6 +1,12 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.1
+-------------
+### General
+- will now perform automatic recover operation during update if necessary
+- marking entries only as dirty when index is getting updated
+
 strucmotif-search 0.9.0
 -------------
 ### Bug fixes

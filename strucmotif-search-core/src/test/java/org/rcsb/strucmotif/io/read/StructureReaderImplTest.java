@@ -3,7 +3,11 @@ package org.rcsb.strucmotif.io.read;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
+import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Atom;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -17,6 +21,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
@@ -24,13 +29,29 @@ import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
 
 public class StructureReaderImplTest {
     private StructureReader structureReader;
+    private MotifSearchConfig motifSearchConfig;
 
     @BeforeEach
     public void init() {
         this.structureReader = new StructureReaderImpl();
+        this.motifSearchConfig = new MotifSearchConfig();
     }
 
-    // TODO 4udf seems slow
+    @Test
+    public void whenDistinctAssemblies_thenParseAllChains() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("6lxk"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
+        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(structure);
+
+        long uniqueChainsInAssemblies = residueGraph.pairingsSequential()
+                .flatMap(pair -> Stream.of(pair.getFirst(), pair.getSecond()))
+                .map(labelSelectionResolver::resolve)
+                .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
+                .distinct()
+                .count();
+
+        assertEquals(8, uniqueChainsInAssemblies, "Not all chains parsed");
+    }
 
     @Test
     public void whenAssemblySelection_thenReturnNoDuplicates() {

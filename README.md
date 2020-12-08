@@ -91,4 +91,4 @@ Configure by placing your `application.properties` on the classpath.
 Structural motif searching is available as part of the RCSB advanced search: coming soon
 
 ## Publication
-Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. coming soon
+Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

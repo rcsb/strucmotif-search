@@ -50,7 +50,7 @@ public class StructureReaderImplTest {
                 .distinct()
                 .count();
 
-        assertEquals(8, uniqueChainsInAssemblies, "Not all chains parsed");
+        assertEquals(10, uniqueChainsInAssemblies, "Not all chains parsed");
     }
 
     @Test

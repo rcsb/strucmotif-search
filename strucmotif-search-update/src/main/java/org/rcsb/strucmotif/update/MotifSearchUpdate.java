@@ -5,11 +5,12 @@ import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
+import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.ResidueGraph;
 import org.rcsb.strucmotif.domain.Revision;
+import org.rcsb.strucmotif.domain.StructureInformation;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -33,18 +34,23 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @ComponentScan({"org.rcsb.strucmotif"})
@@ -161,7 +167,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
     }
 
     static class Context {
-        final Set<Pair<StructureIdentifier, Revision>> processed;
+        final Set<StructureInformation> processed;
         String partitionContext;
         Map<ResiduePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>>> buffer;
         AtomicInteger structureCounter;
@@ -179,8 +185,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
             Revision revision = getRevision(mmCifFile);
+            Map<String, List<String>> assemblyInformation = getAssemblyInformation(mmCifFile);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
-            context.processed.add(new Pair<>(structureIdentifier, revision));
+            context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
         } catch (IOException e) {
             throw new UncheckedIOException("cif parsing failed for " + structureIdentifier, e);
         }
@@ -235,6 +242,78 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
+    private Map<String, List<String>> getAssemblyInformation(MmCifFile mmCifFile) {
+        // TODO maybe this functionality should be part of Structures?
+        /*
+        loop_
+        _pdbx_struct_assembly_gen.assembly_id
+        _pdbx_struct_assembly_gen.oper_expression
+        _pdbx_struct_assembly_gen.asym_id_list
+        1 '(1-60)(61-88)'           A,B,C
+        2 '(61-88)'                 A,B,C
+        3 '(1-5)(61-88)'            A,B,C
+        4 '(1,2,6,10,23,24)(61-88)' A,B,C
+        5 '(1-5)(63-68)'            A,B,C
+        6 '(1,10,23)(61,62,69-88)'  A,B,C
+        7 '(P)(61-88)'              A,B,C
+        #
+         */
+        PdbxStructAssemblyGen pdbxStructAssemblyGen = mmCifFile.getFirstBlock().getPdbxStructAssemblyGen();
+        Map<String, List<String>> assemblyInformation = new LinkedHashMap<>();
+        if (pdbxStructAssemblyGen.isDefined()) {
+            for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
+                String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
+                String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
+                List<String> operList = getOperList(operExpression);
+                assemblyInformation.put(assemblyId, operList);
+            }
+        } else {
+            assemblyInformation.put("1", List.of("1"));
+        }
+        return assemblyInformation;
+    }
+
+    private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
+    private List<String> getOperList(String operExpression) {
+        List<String> operations = new ArrayList<>();
+        String[] split = OPERATION_PATTERN.split(operExpression);
+        if (split.length > 1) {
+            List<String> ids1 = extractTransformationIds(split[0]);
+            List<String> ids2 = extractTransformationIds(split[1]);
+            for (String id1 : ids1) {
+                for (String id2 : ids2) {
+                    operations.add(id1 + "x" + id2);
+                }
+            }
+        } else {
+            operations.addAll(extractTransformationIds(operExpression));
+        }
+
+        return operations;
+    }
+
+    private static final Pattern COMMA_PATTERN = Pattern.compile(",");
+    private List<String> extractTransformationIds(String rawOperation) {
+        String prepared = rawOperation.replace("(", "")
+                .replace(")", "")
+                .replace("'", "");
+
+        return COMMA_PATTERN.splitAsStream(prepared)
+                .flatMap(this::extractTransformationRanges)
+                .collect(Collectors.toList());
+    }
+
+    private static final Pattern RANGE_PATTERN = Pattern.compile("-");
+    private Stream<String> extractTransformationRanges(String raw) {
+        String[] s = RANGE_PATTERN.split(raw);
+        if (s.length == 1) {
+            return Stream.of(raw);
+        } else {
+            return IntStream.range(Integer.parseInt(s[0]), Integer.parseInt(s[1]) + 1)
+                    .mapToObj(String::valueOf);
+        }
+    }
+
     private Revision getRevision(MmCifFile mmCifFile) {
         PdbxAuditRevisionHistory pdbxAuditRevisionHistory = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory();
         int last = pdbxAuditRevisionHistory.getRowCount() - 1;
@@ -272,7 +351,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
         // processed contains all StructureIdentifiers + corresponding revision
         stateRepository.insertKnown(context.processed);
-        stateRepository.deleteDirty(context.processed.stream().map(Pair::getFirst).collect(Collectors.toSet()));
+        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
         context.processed.clear();
     }
 
@@ -336,7 +415,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @return array of IDs that need to be processed for the given context
      */
     public Collection<StructureIdentifier> getDeltaPlusIdentifiers(Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(Pair::getFirst).collect(Collectors.toSet());
+        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
         if (known.isEmpty()) {
             logger.warn("No existing data - starting from scratch");
             return requested;
@@ -353,7 +432,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @return array of IDs that need to be remove for the given context
      */
     public Collection<StructureIdentifier> getDeltaMinusIdentifiers(Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(Pair::getFirst).collect(Collectors.toSet());
+        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
         if (known.isEmpty()) {
             logger.warn("No existing data - no need for cleanup of obsolete entries");
             return Collections.emptySet();

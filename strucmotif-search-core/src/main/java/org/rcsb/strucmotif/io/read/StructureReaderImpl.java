@@ -302,7 +302,7 @@ public class StructureReaderImpl implements StructureReader {
             // use set to ensure chains get only moved to one bioassembly - usually the first one should cover all
             // chains - in cases such as 2y5b, chains are transformed by 2 distinct operations
             Set<String> coveredAsymIds = new HashSet<>();
-            if (pdbxStructAssemblyGen.isDefined() && pdbxStructAssemblyGen.getRowCount() > 0) {
+            if (pdbxStructAssemblyGen.isDefined()) {
                 for (int row = 0; row < pdbxStructAssemblyGen.getRowCount(); row++) {
                     String operExpression = pdbxStructAssemblyGen.getOperExpression().get(row);
                     List<String> asymIds = LIST.splitAsStream(pdbxStructAssemblyGen.getAsymIdList().get(row))

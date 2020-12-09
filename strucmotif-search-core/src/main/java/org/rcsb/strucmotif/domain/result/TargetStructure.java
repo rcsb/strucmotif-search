@@ -137,22 +137,30 @@ public class TargetStructure {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // determine all assembly ids that this collection of label selections appears in
-        int residues = labelSelections.size();
-        Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
-        Map<String, Long> assemblyCounts = labelSelections.stream()
-                .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
-                .map(assemblyMap::get)
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        try {
+            // determine all assembly ids that this collection of label selections appears in
+            int residues = labelSelections.size();
+            Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
+            Map<String, Long> assemblyCounts = labelSelections.stream()
+                    .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
+                    .map(assemblyMap::get)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        return assemblyCounts.entrySet()
-                .stream()
-                // this assembly must be valid for all residues
-                .filter(entry -> entry.getValue() == residues)
-                .map(entry -> new SimpleHit(structureIdentifier,
-                        new AssemblyIdentifier(entry.getKey()),
-                        labelSelections,
-                        score));
+            return assemblyCounts.entrySet()
+                    .stream()
+                    // this assembly must be valid for all residues
+                    .filter(entry -> entry.getValue() == residues)
+                    .map(entry -> new SimpleHit(structureIdentifier,
+                            new AssemblyIdentifier(entry.getKey()),
+                            labelSelections,
+                            score));
+        } catch (NullPointerException e) {
+            // happens if assembly information is missing in source file
+            return Stream.of(new SimpleHit(structureIdentifier,
+                    new AssemblyIdentifier("1"),
+                    labelSelections,
+                    score));
+        }
     }
 }

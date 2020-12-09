@@ -8,5 +8,5 @@ public enum ScoringStrategy {
     /**
      * Score hits based on properties of the geometric descriptors.
      */
-    DESCRIPTOR;
+    DESCRIPTOR
 }

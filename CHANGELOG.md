@@ -1,6 +1,14 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.2
+-------------
+### General
+- report assembly information of hit
+
+### Bug fixes
+- remove dependency on legacy endpoint
+
 strucmotif-search 0.9.1
 -------------
 ### General

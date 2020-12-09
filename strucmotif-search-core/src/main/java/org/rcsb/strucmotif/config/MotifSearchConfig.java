@@ -82,7 +82,7 @@ public class MotifSearchConfig {
     /**
      * RCSB URL that reports currently identifiers in archive.
      */
-    public static final String RCSB_ENTRY_LIST = "http://www.rcsb.org/pdb/json/getCurrent";
+    public static final String RCSB_ENTRY_LIST = "https://data.rcsb.org/rest/v1/holdings/current/entry_ids";
 
     public double getDistanceCutoff() {
         return distanceCutoff;

@@ -14,6 +14,7 @@ import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
+import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,7 +95,6 @@ public class TargetAssemblerImpl implements TargetAssembler {
     private void consume(MotifSearchResult response, Map<StructureIdentifier, ResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
         Map<StructureIdentifier, TargetStructure> targetStructures = response.getTargetStructures();
         QueryStructure queryStructure = response.getQuery().getQueryStructure();
-        double scoreCutoff = response.getQuery().getParameters().getScoreCutoff();
 
         if (targetStructures == null) {
             // first generation: all the paths are valid

@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.update;
 
-import com.google.gson.Gson;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
@@ -29,6 +28,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -47,6 +47,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -264,29 +265,36 @@ public class MotifSearchUpdate implements CommandLineRunner {
             for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
                 String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
                 String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
-                List<String> operList = getOperList(operExpression);
+                String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
+                List<String> operList = getOperList(operExpression, asymIdList);
                 assemblyInformation.put(assemblyId, operList);
             }
-        } else {
-            assemblyInformation.put("1", List.of("1"));
         }
         return assemblyInformation;
     }
 
     private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
-    private List<String> getOperList(String operExpression) {
+    private static final Pattern LIST_PATTERN = Pattern.compile(",");
+    private List<String> getOperList(String operExpression, String asymIdList) {
         List<String> operations = new ArrayList<>();
+        List<String> chains = LIST_PATTERN.splitAsStream(asymIdList).collect(Collectors.toList());
         String[] split = OPERATION_PATTERN.split(operExpression);
         if (split.length > 1) {
             List<String> ids1 = extractTransformationIds(split[0]);
             List<String> ids2 = extractTransformationIds(split[1]);
             for (String id1 : ids1) {
                 for (String id2 : ids2) {
-                    operations.add(id1 + "x" + id2);
+                    for (String chain : chains) {
+                        operations.add(chain + "_" + id1 + "x" + id2);
+                    }
                 }
             }
         } else {
-            operations.addAll(extractTransformationIds(operExpression));
+            for (String id : extractTransformationIds(operExpression)) {
+                for (String chain : chains) {
+                    operations.add(chain + "_" + id);
+                }
+            }
         }
 
         return operations;
@@ -373,40 +381,21 @@ public class MotifSearchUpdate implements CommandLineRunner {
         logger.info("Finished removal operation");
     }
 
+    private static final Pattern ENTRY_ID_PATTERN = Pattern.compile("[0-9][0-9A-Z]{3}");
     public List<StructureIdentifier> getAllIdentifiers() throws IOException {
         logger.info("Retrieving current entry list from {}", MotifSearchConfig.RCSB_ENTRY_LIST);
-        GetCurrentResponse response;
+        String response;
         try (InputStream inputStream = new URL(MotifSearchConfig.RCSB_ENTRY_LIST).openStream()) {
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream)) {
-                response = new Gson().fromJson(inputStreamReader, GetCurrentResponse.class);
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
+                response = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
             }
         }
-        return Arrays.stream(response.getIdList())
+        return ENTRY_ID_PATTERN.matcher(response)
+                .results()
+                .map(MatchResult::group)
                 .map(String::toLowerCase)
                 .map(StructureIdentifier::new)
                 .collect(Collectors.toList());
-    }
-
-    @SuppressWarnings("unused")
-    static class GetCurrentResponse {
-        private int resultCount;
-        private String[] idList;
-
-        int getResultCount() {
-            return resultCount;
-        }
-
-        void setResultCount(int resultCount) {
-            this.resultCount = resultCount;
-        }
-
-        String[] getIdList() {
-            return idList;
-        }
-
-        void setIdList(String[] idList) {
-            this.idList = idList;
-        }
     }
 
     /**

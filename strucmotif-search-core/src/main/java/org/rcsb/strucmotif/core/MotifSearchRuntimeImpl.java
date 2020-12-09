@@ -6,11 +6,10 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
-import org.rcsb.strucmotif.domain.query.ScoringStrategy;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
-import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +27,16 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final MotifSearchConfig motifSearchConfig;
     private final AlignmentService alignmentService;
     private final StructureDataProvider structureDataProvider;
+    private final StateRepository stateRepository;
 
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StateRepository stateRepository) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
         this.alignmentService = alignmentService;
         this.structureDataProvider = structureDataProvider;
+        this.stateRepository = stateRepository;
     }
 
     @Override
@@ -93,7 +94,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 hits = threadPool.submit(() -> result.getTargetStructures()
                         .values()
                         .parallelStream()
-                        .flatMap(TargetStructure::paths)
+                        .flatMap(targetStructure -> targetStructure.paths(stateRepository))
                         // filtered hits if desired
                         .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() < parameters.getScoreCutoff())
                         // align
@@ -107,7 +108,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 hits = threadPool.submit(() -> result.getTargetStructures()
                         .values()
                         .parallelStream()
-                        .flatMap(TargetStructure::paths)
+                        .flatMap(targetStructure -> targetStructure.paths(stateRepository))
                         // filtered hits if desired
                         .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() < parameters.getScoreCutoff())
                         .limit(limit)

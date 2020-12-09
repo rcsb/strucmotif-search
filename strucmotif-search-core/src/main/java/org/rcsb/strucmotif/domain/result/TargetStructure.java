@@ -1,15 +1,22 @@
 package org.rcsb.strucmotif.domain.result;
 
+import org.rcsb.strucmotif.domain.identifier.AssemblyIdentifier;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.persistence.StateRepository;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -100,12 +107,13 @@ public class TargetStructure {
      * that matches the query motif. This ensures a bidirectional mapping between query and potential hit. Implicitly,
      * this causes the structure to be parsed. Also, this method is supposed to be called once and results to be
      * consumed directly.
+     * @param stateRepository provides assembly information
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<SimpleHit> paths() {
+    public Stream<SimpleHit> paths(StateRepository stateRepository) {
         try {
             return paths.stream()
-                    .map(this::createSimpleHit);
+                    .flatMap(p -> createSimpleHits(p, stateRepository));
         } catch (Exception e) {
             // rarely happens when the index references a file not present in the selection-db
             // this is caused by entries that were removed from the archive but can be fixed by removing old entries from archive/index/componentDB
@@ -113,7 +121,8 @@ public class TargetStructure {
         }
     }
 
-    private SimpleHit createSimpleHit(ResiduePairIdentifier[] identifiers) {
+    private Stream<SimpleHit> createSimpleHits(ResiduePairIdentifier[] identifiers, StateRepository stateRepository) {
+        // compute geom score
         int[] partial = new int[] { 0, 0, 0 };
         for (ResiduePairIdentifier identifier : identifiers) {
             partial[0] += identifier.getScore().getBackboneScore();
@@ -128,8 +137,23 @@ public class TargetStructure {
                 .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 .collect(Collectors.toList());
-        return new SimpleHit(structureIdentifier,
-                labelSelections,
-                score);
+
+        // determine all assembly ids that this collection of label selections appears in
+        int residues = labelSelections.size();
+        Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
+        Map<String, Long> assemblyCounts = labelSelections.stream()
+                .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
+                .map(assemblyMap::get)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        return assemblyCounts.entrySet()
+                .stream()
+                // this assembly must be valid for all residues
+                .filter(entry -> entry.getValue() == residues)
+                .map(entry -> new SimpleHit(structureIdentifier,
+                        new AssemblyIdentifier(entry.getKey()),
+                        labelSelections,
+                        score));
     }
 }

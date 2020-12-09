@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.domain.result;
 
 import org.rcsb.strucmotif.domain.Transformation;
+import org.rcsb.strucmotif.domain.identifier.AssemblyIdentifier;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.score.GeometricDescriptorScore;
 import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
@@ -25,6 +26,11 @@ public class TransformedHit implements Hit {
     @Override
     public StructureIdentifier getStructureIdentifier() {
         return delegate.getStructureIdentifier();
+    }
+
+    @Override
+    public AssemblyIdentifier getAssemblyIdentifier() {
+        return delegate.getAssemblyIdentifier();
     }
 
     @Override

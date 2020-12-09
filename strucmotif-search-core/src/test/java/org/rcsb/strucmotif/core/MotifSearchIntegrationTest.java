@@ -6,6 +6,7 @@ import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.StructureInformation;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
@@ -18,11 +19,14 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.FileSystemInvertedIndex;
+import org.rcsb.strucmotif.persistence.FileSystemStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -51,7 +55,7 @@ public class MotifSearchIntegrationTest {
 
     @BeforeEach
     public void init() {
-        FileSystemInvertedIndex invertedIndex = new FileSystemInvertedIndex(new MotifSearchConfig()) {
+        FileSystemInvertedIndex invertedIndex = new FileSystemInvertedIndex(motifSearchConfig) {
             @Override
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
@@ -74,8 +78,20 @@ public class MotifSearchIntegrationTest {
             return structureReader.readFromInputStream(inputStream, selection);
         });
 
+        FileSystemStateRepository stateRepository = new FileSystemStateRepository(motifSearchConfig) {
+            @Override
+            public Collection<StructureInformation> selectKnown() {
+                InputStream inputStream = Helpers.getResource("known.list");
+                return new BufferedReader(new InputStreamReader(inputStream))
+                        .lines()
+                        .map(line -> line.split(","))
+                        .map(this::handleKnownSplit)
+                        .collect(Collectors.toSet());
+            }
+        };
+
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
-        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider);
+        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, stateRepository);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
@@ -112,5 +128,18 @@ public class MotifSearchIntegrationTest {
                 .collect(Collectors.toList());
 
         assertFalse(observedExchanges.isEmpty(), "didn't observe exchange");
+
+        List<String> observedAssemblies = response.getHits()
+                .stream()
+                .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier())
+                .filter(assemblyIdentifier -> !assemblyIdentifier.contains("_1"))
+                .collect(Collectors.toList());
+
+        assertFalse(observedAssemblies.isEmpty(), "didn't observe assemblies");
+
+        // print all results
+        response.getHits().stream()
+                .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier() + " : " + hit.getSelection())
+                .forEach(System.out::println);
     }
 }

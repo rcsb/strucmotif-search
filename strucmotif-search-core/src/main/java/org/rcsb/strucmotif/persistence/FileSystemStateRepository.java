@@ -76,10 +76,10 @@ public class FileSystemStateRepository implements StateRepository {
         }
     }
 
-    private StructureInformation handleKnownSplit(String[] split) {
+    protected StructureInformation handleKnownSplit(String[] split) {
         StructureIdentifier structureIdentifier = new StructureIdentifier(split[0]);
         Revision revision = new Revision(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        Map<String, List<String>> assemblyInformation = IntStream.range(2, split.length)
+        Map<String, List<String>> assemblyInformation = IntStream.range(3, split.length)
                 .mapToObj(i -> {
                     String[] assemblySplit = split[i].split(ASSEMBLY_INFORMATION_DELIMITER);
                     String assemblyId = assemblySplit[0];

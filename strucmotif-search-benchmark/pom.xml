@@ -3,7 +3,7 @@
     <parent>
         <artifactId>strucmotif-search</artifactId>
         <groupId>org.rcsb</groupId>
-        <version>0.9.3-SNAPSHOT</version>
+        <version>0.9.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,7 +13,7 @@
         <dependency>
             <groupId>org.rcsb</groupId>
             <artifactId>strucmotif-search-core</artifactId>
-            <version>0.9.3-SNAPSHOT</version>
+            <version>0.9.3</version>
         </dependency>
 
         <dependency>

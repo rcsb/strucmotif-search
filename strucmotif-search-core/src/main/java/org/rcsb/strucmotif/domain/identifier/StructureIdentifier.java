@@ -26,11 +26,11 @@ public class StructureIdentifier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StructureIdentifier that = (StructureIdentifier) o;
-        return Objects.equals(pdbId, that.pdbId);
+        return pdbId.equalsIgnoreCase(that.pdbId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(pdbId);
+        return Objects.hash(pdbId.toLowerCase());
     }
 }

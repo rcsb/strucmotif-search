@@ -156,11 +156,8 @@ public class TargetStructure {
                             labelSelections,
                             score));
         } catch (NullPointerException e) {
-            // happens if assembly information is missing in source file
-            return Stream.of(new SimpleHit(structureIdentifier,
-                    new AssemblyIdentifier("1"),
-                    labelSelections,
-                    score));
+            // happens if assembly information is missing in source file - these hits will be omitted by RCSB decision
+            return Stream.empty();
         }
     }
 }

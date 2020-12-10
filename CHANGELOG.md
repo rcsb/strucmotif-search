@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.3
+-------------
+### Bug fixes
+- StructureIdentifiers are case-insensitive (wrt equals/hashCode)
+
 strucmotif-search 0.9.2
 -------------
 ### General

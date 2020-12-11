@@ -72,7 +72,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // consume by target structures
             consume(response, residuePairIdentifiers);
 
-            logger.debug("Consumed {} - {} valid target structures remaining",
+            logger.debug("[{}] Consumed {} - {} valid target structures remaining",
+                    response.getQuery().hashCode(),
                     residuePairDescriptor,
                     response.getTargetStructures().size());
         }
@@ -80,7 +81,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
         int pathCount = response.getTargetStructures().values().stream().mapToInt(TargetStructure::getNumberOfValidPaths).sum();
         int structureCount = response.getTargetStructures().size();
-        logger.info("Found {} valid paths ({} target structures) in {} ms", pathCount, structureCount, response.getTimings().getPathsTime());
+        logger.info("[{}] Found {} valid paths ({} target structures) in {} ms",
+                response.getQuery().hashCode(),
+                pathCount,
+                structureCount,
+                response.getTimings().getPathsTime());
         response.setNumberOfPaths(pathCount);
         response.setNumberOfTargetStructures(structureCount);
     }

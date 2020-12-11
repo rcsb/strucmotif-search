@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
+import org.rcsb.strucmotif.domain.query.ScoringStrategy;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -53,12 +54,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             }
 
             Parameters parameters = query.getParameters();
-            logger.info("Query: {}, tolerances: [{}, {}, {}], exchanges: {}",
+            logger.info("[{}] Query: {}, Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
+                    query.hashCode(),
                     queryResiduePairDescriptors,
+                    query.getExchanges(),
                     parameters.getBackboneDistanceTolerance(),
                     parameters.getSideChainDistanceTolerance(),
                     parameters.getAngleTolerance(),
-                    query.getExchanges());
+                    parameters.getScoringStrategy() == ScoringStrategy.DESCRIPTOR ? parameters.getScoreCutoff() : parameters.getRmsdCutoff());
 
             MotifSearchResult result = new MotifSearchResult(query);
 
@@ -66,7 +69,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             targetAssembler.assemble(result);
 
             List<? extends Hit> hits = scoreHits(parameters, result);
-            logger.info("Accepted {} hits in {} ms",
+            logger.info("[{}] Accepted {} hits in {} ms",
+                    query.hashCode(),
                     hits.size(),
                     result.getTimings().getScoreHitsTime());
 

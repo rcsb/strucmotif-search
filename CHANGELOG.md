@@ -1,6 +1,12 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.5
+-------------
+### General
+- better logging (use unique identifier for log statements)
+- strict interpretation of cutoff/limit values (0 was de facto ignored)
+
 strucmotif-search 0.9.4
 -------------
 ### Bug fixes

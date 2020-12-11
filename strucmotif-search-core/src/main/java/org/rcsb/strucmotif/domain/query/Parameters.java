@@ -24,12 +24,12 @@ public class Parameters {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
-        this.scoreCutoff = scoreCutoff == 0 ? Double.MAX_VALUE : scoreCutoff;
-        this.rmsdCutoff = rmsdCutoff == 0 ? Double.MAX_VALUE : rmsdCutoff;
+        this.scoreCutoff = scoreCutoff;
+        this.rmsdCutoff = rmsdCutoff;
         this.scoringStrategy = scoringStrategy;
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
-        this.limit = resultLimit == 0 ? Integer.MAX_VALUE : resultLimit;
+        this.limit = resultLimit;
     }
 
     /**

@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.9.5
+strucmotif-search 0.9.6
 -------------
 ### General
 - better logging (use unique identifier for log statements)

@@ -99,11 +99,11 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                         .values()
                         .parallelStream()
                         .flatMap(targetStructure -> targetStructure.paths(stateRepository))
-                        // filtered hits if desired
+                        // filter hits if desired
                         .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() < parameters.getScoreCutoff())
                         // align
                         .map(hitScorer::score)
-                        .filter(transformedHit -> transformedHit.getRootMeanSquareDeviation().value() < parameters.getRmsdCutoff())
+                        .filter(transformedHit -> transformedHit.getRootMeanSquareDeviation().value() <= parameters.getRmsdCutoff())
                         .limit(limit)
                         .collect(Collectors.toList()))
                         .get();
@@ -113,8 +113,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                         .values()
                         .parallelStream()
                         .flatMap(targetStructure -> targetStructure.paths(stateRepository))
-                        // filtered hits if desired
-                        .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() < parameters.getScoreCutoff())
+                        // filter hits if desired
+                        .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() <= parameters.getScoreCutoff())
                         .limit(limit)
                         .collect(Collectors.toList()))
                         .get();

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.7
+-------------
+### General
+- filtering by score: now less or equal instead of strictly less
+
 strucmotif-search 0.9.6
 -------------
 ### General

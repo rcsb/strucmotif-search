@@ -1,6 +1,12 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.8
+-------------
+### General
+- dedicated IllegalQueryDefinitionException when no residue pairs can be detected
+- no longer throws exception for empty result sets (rather return empty collection)
+
 strucmotif-search 0.9.7
 -------------
 ### General

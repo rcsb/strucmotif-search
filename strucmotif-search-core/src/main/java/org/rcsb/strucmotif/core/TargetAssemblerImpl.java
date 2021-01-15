@@ -130,10 +130,6 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     })
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
                     .get());
-
-            if (targetStructures.isEmpty()) {
-                throw new IllegalArgumentException("did not find any candidates after " + pathGeneration + " generations");
-            }
         }
     }
 }

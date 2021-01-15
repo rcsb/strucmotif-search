@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
+import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -28,7 +29,7 @@ public class QueryStructure {
     QueryStructure(Structure structure, List<ResiduePairOccurrence> residuePairOccurrences) {
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {
-            throw new IllegalArgumentException("did not find any residue pairs in structure");
+            throw new IllegalQueryDefinitionException("Did not find any residue pairs in structure - check query definition");
         }
 
         // sort occurrences to ensure that no dangling words are encountered during path assembly

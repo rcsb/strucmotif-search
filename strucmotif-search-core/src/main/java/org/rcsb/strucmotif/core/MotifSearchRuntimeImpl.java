@@ -48,10 +48,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             // all motifs which can be formed from this query
             List<ResiduePairDescriptor> queryResiduePairDescriptors = queryStructure.getResiduePairDescriptors();
 
-            if (queryResiduePairDescriptors.isEmpty()) {
-                throw new IllegalQueryDefinitionException("did not find any valid motifs in " + queryStructure.getStructure().getStructureIdentifier());
-            }
-
             Parameters parameters = query.getParameters();
             logger.info("[{}] Query: {}, Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
                     query.hashCode(),

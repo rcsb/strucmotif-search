@@ -121,7 +121,7 @@ public class QueryBuilder {
             this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
-            this.scoreCutoff = Double.MAX_VALUE;
+            this.scoreCutoff = 0;
             this.rmsdCutoff = Double.MAX_VALUE;
             this.scoringStrategy = ScoringStrategy.DESCRIPTOR;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;

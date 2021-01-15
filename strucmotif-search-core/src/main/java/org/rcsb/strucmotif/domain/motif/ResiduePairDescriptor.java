@@ -41,7 +41,7 @@ public class ResiduePairDescriptor {
         this.angle = angle;
         if (reference != null) {
             this.score = new GeometricDescriptorScore(Math.abs(backboneDistance.ordinal() - reference.getBackboneDistance().ordinal()),
-                    Math.abs(sideChainDistance.ordinal()- reference.getSideChainDistance().ordinal()),
+                    Math.abs(sideChainDistance.ordinal() - reference.getSideChainDistance().ordinal()),
                     Math.abs(angle.ordinal() - reference.getAngle().ordinal()));
         } else {
             this.score = null;

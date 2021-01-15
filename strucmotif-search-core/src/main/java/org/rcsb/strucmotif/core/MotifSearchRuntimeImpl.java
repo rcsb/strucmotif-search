@@ -49,8 +49,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             List<ResiduePairDescriptor> queryResiduePairDescriptors = queryStructure.getResiduePairDescriptors();
 
             if (queryResiduePairDescriptors.isEmpty()) {
-                throw new IllegalArgumentException("did not find any valid motifs in " + queryStructure.getStructure().getStructureIdentifier() +
-                        " - maybe distance cutoff (" + motifSearchConfig.getDistanceCutoff() + ") exceeded? - maybe wrong selection?");
+                throw new IllegalQueryDefinitionException("did not find any valid motifs in " + queryStructure.getStructure().getStructureIdentifier());
             }
 
             Parameters parameters = query.getParameters();

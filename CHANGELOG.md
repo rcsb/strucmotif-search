@@ -1,6 +1,10 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.10
+### General
+- support queries from transformed coordinates
+
 strucmotif-search 0.9.9
 ### General
 - geom scores normalized [0,1] - high scores are better

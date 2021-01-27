@@ -33,6 +33,16 @@ public class ResidueGraph {
     private final Map<Residue, LabelSelection> labelSelectionResolver;
 
     public ResidueGraph(Structure structure, double squaredCutoff) {
+        this(structure, squaredCutoff, false);
+    }
+
+    /**
+     * Construct a new residue graph.
+     * @param structure data
+     * @param squaredCutoff maximum dot product between atoms to consider
+     * @param allowTransformed set to true during QueryStructure evaluation
+     */
+    public ResidueGraph(Structure structure, double squaredCutoff, boolean allowTransformed) {
         this.labelSelectionResolver = new HashMap<>();
 
         this.backboneDistances = new LinkedHashMap<>();
@@ -75,7 +85,7 @@ public class ResidueGraph {
 
             Residue residue1 = residueGrid.getResidue(residueContact.getI());
             // 'dominant' residue has to be original by contract
-            if (!originalResidues.contains(residue1)) {
+            if (!allowTransformed && !originalResidues.contains(residue1)) {
                 continue;
             }
 

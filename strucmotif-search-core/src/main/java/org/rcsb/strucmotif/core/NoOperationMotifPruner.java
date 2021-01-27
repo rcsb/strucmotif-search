@@ -22,7 +22,7 @@ public class NoOperationMotifPruner implements MotifPruner {
 
     @Override
     public List<ResiduePairOccurrence> prune(Structure structure) {
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), true);
 
         return residueGraph.residuePairOccurrencesSequential()
                 .collect(Collectors.toList());

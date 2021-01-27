@@ -9,7 +9,9 @@ import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.StructureInformation;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
+import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.query.ScoringStrategy;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -141,5 +144,22 @@ public class MotifSearchIntegrationTest {
         response.getHits().stream()
                 .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier() + " : " + hit.getSelection())
                 .forEach(System.out::println);
+    }
+
+    /**
+     * A query defined by non-identity struct_oper_ids.
+     */
+    @Test
+    public void whenAssemblyAndAllowingTransforms_thenReturnFullResidueGraph() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("4oog"),
+                Set.of(new LabelSelection("C", "1", 42),
+                        new LabelSelection("C", "1", 45),
+                        new LabelSelection("C", "1", 49),
+                        new LabelSelection("C", "2", 42),
+                        new LabelSelection("C", "2", 45),
+                        new LabelSelection("C", "2", 49)));
+
+        MotifSearchQuery motifSearchQuery = queryBuilder.defineByStructure(structure).buildParameters().buildQuery();
+        assertEquals(6, motifSearchQuery.getQueryStructure().getResidues().size(), "not all residues present");
     }
 }

@@ -32,7 +32,7 @@ public class KruskalMotifPruner implements MotifPruner {
 
     @Override
     public List<ResiduePairOccurrence> prune(Structure structure) {
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), true);
 
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()
                 .collect(Collectors.toList());

@@ -49,9 +49,12 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             List<ResiduePairDescriptor> queryResiduePairDescriptors = queryStructure.getResiduePairDescriptors();
 
             Parameters parameters = query.getParameters();
-            logger.info("[{}] Query: {}, Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
+            logger.info("[{}] Query: {} with {}",
                     query.hashCode(),
-                    queryResiduePairDescriptors,
+                    queryStructure.getStructure().getStructureIdentifier().getPdbId(),
+                    queryStructure.getResidues());
+            logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
+                    query.hashCode(),
                     query.getExchanges(),
                     parameters.getBackboneDistanceTolerance(),
                     parameters.getSideChainDistanceTolerance(),

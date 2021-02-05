@@ -106,13 +106,14 @@ public class TargetStructure {
      * that matches the query motif. This ensures a bidirectional mapping between query and potential hit. Implicitly,
      * this causes the structure to be parsed. Also, this method is supposed to be called once and results to be
      * consumed directly.
+     * @param residueIndexSwaps how residues were rearranged
      * @param stateRepository provides assembly information
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<SimpleHit> paths(StateRepository stateRepository) {
+    public Stream<SimpleHit> paths(List<Integer> residueIndexSwaps, StateRepository stateRepository) {
         try {
             return paths.stream()
-                    .flatMap(p -> createSimpleHits(p, stateRepository));
+                    .flatMap(p -> createSimpleHits(p, residueIndexSwaps, stateRepository));
         } catch (Exception e) {
             // rarely happens when the index references a file not present in the selection-db
             // this is caused by entries that were removed from the archive but can be fixed by removing old entries from archive/index/componentDB
@@ -120,7 +121,7 @@ public class TargetStructure {
         }
     }
 
-    private Stream<SimpleHit> createSimpleHits(ResiduePairIdentifier[] identifiers, StateRepository stateRepository) {
+    private Stream<SimpleHit> createSimpleHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, StateRepository stateRepository) {
         // compute geom score
         int[] partial = new int[] { 0, 0, 0 };
         for (ResiduePairIdentifier identifier : identifiers) {
@@ -132,9 +133,13 @@ public class TargetStructure {
                 partial[1] / (double) identifiers.length,
                 partial[2] / (double) identifiers.length);
 
-        List<LabelSelection> labelSelections = Arrays.stream(identifiers)
+        // ensure correct 'human-readable' order of residues
+        List<LabelSelection> shuffledLabelSelections = Arrays.stream(identifiers)
                 .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
+                .collect(Collectors.toList());
+        List<LabelSelection> labelSelections = residueIndexSwaps.stream()
+                .map(shuffledLabelSelections::get)
                 .collect(Collectors.toList());
 
         try {

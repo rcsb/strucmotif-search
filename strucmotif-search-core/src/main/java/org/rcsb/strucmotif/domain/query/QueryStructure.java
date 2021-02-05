@@ -7,13 +7,14 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.selection.SelectionResolver;
+import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A query structure wraps a {@link Structure} and provides additional functionality needed to employ it as motif
@@ -25,6 +26,8 @@ public class QueryStructure {
     private final List<ResiduePairIdentifier> residuePairIdentifiers;
     private final List<ResiduePairDescriptor> residuePairDescriptors;
     private final List<Residue> residues;
+    private final List<Integer> residueIndexSwaps;
+    private final List<LabelSelection> labelSelections;
 
     QueryStructure(Structure structure, List<ResiduePairOccurrence> residuePairOccurrences) {
         this.structure = structure;
@@ -47,13 +50,25 @@ public class QueryStructure {
         // explode query into motifs and get entities by that - this provides the correct order of entities so that the
         // alignment routine does not have to care about finding correspondence
         List<LabelSelection> residueIdentifiers = residuePairIdentifiers.stream()
-                .flatMap(lookupTargetIdentifier -> Stream.of(lookupTargetIdentifier.getLabelSelection1(), lookupTargetIdentifier.getLabelSelection2()))
+                .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 .collect(Collectors.toList());
 
-        // we do this to ensure correct ordering
+        // we do this to ensure correct ordering - this set has the same order as hits
         SelectionResolver<LabelSelection> labelSelectionResolver = new LabelSelectionResolver(structure);
         this.residues = residueIdentifiers.stream()
+                .map(labelSelectionResolver::resolve)
+                .collect(Collectors.toList());
+
+        List<Residue> originalResidueOrder = structure.getChains()
+                .stream()
+                .map(Chain::getResidues)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        this.residueIndexSwaps = originalResidueOrder.stream()
+                .map(residues::indexOf)
+                .collect(Collectors.toList());
+        this.labelSelections = originalResidueOrder.stream()
                 .map(labelSelectionResolver::resolve)
                 .collect(Collectors.toList());
     }
@@ -133,9 +148,25 @@ public class QueryStructure {
 
     /**
      * All components of this query structure.
-     * @return a collection of components
+     * @return a collection of residues
      */
     public List<Residue> getResidues() {
         return residues;
+    }
+
+    /**
+     * All selections of this query structure.
+     * @return a collection of LabelSelections
+     */
+    public List<LabelSelection> getLabelSelections() {
+        return labelSelections;
+    }
+
+    /**
+     * This allows re-arranging residues in hits so they have the same order as the query.
+     * @return an array tracks how residues were swapped
+     */
+    public List<Integer> getResidueIndexSwaps() {
+        return residueIndexSwaps;
     }
 }

@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
@@ -45,14 +44,11 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         try {
             QueryStructure queryStructure = query.getQueryStructure();
 
-            // all motifs which can be formed from this query
-            List<ResiduePairDescriptor> queryResiduePairDescriptors = queryStructure.getResiduePairDescriptors();
-
             Parameters parameters = query.getParameters();
             logger.info("[{}] Query: {} with {}",
                     query.hashCode(),
                     queryStructure.getStructure().getStructureIdentifier().getPdbId(),
-                    queryStructure.getResidues());
+                    queryStructure.getLabelSelections());
             logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
                     query.hashCode(),
                     query.getExchanges(),
@@ -66,7 +62,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             // get all valid targets
             targetAssembler.assemble(result);
 
-            List<? extends Hit> hits = scoreHits(parameters, result);
+            List<? extends Hit> hits = scoreHits(parameters, result, queryStructure.getResidueIndexSwaps());
             logger.info("[{}] Accepted {} hits in {} ms",
                     query.hashCode(),
                     hits.size(),
@@ -85,7 +81,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
     }
 
-    private List<? extends Hit> scoreHits(Parameters parameters, MotifSearchResult result) throws ExecutionException, InterruptedException {
+    private List<? extends Hit> scoreHits(Parameters parameters, MotifSearchResult result, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {
         result.getTimings().scoreHitsStart();
         int limit = Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults());
         List<? extends Hit> hits;
@@ -96,7 +92,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 hits = threadPool.submit(() -> result.getTargetStructures()
                         .values()
                         .parallelStream()
-                        .flatMap(targetStructure -> targetStructure.paths(stateRepository))
+                        .flatMap(targetStructure -> targetStructure.paths(residueIndexSwaps, stateRepository))
                         // filter hits if desired
                         .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
                         // align
@@ -110,7 +106,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 hits = threadPool.submit(() -> result.getTargetStructures()
                         .values()
                         .parallelStream()
-                        .flatMap(targetStructure -> targetStructure.paths(stateRepository))
+                        .flatMap(targetStructure -> targetStructure.paths(residueIndexSwaps, stateRepository))
                         // filter hits if desired
                         .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
                         .limit(limit)

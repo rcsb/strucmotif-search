@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -138,6 +139,17 @@ public class MotifSearchIntegrationTest {
                 .collect(Collectors.toList());
 
         assertFalse(observedAssemblies.isEmpty(), "didn't observe assemblies");
+
+        List<List<Integer>> swaps = response.getHits()
+                .stream()
+                .map(hit -> hit.getSelection().stream().map(LabelSelection::getLabelSeqId).collect(Collectors.toList()))
+                // check if some elements are unordered
+                .filter(list -> IntStream.range(1, list.size())
+                        .map(index -> list.get(index - 1).compareTo(list.get(index)))
+                        .anyMatch(order -> order > 0))
+                .collect(Collectors.toList());
+
+        assertFalse(swaps.isEmpty(), "didn't observe swaps");
 
         // print all results
         response.getHits().stream()

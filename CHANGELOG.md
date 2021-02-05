@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.11
+-------------
+### General
+- order result residues wrt query
+
 strucmotif-search 0.9.10
 -------------
 ### General

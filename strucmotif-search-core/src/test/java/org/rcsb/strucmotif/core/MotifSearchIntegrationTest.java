@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.StructureInformation;
@@ -96,6 +97,16 @@ public class MotifSearchIntegrationTest {
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
         MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, stateRepository);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
+    }
+
+    @Test
+    public void whenFailLateWithMalformedQuery_thenThrowIllegalQueryException() {
+        // this will pass initial checks and fail later in the computation
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"),
+                Set.of(new LabelSelection("A", "1", 62), // K
+                        new LabelSelection("A", "1", 245), // E
+                        new LabelSelection("A", "1", 295))); // H
+        queryBuilder.defineByStructure(structure).buildParameters().buildQuery().run();
     }
 
     /**

@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
@@ -77,8 +78,22 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
             return result;
         } catch (Exception e) {
+            // unwrap specific exceptions
+            Throwable t = unwrapException(e);
+            if (t instanceof IllegalQueryDefinitionException) {
+                throw (IllegalQueryDefinitionException) t;
+            }
             throw new RuntimeException(e);
         }
+    }
+
+    private static Throwable unwrapException(Throwable throwable) {
+        Objects.requireNonNull(throwable);
+        Throwable rootCause = throwable;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
     }
 
     private List<? extends Hit> scoreHits(Parameters parameters, MotifSearchResult result, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {

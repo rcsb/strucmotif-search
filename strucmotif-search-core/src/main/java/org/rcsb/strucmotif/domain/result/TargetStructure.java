@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.result;
 
+import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.domain.identifier.AssemblyIdentifier;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
@@ -138,9 +139,15 @@ public class TargetStructure {
                 .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 .collect(Collectors.toList());
-        List<LabelSelection> labelSelections = residueIndexSwaps.stream()
-                .map(shuffledLabelSelections::get)
-                .collect(Collectors.toList());
+        List<LabelSelection> labelSelections;
+        try {
+            labelSelections = residueIndexSwaps.stream()
+                    .map(shuffledLabelSelections::get)
+                    .collect(Collectors.toList());
+        } catch (IndexOutOfBoundsException e) {
+            // this indicates that fewer residues are present in the result than specified by the query
+            throw new IllegalQueryDefinitionException("Query violates distance threshold");
+        }
 
         try {
             // determine all assembly ids that this collection of label selections appears in

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.12
+-------------
+### Bug fix
+- throw IllegalQueryDefinitionException when detected during result stage
+
 strucmotif-search 0.9.11
 -------------
 ### General

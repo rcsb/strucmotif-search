@@ -88,7 +88,7 @@ class Demo {
 Configure by placing your `application.properties` on the classpath.
 
 ## Availability
-Structural motif searching is available as part of the RCSB advanced search: coming soon
+Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search/advanced-search/structural-motif-search).
 
 ## Publication
 Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

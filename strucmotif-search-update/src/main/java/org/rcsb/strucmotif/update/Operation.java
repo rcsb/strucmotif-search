@@ -3,6 +3,9 @@ package org.rcsb.strucmotif.update;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
+/**
+ * The possible operations during a strucmotif update ('ADD' structures, 'REMOVE' structures, 'RECOVER').
+ */
 public enum Operation {
     ADD,
     REMOVE,

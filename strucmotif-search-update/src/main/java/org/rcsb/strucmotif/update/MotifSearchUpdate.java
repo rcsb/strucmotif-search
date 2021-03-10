@@ -53,12 +53,19 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * Runs strucmotif updates from the command-line.
+ */
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @ComponentScan({"org.rcsb.strucmotif"})
 @EntityScan("org.rcsb.strucmotif")
 public class MotifSearchUpdate implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchUpdate.class);
 
+    /**
+     * Entry point from the command-line.
+     * @param args command-line arguments
+     */
     public static void main(String[] args) {
         SpringApplication.run(MotifSearchUpdate.class, args);
     }
@@ -69,6 +76,14 @@ public class MotifSearchUpdate implements CommandLineRunner {
     private final MotifSearchConfig motifSearchConfig;
     private final ThreadPool threadPool;
 
+    /**
+     * Injectable constructor.
+     * @param stateRepository the state repo
+     * @param structureDataProvider data provider
+     * @param invertedIndex inverted index
+     * @param motifSearchConfig configs
+     * @param threadPool thread pool
+     */
     @Autowired
     public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig, ThreadPool threadPool) {
         this.stateRepository = stateRepository;
@@ -78,6 +93,11 @@ public class MotifSearchUpdate implements CommandLineRunner {
         this.threadPool = threadPool;
     }
 
+    /**
+     * Actual run method with the given arguments.
+     * @param args command-line arguments
+     * @throws Exception update failure
+     */
     public void run(String[] args) throws Exception {
         if (args.length < 1) {
             System.out.println("Too few arguments");
@@ -136,6 +156,12 @@ public class MotifSearchUpdate implements CommandLineRunner {
         logger.info("Finished update operation");
     }
 
+    /**
+     * The 'ADD' operation.
+     * @param identifiers set of identifiers to add
+     * @throws ExecutionException update failure
+     * @throws InterruptedException update failure
+     */
     public void add(Collection<StructureIdentifier> identifiers) throws ExecutionException, InterruptedException {
         long target = identifiers.size();
         logger.info("{} files to process in total", target);
@@ -363,6 +389,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
         context.processed.clear();
     }
 
+    /**
+     * 'REMOVE' operation.
+     * @param identifiers set of identifiers to remove
+     */
     public void remove(Collection<StructureIdentifier> identifiers) {
         AtomicInteger counter = new AtomicInteger();
         for (StructureIdentifier structureIdentifier : identifiers) {
@@ -382,6 +412,12 @@ public class MotifSearchUpdate implements CommandLineRunner {
     }
 
     private static final Pattern ENTRY_ID_PATTERN = Pattern.compile("[0-9][0-9A-Z]{3}");
+
+    /**
+     * Reports all structures currently present in the PDB archive.
+     * @return collection of structure identifiers
+     * @throws IOException connection failure
+     */
     public List<StructureIdentifier> getAllIdentifiers() throws IOException {
         logger.info("Retrieving current entry list from {}", MotifSearchConfig.RCSB_ENTRY_LIST);
         String response;

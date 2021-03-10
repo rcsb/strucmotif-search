@@ -1,10 +1,15 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.14
+-------------
+### Bug fix
+- avoid IOException when missing permissions for default path (FileSystemInvertedIndex)
+
 strucmotif-search 0.9.13
 -------------
 ### Bug fix
-- avoid IOException when missing permissions for default path (may not be used)
+- avoid IOException when missing permissions for default path (StructureDataProviderImpl)
 
 strucmotif-search 0.9.12
 -------------

@@ -43,7 +43,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.9.13</version>
+  <version>0.9.14</version>
 </dependency>
 ```
 

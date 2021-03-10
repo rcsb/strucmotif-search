@@ -41,15 +41,20 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
     private final Path basePath;
+    private boolean paths;
 
     public FileSystemInvertedIndex(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
-
-        ensureDirectoriesExist();
+        this.paths = false;
     }
 
     @Override
     public void insert(ResiduePairDescriptor residuePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>> residuePairOccurrences) {
+        if (!paths) {
+            this.paths = true;
+            ensureDirectoriesExist();
+        }
+
         try {
             Map<String, Object> data = residuePairOccurrences.entrySet()
                     .stream()

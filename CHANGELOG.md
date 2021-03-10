@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.13
+-------------
+### Bug fix
+- avoid IOException when missing permissions for default path (may not be used)
+
 strucmotif-search 0.9.12
 -------------
 ### Bug fix

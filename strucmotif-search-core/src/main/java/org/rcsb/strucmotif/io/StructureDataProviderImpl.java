@@ -31,6 +31,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final String dataSource;
     private final Path renumberedPath;
     private final String extension;
+    private boolean paths;
 
     @Autowired
     public StructureDataProviderImpl(StructureReader structureReader,
@@ -43,18 +44,21 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.renumberedPath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.RENUMBERED_DIRECTORY);
         this.extension = motifSearchConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
 
-        // ensure directories exist
-        try {
-            Files.createDirectories(renumberedPath);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
         logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {} - gzipping: {}",
                 motifSearchConfig.getDataSource(),
                 motifSearchConfig.getCifFetchUrl(),
                 motifSearchConfig.getRenumberedCoordinatePrecision(),
                 motifSearchConfig.isRenumberedGzip());
+
+        this.paths = false;
+    }
+
+    private void ensureRenumberedPathExists() {
+        try {
+            Files.createDirectories(renumberedPath);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     private String prepareUri(String raw, StructureIdentifier structureIdentifier) {
@@ -142,6 +146,10 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     @Override
     public void writeRenumbered(StructureIdentifier structureIdentifier, MmCifFile mmCifFile) {
+        if (!paths) {
+            this.paths = true;
+            ensureRenumberedPathExists();
+        }
         renumberedStructureWriter.write(mmCifFile, getRenumberedStructurePath(structureIdentifier));
     }
 

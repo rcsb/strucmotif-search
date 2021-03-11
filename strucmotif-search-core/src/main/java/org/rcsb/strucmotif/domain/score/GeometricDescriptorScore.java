@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.domain.score;
 
+/**
+ * A composite score derived from geometric properties of this hit.
+ */
 public class GeometricDescriptorScore implements Score {
     private static final double BACKBONE_WEIGHT = 0.333;
     private static final double SIDE_CHAIN_WEIGHT = 0.333;

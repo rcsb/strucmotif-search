@@ -39,6 +39,9 @@ import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.multiply4d;
 
+/**
+ * The default implementation of a structure reader.
+ */
 @Service
 public class StructureReaderImpl implements StructureReader {
     @Override

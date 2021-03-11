@@ -9,6 +9,11 @@ public class Pair<F, S> {
     private final F first;
     private final S second;
 
+    /**
+     * Construct a pair.
+     * @param first 1st element
+     * @param second 2nd element
+     */
     public Pair(F first, S second) {
         this.first = first;
         this.second = second;

@@ -10,15 +10,28 @@ public class ChainIdentifier {
     private final String labelAsymId;
     private final String structOperId;
 
+    /**
+     * Identify a chain by its label_asym_id and struct_oper_id.
+     * @param labelAsymId the name
+     * @param structOperId the operator
+     */
     public ChainIdentifier(String labelAsymId, String structOperId) {
         this.labelAsymId = labelAsymId;
         this.structOperId = structOperId;
     }
 
+    /**
+     * Returns the name of this chain.
+     * @return a String
+     */
     public String getLabelAsymId() {
         return labelAsymId;
     }
 
+    /**
+     * Returns the assembly operation used to transform this chain.
+     * @return a String
+     */
     public String getStructOperId() {
         return structOperId;
     }

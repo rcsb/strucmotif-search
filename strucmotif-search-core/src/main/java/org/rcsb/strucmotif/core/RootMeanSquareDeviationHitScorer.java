@@ -25,6 +25,13 @@ public class RootMeanSquareDeviationHitScorer implements HitScorer {
     private final AlignmentService alignmentService;
     private final StructureDataProvider structureDataProvider;
 
+    /**
+     * Construct a query-specific hit scorer.
+     * @param queryStructure the reference structure
+     * @param atomPairingScheme how to pair atoms?
+     * @param alignmentService alignment service
+     * @param structureDataProvider structure data provider
+     */
     public RootMeanSquareDeviationHitScorer(Structure queryStructure, AtomPairingScheme atomPairingScheme, AlignmentService alignmentService, StructureDataProvider structureDataProvider) {
         this.queryStructure = queryStructure;
         this.queryResidues = queryStructure.getChains()

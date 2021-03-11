@@ -30,6 +30,11 @@ public class ResidueGrid {
     private final int[] intBounds;
     private final ResidueGridCell[][][] gridCells;
 
+    /**
+     * Construct a residue grid from a structure.
+     * @param structure the structure to process
+     * @param squaredCutoff maximum distance between residues
+     */
     public ResidueGrid(Structure structure, double squaredCutoff) {
         this.squaredCutoff = squaredCutoff;
         this.cellSize = (int) Math.floor(Math.sqrt(squaredCutoff) * SCALE);
@@ -91,6 +96,10 @@ public class ResidueGrid {
         return cellSize * ((int) Math.floor(number * ResidueGrid.SCALE / cellSize));
     }
 
+    /**
+     * All contacts registered.
+     * @return a collection of contacts
+     */
     public List<ResidueContact> getIndicesContacts() {
         List<ResidueContact> contacts = new ArrayList<>();
 
@@ -130,6 +139,11 @@ public class ResidueGrid {
         return contacts;
     }
 
+    /**
+     * Access a residue by its index.
+     * @param index position
+     * @return a residue
+     */
     public Residue getResidue(int index) {
         return residues.get(index);
     }

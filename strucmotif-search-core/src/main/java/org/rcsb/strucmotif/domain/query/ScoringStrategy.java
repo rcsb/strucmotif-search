@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.domain.query;
 
+/**
+ * How to score hits?
+ */
 public enum ScoringStrategy {
     /**
      * Score hits by an alignment.

@@ -20,6 +20,9 @@ import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * The default strucmotif-search runtime.
+ */
 @Service
 public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchRuntimeImpl.class);
@@ -30,6 +33,15 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final StructureDataProvider structureDataProvider;
     private final StateRepository stateRepository;
 
+    /**
+     * Injectable constructor.
+     * @param targetAssembler target assembler
+     * @param threadPool thread pool
+     * @param motifSearchConfig app config
+     * @param alignmentService alignment service
+     * @param structureDataProvider structure data provider
+     * @param stateRepository state manager
+     */
     @Autowired
     public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StateRepository stateRepository) {
         this.targetAssembler = targetAssembler;

@@ -13,6 +13,9 @@ import java.util.List;
  * A transformation described by a 4x4 matrix.
  */
 public class Transformation {
+    /**
+     * Neutral/identity transformation.
+     */
     public static final double[][] IDENTITY_MATRIX_4D = new double[][] {
             { 1, 0, 0, 0 },
             { 0, 1, 0, 0 },
@@ -23,20 +26,39 @@ public class Transformation {
     private final double[] translation;
     private final double[][] transformation;
 
+    /**
+     * Construct a transformation from translation and rotation.
+     * @param translation 3-d vector
+     * @param rotation 3x3 matrix
+     */
     public Transformation(double[] translation, double[][] rotation) {
         this(translation, rotation, Algebra.composeTransformationMatrix(rotation, translation));
     }
 
+    /**
+     * Construct a transformation.
+     * @param translation 3-d vector
+     * @param rotation 3x3 matrix
+     * @param transformation 4x4 matrix
+     */
     public Transformation(double[] translation, double[][] rotation, double[][] transformation) {
         this.translation = translation;
         this.rotation = rotation;
         this.transformation = transformation;
     }
 
+    /**
+     * Rotation matrix.
+     * @return 3x3 matrix
+     */
     public double[][] getRotation() {
         return rotation;
     }
 
+    /**
+     * Translation vector.
+     * @return 3-d vector
+     */
     public double[] getTranslation() {
         return translation;
     }

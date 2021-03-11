@@ -19,6 +19,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Setup needed to benchmark.
+ */
 @State(Scope.Benchmark)
 public class MyState {
     private final MotifSearchConfig config = new MotifSearchConfig();
@@ -26,6 +29,9 @@ public class MyState {
     public final QueryBuilder queryBuilder = MotifSearch.newQuery();
     public final Map<Motifs, Structure> structureMap;
 
+    /**
+     * Create state.
+     */
     public MyState() {
         this.structureMap = Arrays.stream(Motifs.values())
                 .collect(Collectors.toMap(Function.identity(), this::createStructure));

@@ -8,6 +8,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 
+/**
+ * Wraps a ForkJoinPool.
+ */
 @Service
 public class ThreadPoolImpl implements ThreadPool {
     private final ForkJoinPool pool;

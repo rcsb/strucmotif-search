@@ -27,6 +27,12 @@ public class AtomCorrespondence {
     private final List<double[]> centeredReference;
     private final List<double[]> centeredCandidate;
 
+    /**
+     * Finds the correspondence between reference and candidate.
+     * @param originalReference original reference residues
+     * @param originalCandidate original candidate residues
+     * @param atomPairingScheme how to pair atoms?
+     */
     public AtomCorrespondence(List<Residue> originalReference, List<Residue> originalCandidate, AtomPairingScheme atomPairingScheme) {
         this.originalReference = originalReference;
         this.originalCandidate = originalCandidate;

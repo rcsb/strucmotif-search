@@ -8,11 +8,18 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 
+/**
+ * The entry point of the strucmotif-search application.
+ */
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @EntityScan("org.rcsb.strucmotif")
 public class MotifSearchApplication {
     static QueryBuilder queryBuilder;
 
+    /**
+     * Default entry point.
+     * @param args arguments
+     */
     public static void main(String[] args) {
         SpringApplication.run(MotifSearchApplication.class, args);
     }

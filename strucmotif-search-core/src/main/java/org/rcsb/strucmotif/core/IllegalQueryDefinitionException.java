@@ -8,17 +8,33 @@ import org.rcsb.strucmotif.config.MotifSearchConfig;
  * auth_seq_id).
  */
 public class IllegalQueryDefinitionException extends IllegalArgumentException {
+    /**
+     * Default constructor.
+     */
     public IllegalQueryDefinitionException() {
     }
 
+    /**
+     * Construct with message.
+     * @param s message
+     */
     public IllegalQueryDefinitionException(String s) {
         super(s);
     }
 
+    /**
+     * Construct with message and cause.
+     * @param message message
+     * @param cause the cause
+     */
     public IllegalQueryDefinitionException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Construct with cause.
+     * @param cause the cause
+     */
     public IllegalQueryDefinitionException(Throwable cause) {
         super(cause);
     }

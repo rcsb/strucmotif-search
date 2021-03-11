@@ -103,6 +103,14 @@ public class QuaternionAlignmentService implements AlignmentService {
                 new RootMeanSquareDeviation(alignment.getSecond()));
     }
 
+    /**
+     * Align two set of residues. Must have equal size.
+     * @param referencePoints set of reference points
+     * @param referenceCentroid the centroid of reference points
+     * @param candidatePoints set of candidate points
+     * @param candidateCentroid the centroid of candidate points
+     * @return pair of transformation and RMSD
+     */
     @SuppressWarnings("Duplicates")
     public static Pair<Transformation, Double> align(List<double[]> referencePoints, double[] referenceCentroid, List<double[]> candidatePoints, double[] candidateCentroid) {
         double[][] rot = new double[3][3];

@@ -7,10 +7,24 @@ import java.util.NoSuchElementException;
  * The possible operations during a strucmotif update ('ADD' structures, 'REMOVE' structures, 'RECOVER').
  */
 public enum Operation {
+    /**
+     * Add structures.
+     */
     ADD,
+    /**
+     * Remove structures.
+     */
     REMOVE,
+    /**
+     * Try to recover - this is used when the JVM dies while manipulating the inverted index.
+     */
     RECOVER;
 
+    /**
+     * Map from string to Operation enum.
+     * @param s the name
+     * @return the corresponding enum entry
+     */
     public static Operation resolve(String s) {
         String uc = s.toUpperCase();
         return Arrays.stream(Operation.values())

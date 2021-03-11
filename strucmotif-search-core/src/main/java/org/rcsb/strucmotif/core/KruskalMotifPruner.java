@@ -25,6 +25,10 @@ import java.util.stream.Collectors;
 public class KruskalMotifPruner implements MotifPruner {
     private final MotifSearchConfig motifSearchConfig;
 
+    /**
+     * Injectable constructor.
+     * @param motifSearchConfig app config
+     */
     @Autowired
     public KruskalMotifPruner(MotifSearchConfig motifSearchConfig) {
         this.motifSearchConfig = motifSearchConfig;

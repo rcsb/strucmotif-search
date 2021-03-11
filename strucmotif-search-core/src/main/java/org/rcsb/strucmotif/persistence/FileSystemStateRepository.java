@@ -24,6 +24,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * A file-system-based state repository.
+ */
 @Service
 public class FileSystemStateRepository implements StateRepository {
     private static final String TOP_LEVEL_DELIMITER = ",";

@@ -16,6 +16,11 @@ public class Partition<T> extends AbstractList<List<T>> {
     private final List<T> list;
     private final int chunkSize;
 
+    /**
+     * Split a collection into partitions up to a defined size.
+     * @param list collection to partition
+     * @param chunkSize how many elements in one batch
+     */
     public Partition(Collection<T> list, int chunkSize) {
         this.list = new ArrayList<>(list);
         // shuffle to prevent troublemakers such as ribosome and virus capsids occurring in the same chunk

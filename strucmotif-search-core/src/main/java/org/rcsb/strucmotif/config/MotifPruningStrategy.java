@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.config;
 
+/**
+ * How to simplify/prune motifs?
+ */
 public enum MotifPruningStrategy {
     /**
      * Minimal spanning tree, determined by Kruskal's algorithm.

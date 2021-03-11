@@ -10,6 +10,9 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.util.List;
 
+/**
+ * A hit with additional transformation information. Implemented using a {@link SimpleHit} as delegate.
+ */
 public class TransformedHit implements Hit {
     private final SimpleHit delegate;
     private final List<ResidueType> residueTypes;

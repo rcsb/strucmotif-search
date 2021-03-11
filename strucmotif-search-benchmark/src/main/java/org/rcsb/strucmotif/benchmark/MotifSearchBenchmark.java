@@ -12,36 +12,69 @@ import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+/**
+ * Generic benchmark via JMH.
+ */
 public class MotifSearchBenchmark {
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForCatalyticTriad(Blackhole blackhole, MyState state) {
         // catalytic activity - the trivial case
         blackhole.consume(run(Motifs.HDS, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForAminoPeptidase(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.KDDDE, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForIonCoordination(Blackhole blackhole, MyState state) {
         // ion fixation - 3 residues with ambiguity
         blackhole.consume(run(Motifs.CHH, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForSuperfamilyTemplate(Blackhole blackhole, MyState state) {
         // superfamily template - 5 residues with ambiguity
         blackhole.consume(run(Motifs.KDEEH, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForSuperfamilyTemplateExchanges(Blackhole blackhole, MyState state) {
         // superfamily template - 5 residues with ambiguity
         blackhole.consume(run(Motifs.KDEEH_EXCHANGES, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForRNAComplex(Blackhole blackhole, MyState state) {
         // RNA interaction motif - 4 residues with total ambiguity

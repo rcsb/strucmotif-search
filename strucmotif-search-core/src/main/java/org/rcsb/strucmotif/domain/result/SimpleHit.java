@@ -7,6 +7,9 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.List;
 
+/**
+ * A simple hit without transformation information.
+ */
 public class SimpleHit implements Hit {
     private final StructureIdentifier structureIdentifier;
     private final AssemblyIdentifier assemblyIdentifier;

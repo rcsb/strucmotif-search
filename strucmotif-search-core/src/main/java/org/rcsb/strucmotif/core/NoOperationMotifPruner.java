@@ -16,6 +16,10 @@ import java.util.stream.Collectors;
 public class NoOperationMotifPruner implements MotifPruner {
     private final MotifSearchConfig motifSearchConfig;
 
+    /**
+     * Injectable constructor.
+     * @param motifSearchConfig app config
+     */
     public NoOperationMotifPruner(MotifSearchConfig motifSearchConfig) {
         this.motifSearchConfig = motifSearchConfig;
     }

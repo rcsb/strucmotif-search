@@ -9,15 +9,28 @@ public class Revision {
     private final int major;
     private final int minor;
 
+    /**
+     * Construct a version tag.
+     * @param major major version
+     * @param minor minor version
+     */
     public Revision(int major, int minor) {
         this.major = major;
         this.minor = minor;
     }
 
+    /**
+     * The major version component.
+     * @return an int
+     */
     public int getMajor() {
         return major;
     }
 
+    /**
+     * The minor version component.
+     * @return an int
+     */
     public int getMinor() {
         return minor;
     }

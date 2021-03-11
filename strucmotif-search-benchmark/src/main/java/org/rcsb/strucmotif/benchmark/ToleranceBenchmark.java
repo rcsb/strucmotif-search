@@ -17,36 +17,69 @@ import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+/**
+ * Tolerance-specific benchmark via JMH.
+ */
 @State(Scope.Benchmark)
 public class ToleranceBenchmark {
     @Param({"1", "2", "3"})
     public int tolerance;
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForSerineProtease(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.HDS, tolerance, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForAminopeptidase(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.KDDDE, tolerance, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForZincCoordination(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.CHH, tolerance, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForEnolaseSuperfamily(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.KDEEH, tolerance, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForEnolaseSuperfamilyExchanges(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.KDEEH_EXCHANGES, tolerance, state));
     }
 
+    /**
+     * A benchmark.
+     * @param blackhole consume results (avoid dead-code elimination)
+     * @param state state
+     */
     @Benchmark
     public void searchForQuadruplex(Blackhole blackhole, MyState state) {
         blackhole.consume(run(Motifs.GGGG, tolerance, state));
@@ -71,6 +104,11 @@ public class ToleranceBenchmark {
             .run();
     }
 
+    /**
+     * Entry point for benchmarks.
+     * @param args arguments
+     * @throws RunnerException benchmark failure
+     */
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
                 .include(ToleranceBenchmark.class.getSimpleName())

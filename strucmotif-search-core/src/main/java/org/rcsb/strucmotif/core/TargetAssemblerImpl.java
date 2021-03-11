@@ -25,12 +25,20 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+/**
+ * The default strucmotif-search target assembler.
+ */
 @Service
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
     private final InvertedIndex invertedIndex;
     private final ThreadPool threadPool;
 
+    /**
+     * Injectable constructor.
+     * @param invertedIndex inverted index
+     * @param threadPool thread pool
+     */
     @Autowired
     public TargetAssemblerImpl(InvertedIndex invertedIndex, ThreadPool threadPool) {
         this.invertedIndex = invertedIndex;

@@ -8,5 +8,11 @@ import java.util.concurrent.Future;
  * on parallel streams.
  */
 public interface ThreadPool {
+    /**
+     * Dispatch a Callable.
+     * @param task a callable
+     * @param <R> type
+     * @return a Future aka promise
+     */
     <R> Future<R> submit(Callable<R> task);
 }

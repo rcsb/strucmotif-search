@@ -4,6 +4,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * All properties used throughout the strucmotif-search application.
+ */
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "strucmotif")
@@ -84,102 +87,208 @@ public class MotifSearchConfig {
      */
     public static final String RCSB_ENTRY_LIST = "https://data.rcsb.org/rest/v1/holdings/current/entry_ids";
 
+    /**
+     * Maximum distance of residue pairs.
+     * @return threshold in Angstrom
+     */
     public double getDistanceCutoff() {
         return distanceCutoff;
     }
 
+    /**
+     * Set maximum distance of residue pairs.
+     * @param distanceCutoff threshold in Angstrom
+     */
     public void setDistanceCutoff(double distanceCutoff) {
         this.distanceCutoff = distanceCutoff;
     }
 
+    /**
+     * The root path where data is read/written.
+     * @return a path
+     */
     public String getRootPath() {
         return rootPath;
     }
 
+    /**
+     * Set the root path where data is read/written.
+     * @param rootPath a path
+     */
     public void setRootPath(String rootPath) {
         this.rootPath = rootPath;
     }
 
+    /**
+     * Optional path to a local collection of structure data. This will be used during update operations. If not set or
+     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
+     * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
+     * @return a path
+     */
     public String getDataSource() {
         return dataSource;
     }
 
+    /**
+     * Optional path to a local collection of structure data. This will be used during update operations. If not set or
+     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
+     * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
+     * @param dataSource a path
+     */
     public void setDataSource(String dataSource) {
         this.dataSource = dataSource;
     }
 
+    /**
+     * How many threads to use?
+     * @return an int
+     */
     public int getNumberThreads() {
         return numberThreads;
     }
 
+    /**
+     * Set how many threads to use?
+     * @param numberThreads an int >0
+     */
     public void setNumberThreads(int numberThreads) {
         this.numberThreads = numberThreads;
     }
 
+    /**
+     * Maximum number of results returned.
+     * @return an int
+     */
     public int getMaxResults() {
         return maxResults;
     }
 
+    /**
+     * Set maximum number of results returned.
+     * @param maxResults an int
+     */
     public void setMaxResults(int maxResults) {
         this.maxResults = maxResults;
     }
 
+    /**
+     * How many digits to write (e.g. for RMSD).
+     * @return an int
+     */
     public int getDecimalPlacesScore() {
         return decimalPlacesScore;
     }
 
+    /**
+     * Set how many digits to write (e.g. for RMSD).
+     * @param decimalPlacesScore an int
+     */
     public void setDecimalPlacesScore(int decimalPlacesScore) {
         this.decimalPlacesScore = decimalPlacesScore;
     }
 
+    /**
+     * How many digits to write for matrices.
+     * @return an int
+     */
     public int getDecimalPlacesMatrix() {
         return decimalPlacesMatrix;
     }
 
+    /**
+     * Set how many digits to write for matrices.
+     * @param decimalPlacesMatrix an int
+     */
     public void setDecimalPlacesMatrix(int decimalPlacesMatrix) {
         this.decimalPlacesMatrix = decimalPlacesMatrix;
     }
 
+    /**
+     * How many structures to process before flushing to inverted index.
+     * @return an int
+     */
     public int getUpdateChunkSize() {
         return updateChunkSize;
     }
 
+    /**
+     * Set how many structures to process before flushing to inverted index.
+     * @param updateChunkSize an int
+     */
     public void setUpdateChunkSize(int updateChunkSize) {
         this.updateChunkSize = updateChunkSize;
     }
 
+    /**
+     * Maximum number of residues in a motif.
+     * @return an int
+     */
     public int getMaxMotifSize() {
         return maxMotifSize;
     }
 
+    /**
+     * Set maximum number of residues in a motif.
+     * @param maxMotifSize an int
+     */
     public void setMaxMotifSize(int maxMotifSize) {
         this.maxMotifSize = maxMotifSize;
     }
 
+    /**
+     * The URL where (Binary)CIF data will be fetched from if not present locally. <code>{id}</code> refers to the
+     * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
+     * @return a URL
+     */
     public String getCifFetchUrl() {
         return cifFetchUrl;
     }
 
+    /**
+     * The URL where (Binary)CIF data will be fetched from if not present locally. <code>{id}</code> refers to the
+     * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
+     * @param cifFetchUrl a URL
+     */
     public void setCifFetchUrl(String cifFetchUrl) {
         this.cifFetchUrl = cifFetchUrl;
     }
 
+    /**
+     * Convenience method to get squared distance cutoff.
+     * @return a double
+     */
     public double getSquaredDistanceCutoff() {
         return distanceCutoff * distanceCutoff;
     }
 
+    /**
+     * How many digits to write for renumbered files.
+     * @return an int
+     */
     public int getRenumberedCoordinatePrecision() {
         return renumberedCoordinatePrecision;
     }
 
+    /**
+     * Set how many digits to write for renumbered files.
+     * @param renumberedCoordinatePrecision an int
+     */
     public void setRenumberedCoordinatePrecision(int renumberedCoordinatePrecision) {
         this.renumberedCoordinatePrecision = renumberedCoordinatePrecision;
     }
 
+    /**
+     * Gzip renumbered files?
+     * @return a Boolean
+     */
     public boolean isRenumberedGzip() {
         return renumberedGzip;
     }
 
+    /**
+     * Set gzip renumbered files?
+     * @param renumberedGzip a Boolean
+     */
     public void setRenumberedGzip(boolean renumberedGzip) {
         this.renumberedGzip = renumberedGzip;
     }

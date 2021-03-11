@@ -22,6 +22,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 
+/**
+ * Default implementation of a structure data provider.
+ */
 @Service
 public class StructureDataProviderImpl implements StructureDataProvider {
     private static final Logger logger = LoggerFactory.getLogger(StructureDataProviderImpl.class);

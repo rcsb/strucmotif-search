@@ -8,10 +8,18 @@ import java.util.Objects;
 public class AssemblyIdentifier {
     private final String assemblyId;
 
+    /**
+     * Construct an assembly identifier.
+     * @param assemblyId the id
+     */
     public AssemblyIdentifier(String assemblyId) {
         this.assemblyId = assemblyId;
     }
 
+    /**
+     * this assembly identifier
+     * @return a String
+     */
     public String getAssemblyId() {
         return assemblyId;
     }

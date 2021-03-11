@@ -13,6 +13,12 @@ public class StructureInformation {
     private final Revision revision;
     private final Map<String, List<String>> assemblyInformation;
 
+    /**
+     * Wraps info on a structure.
+     * @param structureIdentifier entry id
+     * @param revision version
+     * @param assemblyInformation present assemblies
+     */
     public StructureInformation(StructureIdentifier structureIdentifier, Revision revision, Map<String, List<String>> assemblyInformation) {
         this.structureIdentifier = structureIdentifier;
         this.revision = revision;

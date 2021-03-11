@@ -32,6 +32,11 @@ public class ResidueGraph {
     private final int numberOfPairings;
     private final Map<Residue, LabelSelection> labelSelectionResolver;
 
+    /**
+     * Construct a residue graph from a structure.
+     * @param structure the structure to process
+     * @param squaredCutoff maximum squared residue distance
+     */
     public ResidueGraph(Structure structure, double squaredCutoff) {
         this(structure, squaredCutoff, false);
     }
@@ -224,6 +229,10 @@ public class ResidueGraph {
                 .map(this::createMotifOccurrence);
     }
 
+    /**
+     * Allows to traverse all residue pair occurrences. Will employ sequential stream.
+     * @return a stream of {@link ResiduePairOccurrence} instances
+     */
     public Stream<ResiduePairOccurrence> residuePairOccurrencesSequential() {
         return pairingsSequential()
                 .map(this::createMotifOccurrence);

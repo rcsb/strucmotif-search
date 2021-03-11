@@ -9,15 +9,28 @@ public class AtomIdentifier {
     private final String labelAtomId;
     private final int id;
 
+    /**
+     * Identify an individual atom by its name and serial.
+     * @param labelAtomId the name
+     * @param id the serial
+     */
     public AtomIdentifier(String labelAtomId, int id) {
         this.labelAtomId = labelAtomId;
         this.id = id;
     }
 
+    /**
+     * Name of this atom.
+     * @return a String
+     */
     public String getLabelAtomId() {
         return labelAtomId;
     }
 
+    /**
+     * Serial of this atom.
+     * @return an int
+     */
     public int getId() {
         return id;
     }
@@ -41,6 +54,12 @@ public class AtomIdentifier {
         return Objects.hash(id, labelAtomId);
     }
 
+    /**
+     * Check if two AtomIdentifiers reference the same atom (i.e. one with the same name). Useful to find compatible
+     * atoms during alignment.
+     * @param other another instance
+     * @return true if the same atom name
+     */
     public boolean describeSameAtom(AtomIdentifier other) {
         return labelAtomId.equals(other.getLabelAtomId());
     }

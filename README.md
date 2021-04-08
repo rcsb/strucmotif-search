@@ -37,7 +37,7 @@ Current benchmark times to search in `160,467` structures as of `2/17/20`.
 - position-specific exchanges
 - modified residues
 
-## Getting started
+## Getting started with a dependency
 strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
 ```xml
 <dependency>
@@ -47,7 +47,9 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 </dependency>
 ```
 
-## Example
+### Search for structural motifs
+The `MotifSearch` class provides a fluent API to process structural motif queries.
+
 ```java
 class Demo {
     public static void main(String[] args) {
@@ -68,6 +70,52 @@ class Demo {
     }
 }
 ```
+
+### Update structure and inverted index data
+Before searching, you need to add structure and inverted index data. Use the `MotifSearchUpdate` class to perform an 
+update.
+
+```java
+class Demo {
+    public static void main(String[] args) {
+        // perform a full load of all structures in RCSB PDB with default configuration
+        MotifSearchUpdate.main(new String[] { "ADD", "full" });
+    }
+}
+```
+
+Supported operations are `ADD` and `REMOVE`. Either process all current PDB structures (`full`) or provide an array of 
+entry IDs you want to process (e.g., `"4hhb", "1muw", "1exr"`).
+
+## Getting started by cloning
+An alternative way to use the library is cloning this repository and building the corresponding Maven modules.
+
+### Update structure and inverted index data
+Like before, you will need run a local update to get results from a search. To do so, build the project and execute the 
+packaged update jar:
+```shell
+java -jar -Xmx12G strucmotif-search-update/dist/strucmotif-update.jar ADD full
+```
+
+Specify the heap parameter `-Xmx` as roughly 75% of the available memory on your system for optimal performance.
+
+### Controlling application properties during update
+Application properties during the update process can be controlled by placing a file with the name 
+`application.properties` in the directory from which the update will be executed. The file can be used to override 
+default configurations.
+
+```yaml
+strucmotif.root-path=/Users/rcsb/strucmotif-data/
+strucmotif.update-chunk-size=400
+```
+
+Use `root-path` to specify the directory to which structure and inverted index data will be written.
+
+Set the `update-chunk-size` to a value that matches the `-Xmx` parameter. 400 works well with 12 GB of heap, 1,200 works
+well with 24 GB. Decrease the chunk size if less memory is available, increase if more memory can be used. High values 
+result in faster updates.
+
+See the Configuration section for other parameters.
 
 ## Configuration
 | Property     | Action | Default Value/Behavior |

@@ -19,6 +19,9 @@ containing the query motif and ignoring most of the structures that are irreleva
 approach enables real-time retrieval and superposition of structural motifs, either extracted
 from a reference structure or uploaded by the user.
 
+## See it in action
+Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search/advanced-search/structural-motif-search).
+
 ## Performance
 Current benchmark times to search in `160,467` structures as of `2/17/20`.
 
@@ -134,9 +137,6 @@ See the Configuration section for other parameters.
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 
 Configure by placing your `application.properties` on the classpath.
-
-## Availability
-Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search/advanced-search/structural-motif-search).
 
 ## Publication
 Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

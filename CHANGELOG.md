@@ -1,6 +1,12 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.9.15
+-------------
+### Bug fix
+- fix timing issues for mkdir in StructureDataProviderImpl & FileSystemInvertedIndex
+- properly handle blank lines in state.list & known.list
+
 strucmotif-search 0.9.14
 -------------
 ### Bug fix

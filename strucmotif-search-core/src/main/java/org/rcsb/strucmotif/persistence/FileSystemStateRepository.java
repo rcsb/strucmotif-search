@@ -71,6 +71,7 @@ public class FileSystemStateRepository implements StateRepository {
     public Collection<StructureInformation> selectKnown() {
         try {
             return Files.lines(knownPath)
+                    .filter(line -> !line.isBlank())
                     .map(line -> line.split(TOP_LEVEL_DELIMITER))
                     .map(this::handleKnownSplit)
                     .collect(Collectors.toSet());

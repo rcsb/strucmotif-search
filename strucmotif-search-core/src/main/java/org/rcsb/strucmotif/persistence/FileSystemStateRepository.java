@@ -107,6 +107,7 @@ public class FileSystemStateRepository implements StateRepository {
     private Set<StructureIdentifier> select(Path source) {
         try {
             return Files.lines(source)
+                    .filter(line -> !line.isBlank())
                     .map(StructureIdentifier::new)
                     .collect(Collectors.toSet());
         } catch (IOException e) {

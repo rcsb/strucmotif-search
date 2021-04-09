@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.update;
 
 import org.rcsb.cif.CifIO;
+import org.rcsb.cif.ParsingException;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
@@ -217,6 +218,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
             context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
         } catch (IOException e) {
             throw new UncheckedIOException("cif parsing failed for " + structureIdentifier, e);
+        } catch (ParsingException e) {
+            logger.info("cif parsing failed for " + structureIdentifier, e);
+            throw e;
         }
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain

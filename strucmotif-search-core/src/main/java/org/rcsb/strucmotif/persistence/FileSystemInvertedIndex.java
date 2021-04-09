@@ -51,8 +51,8 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     @Override
     public void insert(ResiduePairDescriptor residuePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>> residuePairOccurrences) {
         if (!paths) {
-            this.paths = true;
             ensureDirectoriesExist();
+            this.paths = true;
         }
 
         try {

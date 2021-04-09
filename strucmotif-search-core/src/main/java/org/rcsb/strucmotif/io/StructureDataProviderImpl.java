@@ -150,8 +150,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     @Override
     public void writeRenumbered(StructureIdentifier structureIdentifier, MmCifFile mmCifFile) {
         if (!paths) {
-            this.paths = true;
             ensureRenumberedPathExists();
+            this.paths = true;
         }
         renumberedStructureWriter.write(mmCifFile, getRenumberedStructurePath(structureIdentifier));
     }

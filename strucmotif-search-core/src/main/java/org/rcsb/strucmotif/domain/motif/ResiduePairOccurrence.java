@@ -19,15 +19,28 @@ public class ResiduePairOccurrence {
     private final ResiduePairDescriptor residuePairDescriptor;
     private final ResiduePairIdentifier residuePairIdentifier;
 
+    /**
+     * Construct a pair occurrence.
+     * @param residuePairDescriptor what are the properties of this pair?
+     * @param residuePairIdentifier where is this pair located?
+     */
     public ResiduePairOccurrence(ResiduePairDescriptor residuePairDescriptor, ResiduePairIdentifier residuePairIdentifier) {
         this.residuePairDescriptor = residuePairDescriptor;
         this.residuePairIdentifier = residuePairIdentifier;
     }
 
+    /**
+     * What are the properties of this pair?
+     * @return a pair descriptor
+     */
     public ResiduePairDescriptor getResiduePairDescriptor() {
         return residuePairDescriptor;
     }
 
+    /**
+     * Where is this pair located?
+     * @return a pair identifier
+     */
     public ResiduePairIdentifier getResidueIdentifier() {
         return residuePairIdentifier;
     }

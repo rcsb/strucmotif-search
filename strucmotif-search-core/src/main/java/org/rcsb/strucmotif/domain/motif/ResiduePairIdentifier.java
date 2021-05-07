@@ -14,32 +14,64 @@ public class ResiduePairIdentifier {
     private final LabelSelection labelSelection2;
     private final GeometricDescriptorScore score;
 
+    /**
+     * Construct an identifier pair.
+     * @param labelSelection1 first selection
+     * @param labelSelection2 second selection
+     */
     public ResiduePairIdentifier(LabelSelection labelSelection1, LabelSelection labelSelection2) {
         this(labelSelection1, labelSelection2, null);
     }
 
+    /**
+     * Construct an identifier pair.
+     * @param labelSelection1 first selection
+     * @param labelSelection2 second selection
+     * @param original if present the score of this reference descriptor will be attached to this instance
+     */
     public ResiduePairIdentifier(LabelSelection labelSelection1, LabelSelection labelSelection2, ResiduePairDescriptor original) {
         this.labelSelection1 = labelSelection1;
         this.labelSelection2 = labelSelection2;
         this.score = original != null ? original.getScore() : null;
     }
 
+    /**
+     * First selection.
+     * @return a label selection
+     */
     public LabelSelection getLabelSelection1() {
         return labelSelection1;
     }
 
+    /**
+     * Second selection.
+     * @return a label selection
+     */
     public LabelSelection getLabelSelection2() {
         return labelSelection2;
     }
 
+    /**
+     * The score of this occurrence which will be used to derive the complete geometric descriptor score of a putative
+     * hit.
+     * @return a score or null
+     */
     public GeometricDescriptorScore getScore() {
         return score;
     }
 
+    /**
+     * Convenience method to access referenced selections.
+     * @return Stream of both selections
+     */
     public Stream<LabelSelection> labelSelections() {
         return Stream.of(labelSelection1, labelSelection2);
     }
 
+    /**
+     * States if this instances references a score.
+     * @return true if score is attached
+     */
     public boolean providesScore() {
         return score != null;
     }

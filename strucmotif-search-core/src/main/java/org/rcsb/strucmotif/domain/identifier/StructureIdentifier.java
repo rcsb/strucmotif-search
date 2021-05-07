@@ -8,10 +8,18 @@ import java.util.Objects;
 public class StructureIdentifier {
     private final String pdbId;
 
+    /**
+     * Constructor.
+     * @param pdbId the PDB identifier of this structure
+     */
     public StructureIdentifier(String pdbId) {
         this.pdbId = pdbId;
     }
 
+    /**
+     * Returns the PDB identifier of this structure.
+     * @return a String
+     */
     public String getPdbId() {
         return pdbId;
     }

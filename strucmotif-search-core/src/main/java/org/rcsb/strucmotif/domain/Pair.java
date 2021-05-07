@@ -19,10 +19,18 @@ public class Pair<F, S> {
         this.second = second;
     }
 
+    /**
+     * The first element.
+     * @return the wrapped object
+     */
     public F getFirst() {
         return first;
     }
 
+    /**
+     * The second element.
+     * @return the wrapped object
+     */
     public S getSecond() {
         return second;
     }

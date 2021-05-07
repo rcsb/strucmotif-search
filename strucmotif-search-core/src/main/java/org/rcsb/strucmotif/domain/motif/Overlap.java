@@ -8,11 +8,29 @@ import org.rcsb.strucmotif.domain.selection.LabelSelection;
  * overlaps. Can be LEFT_LEFT (left/first identifier of first word paired to left/first of second word) and so on.
  */
 public enum Overlap {
+    /**
+     * No overlap.
+     */
     NONE,
+    /**
+     * Left identifier of first word corresponds to left identifier of second word.
+     */
     LEFT_LEFT,
+    /**
+     * Left identifier of first word corresponds to right identifier of second word.
+     */
     LEFT_RIGHT,
+    /**
+     * Right identifier of first word corresponds to left identifier of second word.
+     */
     RIGHT_LEFT,
+    /**
+     * Right identifier of first word corresponds to right identifier of second word.
+     */
     RIGHT_RIGHT,
+    /**
+     * Both sides overlap.
+     */
     BOTH;
 
     /**

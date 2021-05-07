@@ -35,6 +35,14 @@ public class QueryBuilder {
     private final MotifSearchRuntime motifSearchRuntime;
     private final MotifSearchConfig motifSearchConfig;
 
+    /**
+     * Construct a new query builder.
+     * @param structureDataProvider injectable structure provider
+     * @param kruskalMotifPruner injectable motif pruner
+     * @param noOperationMotifPruner injectable nop motif pruner
+     * @param motifSearchRuntime injectable runtime
+     * @param motifSearchConfig injectable config
+     */
     @Autowired
     public QueryBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
         this.structureDataProvider = structureDataProvider;
@@ -54,8 +62,6 @@ public class QueryBuilder {
         Structure structure = structureDataProvider.readSome(new StructureIdentifier(pdbId), selection);
         return defineByStructure(structure);
     }
-
-
 
     /**
      * Define a motif based on a stream of structure data and a selection of components.
@@ -290,11 +296,21 @@ public class QueryBuilder {
             return this;
         }
 
+        /**
+         * Narrow down the search space to the specified entries. Leave empty to search everything.
+         * @param structureIdentifiers a collection of structure identifiers
+         * @return this builder
+         */
         public OptionalStepBuilder whitelist(Collection<StructureIdentifier> structureIdentifiers) {
             this.whitelist.addAll(structureIdentifiers);
             return this;
         }
 
+        /**
+         * Filter out hits from the specified entries.
+         * @param structureIdentifiers a collection of structure identifiers
+         * @return this builder
+         */
         public OptionalStepBuilder blacklist(Collection<StructureIdentifier> structureIdentifiers) {
             this.blacklist.addAll(structureIdentifiers);
             return this;

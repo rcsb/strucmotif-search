@@ -24,6 +24,10 @@ public class MotifSearchResult {
     private int numberOfPaths;
     private int numberOfTargetStructures;
 
+    /**
+     * Construct a result container.
+     * @param query the initial query
+     */
     public MotifSearchResult(MotifSearchQuery query) {
         this.query = query;
         this.timings = new Timings();
@@ -31,46 +35,90 @@ public class MotifSearchResult {
         this.hits = new ArrayList<>();
     }
 
+    /**
+     * The initial query.
+     * @return a query
+     */
     public MotifSearchQuery getQuery() {
         return query;
     }
 
+    /**
+     * Associated timings.
+     * @return timings object
+     */
     public Timings getTimings() {
         return timings;
     }
 
+    /**
+     * Access to all currently referenced target structures.
+     * @return a map with structure identifiers as keys and target structure instances as values
+     */
     public Map<StructureIdentifier, TargetStructure> getTargetStructures() {
         return targetStructures;
     }
 
+    /**
+     * Update the currently referenced target structures.
+     * @param targetStructures a map with structure identifiers as keys and target structure instances as values
+     */
     public void setTargetStructures(Map<StructureIdentifier, TargetStructure> targetStructures) {
         this.targetStructures = targetStructures;
     }
 
+    /**
+     * Update the collection of currently valid hits.
+     * @param hits a collection of hits
+     */
     public void setHits(List<? extends Hit> hits) {
         this.hits = hits;
     }
 
+    /**
+     * Access all (currently) valid hits.
+     * @return a collection of hits
+     */
     public List<? extends Hit> getHits() {
         return hits;
     }
 
+    /**
+     * Update the number of valid paths.
+     * @param numberOfPaths an int
+     */
     public void setNumberOfPaths(int numberOfPaths) {
         this.numberOfPaths = numberOfPaths;
     }
 
+    /**
+     * The number of valid paths in all target structures.
+     * @return an int
+     */
     public int getNumberOfPaths() {
         return numberOfPaths;
     }
 
+    /**
+     * Update the number of referenced target structures.
+     * @param numberOfTargetStructures an int
+     */
     public void setNumberOfTargetStructures(int numberOfTargetStructures) {
         this.numberOfTargetStructures = numberOfTargetStructures;
     }
 
+    /**
+     * The number of referenced target structures.
+     * @return an int
+     */
     public int getNumberOfTargetStructures() {
         return numberOfTargetStructures;
     }
 
+    /**
+     * Called internally after a descriptor has been processed.
+     * @return the new path generation
+     */
     public int incrementAndGetPathGeneration() {
         pathGeneration++;
         return pathGeneration;

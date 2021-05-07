@@ -24,6 +24,10 @@ public class MotifSearchApplication {
         SpringApplication.run(MotifSearchApplication.class, args);
     }
 
+    /**
+     * Constructor.
+     * @param queryBuilder injectable query builder
+     */
     @Autowired
     public MotifSearchApplication(QueryBuilder queryBuilder) {
         MotifSearchApplication.queryBuilder = queryBuilder;

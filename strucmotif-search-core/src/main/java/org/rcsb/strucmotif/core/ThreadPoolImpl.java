@@ -15,6 +15,10 @@ import java.util.concurrent.Future;
 public class ThreadPoolImpl implements ThreadPool {
     private final ForkJoinPool pool;
 
+    /**
+     * Constructor.
+     * @param motifSearchConfig injectable configuration
+     */
     @Autowired
     public ThreadPoolImpl(MotifSearchConfig motifSearchConfig) {
         this.pool = new ForkJoinPool(motifSearchConfig.getNumberThreads());

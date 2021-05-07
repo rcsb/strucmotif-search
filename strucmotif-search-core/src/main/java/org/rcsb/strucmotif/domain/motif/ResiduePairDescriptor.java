@@ -48,22 +48,42 @@ public class ResiduePairDescriptor {
         }
     }
 
+    /**
+     * Residue type (label_comp_id) of first element.
+     * @return a residue type
+     */
     public ResidueType getResidueType1() {
         return residueType1;
     }
 
+    /**
+     * Residue type (label_comp_id) of second element.
+     * @return a residue type
+     */
     public ResidueType getResidueType2() {
         return residueType2;
     }
 
+    /**
+     * Binned backbone distance for this pair.
+     * @return a distance type
+     */
     public DistanceType getBackboneDistance() {
         return backboneDistance;
     }
 
+    /**
+     * Binned side-chain distance for this pair.
+     * @return a distance type
+     */
     public DistanceType getSideChainDistance() {
         return sideChainDistance;
     }
 
+    /**
+     * Binned angle for this pair.
+     * @return an angle type
+     */
     public AngleType getAngle() {
         return angle;
     }

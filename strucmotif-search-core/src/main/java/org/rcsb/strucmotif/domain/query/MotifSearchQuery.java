@@ -63,14 +63,26 @@ public class MotifSearchQuery {
         return exchanges;
     }
 
+    /**
+     * Returns the specified search space - no restrictions apply if empty.
+     * @return a collection of the search space
+     */
     public Collection<StructureIdentifier> getWhitelist() {
         return whitelist;
     }
 
+    /**
+     * Returns disallowed entries of the search space.
+     * @return a collection of entries that will be ignored
+     */
     public Collection<StructureIdentifier> getBlacklist() {
         return blacklist;
     }
 
+    /**
+     * Dispatch this query and perform the corresponding search.
+     * @return the result container
+     */
     public MotifSearchResult run() {
         return motifSearchRuntime.performSearch(this);
     }

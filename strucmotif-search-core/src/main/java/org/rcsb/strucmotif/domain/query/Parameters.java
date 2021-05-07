@@ -96,10 +96,18 @@ public class Parameters {
         return motifPruner;
     }
 
+    /**
+     * Terminate the search after this many hits have been accepted.
+     * @return an int
+     */
     public int getLimit() {
         return limit;
     }
 
+    /**
+     * Report if the result count is limited.
+     * @return true if search will stop after a certain number of hits has been accepted.
+     */
     public boolean hasLimit() {
         return limit != Integer.MAX_VALUE;
     }

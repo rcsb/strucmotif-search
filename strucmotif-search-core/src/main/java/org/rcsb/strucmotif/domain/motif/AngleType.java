@@ -6,17 +6,50 @@ import org.rcsb.strucmotif.math.Algebra;
  * Binned representation of the angle between residues.
  */
 public enum AngleType {
+    /**
+     * [0, 10) deg.
+     */
     A0,
+    /**
+     * [10, 30) deg.
+     */
     A20,
+    /**
+     * [30, 50) deg.
+     */
     A40,
+    /**
+     * [50, 70) deg.
+     */
     A60,
+    /**
+     * [70, 90) deg.
+     */
     A80,
+    /**
+     * [90, 110) deg.
+     */
     A100,
+    /**
+     * [110, 130) deg.
+     */
     A120,
+    /**
+     * [130, 150) deg.
+     */
     A140,
+    /**
+     * [150, 170) deg.
+     */
     A160,
+    /**
+     * [170, 180]
+     */
     A180;
 
+    /**
+     * Width of an angle bin.
+     */
     public static final int BIN_SIZE = 20;
 
     /**

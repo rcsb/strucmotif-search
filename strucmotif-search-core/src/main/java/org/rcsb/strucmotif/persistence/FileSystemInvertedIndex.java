@@ -43,6 +43,10 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     private final Path basePath;
     private boolean paths;
 
+    /**
+     * Construct a inverted index instance.
+     * @param motifSearchConfig the config
+     */
     public FileSystemInvertedIndex(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
         this.paths = false;
@@ -141,6 +145,12 @@ public class FileSystemInvertedIndex implements InvertedIndex {
         return MessagePackCodec.decode(inputStream).entrySet().stream();
     }
 
+    /**
+     * Acquire the input stream for a descriptor.
+     * @param residuePairDescriptor the descriptor of interest
+     * @return the corresponding input stream
+     * @throws IOException reading failed
+     */
     protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
         Path path = getPath(residuePairDescriptor);
         return new BufferedInputStream(Files.newInputStream(path), 65536);

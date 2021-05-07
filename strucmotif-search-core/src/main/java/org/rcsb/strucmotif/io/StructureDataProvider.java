@@ -38,6 +38,11 @@ public interface StructureDataProvider {
      */
     Structure readRenumbered(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection);
 
+    /**
+     * Read a renumbered structure entirely.
+     * @param structureIdentifier the structure to read
+     * @return the corresponding {@link Structure}
+     */
     default Structure readRenumbered(StructureIdentifier structureIdentifier) {
         return readRenumbered(structureIdentifier, null);
     }
@@ -50,6 +55,11 @@ public interface StructureDataProvider {
      */
     Structure readOriginal(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection);
 
+    /**
+     * Read an original structure entirely.
+     * @param structureIdentifier the structure to read
+     * @return the corresponding {@link Structure}
+     */
     default Structure readOriginal(StructureIdentifier structureIdentifier) {
         return readOriginal(structureIdentifier, null);
     }
@@ -62,6 +72,11 @@ public interface StructureDataProvider {
      */
     Structure readSome(StructureIdentifier structureIdentifier, Collection<? extends ResidueSelection> selection);
 
+    /**
+     * Read some structure entirely.
+     * @param structureIdentifier the structure to read
+     * @return the corresponding {@link Structure}
+     */
     default Structure readSome(StructureIdentifier structureIdentifier) {
         return readSome(structureIdentifier, null);
     }

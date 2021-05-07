@@ -36,6 +36,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final String extension;
     private boolean paths;
 
+    /**
+     * Construct a structure provider.
+     * @param structureReader the reader
+     * @param renumberedStructureWriter the writer
+     * @param motifSearchConfig the config
+     */
     @Autowired
     public StructureDataProviderImpl(StructureReader structureReader,
                                      RenumberedStructureWriter renumberedStructureWriter,

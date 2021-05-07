@@ -6,6 +6,10 @@ import org.rcsb.strucmotif.domain.structure.Residue;
  * Identifies a {@link Residue} uniquely in a complete structure.
  */
 public interface ResidueSelection {
+    /**
+     * The struct_oper_id expression to select.
+     * @return a String
+     */
     String getStructOperId();
 
     /**

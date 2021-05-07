@@ -19,6 +19,13 @@ public class TransformedHit implements Hit {
     private final RootMeanSquareDeviation rootMeanSquareDeviation;
     private final Transformation transformation;
 
+    /**
+     * Construct a transformed hit (i.e., scored by an alignment).
+     * @param delegate the wrapped simple hit
+     * @param residueTypes mapped residue types
+     * @param rootMeanSquareDeviation the alignment score
+     * @param transformation the transformation determined by the alignment
+     */
     public TransformedHit(SimpleHit delegate, List<ResidueType> residueTypes, RootMeanSquareDeviation rootMeanSquareDeviation, Transformation transformation) {
         this.delegate = delegate;
         this.residueTypes = residueTypes;
@@ -46,14 +53,26 @@ public class TransformedHit implements Hit {
         return delegate.getGeometricDescriptorScore();
     }
 
+    /**
+     * Returns residue types (label_comp_id) of this hit.
+     * @return an ordered set of residue types
+     */
     public List<ResidueType> getResidueTypes() {
         return residueTypes;
     }
 
+    /**
+     * Returns the RMSD of this hit.
+     * @return a score object
+     */
     public RootMeanSquareDeviation getRootMeanSquareDeviation() {
         return rootMeanSquareDeviation;
     }
 
+    /**
+     * Returns the transformation yielded by the underlying alignment.
+     * @return a transformation object
+     */
     public Transformation getTransformation() {
         return transformation;
     }

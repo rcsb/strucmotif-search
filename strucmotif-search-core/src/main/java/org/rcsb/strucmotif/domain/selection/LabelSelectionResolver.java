@@ -15,6 +15,10 @@ public class LabelSelectionResolver implements SelectionResolver<LabelSelection>
     private final Map<Residue, LabelSelection> forward;
     private final Map<LabelSelection, Residue> backward;
 
+    /**
+     * Initialize a selection resolver on a structure.
+     * @param structure the structure to process
+     */
     public LabelSelectionResolver(Structure structure) {
         this.forward = new HashMap<>();
         this.backward = new HashMap<>();

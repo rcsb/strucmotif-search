@@ -260,6 +260,11 @@ public class Algebra {
         }};
     }
 
+    /**
+     * Transpose a 3x3 matrix.
+     * @param rot the original matrix
+     * @return a new, transposed matrix
+     */
     public static double[][] transpose3d(double[][] rot) {
         return new double[][] {
                 { rot[0][0], rot[1][0], rot[2][0] },
@@ -268,6 +273,12 @@ public class Algebra {
         };
     }
 
+    /**
+     * Combine a rotation matrix and a translation vector into a 4x4 transformation matrix.
+     * @param rotation3x3 a 3x3 rotation matrix
+     * @param translation3d a 3-element translation vector
+     * @return a transformation matrix
+     */
     public static double[][] composeTransformationMatrix(double[][] rotation3x3, double[] translation3d) {
         double[][] matrix = new double[4][];
 

@@ -37,6 +37,11 @@ public class TargetStructure {
     // non-final fields to achieve the lazy behavior - tread lightly
     private List<ResiduePairIdentifier[]> paths;
 
+    /**
+     * Construct a target structure instance.
+     * @param structureIdentifier its identifier
+     * @param residuePairIdentifiers all first-generation residue pairs
+     */
     public TargetStructure(StructureIdentifier structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers) {
         this.structureIdentifier = structureIdentifier;
         // each target identifier is the first step of a potential path in this target structure

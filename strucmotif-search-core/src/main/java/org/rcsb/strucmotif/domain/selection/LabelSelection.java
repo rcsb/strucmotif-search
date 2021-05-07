@@ -11,12 +11,22 @@ public class LabelSelection implements ResidueSelection {
     private final String structOperId;
     private final int labelSeqId;
 
+    /**
+     * Construct a label selection.
+     * @param labelAsymId the chain of interest
+     * @param structOperId the operation of interest
+     * @param labelSeqId the sequence position of interest
+     */
     public LabelSelection(String labelAsymId, String structOperId, int labelSeqId) {
         this.labelAsymId = labelAsymId;
         this.structOperId = structOperId;
         this.labelSeqId = labelSeqId;
     }
 
+    /**
+     * The chain of interest. Corresponds to 'label_asym_id' in mmCIF.
+     * @return a String
+     */
     public String getLabelAsymId() {
         return labelAsymId;
     }
@@ -26,6 +36,10 @@ public class LabelSelection implements ResidueSelection {
         return structOperId;
     }
 
+    /**
+     * The sequence position of interest. Corresponds to 'label_seq_id' in mmCIF.
+     * @return an int
+     */
     public int getLabelSeqId() {
         return labelSeqId;
     }

@@ -36,6 +36,10 @@ public class FileSystemStateRepository implements StateRepository {
     // maps from struct_oper_id to all assemblies this transformation is part of
     private final Map<StructureIdentifier, Map<String, Set<String>>> reverseAssemblyInformation;
 
+    /**
+     * Construct a state repository instance.
+     * @param motifSearchConfig the config
+     */
     public FileSystemStateRepository(MotifSearchConfig motifSearchConfig) {
         Path rootPath = Paths.get(motifSearchConfig.getRootPath());
         this.knownPath = rootPath.resolve(MotifSearchConfig.STATE_KNOWN_LIST);
@@ -80,6 +84,11 @@ public class FileSystemStateRepository implements StateRepository {
         }
     }
 
+    /**
+     * Split a line into a structure information object.
+     * @param split the raw line
+     * @return a structure information container
+     */
     protected StructureInformation handleKnownSplit(String[] split) {
         StructureIdentifier structureIdentifier = new StructureIdentifier(split[0]);
         Revision revision = new Revision(Integer.parseInt(split[1]), Integer.parseInt(split[2]));

@@ -16,6 +16,13 @@ public class SimpleHit implements Hit {
     private final List<LabelSelection> selection;
     private final GeometricDescriptorScore geometricDescriptorScore;
 
+    /**
+     * Construct a generic hit (without alignment).
+     * @param structureIdentifier the parent structure
+     * @param assemblyIdentifier the parent assembly
+     * @param selection the selection of this hit
+     * @param geometricDescriptorScore its score
+     */
     public SimpleHit(StructureIdentifier structureIdentifier, AssemblyIdentifier assemblyIdentifier, List<LabelSelection> selection, GeometricDescriptorScore geometricDescriptorScore) {
         this.structureIdentifier = structureIdentifier;
         this.assemblyIdentifier = assemblyIdentifier;

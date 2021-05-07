@@ -13,6 +13,12 @@ public class GeometricDescriptorScore implements Score {
     private final double angleScore;
     private final double score;
 
+    /**
+     * Construct a geometric descriptor score, based on geometric properties.
+     * @param backboneScore the backbone score
+     * @param sideChainScore the side-chain score
+     * @param angleScore the angle score
+     */
     public GeometricDescriptorScore(double backboneScore, double sideChainScore, double angleScore) {
         this.backboneScore = backboneScore;
         this.sideChainScore = sideChainScore;
@@ -25,14 +31,26 @@ public class GeometricDescriptorScore implements Score {
         return score;
     }
 
+    /**
+     * Original value of the backbone component.
+     * @return a double
+     */
     public double getBackboneScore() {
         return backboneScore;
     }
 
+    /**
+     * Original value of the side-chain component.
+     * @return a double
+     */
     public double getSideChainScore() {
         return sideChainScore;
     }
 
+    /**
+     * Original value of the angle component.
+     * @return a double
+     */
     public double getAngleScore() {
         return angleScore;
     }

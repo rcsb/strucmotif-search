@@ -47,6 +47,10 @@ import java.nio.file.Path;
 public class RenumberedStructureWriterImpl implements RenumberedStructureWriter {
     private final CifOptions options;
 
+    /**
+     * Construct a writer.
+     * @param motifSearchConfig the config
+     */
     public RenumberedStructureWriterImpl(MotifSearchConfig motifSearchConfig) {
         int precision = motifSearchConfig.getRenumberedCoordinatePrecision();
         this.options = CifOptions.builder()

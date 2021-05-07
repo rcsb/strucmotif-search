@@ -123,6 +123,11 @@ public class Residue {
         return null;
     }
 
+    /**
+     * Convenience method to access an atom by its name.
+     * @param atomName the 'label_atom_id' of interset
+     * @return an optional that maybe wraps the first matched atom (or remained empty)
+     */
     public Optional<Atom> findAtom(String atomName) {
         for (Atom atom : atoms) {
             if (atom.getAtomIdentifier().getLabelAtomId().equals(atomName)) {

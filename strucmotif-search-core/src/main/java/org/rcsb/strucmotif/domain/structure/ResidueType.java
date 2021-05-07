@@ -6,43 +6,136 @@ package org.rcsb.strucmotif.domain.structure;
  */
 public enum ResidueType {
     // amino acids
+    /**
+     * Alanine
+     */
     ALANINE("ALA", "A", PolymerType.AMINO_ACID),
+    /**
+     * Cysteine
+     */
     CYSTEINE("CYS", "C", PolymerType.AMINO_ACID),
+    /**
+     * Aspartic acid
+     */
     ASPARTIC_ACID("ASP", "D", PolymerType.AMINO_ACID),
+    /**
+     * Glutamic acid
+     */
     GLUTAMIC_ACID("GLU", "E", PolymerType.AMINO_ACID),
+    /**
+     * Phenylalanine
+     */
     PHENYLALANINE("PHE", "F", PolymerType.AMINO_ACID), // 5
+    /**
+     * Glycine
+     */
     GLYCINE("GLY", "G", PolymerType.AMINO_ACID),
+    /**
+     * Histidine
+     */
     HISTIDINE("HIS", "H", PolymerType.AMINO_ACID),
+    /**
+     * Isoleucine
+     */
     ISOLEUCINE("ILE", "I", PolymerType.AMINO_ACID),
+    /**
+     * Lysine
+     */
     LYSINE("LYS", "K", PolymerType.AMINO_ACID),
+    /**
+     * Leucine
+     */
     LEUCINE("LEU", "L", PolymerType.AMINO_ACID), // 10
+    /**
+     * Methionine
+     */
     METHIONINE("MET", "M", PolymerType.AMINO_ACID),
+    /**
+     * Asparagine
+     */
     ASPARAGINE("ASN", "N", PolymerType.AMINO_ACID),
+    /**
+     * Proline
+     */
     PROLINE("PRO", "P", PolymerType.AMINO_ACID),
+    /**
+     * Glutamine
+     */
     GLUTAMINE("GLN", "Q", PolymerType.AMINO_ACID),
+    /**
+     * Arginine
+     */
     ARGININE("ARG", "R", PolymerType.AMINO_ACID), // 15
+    /**
+     * Serine
+     */
     SERINE("SER", "S", PolymerType.AMINO_ACID),
+    /**
+     * Threonine
+     */
     THREONINE("THR", "T", PolymerType.AMINO_ACID),
+    /**
+     * Valine
+     */
     VALINE("VAL", "V", PolymerType.AMINO_ACID),
+    /**
+     * Tryptophan
+     */
     TRYPTOPHAN("TRP", "W", PolymerType.AMINO_ACID),
+    /**
+     * Tyrosine
+     */
     TYROSINE("TYR", "Y", PolymerType.AMINO_ACID), // 20
 
     // nucleotides
+    /**
+     * Adenosine
+     */
     ADENOSINE("A", "0", PolymerType.NUCLEOTIDE),
+    /**
+     * Cytidine
+     */
     CYTIDINE("C", "1", PolymerType.NUCLEOTIDE),
+    /**
+     * Deoxyadenosine
+     */
     DEOXYADENOSINE("DA", "2", PolymerType.NUCLEOTIDE),
+    /**
+     * Deoxycytidine
+     */
     DEOXYCYTIDINE("DC", "3", PolymerType.NUCLEOTIDE),
+    /**
+     * Deoxyguanosine
+     */
     DEOXYGUANOSINE("DG", "4", PolymerType.NUCLEOTIDE), // 25
+    /**
+     * Guanosine
+     */
     GUANOSINE("G", "5", PolymerType.NUCLEOTIDE),
+    /**
+     * Thymidine
+     */
     THYMIDINE("T", "6", PolymerType.NUCLEOTIDE),
+    /**
+     * Uridine
+     */
     URIDINE("U", "7", PolymerType.NUCLEOTIDE),
 
     // joker categories
 //    LIGAND("LIG", "l"),
 
     // stuff to ignore for hashCode creation
+    /**
+     * Some unknown amino acid.
+     */
     UNKNOWN_AMINO_ACID("UNK", "X", null),
+    /**
+     * Some unknown nucleotide.
+     */
     UNKNOWN_NUCLEOTIDE("N", "Z", null),
+    /**
+     * Some unknown, yet polymeric component.
+     */
     UNKNOWN_COMPONENT("?", "U", null);
 
     // used to retrieve the correct entity from the label_comp_id field
@@ -160,6 +253,11 @@ public enum ResidueType {
         }
     }
 
+    /**
+     * Resolve a one-letter-code.
+     * @param oneLetterCode the one-letter-code (as defined in this implementation)
+     * @return a residue type or null
+     */
     public static ResidueType ofOneLetterCode(String oneLetterCode) {
         if (oneLetterCode == null) {
             return UNKNOWN_COMPONENT;

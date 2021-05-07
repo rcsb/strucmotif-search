@@ -67,9 +67,9 @@ public class MotifSearchConfig {
      */
     private boolean renumberedGzip = true;
     /**
-     * Number of allowed retries during file download before an {@link java.io.IOException} is thrown.
+     * Number of allowed tries during file download before an {@link java.io.IOException} is thrown.
      */
-    private int downloadRetries = 1;
+    private int downloadTries = 1;
     /**
      * List of all identifiers ever registered.
      */
@@ -298,18 +298,18 @@ public class MotifSearchConfig {
     }
 
     /**
-     * How many retries are allowed for connection failures/timeouts during update.
+     * How many tries are allowed for connection failures/timeouts during update.
      * @return an int
      */
-    public int getDownloadRetries() {
-        return downloadRetries;
+    public int getDownloadTries() {
+        return downloadTries;
     }
 
     /**
-     * Set how many retries should be allowed for connection failures/timeouts during update.
-     * @param downloadRetries an int
+     * Set how many tries should be allowed for connection failures/timeouts during update.
+     * @param downloadTries an int
      */
-    public void setDownloadRetries(int downloadRetries) {
-        this.downloadRetries = downloadRetries;
+    public void setDownloadTries(int downloadTries) {
+        this.downloadTries = downloadTries;
     }
 }

@@ -206,9 +206,30 @@ public class MotifSearchUpdate implements CommandLineRunner {
     }
 
     private void handleStructureIdentifier(StructureIdentifier structureIdentifier, Context context) {
-        int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier.getPdbId();
+        int maxRetries = motifSearchConfig.getDownloadTries();
+        for (int i = 1; i <= maxRetries; i++) {
+            try {
+                handleStructureIdentifierInternal(structureIdentifier, context);
+                break;
+            } catch (UncheckedIOException e) {
+                if (i >= maxRetries) {
+                    // max retries exceeded
+                    throw e;
+                }
 
+                int count = context.structureCounter.get();
+                String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier.getPdbId();
+                logger.warn("[{}] [{}] [try: {} / {}] Failed to download source file - {}",
+                        context.partitionContext,
+                        structureContext,
+                        i,
+                        maxRetries,
+                        e.getMessage());
+            }
+        }
+    }
+
+    private void handleStructureIdentifierInternal(StructureIdentifier structureIdentifier, Context context) {
         try {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
@@ -222,6 +243,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
             logger.info("cif parsing failed for " + structureIdentifier, e);
             throw e;
         }
+
+        int count = context.structureCounter.incrementAndGet();
+        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier.getPdbId();
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.10.0
+-------------
+### Added
+- download-tries config parameter for update routine
+
 strucmotif-search 0.9.15
 -------------
 ### Bug fix
@@ -107,4 +112,4 @@ strucmotif-search 0.8.1
 strucmotif-search 0.0.1
 -------------
 ### General
-- this is the implementation described in the paper and the prototype at motif.rcsb.org
+- this is the implementation described in the paper

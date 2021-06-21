@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
 import org.rcsb.strucmotif.domain.result.SimpleHit;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
+import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -57,10 +58,10 @@ public class RootMeanSquareDeviationHitScorer implements HitScorer {
     @Override
     public TransformedHit score(SimpleHit simpleHit) {
         Structure targetStructure = structureDataProvider.readRenumbered(simpleHit.getStructureIdentifier(), simpleHit.getSelection());
-        List<Residue> targetResidues = targetStructure.getChains()
+        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(targetStructure);
+        List<Residue> targetResidues = simpleHit.getSelection()
                 .stream()
-                .map(Chain::getResidues)
-                .flatMap(Collection::stream)
+                .map(labelSelectionResolver::resolve)
                 .collect(Collectors.toList());
         AlignmentResult alignmentResult = alignmentService.align(queryResidues, targetResidues, atomPairingScheme);
 

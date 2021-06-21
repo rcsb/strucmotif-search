@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.10.1
+-------------
+### Bug fix
+- correct order of residues in transformed hits
+
 strucmotif-search 0.10.0
 -------------
 ### Added

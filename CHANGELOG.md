@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.11.0
+-------------
+### Added
+- write results to file & custom consumers
+
 strucmotif-search 0.10.1
 -------------
 ### Bug fix

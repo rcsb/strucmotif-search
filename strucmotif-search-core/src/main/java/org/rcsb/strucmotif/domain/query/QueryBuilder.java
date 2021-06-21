@@ -321,7 +321,7 @@ public class QueryBuilder {
          * @return the immutable instance of all query parameters
          */
         public MotifSearchQuery buildQuery() {
-            return new MotifSearchQuery(motifSearchRuntime, structure, parameters, exchanges, whitelist, blacklist);
+            return new MotifSearchQuery(motifSearchRuntime, structure, parameters, exchanges, whitelist, blacklist, motifSearchConfig);
         }
     }
 }

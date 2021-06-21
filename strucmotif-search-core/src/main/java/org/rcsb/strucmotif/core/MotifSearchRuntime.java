@@ -1,7 +1,10 @@
 package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
+import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+
+import java.util.function.Consumer;
 
 /**
  * Performs motif search queries and returns the corresponding result object.
@@ -13,4 +16,11 @@ public interface MotifSearchRuntime {
      * @return the result container
      */
     MotifSearchResult performSearch(MotifSearchQuery query);
+
+    /**
+     * Performs a structural motif search for a given query.
+     * @param query the query, specifying motif and all parameters
+     * @param consumer some terminal operation that will be applied to each accepted hit
+     */
+    void performSearch(MotifSearchQuery query, Consumer<Hit> consumer);
 }

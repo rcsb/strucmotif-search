@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -56,24 +58,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     public MotifSearchResult performSearch(MotifSearchQuery query) {
         try {
             QueryStructure queryStructure = query.getQueryStructure();
-
             Parameters parameters = query.getParameters();
-            logger.info("[{}] Query: {} with {}",
-                    query.hashCode(),
-                    queryStructure.getStructure().getStructureIdentifier().getPdbId(),
-                    queryStructure.getLabelSelections());
-            logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
-                    query.hashCode(),
-                    query.getExchanges(),
-                    parameters.getBackboneDistanceTolerance(),
-                    parameters.getSideChainDistanceTolerance(),
-                    parameters.getAngleTolerance(),
-                    parameters.getScoringStrategy() == ScoringStrategy.DESCRIPTOR ? parameters.getScoreCutoff() : parameters.getRmsdCutoff());
-
-            MotifSearchResult result = new MotifSearchResult(query);
-
-            // get all valid targets
-            targetAssembler.assemble(result);
+            MotifSearchResult result = createResultContainer(query, queryStructure, parameters);
 
             List<? extends Hit> hits = scoreHits(parameters, result, queryStructure.getResidueIndexSwaps());
             logger.info("[{}] Accepted {} hits in {} ms",
@@ -97,6 +83,49 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             }
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void performSearch(MotifSearchQuery query, Consumer<Hit> consumer) {
+        try {
+            QueryStructure queryStructure = query.getQueryStructure();
+            Parameters parameters = query.getParameters();
+            MotifSearchResult result = createResultContainer(query, queryStructure, parameters);
+
+            int hits = scoreHits(parameters, result, consumer, queryStructure.getResidueIndexSwaps());
+            logger.info("[{}] Accepted {} hits in {} ms",
+                    query.hashCode(),
+                    hits,
+                    result.getTimings().getScoreHitsTime());
+        } catch (Exception e) {
+            // unwrap specific exceptions
+            Throwable t = unwrapException(e);
+            if (t instanceof IllegalQueryDefinitionException) {
+                throw (IllegalQueryDefinitionException) t;
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    private MotifSearchResult createResultContainer(MotifSearchQuery query, QueryStructure queryStructure, Parameters parameters) throws ExecutionException, InterruptedException {
+        logger.info("[{}] Query: {} with {}",
+                query.hashCode(),
+                queryStructure.getStructure().getStructureIdentifier().getPdbId(),
+                queryStructure.getLabelSelections());
+        logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
+                query.hashCode(),
+                query.getExchanges(),
+                parameters.getBackboneDistanceTolerance(),
+                parameters.getSideChainDistanceTolerance(),
+                parameters.getAngleTolerance(),
+                parameters.getScoringStrategy() == ScoringStrategy.DESCRIPTOR ? parameters.getScoreCutoff() : parameters.getRmsdCutoff());
+
+        MotifSearchResult result = new MotifSearchResult(query);
+
+        // get all valid targets
+        targetAssembler.assemble(result);
+
+        return result;
     }
 
     private static Throwable unwrapException(Throwable throwable) {
@@ -145,5 +174,52 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
         result.getTimings().scoreHitsStop();
         return hits;
+    }
+
+    private int scoreHits(Parameters parameters, MotifSearchResult result, Consumer<Hit> consumer, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {
+        result.getTimings().scoreHitsStart();
+        AtomicInteger hits = new AtomicInteger();
+        // this route doesn't enforce any limit and merely counts the number of accepted hits
+        switch (parameters.getScoringStrategy()) {
+            case ALIGNMENT:
+                HitScorer hitScorer = new RootMeanSquareDeviationHitScorer(result.getQuery().getQueryStructure().getStructure(),
+                        parameters.getAtomPairingScheme(), alignmentService, structureDataProvider);
+                threadPool.submit(() -> {
+                    result.getTargetStructures()
+                            .values()
+                            .parallelStream()
+                            .flatMap(targetStructure -> targetStructure.paths(residueIndexSwaps, stateRepository))
+                            // filter hits if desired
+                            .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
+                            // align
+                            .map(hitScorer::score)
+                            .filter(transformedHit -> transformedHit.getRootMeanSquareDeviation().value() <= parameters.getRmsdCutoff())
+                            .forEach(hit -> {
+                                consumer.accept(hit);
+                                hits.incrementAndGet();
+                            });
+                    return null;
+                }).get();
+                break;
+            case DESCRIPTOR:
+                threadPool.submit(() -> {
+                    result.getTargetStructures()
+                            .values()
+                            .parallelStream()
+                            .flatMap(targetStructure -> targetStructure.paths(residueIndexSwaps, stateRepository))
+                            // filter hits if desired
+                            .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
+                            .forEach(hit -> {
+                                consumer.accept(hit);
+                                hits.incrementAndGet();
+                            });
+                    return null;
+                }).get();
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown scoring strategy: " + parameters.getScoringStrategy());
+        }
+        result.getTimings().scoreHitsStop();
+        return hits.get();
     }
 }

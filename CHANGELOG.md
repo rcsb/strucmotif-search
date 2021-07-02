@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.11.2
+-------------
+### Bug fix
+- fix multiplication of matrices
+
 strucmotif-search 0.11.1
 -------------
 ### Added

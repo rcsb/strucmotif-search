@@ -218,45 +218,45 @@ public class Algebra {
      * Multiplies 2 4x4 matrices. Does not manipulate original matrices.
      * @param matrix4d1 first matrix
      * @param matrix4d2 second matrix
-     * @return the resuling 4x4 matrix
+     * @return the resulting 4x4 matrix
      */
     public static double[][] multiply4d(double[][] matrix4d1, double[][] matrix4d2) {
         return new double[][] {{
             matrix4d1[0][0] * matrix4d2[0][0] + matrix4d1[0][1] * matrix4d2[1][0] +
-                    matrix4d1[0][2] * matrix4d2[2][0] * matrix4d1[0][3] * matrix4d2[3][0],
+                    matrix4d1[0][2] * matrix4d2[2][0] + matrix4d1[0][3] * matrix4d2[3][0],
             matrix4d1[0][0] * matrix4d2[0][1] + matrix4d1[0][1] * matrix4d2[1][1] +
-                    matrix4d1[0][2] * matrix4d2[2][1] * matrix4d1[0][3] * matrix4d2[3][1],
+                    matrix4d1[0][2] * matrix4d2[2][1] + matrix4d1[0][3] * matrix4d2[3][1],
             matrix4d1[0][0] * matrix4d2[0][2] + matrix4d1[0][1] * matrix4d2[1][2] +
-                    matrix4d1[0][2] * matrix4d2[2][2] * matrix4d1[0][3] * matrix4d2[3][2],
+                    matrix4d1[0][2] * matrix4d2[2][2] + matrix4d1[0][3] * matrix4d2[3][2],
             matrix4d1[0][0] * matrix4d2[0][3] + matrix4d1[0][1] * matrix4d2[1][3] +
-                    matrix4d1[0][2] * matrix4d2[2][3] * matrix4d1[0][3] * matrix4d2[3][3]
+                    matrix4d1[0][2] * matrix4d2[2][3] + matrix4d1[0][3] * matrix4d2[3][3]
         }, {
             matrix4d1[1][0] * matrix4d2[0][0] + matrix4d1[1][1] * matrix4d2[1][0] +
-                    matrix4d1[1][2] * matrix4d2[2][0] * matrix4d1[1][3] * matrix4d2[3][0],
+                    matrix4d1[1][2] * matrix4d2[2][0] + matrix4d1[1][3] * matrix4d2[3][0],
             matrix4d1[1][0] * matrix4d2[0][1] + matrix4d1[1][1] * matrix4d2[1][1] +
-                    matrix4d1[1][2] * matrix4d2[2][1] * matrix4d1[1][3] * matrix4d2[3][1],
+                    matrix4d1[1][2] * matrix4d2[2][1] + matrix4d1[1][3] * matrix4d2[3][1],
             matrix4d1[1][0] * matrix4d2[0][2] + matrix4d1[1][1] * matrix4d2[1][2] +
-                    matrix4d1[1][2] * matrix4d2[2][2] * matrix4d1[1][3] * matrix4d2[3][2],
+                    matrix4d1[1][2] * matrix4d2[2][2] + matrix4d1[1][3] * matrix4d2[3][2],
             matrix4d1[1][0] * matrix4d2[0][3] + matrix4d1[1][1] * matrix4d2[1][3] +
-                    matrix4d1[1][2] * matrix4d2[2][3] * matrix4d1[1][3] * matrix4d2[3][3]
+                    matrix4d1[1][2] * matrix4d2[2][3] + matrix4d1[1][3] * matrix4d2[3][3]
         }, {
             matrix4d1[2][0] * matrix4d2[0][0] + matrix4d1[2][1] * matrix4d2[1][0] +
-                    matrix4d1[2][2] * matrix4d2[2][0] * matrix4d1[2][3] * matrix4d2[3][0],
+                    matrix4d1[2][2] * matrix4d2[2][0] + matrix4d1[2][3] * matrix4d2[3][0],
             matrix4d1[2][0] * matrix4d2[0][1] + matrix4d1[2][1] * matrix4d2[1][1] +
-                    matrix4d1[2][2] * matrix4d2[2][1] * matrix4d1[2][3] * matrix4d2[3][1],
+                    matrix4d1[2][2] * matrix4d2[2][1] + matrix4d1[2][3] * matrix4d2[3][1],
             matrix4d1[2][0] * matrix4d2[0][2] + matrix4d1[2][1] * matrix4d2[1][2] +
-                    matrix4d1[2][2] * matrix4d2[2][2] * matrix4d1[2][3] * matrix4d2[3][2],
+                    matrix4d1[2][2] * matrix4d2[2][2] + matrix4d1[2][3] * matrix4d2[3][2],
             matrix4d1[2][0] * matrix4d2[0][3] + matrix4d1[2][1] * matrix4d2[1][3] +
-                    matrix4d1[2][2] * matrix4d2[2][3] * matrix4d1[2][3] * matrix4d2[3][3]
+                    matrix4d1[2][2] * matrix4d2[2][3] + matrix4d1[2][3] * matrix4d2[3][3]
         }, {
             matrix4d1[3][0] * matrix4d2[0][0] + matrix4d1[3][1] * matrix4d2[1][0] +
-                    matrix4d1[3][2] * matrix4d2[2][0] * matrix4d1[3][3] * matrix4d2[3][0],
+                    matrix4d1[3][2] * matrix4d2[2][0] + matrix4d1[3][3] * matrix4d2[3][0],
             matrix4d1[3][0] * matrix4d2[0][1] + matrix4d1[3][1] * matrix4d2[1][1] +
-                    matrix4d1[3][2] * matrix4d2[2][1] * matrix4d1[3][3] * matrix4d2[3][1],
+                    matrix4d1[3][2] * matrix4d2[2][1] + matrix4d1[3][3] * matrix4d2[3][1],
             matrix4d1[3][0] * matrix4d2[0][2] + matrix4d1[3][1] * matrix4d2[1][2] +
-                    matrix4d1[3][2] * matrix4d2[2][2] * matrix4d1[3][3] * matrix4d2[3][2],
+                    matrix4d1[3][2] * matrix4d2[2][2] + matrix4d1[3][3] * matrix4d2[3][2],
             matrix4d1[3][0] * matrix4d2[0][3] + matrix4d1[3][1] * matrix4d2[1][3] +
-                    matrix4d1[3][2] * matrix4d2[2][3] * matrix4d1[3][3] * matrix4d2[3][3]
+                    matrix4d1[3][2] * matrix4d2[2][3] + matrix4d1[3][3] * matrix4d2[3][3]
         }};
     }
 

@@ -1,0 +1,15 @@
+package org.rcsb.strucmotif.config;
+
+/**
+ * Keep index and structure data in memory? Requires ~100 GB of memory.
+ */
+public enum InMemoryStrategy {
+    /**
+     * Access file-system any time data is requested.
+     */
+    DISABLED,
+    /**
+     * Load all data into an off-heap store during initialization.
+     */
+    OFF_HEAP
+}

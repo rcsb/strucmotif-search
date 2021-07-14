@@ -71,13 +71,9 @@ public class MotifSearchConfig {
      */
     private int downloadTries = 1;
     /**
-     * If true, inverted index data will be kept in off-heap memory.
+     * Allocate a lot of memory to keep index and structure data in memory?
      */
-    private boolean keepIndexInMemory = false;
-    /**
-     * If true, structure data will be kept in off-heap memory.
-     */
-    private boolean keepStructuresInMemory = false;
+    private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.DISABLED;
     /**
      * List of all identifiers ever registered.
      */
@@ -322,34 +318,18 @@ public class MotifSearchConfig {
     }
 
     /**
-     * Keep inverted index in memory?
-     * @return a Boolean
+     * How is index and structure data acquired at runtime?
+     * @return the InMemoryStrategy
      */
-    public boolean isKeepIndexInMemory() {
-        return keepIndexInMemory;
+    public InMemoryStrategy getInMemoryStrategy() {
+        return inMemoryStrategy;
     }
 
     /**
-     * Set whether inverted index is kept in memory.
-     * @param keepIndexInMemory a Boolean
+     * Set how index and structure data is acquired at runtime.
+     * @param inMemoryStrategy the new value
      */
-    public void setKeepIndexInMemory(boolean keepIndexInMemory) {
-        this.keepIndexInMemory = keepIndexInMemory;
-    }
-
-    /**
-     * Keep structure data in memory?
-     * @return a Boolean
-     */
-    public boolean isKeepStructuresInMemory() {
-        return keepStructuresInMemory;
-    }
-
-    /**
-     * Set whether structure data is kept in memory.
-     * @param keepStructuresInMemory a Boolean
-     */
-    public void setKeepStructuresInMemory(boolean keepStructuresInMemory) {
-        this.keepStructuresInMemory = keepStructuresInMemory;
+    public void setInMemoryStrategy(InMemoryStrategy inMemoryStrategy) {
+        this.inMemoryStrategy = inMemoryStrategy;
     }
 }

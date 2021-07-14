@@ -9,6 +9,8 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 import org.rcsb.strucmotif.Motifs;
+import org.rcsb.strucmotif.domain.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.query.ScoringStrategy;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -84,12 +86,26 @@ public class MotifSearchBenchmark {
     private MotifSearchResult run(Motifs motif, MyState state) {
         Structure structure = state.structureMap.get(motif);
         return state.queryBuilder.defineByStructure(structure)
+                .scoringStrategy(ScoringStrategy.ALIGNMENT)
+                .atomPairingScheme(AtomPairingScheme.ALL)
+                .rmsdCutoff(2.0)
                 .buildParameters()
                 .buildQuery()
                 .run();
     }
 
     /*
+    Jul 2021 - 0.11.2 - coordinates read on-the-fly from local BinaryCIF
+
+    Jul 2021 - 0.11.2 - geometric scores
+    MotifSearchBenchmark.searchForAminoPeptidase                avgt   10  0.888 ± 0.049   s/op
+    MotifSearchBenchmark.searchForCatalyticTriad                avgt   10  1.020 ± 0.076   s/op
+    MotifSearchBenchmark.searchForIonCoordination               avgt   10  0.113 ± 0.009   s/op
+    MotifSearchBenchmark.searchForRNAComplex                    avgt   10  0.520 ± 0.032   s/op
+    MotifSearchBenchmark.searchForSuperfamilyTemplate           avgt   10  0.618 ± 0.054   s/op
+    MotifSearchBenchmark.searchForSuperfamilyTemplateExchanges  avgt   10  0.761 ± 0.349   s/op
+
+    Feb 2020 - 0.0.1 - coordinates from MongoDB
     Benchmark                                                          Mode  Cnt  Score   Error  Units
     MotifSearchBenchmark.searchForAminoPeptidase                avgt   10  0.494 ± 0.128   s/op
     MotifSearchBenchmark.searchForCatalyticTriad                avgt   10  0.869 ± 0.087   s/op

@@ -25,6 +25,8 @@ Structural motif searching is available as part of the [RCSB Advanced Search](ht
 ## Performance
 Current benchmark times to search in `180,207` structures as of `7/14/21`.
 
+TODO update values
+
 | Motif | Hits | Time | Units |
 | --- | --- | --- | --- |
 | Serine Protease (HDS) | 3,498 | 0.92 | s/op |
@@ -46,7 +48,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.10.0</version>
+  <version>0.11.2</version>
 </dependency>
 ```
 
@@ -129,7 +131,7 @@ See the Configuration section for other parameters.
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `1` |
-| `in-memory-strategy` | Either `DISABLED` or `OFF_HEAP` | `DISABLED` |
+| `in-memory-strategy` | Either `DISABLED` or `HEAP` | `DISABLED` |
 | `max-results` | Maximum number of results that will be returned | `10000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |

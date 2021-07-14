@@ -9,7 +9,7 @@ public enum InMemoryStrategy {
      */
     DISABLED,
     /**
-     * Load all data into an off-heap store during initialization.
+     * Load all data into heap during initialization.
      */
-    OFF_HEAP
+    HEAP
 }

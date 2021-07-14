@@ -95,7 +95,13 @@ public class MotifSearchBenchmark {
     }
 
     /*
-    Jul 2021 - 0.11.2 - coordinates read on-the-fly from local BinaryCIF
+    Jul 2021 - 0.11.2 - score by RMSD, coordinates read on-the-fly from local BinaryCIF
+    MotifSearchBenchmark.searchForAminoPeptidase                avgt   10    1.193 ±  0.138   s/op
+    MotifSearchBenchmark.searchForCatalyticTriad                avgt   10   12.482 ±  3.426   s/op
+    MotifSearchBenchmark.searchForIonCoordination               avgt   10    0.491 ±  0.037   s/op
+    MotifSearchBenchmark.searchForRNAComplex                    avgt   10  135.017 ± 19.194   s/op
+    MotifSearchBenchmark.searchForSuperfamilyTemplate           avgt   10    0.682 ±  0.034   s/op
+    MotifSearchBenchmark.searchForSuperfamilyTemplateExchanges  avgt   10    0.689 ±  0.037   s/op
 
     Jul 2021 - 0.11.2 - geometric scores
     MotifSearchBenchmark.searchForAminoPeptidase                avgt   10  0.888 ± 0.049   s/op

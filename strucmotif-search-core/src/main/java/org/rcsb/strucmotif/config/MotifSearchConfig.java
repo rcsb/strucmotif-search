@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Configuration;
 public class MotifSearchConfig {
     /**
      * The maximum distance in Å between alpha carbon atoms of residue pairs. All pairs below will be added the inverted
-     * index and can appear as search results. 18 is really generous, lower values ease storage requirements and improve
-     * speed of update operations.
+     * index and can appear as search results. Lower values ease storage requirements and improve speed of update
+     * operations.
      */
     private double distanceCutoff = 15;
     /**
@@ -71,6 +71,14 @@ public class MotifSearchConfig {
      */
     private int downloadTries = 1;
     /**
+     * If true, inverted index data will be kept in off-heap memory.
+     */
+    private boolean keepIndexInMemory = false;
+    /**
+     * If true, structure data will be kept in off-heap memory.
+     */
+    private boolean keepStructuresInMemory = false;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -87,7 +95,7 @@ public class MotifSearchConfig {
      */
     public static final String INDEX_DIRECTORY = "index";
     /**
-     * RCSB URL that reports currently identifiers in archive.
+     * RCSB URL that reports currently present identifiers in archive.
      */
     public static final String RCSB_ENTRY_LIST = "https://data.rcsb.org/rest/v1/holdings/current/entry_ids";
 
@@ -311,5 +319,37 @@ public class MotifSearchConfig {
      */
     public void setDownloadTries(int downloadTries) {
         this.downloadTries = downloadTries;
+    }
+
+    /**
+     * Keep inverted index in memory?
+     * @return a Boolean
+     */
+    public boolean isKeepIndexInMemory() {
+        return keepIndexInMemory;
+    }
+
+    /**
+     * Set whether inverted index is kept in memory.
+     * @param keepIndexInMemory a Boolean
+     */
+    public void setKeepIndexInMemory(boolean keepIndexInMemory) {
+        this.keepIndexInMemory = keepIndexInMemory;
+    }
+
+    /**
+     * Keep structure data in memory?
+     * @return a Boolean
+     */
+    public boolean isKeepStructuresInMemory() {
+        return keepStructuresInMemory;
+    }
+
+    /**
+     * Set whether structure data is kept in memory.
+     * @param keepStructuresInMemory a Boolean
+     */
+    public void setKeepStructuresInMemory(boolean keepStructuresInMemory) {
+        this.keepStructuresInMemory = keepStructuresInMemory;
     }
 }

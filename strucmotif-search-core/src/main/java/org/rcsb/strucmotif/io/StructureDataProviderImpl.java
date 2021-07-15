@@ -126,7 +126,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
                                     for (Residue residue : chain.getResidues()) {
                                         ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
-                                        String key = pdbId + ":" + structOperId + ":" + residueIdentifier.getLabelSeqId();
+                                        String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + residueIdentifier.getLabelSeqId();
 
                                         Object[] atomData = new Object[3 + residue.getAtoms().size() * 4];
                                         int pointer = 0;
@@ -238,7 +238,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         }
 
         try {
-            String pdbId = structureIdentifier.getPdbId();
+            String pdbId = structureIdentifier.getPdbId().toLowerCase();
             Map<ChainIdentifier, List<Residue>> tmp = new LinkedHashMap<>();
 
             int aIndex = 0;
@@ -247,7 +247,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 String labelAsymId = ls.getLabelAsymId();
                 String structOperId = ls.getStructOperId();
                 int labelSeqId = ls.getLabelSeqId();
-                String key = pdbId + ":" + structOperId + ":" + labelSeqId;
+                String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + labelSeqId;
 
                 byte[] content = cache.get(key);
                 Object[] res = (Object[]) MessagePackCodec.decode(new ByteArrayInputStream(content)).get("v");
@@ -277,6 +277,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             return StructureFactory.createStructure(new StructureIdentifier(pdbId), chains);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

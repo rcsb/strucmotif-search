@@ -92,7 +92,6 @@ public class StructureReaderImpl implements StructureReader {
             MmCifBlock block = mmCifFile.getFirstBlock();
 
             this.structureIdentifier = new StructureIdentifier(block.getBlockHeader().toLowerCase());
-            // TODO 1car is empty - address this (either by writing better files or pass a real map instance to the BinaryBlock constructor in ciftools
             this.atomSite = block.getAtomSite();
             this.pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
             this.pdbxStructOperList = block.getPdbxStructOperList();

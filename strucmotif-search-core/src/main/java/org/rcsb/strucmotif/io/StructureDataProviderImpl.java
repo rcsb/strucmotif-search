@@ -115,8 +115,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                             }
                         })
                         .forEach(path -> {
-                            try {
-                                Structure structure = structureReader.readFromInputStream(Files.newInputStream(path));
+                            try (InputStream inputStream = Files.newInputStream(path)) {
+                                Structure structure = structureReader.readFromInputStream(inputStream);
                                 String pdbId = structure.getStructureIdentifier().getPdbId();
 
                                 for (Chain chain : structure.getChains()) {

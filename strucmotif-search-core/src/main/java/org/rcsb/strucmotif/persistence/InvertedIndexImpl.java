@@ -85,9 +85,9 @@ public class InvertedIndexImpl implements InvertedIndex {
                         })
                         .map(this::createResiduePairDescriptor)
                         .forEach(key -> {
-                            try {
-                                InputStream inputStream = getInputStream(key, false);
+                            try (InputStream inputStream = getInputStream(key, false)) {
                                 byte[] content = inputStream.readAllBytes();
+                                inputStream.close();
                                 this.cache.put(key.toString(), content);
                             } catch (IOException e) {
                                 throw new UncheckedIOException(e);

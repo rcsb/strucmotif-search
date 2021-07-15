@@ -22,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The default strucmotif-search runtime.
@@ -154,6 +155,11 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                                     // filter hits by geom_score if desired
                                     .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
                                     .collect(Collectors.toList());
+
+                            if (h.isEmpty()) {
+                                return Stream.empty();
+                            }
+
                             // align
                             return hitScorer.score(h);
                         })

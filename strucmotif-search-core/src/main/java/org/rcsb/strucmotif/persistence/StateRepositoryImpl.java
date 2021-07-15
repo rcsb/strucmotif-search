@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
  * A file-system-based state repository.
  */
 @Service
-public class FileSystemStateRepository implements StateRepository {
+public class StateRepositoryImpl implements StateRepository {
     private static final String TOP_LEVEL_DELIMITER = ",";
     private static final String ASSEMBLY_INFORMATION_DELIMITER = ";";
     private final Path knownPath;
@@ -40,7 +40,7 @@ public class FileSystemStateRepository implements StateRepository {
      * Construct a state repository instance.
      * @param motifSearchConfig the config
      */
-    public FileSystemStateRepository(MotifSearchConfig motifSearchConfig) {
+    public StateRepositoryImpl(MotifSearchConfig motifSearchConfig) {
         Path rootPath = Paths.get(motifSearchConfig.getRootPath());
         this.knownPath = rootPath.resolve(MotifSearchConfig.STATE_KNOWN_LIST);
         this.dirtyPath = rootPath.resolve(MotifSearchConfig.STATE_DIRTY_LIST);

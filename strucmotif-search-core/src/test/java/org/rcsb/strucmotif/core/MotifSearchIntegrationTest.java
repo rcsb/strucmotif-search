@@ -21,7 +21,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
 import org.rcsb.strucmotif.persistence.InvertedIndexImpl;
-import org.rcsb.strucmotif.persistence.FileSystemStateRepository;
+import org.rcsb.strucmotif.persistence.StateRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -82,7 +82,7 @@ public class MotifSearchIntegrationTest {
             return structureReader.readFromInputStream(inputStream, selection);
         });
 
-        FileSystemStateRepository stateRepository = new FileSystemStateRepository(motifSearchConfig) {
+        StateRepositoryImpl stateRepository = new StateRepositoryImpl(motifSearchConfig) {
             @Override
             public Collection<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");

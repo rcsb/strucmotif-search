@@ -1,5 +1,7 @@
 package org.rcsb.strucmotif;
 
+import org.rcsb.strucmotif.domain.query.ScoringStrategy;
+import org.rcsb.strucmotif.domain.result.TransformedHit;
 import org.rcsb.strucmotif.domain.selection.LabelSelection;
 
 import java.util.Set;
@@ -14,11 +16,18 @@ public class Demo {
                         Set.of(new LabelSelection("B", "1", 42), // HIS
                                new LabelSelection("B", "1", 87), // ASP
                                new LabelSelection("C", "1", 47))) // SER
+                .scoringStrategy(ScoringStrategy.ALIGNMENT)
                 // parameters are considered mandatory arguments
                 .buildParameters()
                 // retrieve container with complete query
                 .buildQuery()
                 // execute query
-                .run();
+                .run()
+                .getHits()
+                .stream()
+                .map(TransformedHit.class::cast)
+                .forEach(hit -> {
+                    System.out.println(hit.getStructureIdentifier() + " " + hit.getAssemblyIdentifier() + " " + hit.getSelection() + " " + hit.getRootMeanSquareDeviation().value());
+                });
     }
 }

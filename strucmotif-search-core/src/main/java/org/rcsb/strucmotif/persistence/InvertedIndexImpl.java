@@ -56,7 +56,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
         this.paths = false;
         // TODO this should only happen in read mode - not needed for update
-        // TODO move init routine out of constructor
+        // TODO move init routine out of constructor?
         if (motifSearchConfig.getInMemoryStrategy() == InMemoryStrategy.HEAP) {
             logger.info("Loading inverted index data into memory");
             try {

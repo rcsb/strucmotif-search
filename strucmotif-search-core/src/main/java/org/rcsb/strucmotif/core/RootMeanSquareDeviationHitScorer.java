@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.domain.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.identifier.ResidueIdentifier;
 import org.rcsb.strucmotif.domain.result.SimpleHit;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
+import org.rcsb.strucmotif.domain.selection.LabelSelection;
 import org.rcsb.strucmotif.domain.selection.LabelSelectionResolver;
 import org.rcsb.strucmotif.domain.structure.Chain;
 import org.rcsb.strucmotif.domain.structure.Residue;
@@ -15,6 +16,7 @@ import org.rcsb.strucmotif.io.StructureDataProvider;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Scores hits by computing the RMSD with respect to the reference motif.
@@ -56,18 +58,27 @@ public class RootMeanSquareDeviationHitScorer implements HitScorer {
     }
 
     @Override
-    public TransformedHit score(SimpleHit simpleHit) {
-        Structure targetStructure = structureDataProvider.readRenumbered(simpleHit.getStructureIdentifier(), simpleHit.getSelection());
-        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(targetStructure);
-        List<Residue> targetResidues = simpleHit.getSelection()
-                .stream()
-                .map(labelSelectionResolver::resolve)
+    public Stream<TransformedHit> score(List<SimpleHit> simpleHits) {
+        List<LabelSelection> allResidues = simpleHits.stream()
+                .map(SimpleHit::getSelection)
+                .flatMap(Collection::stream)
+                .distinct()
                 .collect(Collectors.toList());
-        AlignmentResult alignmentResult = alignmentService.align(queryResidues, targetResidues, atomPairingScheme);
+        Structure parentStructure = structureDataProvider.readRenumbered(simpleHits.get(0).getStructureIdentifier(), allResidues);
+        LabelSelectionResolver labelSelectionResolver = new LabelSelectionResolver(parentStructure);
 
-        return new TransformedHit(simpleHit,
-                targetResidues.stream().map(Residue::getResidueIdentifier).map(ResidueIdentifier::getResidueType).collect(Collectors.toList()),
-                alignmentResult.getRootMeanSquareDeviation(),
-                alignmentResult.getTransformation());
+        return simpleHits.stream()
+                .map(h -> {
+                    List<Residue> targetResidues = h.getSelection()
+                            .stream()
+                            .map(labelSelectionResolver::resolve)
+                            .collect(Collectors.toList());
+                    AlignmentResult alignmentResult = alignmentService.align(queryResidues, targetResidues, atomPairingScheme);
+
+                    return new TransformedHit(h,
+                            targetResidues.stream().map(Residue::getResidueIdentifier).map(ResidueIdentifier::getResidueType).collect(Collectors.toList()),
+                            alignmentResult.getRootMeanSquareDeviation(),
+                            alignmentResult.getTransformation());
+                });
     }
 }

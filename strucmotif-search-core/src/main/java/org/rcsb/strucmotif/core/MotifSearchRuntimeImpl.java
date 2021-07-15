@@ -8,6 +8,7 @@ import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.query.ScoringStrategy;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.result.SimpleHit;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;
@@ -148,11 +149,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 hits = threadPool.submit(() -> result.getTargetStructures()
                         .values()
                         .parallelStream()
-                        .flatMap(targetStructure -> targetStructure.paths(residueIndexSwaps, stateRepository))
-                        // filter hits if desired
-                        .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
-                        // align
-                        .map(hitScorer::score)
+                        .flatMap(targetStructure -> {
+                            List<SimpleHit> h = targetStructure.paths(residueIndexSwaps, stateRepository)
+                                    // filter hits by geom_score if desired
+                                    .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
+                                    .collect(Collectors.toList());
+                            // align
+                            return hitScorer.score(h);
+                        })
                         .filter(transformedHit -> transformedHit.getRootMeanSquareDeviation().value() <= parameters.getRmsdCutoff())
                         .limit(limit)
                         .collect(Collectors.toList()))
@@ -188,11 +192,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                     result.getTargetStructures()
                             .values()
                             .parallelStream()
-                            .flatMap(targetStructure -> targetStructure.paths(residueIndexSwaps, stateRepository))
-                            // filter hits if desired
-                            .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
-                            // align
-                            .map(hitScorer::score)
+                            .flatMap(targetStructure -> {
+                                List<SimpleHit> h = targetStructure.paths(residueIndexSwaps, stateRepository)
+                                        // filter hits by geom_score if desired
+                                        .filter(simpleHit -> simpleHit.getGeometricDescriptorScore().value() >= parameters.getScoreCutoff())
+                                        .collect(Collectors.toList());
+                                // align
+                                return hitScorer.score(h);
+                            })
                             .filter(transformedHit -> transformedHit.getRootMeanSquareDeviation().value() <= parameters.getRmsdCutoff())
                             .forEach(hit -> {
                                 consumer.accept(hit);

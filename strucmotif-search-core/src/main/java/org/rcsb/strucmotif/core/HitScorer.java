@@ -6,6 +6,9 @@ import org.rcsb.strucmotif.domain.result.SimpleHit;
 import org.rcsb.strucmotif.domain.result.TransformedHit;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 /**
  * Quantifies how well a {@link SimpleHit} resembles the query motif.
  */
@@ -15,7 +18,7 @@ public interface HitScorer {
      * @param simpleHit the original hit that should be scored
      * @return a {@link Hit} instance
      */
-    TransformedHit score(SimpleHit simpleHit);
+    Stream<TransformedHit> score(List<SimpleHit> simpleHit);
 
     /**
      * The reference structure with respect to which hits will be aligned.

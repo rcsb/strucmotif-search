@@ -131,7 +131,7 @@ See the Configuration section for other parameters.
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `1` |
-| `in-memory-strategy` | Either `DISABLED` or `HEAP` | `DISABLED` |
+| `in-memory-strategy` | Either `OFF` or `HEAP` | `OFF` |
 | `max-results` | Maximum number of results that will be returned | `10000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |

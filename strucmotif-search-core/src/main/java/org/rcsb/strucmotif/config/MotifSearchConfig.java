@@ -73,7 +73,7 @@ public class MotifSearchConfig {
     /**
      * Allocate a lot of memory to keep index and structure data in memory?
      */
-    private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.DISABLED;
+    private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
     /**
      * List of all identifiers ever registered.
      */

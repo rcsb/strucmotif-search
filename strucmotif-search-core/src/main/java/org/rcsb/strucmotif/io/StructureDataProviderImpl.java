@@ -85,7 +85,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
         // TODO this should only happen in read mode - not needed for update
         // TODO move init routine out of constructor?
-        // TODO consider caching only referenced residues
+        // TODO consider caching only referenced residues - could use referenced assemblies from state repo for this
         // TODO make this chunked - running in parallel and dumping data single-threaded to the map
         if (motifSearchConfig.getInMemoryStrategy() == InMemoryStrategy.HEAP) {
             logger.info("Loading structure data into memory");
@@ -128,12 +128,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                                         ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
                                         String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + residueIdentifier.getLabelSeqId();
 
-                                        Object[] atomData = new Object[3 + residue.getAtoms().size() * 4];
+                                        Object[] atomData = new Object[1 + residue.getAtoms().size() * 4];
                                         int pointer = 0;
-                                        // TODO not needed?
-                                        atomData[pointer++] = labelAsymId;
-                                        // TODO not needed?
-                                        atomData[pointer++] = residueIdentifier.getLabelSeqId();
                                         atomData[pointer++] = residueIdentifier.getResidueType().getOneLetterCode();
 
                                         for (Atom atom : residue.getAtoms()) {
@@ -253,11 +249,10 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 Object[] res = (Object[]) MessagePackCodec.decode(new ByteArrayInputStream(content)).get("v");
 
                 ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, structOperId);
-                ResidueType residueType = ResidueType.ofOneLetterCode((String) res[2]);
-                // TODO need index?
+                ResidueType residueType = ResidueType.ofOneLetterCode((String) res[0]);
                 ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, labelSeqId, -1);
                 List<Atom> atoms = new ArrayList<>((int) Math.round((res.length - 3) * 0.25));
-                for (int i = 3; i < res.length; i = i + 4) {
+                for (int i = 1; i < res.length; i = i + 4) {
                     String name = (String) res[i];
                     double[] coord = new double[]{
                             ((int) res[i + 1]) * 0.1,

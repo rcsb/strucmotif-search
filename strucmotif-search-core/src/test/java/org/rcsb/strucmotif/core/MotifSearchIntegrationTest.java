@@ -61,7 +61,9 @@ public class MotifSearchIntegrationTest {
     public void init() {
         InvertedIndexImpl invertedIndex = new InvertedIndexImpl(motifSearchConfig) {
             @Override
-            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor, boolean b) throws IOException {
+            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor
+//                    , boolean b
+            ) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("index/" + residuePairDescriptor.toString() + ".msg");

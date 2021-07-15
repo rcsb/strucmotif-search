@@ -49,6 +49,7 @@ public class Demo {
 
 //        HDS - grouped BCIF : 12339.8 ms
 //        HDS - in-memory index + structures: 12351.5 ms
-//        HDS - disk index + in-memory structures:
+//        HDS - disk index + in-memory structures: 6831.6 ms - has some spikes
+//        HDS - disk index + in-memory structures + single thread: 3627.5 ms
     }
 }

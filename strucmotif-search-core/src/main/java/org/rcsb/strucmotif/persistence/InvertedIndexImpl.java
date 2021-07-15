@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.persistence;
 
 import org.rcsb.cif.binary.codec.MessagePackCodec;
-import org.rcsb.strucmotif.config.InMemoryStrategy;
+//import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
+//import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -26,7 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,7 +45,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
     private final Path basePath;
     private boolean paths;
-    private final Map<String, byte[]> cache;
+//    private final Map<String, byte[]> cache;
 
     /**
      * Construct a inverted index instance.
@@ -56,51 +56,51 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.paths = false;
         // TODO this should only happen in read mode - not needed for update
         // TODO move init routine out of constructor?
-        if (motifSearchConfig.getInMemoryStrategy() == InMemoryStrategy.HEAP) {
-            logger.info("Loading inverted index data into memory");
-            try {
-                long numberOfBins = Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
-                        .parallel()
-                        // ignore directories
-                        .filter(path -> !Files.isDirectory(path))
-                        .count();
-
-                if (numberOfBins > Integer.MAX_VALUE) {
-                    throw new IllegalArgumentException("Number of bins cannot exceed 2^32");
-                }
-
-                logger.info("Number of inverted index bin to load is {}", numberOfBins);
-                this.cache = new HashMap<>((int) numberOfBins, 1.0f);
-
-                // populate map with index data
-                AtomicInteger counter = new AtomicInteger();
-                Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
-                        // ignore directories
-                        .filter(path -> !Files.isDirectory(path))
-                        .peek(p -> {
-                            int i = counter.incrementAndGet();
-                            if (i % 5000 == 0) {
-                                logger.info("Progress: {} / {}", i, numberOfBins);
-                            }
-                        })
-                        .map(this::createResiduePairDescriptor)
-                        .forEach(key -> {
-                            try (InputStream inputStream = getInputStream(key, false)) {
-                                byte[] content = inputStream.readAllBytes();
-                                inputStream.close();
-                                this.cache.put(key.toString(), content);
-                            } catch (IOException e) {
-                                throw new UncheckedIOException(e);
-                            }
-                        });
-
-                logger.info("Done loading inverted index into memory");
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        } else {
-            this.cache = null;
-        }
+//        if (motifSearchConfig.getInMemoryStrategy() == InMemoryStrategy.HEAP) {
+//            logger.info("Loading inverted index data into memory");
+//            try {
+//                long numberOfBins = Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
+//                        .parallel()
+//                        // ignore directories
+//                        .filter(path -> !Files.isDirectory(path))
+//                        .count();
+//
+//                if (numberOfBins > Integer.MAX_VALUE) {
+//                    throw new IllegalArgumentException("Number of bins cannot exceed 2^32");
+//                }
+//
+//                logger.info("Number of inverted index bin to load is {}", numberOfBins);
+//                this.cache = new HashMap<>((int) numberOfBins, 1.0f);
+//
+//                // populate map with index data
+//                AtomicInteger counter = new AtomicInteger();
+//                Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
+//                        // ignore directories
+//                        .filter(path -> !Files.isDirectory(path))
+//                        .peek(p -> {
+//                            int i = counter.incrementAndGet();
+//                            if (i % 5000 == 0) {
+//                                logger.info("Progress: {} / {}", i, numberOfBins);
+//                            }
+//                        })
+//                        .map(this::createResiduePairDescriptor)
+//                        .forEach(key -> {
+//                            try (InputStream inputStream = getInputStream(key, false)) {
+//                                byte[] content = inputStream.readAllBytes();
+//                                inputStream.close();
+//                                this.cache.put(key.toString(), content);
+//                            } catch (IOException e) {
+//                                throw new UncheckedIOException(e);
+//                            }
+//                        });
+//
+//                logger.info("Done loading inverted index into memory");
+//            } catch (IOException e) {
+//                throw new UncheckedIOException(e);
+//            }
+//        } else {
+//            this.cache = null;
+//        }
     }
 
     @Override
@@ -137,7 +137,9 @@ public class InvertedIndexImpl implements InvertedIndex {
     @Override
     public Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor) {
         try {
-            InputStream inputStream = getInputStream(residuePairDescriptor, cache != null);
+            InputStream inputStream = getInputStream(residuePairDescriptor
+//                    , cache != null
+            );
 
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
             return getPairs(inputStream, residuePairDescriptor);
@@ -199,22 +201,24 @@ public class InvertedIndexImpl implements InvertedIndex {
     /**
      * Acquire the input stream for a descriptor.
      * @param residuePairDescriptor the descriptor of interest
-     * @param enableCache if available, use cache
+//     * @param enableCache if available, use cache
      * @return the corresponding input stream
      * @throws IOException reading failed
      */
-    protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor, boolean enableCache) throws IOException {
-        if (cache == null || !enableCache) {
+    protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor
+//            , boolean enableCache
+    ) throws IOException {
+//        if (cache == null || !enableCache) {
             Path path = getPath(residuePairDescriptor);
             return new BufferedInputStream(Files.newInputStream(path), 65536);
-        } else {
-            String key = residuePairDescriptor.toString();
-            if (!cache.containsKey(key)) {
-                throw new IOException("No data for " + residuePairDescriptor);
-            }
-            byte[] content = cache.get(key);
-            return new ByteArrayInputStream(content);
-        }
+//        } else {
+//            String key = residuePairDescriptor.toString();
+//            if (!cache.containsKey(key)) {
+//                throw new IOException("No data for " + residuePairDescriptor);
+//            }
+//            byte[] content = cache.get(key);
+//            return new ByteArrayInputStream(content);
+//        }
     }
 
     private Path getPath(ResiduePairDescriptor residuePairDescriptor) {
@@ -225,7 +229,9 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     private Map<String, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
         try {
-            return MessagePackCodec.decode(getInputStream(residuePairDescriptor, false));
+            return MessagePackCodec.decode(getInputStream(residuePairDescriptor
+//                    , false
+                    ));
         } catch (IOException e) {
             return Collections.emptyMap();
         }

@@ -21,9 +21,9 @@ public class InvertedIndexImplTest {
 
     @BeforeEach
     public void init() {
-        invertedIndex = new FileSystemInvertedIndex(new MotifSearchConfig()) {
+        invertedIndex = new InvertedIndexImpl(new MotifSearchConfig()) {
             @Override
-            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
+            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor, boolean b) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("index/" + residuePairDescriptor.toString() + ".msg");

@@ -20,7 +20,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.read.StructureReader;
-import org.rcsb.strucmotif.persistence.FileSystemInvertedIndex;
+import org.rcsb.strucmotif.persistence.InvertedIndexImpl;
 import org.rcsb.strucmotif.persistence.FileSystemStateRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,9 +59,9 @@ public class MotifSearchIntegrationTest {
 
     @BeforeEach
     public void init() {
-        FileSystemInvertedIndex invertedIndex = new FileSystemInvertedIndex(motifSearchConfig) {
+        InvertedIndexImpl invertedIndex = new InvertedIndexImpl(motifSearchConfig) {
             @Override
-            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
+            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor, boolean b) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("index/" + residuePairDescriptor.toString() + ".msg");

@@ -1,6 +1,9 @@
 package org.rcsb.strucmotif.persistence;
 
+import com.cfelde.bohmap.BOHMap;
+import com.cfelde.bohmap.Binary;
 import org.rcsb.cif.binary.codec.MessagePackCodec;
+import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -33,23 +37,71 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * The naive file-system-based implementation of the inverted index.
+ * The implementation of the inverted index.
  */
 @Service
-public class FileSystemInvertedIndex implements InvertedIndex {
-    private static final Logger logger = LoggerFactory.getLogger(FileSystemInvertedIndex.class);
+public class InvertedIndexImpl implements InvertedIndex {
+    private static final Logger logger = LoggerFactory.getLogger(InvertedIndexImpl.class);
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
     private final Path basePath;
     private boolean paths;
+    private final BOHMap cache;
 
     /**
      * Construct a inverted index instance.
      * @param motifSearchConfig the config
      */
-    public FileSystemInvertedIndex(MotifSearchConfig motifSearchConfig) {
+    public InvertedIndexImpl(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
         this.paths = false;
+        // TODO this should only happen in read mode - not needed for update
+        // TODO move init routine out of constructor
+        if (motifSearchConfig.getInMemoryStrategy() == InMemoryStrategy.HEAP) {
+            logger.info("Loading inverted index data into memory");
+            try {
+                long numberOfBins = Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
+                        .parallel()
+                        // ignore directories
+                        .filter(path -> !Files.isDirectory(path))
+                        .count();
+
+                if (numberOfBins > Integer.MAX_VALUE) {
+                    throw new IllegalArgumentException("Number of bins cannot exceed 2^32");
+                }
+
+                logger.info("Number of inverted index bin to load is {}", numberOfBins);
+                this.cache = new BOHMap((int) numberOfBins);
+
+                // populate map with index data
+                AtomicInteger counter = new AtomicInteger();
+                Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
+                        // ignore directories
+                        .filter(path -> !Files.isDirectory(path))
+                        .peek(p -> {
+                            int i = counter.incrementAndGet();
+                            if (i % 5000 == 0) {
+                                logger.info("Progress: {} / {}", i, numberOfBins);
+                            }
+                        })
+                        .map(this::createResiduePairDescriptor)
+                        .forEach(key -> {
+                            try {
+                                InputStream inputStream = getInputStream(key, false);
+                                byte[] content = inputStream.readAllBytes();
+                                this.cache.put(new Binary(key.toString().getBytes()), new Binary(content));
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
+
+                logger.info("Done loading inverted index into memory");
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            this.cache = null;
+        }
     }
 
     @Override
@@ -86,7 +138,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     @Override
     public Stream<Pair<StructureIdentifier, ResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor) {
         try {
-            InputStream inputStream = getInputStream(residuePairDescriptor);
+            InputStream inputStream = getInputStream(residuePairDescriptor, cache != null);
 
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
             return getPairs(inputStream, residuePairDescriptor);
@@ -148,12 +200,22 @@ public class FileSystemInvertedIndex implements InvertedIndex {
     /**
      * Acquire the input stream for a descriptor.
      * @param residuePairDescriptor the descriptor of interest
+     * @param enableCache if available, use cache
      * @return the corresponding input stream
      * @throws IOException reading failed
      */
-    protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
-        Path path = getPath(residuePairDescriptor);
-        return new BufferedInputStream(Files.newInputStream(path), 65536);
+    protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor, boolean enableCache) throws IOException {
+        if (cache == null || !enableCache) {
+            Path path = getPath(residuePairDescriptor);
+            return new BufferedInputStream(Files.newInputStream(path), 65536);
+        } else {
+            Binary key = new Binary(residuePairDescriptor.toString().getBytes());
+            if (!cache.containsKey(key)) {
+                throw new IOException("No data for " + residuePairDescriptor);
+            }
+            Binary content = cache.get(new Binary(residuePairDescriptor.toString().getBytes()));
+            return new ByteArrayInputStream(content.getValue());
+        }
     }
 
     private Path getPath(ResiduePairDescriptor residuePairDescriptor) {
@@ -164,7 +226,7 @@ public class FileSystemInvertedIndex implements InvertedIndex {
 
     private Map<String, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
         try {
-            return MessagePackCodec.decode(getInputStream(residuePairDescriptor));
+            return MessagePackCodec.decode(getInputStream(residuePairDescriptor, false));
         } catch (IOException e) {
             return Collections.emptyMap();
         }

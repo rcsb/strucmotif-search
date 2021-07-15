@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.persistence;
 
-import com.cfelde.bohmap.BOHMap;
-import com.cfelde.bohmap.Binary;
 import org.rcsb.cif.binary.codec.MessagePackCodec;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
@@ -28,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +45,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
     private final Path basePath;
     private boolean paths;
-    private final BOHMap cache;
+    private final Map<String, byte[]> cache;
 
     /**
      * Construct a inverted index instance.
@@ -71,7 +70,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                 }
 
                 logger.info("Number of inverted index bin to load is {}", numberOfBins);
-                this.cache = new BOHMap((int) numberOfBins);
+                this.cache = new HashMap<>((int) numberOfBins, 1.0f);
 
                 // populate map with index data
                 AtomicInteger counter = new AtomicInteger();
@@ -89,7 +88,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                             try {
                                 InputStream inputStream = getInputStream(key, false);
                                 byte[] content = inputStream.readAllBytes();
-                                this.cache.put(new Binary(key.toString().getBytes()), new Binary(content));
+                                this.cache.put(key.toString(), content);
                             } catch (IOException e) {
                                 throw new UncheckedIOException(e);
                             }
@@ -209,12 +208,12 @@ public class InvertedIndexImpl implements InvertedIndex {
             Path path = getPath(residuePairDescriptor);
             return new BufferedInputStream(Files.newInputStream(path), 65536);
         } else {
-            Binary key = new Binary(residuePairDescriptor.toString().getBytes());
+            String key = residuePairDescriptor.toString();
             if (!cache.containsKey(key)) {
                 throw new IOException("No data for " + residuePairDescriptor);
             }
-            Binary content = cache.get(new Binary(residuePairDescriptor.toString().getBytes()));
-            return new ByteArrayInputStream(content.getValue());
+            byte[] content = cache.get(key);
+            return new ByteArrayInputStream(content);
         }
     }
 

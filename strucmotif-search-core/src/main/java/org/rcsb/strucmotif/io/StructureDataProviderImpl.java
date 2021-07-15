@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.io;
 
-import com.cfelde.bohmap.BOHMap;
-import com.cfelde.bohmap.Binary;
 import org.rcsb.cif.binary.codec.MessagePackCodec;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
@@ -38,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final Path renumberedPath;
     private final String extension;
     private boolean paths;
-    private final BOHMap cache;
+    private final Map<String, byte[]> cache;
 
     /**
      * Construct a structure provider.
@@ -102,7 +101,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 }
 
                 logger.info("Number of structures to load is {}", numberOfFiles);
-                this.cache = new BOHMap((int) numberOfFiles);
+                this.cache = new HashMap<>((int) numberOfFiles, 1.0f);
 
                 // populate map with index data
                 AtomicInteger counter = new AtomicInteger();
@@ -151,7 +150,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                                         // TODO worth to encode arrays directly
                                         Map<String, Object> map = Map.of("v", atomData);
                                         byte[] content = MessagePackCodec.encode(map);
-                                        this.cache.put(new Binary(key.getBytes()), new Binary(content));
+                                        this.cache.put(key, content);
                                     }
                                 }
                             } catch (UnsupportedOperationException e) {
@@ -250,8 +249,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 int labelSeqId = ls.getLabelSeqId();
                 String key = pdbId + ":" + structOperId + ":" + labelSeqId;
 
-                Binary content = cache.get(new Binary(key.getBytes()));
-                Object[] res = (Object[]) MessagePackCodec.decode(new ByteArrayInputStream(content.getValue())).get("v");
+                byte[] content = cache.get(key);
+                Object[] res = (Object[]) MessagePackCodec.decode(new ByteArrayInputStream(content)).get("v");
 
                 ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, structOperId);
                 ResidueType residueType = ResidueType.ofOneLetterCode((String) res[2]);

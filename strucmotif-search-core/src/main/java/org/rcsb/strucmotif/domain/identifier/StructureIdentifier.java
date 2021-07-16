@@ -13,7 +13,7 @@ public class StructureIdentifier {
      * @param pdbId the PDB identifier of this structure
      */
     public StructureIdentifier(String pdbId) {
-        this.pdbId = pdbId;
+        this.pdbId = pdbId.toLowerCase();
     }
 
     /**

@@ -16,6 +16,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.math.Partition;
 import org.rcsb.strucmotif.persistence.InvertedIndex;
 import org.rcsb.strucmotif.persistence.StateRepository;
 import org.slf4j.Logger;

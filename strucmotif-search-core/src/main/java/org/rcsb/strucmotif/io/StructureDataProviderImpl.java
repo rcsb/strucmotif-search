@@ -1,9 +1,9 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.cif.binary.codec.MessagePackCodec;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.identifier.AtomIdentifier;
 import org.rcsb.strucmotif.domain.identifier.ChainIdentifier;
@@ -24,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
@@ -36,7 +35,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +54,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final Path renumberedPath;
     private final String extension;
     private boolean paths;
-    private final Map<String, byte[]> cache;
+    private final Map<String, Object[]> cache;
 
     /**
      * Construct a structure provider.
@@ -86,80 +84,79 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         // TODO this should only happen in read mode - not needed for update
         // TODO move init routine out of constructor?
         // TODO consider caching only referenced residues - could use referenced assemblies from state repo for this
-        // TODO make this chunked - running in parallel and dumping data single-threaded to the map
+        // TODO try to have coords always as ints with 1 pseudo-decimal-place
+        // TODO standardize handling of lower/upper-case identifiers
+        // TODO smarter way to handle transformations and store only original + transformation matrices
         if (motifSearchConfig.getInMemoryStrategy() == InMemoryStrategy.HEAP) {
             logger.info("Loading structure data into memory");
             try {
-                long numberOfFiles = Files.walk(renumberedPath, FileVisitOption.FOLLOW_LINKS)
+                List<Path> paths = Files.walk(renumberedPath, FileVisitOption.FOLLOW_LINKS)
                         .parallel()
                         // ignore directories
                         .filter(path -> !Files.isDirectory(path))
-                        .count();
+                        .collect(Collectors.toList());
 
-                if (numberOfFiles > Integer.MAX_VALUE) {
-                    throw new IllegalArgumentException("Number of structures cannot exceed 2^32");
-                }
-
-                logger.info("Number of structures to load is {}", numberOfFiles);
-                this.cache = new HashMap<>((int) numberOfFiles, 1.0f);
+                logger.info("Number of structures to load is {}", paths.size());
 
                 // populate map with index data
                 AtomicInteger counter = new AtomicInteger();
-                Files.walk(renumberedPath, FileVisitOption.FOLLOW_LINKS)
+                this.cache = Files.walk(renumberedPath, FileVisitOption.FOLLOW_LINKS)
                         // ignore directories
                         .filter(path -> !Files.isDirectory(path))
                         .peek(p -> {
                             int i = counter.incrementAndGet();
-                            if (i % 5000 == 0) {
-                                logger.info("Progress: {} / {}", i, numberOfFiles);
+                            if (i % 50 == 0) {
+                                logger.info("Progress: {} / {}", i, paths.size());
                             }
                         })
-                        .forEach(path -> {
-                            try (InputStream inputStream = Files.newInputStream(path)) {
-                                Structure structure = structureReader.readFromInputStream(inputStream);
-                                String pdbId = structure.getStructureIdentifier().getPdbId();
+                        .flatMap(path -> {
+                            try {
+                                try (InputStream inputStream = Files.newInputStream(path)) {
+                                    Structure structure = structureReader.readFromInputStream(inputStream);
+                                    String pdbId = structure.getStructureIdentifier().getPdbId();
 
-                                for (Chain chain : structure.getChains()) {
-                                    ChainIdentifier chainIdentifier = chain.getChainIdentifier();
-                                    String labelAsymId = chainIdentifier.getLabelAsymId();
-                                    String structOperId = chainIdentifier.getStructOperId();
+                                    return structure.getChains()
+                                            .stream()
+                                            .flatMap(chain -> {
+                                                ChainIdentifier chainIdentifier = chain.getChainIdentifier();
+                                                String labelAsymId = chainIdentifier.getLabelAsymId();
+                                                String structOperId = chainIdentifier.getStructOperId();
 
-                                    for (Residue residue : chain.getResidues()) {
-                                        ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
-                                        String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + residueIdentifier.getLabelSeqId();
+                                                return chain.getResidues()
+                                                        .stream()
+                                                        .map(residue -> {
+                                                            ResidueIdentifier residueIdentifier = residue.getResidueIdentifier();
+                                                            String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + residueIdentifier.getLabelSeqId();
 
-                                        Object[] atomData = new Object[1 + residue.getAtoms().size() * 4];
-                                        int pointer = 0;
-                                        atomData[pointer++] = residueIdentifier.getResidueType().getOneLetterCode();
+                                                            Object[] atomData = new Object[1 + residue.getAtoms().size() * 4];
+                                                            int pointer = 0;
+                                                            atomData[pointer++] = residueIdentifier.getResidueType().getOneLetterCode();
 
-                                        for (Atom atom : residue.getAtoms()) {
-                                            AtomIdentifier atomIdentifier = atom.getAtomIdentifier();
-                                            String labelAtomId = atomIdentifier.getLabelAtomId();
-                                            double[] coord = atom.getCoord();
+                                                            for (Atom atom : residue.getAtoms()) {
+                                                                AtomIdentifier atomIdentifier = atom.getAtomIdentifier();
+                                                                String labelAtomId = atomIdentifier.getLabelAtomId();
+                                                                double[] coord = atom.getCoord();
 
-                                            atomData[pointer++] = labelAtomId;
-                                            atomData[pointer++] = (int) Math.round(coord[0] * 10);
-                                            atomData[pointer++] = (int) Math.round(coord[1] * 10);
-                                            atomData[pointer++] = (int) Math.round(coord[2] * 10);
-                                        }
+                                                                atomData[pointer++] = labelAtomId;
+                                                                atomData[pointer++] = (int) Math.round(coord[0] * 10);
+                                                                atomData[pointer++] = (int) Math.round(coord[1] * 10);
+                                                                atomData[pointer++] = (int) Math.round(coord[2] * 10);
+                                                            }
 
-                                        // TODO worth to encode arrays directly
-                                        Map<String, Object> map = Map.of("v", atomData);
-                                        byte[] content = MessagePackCodec.encode(map);
-                                        this.cache.put(key, content);
-                                    }
+                                                            return new Pair<>(key, atomData);
+                                                        });
+                                            });
                                 }
-                            } catch (UnsupportedOperationException e) {
-                                // happens for empty files without atom_site record
                             } catch (IOException e) {
                                 throw new UncheckedIOException(e);
                             }
-                        });
-
-                logger.info("Done loading structure into memory");
+                        })
+                        .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
+
+            logger.info("Done loading structure into memory");
         } else {
             this.cache = null;
         }
@@ -233,48 +230,43 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             return readFromInputStream(getRenumberedInputStream(structureIdentifier), selection);
         }
 
-        try {
-            String pdbId = structureIdentifier.getPdbId().toLowerCase();
-            Map<ChainIdentifier, List<Residue>> tmp = new LinkedHashMap<>();
+        String pdbId = structureIdentifier.getPdbId().toLowerCase();
+        Map<ChainIdentifier, List<Residue>> tmp = new LinkedHashMap<>();
 
-            int aIndex = 0;
-            for (ResidueSelection rs : selection) {
-                LabelSelection ls = (LabelSelection) rs;
-                String labelAsymId = ls.getLabelAsymId();
-                String structOperId = ls.getStructOperId();
-                int labelSeqId = ls.getLabelSeqId();
-                String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + labelSeqId;
+        int aIndex = 0;
+        for (ResidueSelection rs : selection) {
+            LabelSelection ls = (LabelSelection) rs;
+            String labelAsymId = ls.getLabelAsymId();
+            String structOperId = ls.getStructOperId();
+            int labelSeqId = ls.getLabelSeqId();
+            String key = pdbId + ":" + labelAsymId + ":" + structOperId + ":" + labelSeqId;
 
-                byte[] content = cache.get(key);
-                Object[] res = (Object[]) MessagePackCodec.decode(new ByteArrayInputStream(content)).get("v");
+            Object[] res = cache.get(key);
 
-                ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, structOperId);
-                ResidueType residueType = ResidueType.ofOneLetterCode((String) res[0]);
-                ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, labelSeqId, -1);
-                List<Atom> atoms = new ArrayList<>((int) Math.round((res.length - 3) * 0.25));
-                for (int i = 1; i < res.length; i = i + 4) {
-                    String name = (String) res[i];
-                    double[] coord = new double[]{
-                            ((int) res[i + 1]) * 0.1,
-                            ((int) res[i + 2]) * 0.1,
-                            ((int) res[i + 3]) * 0.1
-                    };
-                    atoms.add(StructureFactory.createAtom(new AtomIdentifier(name, ++aIndex), coord));
-                }
-                Residue residue = StructureFactory.createResidue(residueIdentifier, atoms, Transformation.IDENTITY_MATRIX_4D);
-                tmp.computeIfAbsent(chainIdentifier, c -> new ArrayList<>()).add(residue);
+            ChainIdentifier chainIdentifier = new ChainIdentifier(labelAsymId, structOperId);
+            ResidueType residueType = ResidueType.ofOneLetterCode((String) res[0]);
+            ResidueIdentifier residueIdentifier = new ResidueIdentifier(residueType, labelSeqId, -1);
+            List<Atom> atoms = new ArrayList<>((int) Math.round((res.length - 3) * 0.25));
+            for (int i = 1; i < res.length; i = i + 4) {
+                String name = (String) res[i];
+                // TODO hard-coded ints as coordinates?
+                // TODO it would be nice to work on these objects directly
+                double[] coord = new double[]{
+                        ((int) res[i + 1]) * 0.1,
+                        ((int) res[i + 2]) * 0.1,
+                        ((int) res[i + 3]) * 0.1
+                };
+                atoms.add(StructureFactory.createAtom(new AtomIdentifier(name, ++aIndex), coord));
             }
-
-            List<Chain> chains = tmp.entrySet()
-                    .stream()
-                    .map(entry -> StructureFactory.createChain(entry.getKey(), entry.getValue(), Transformation.IDENTITY_MATRIX_4D))
-                    .collect(Collectors.toList());
-            return StructureFactory.createStructure(new StructureIdentifier(pdbId), chains);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+            Residue residue = StructureFactory.createResidue(residueIdentifier, atoms, Transformation.IDENTITY_MATRIX_4D);
+            tmp.computeIfAbsent(chainIdentifier, c -> new ArrayList<>()).add(residue);
         }
+
+        List<Chain> chains = tmp.entrySet()
+                .stream()
+                .map(entry -> StructureFactory.createChain(entry.getKey(), entry.getValue(), Transformation.IDENTITY_MATRIX_4D))
+                .collect(Collectors.toList());
+        return StructureFactory.createStructure(new StructureIdentifier(pdbId), chains);
     }
 
     @Override

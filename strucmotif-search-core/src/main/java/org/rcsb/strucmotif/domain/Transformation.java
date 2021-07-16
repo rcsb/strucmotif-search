@@ -22,6 +22,8 @@ public class Transformation {
             { 0, 0, 1, 0 },
             { 0, 0, 0, 1 }
     };
+    public static final Transformation IDENTITY_TRANSFORMATION = new Transformation(new double[3],
+            new double[][] { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } });
     private final double[][] rotation;
     private final double[] translation;
     private final double[][] transformation;

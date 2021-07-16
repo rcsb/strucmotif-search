@@ -207,7 +207,11 @@ public class StructureReaderImpl implements StructureReader {
             addResidue();
             addChain();
 
-            return StructureFactory.createStructure(structureIdentifier, buildAssemblies(chains, selection));
+            long s = System.currentTimeMillis();
+            List<Chain> chains = buildAssemblies(this.chains, selection);
+            long t = System.currentTimeMillis() - s;
+            if (t > 100) System.out.println(structureIdentifier + " : " + t + " ms");
+            return StructureFactory.createStructure(structureIdentifier, chains);
         }
 
         /**

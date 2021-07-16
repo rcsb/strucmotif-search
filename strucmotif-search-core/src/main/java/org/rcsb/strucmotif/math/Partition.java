@@ -1,4 +1,4 @@
-package org.rcsb.strucmotif.update;
+package org.rcsb.strucmotif.math;
 
 import java.util.AbstractList;
 import java.util.ArrayList;

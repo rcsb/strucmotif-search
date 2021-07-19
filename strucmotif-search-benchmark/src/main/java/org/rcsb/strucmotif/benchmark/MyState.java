@@ -2,13 +2,13 @@ package org.rcsb.strucmotif.benchmark;
 
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.rcsb.strucmotif.MotifSearch;
-import org.rcsb.strucmotif.Motifs;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
-import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.read.StructureReaderImpl;
+import org.rcsb.strucmotif2.MotifSearch;
+import org.rcsb.strucmotif2.Motifs;
+import org.rcsb.strucmotif2.config.MotifSearchConfig;
+import org.rcsb.strucmotif2.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif2.domain.query.QueryBuilder;
+import org.rcsb.strucmotif2.domain.structure.Structure;
+import org.rcsb.strucmotif2.io.read.StructureReaderImpl;
 
 import java.io.IOException;
 import java.io.InputStream;

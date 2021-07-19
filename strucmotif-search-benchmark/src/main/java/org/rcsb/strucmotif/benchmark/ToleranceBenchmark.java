@@ -11,11 +11,11 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.rcsb.strucmotif.Motifs;
-import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
-import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif2.Motifs;
+import org.rcsb.strucmotif2.domain.query.PositionSpecificExchange;
+import org.rcsb.strucmotif2.domain.query.QueryBuilder;
+import org.rcsb.strucmotif2.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif2.domain.structure.Structure;
 
 /**
  * Tolerance-specific benchmark via JMH.

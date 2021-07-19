@@ -1,0 +1,52 @@
+package org.rcsb.strucmotif2.domain.result;
+
+import org.rcsb.strucmotif2.domain.identifier.AssemblyIdentifier;
+import org.rcsb.strucmotif2.domain.identifier.StructureIdentifier;
+import org.rcsb.strucmotif2.domain.score.GeometricDescriptorScore;
+import org.rcsb.strucmotif2.domain.selection.LabelSelection;
+
+import java.util.List;
+
+/**
+ * A simple hit without transformation information.
+ */
+public class SimpleHit implements Hit {
+    private final StructureIdentifier structureIdentifier;
+    private final AssemblyIdentifier assemblyIdentifier;
+    private final List<LabelSelection> selection;
+    private final GeometricDescriptorScore geometricDescriptorScore;
+
+    /**
+     * Construct a generic hit (without alignment).
+     * @param structureIdentifier the parent structure
+     * @param assemblyIdentifier the parent assembly
+     * @param selection the selection of this hit
+     * @param geometricDescriptorScore its score
+     */
+    public SimpleHit(StructureIdentifier structureIdentifier, AssemblyIdentifier assemblyIdentifier, List<LabelSelection> selection, GeometricDescriptorScore geometricDescriptorScore) {
+        this.structureIdentifier = structureIdentifier;
+        this.assemblyIdentifier = assemblyIdentifier;
+        this.selection = selection;
+        this.geometricDescriptorScore = geometricDescriptorScore;
+    }
+
+    @Override
+    public StructureIdentifier getStructureIdentifier() {
+        return structureIdentifier;
+    }
+
+    @Override
+    public AssemblyIdentifier getAssemblyIdentifier() {
+        return assemblyIdentifier;
+    }
+
+    @Override
+    public List<LabelSelection> getSelection() {
+        return selection;
+    }
+
+    @Override
+    public GeometricDescriptorScore getGeometricDescriptorScore() {
+        return geometricDescriptorScore;
+    }
+}

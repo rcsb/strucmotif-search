@@ -1,0 +1,257 @@
+package org.rcsb.strucmotif.domain.structure;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.domain.motif.AngleType;
+import org.rcsb.strucmotif.domain.motif.DistanceType;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.io.StructureReader;
+import org.rcsb.strucmotif.io.StructureReaderImpl;
+import org.rcsb.strucmotif.math.Algebra;
+
+import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.rcsb.strucmotif.Helpers.*;
+
+class ResidueGraphTest {
+    @Test
+    public void whenGlycine_thenCreateVirtualBetaCarbon() {
+        Map<String, float[]> residue = Map.of("N", new float[] { -0.966f, 0.493f, 1.500f },
+                "CA", new float[] { 0.257f, 0.418f, 0.692f },
+                "C", new float[] { -0.094f, 0.017f, -0.716f },
+                "O", new float[] { -1.056f, -0.682f, -0.923f });
+
+        float[] betaCarbon = ResidueGraph.getVirtualCB(residue);
+        assertArrayEquals(new float[]{1.204f, -0.620f, 1.296f}, betaCarbon, 0.01f);
+    }
+
+    private static final float TEST_DISTANCE_CUTOFF = 20;
+    private static final float TEST_SQUARED_DISTANCE_CUTOFF = TEST_DISTANCE_CUTOFF * TEST_DISTANCE_CUTOFF;
+    private StructureReader structureReader;
+
+    @BeforeEach
+    public void init() {
+        structureReader = new StructureReaderImpl();
+    }
+
+    @Test
+    public void whenResidueOrderSwapped_thenDescriptorSame() {
+        List<String> perms = List.of("456", "465", "546", "564", "645", "654");
+        Set<String> expectedDescriptors = Set.of("5-7-8", "4-5-7", "4-5-2");
+        for (String perm : perms) {
+            InputStream resource = getResource("cif/1acj-" + perm + ".cif");
+            Structure structure = structureReader.readFromInputStream(resource);
+            ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+            Set<String> descriptors = residueGraph.residuePairOccurrencesSequential()
+                    .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                    .map(desc -> desc.getBackboneDistance().ordinal() + "-" + desc.getSideChainDistance().ordinal() + "-" + desc.getAngle().ordinal())
+                    .collect(Collectors.toSet());
+            for (String desc : descriptors) {
+                assertTrue(expectedDescriptors.contains(desc), "descriptor definition not symmetric");
+            }
+        }
+    }
+
+    @Test
+    public void whenReadingRenumbered3vvk_then6Valid() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        long c = residueGraph.residuePairOccurrencesSequential()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .distinct()
+                .map(LabelSelection::getLabelAsymId)
+                .distinct()
+                // .peek(System.out::println)
+                .count();
+
+        // this is a structure with distinct chains in altlocs
+        // currently, there is no support for altlocs (especially of this nature) - thus, many weird words will be reported - that's okay for now
+        assertEquals(6, c);
+    }
+
+    @Test
+    public void whenReadingRenumbered1dsd_then8ValidInChainC() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        long c = residueGraph.residuePairOccurrencesSequential()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .distinct()
+                // keep only freakish chain
+                .filter(labelSelection -> labelSelection.getLabelAsymId().equals("C"))
+                // map back to unique groups
+                .map(labelSelection -> structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId()))
+                .map(index -> index + " " + structure.getResidueType(index))
+                .count();
+
+        // sequence is T DVA P SAR MVA PXZ T DVA P SAR MVA
+        // SAR and PXZ don't contain CA and/or CB - only 8 valid
+        assertEquals(8, c);
+    }
+
+    @Test
+    public void whenReadingOriginal200l_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        assertEquals(5939, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .distinct()
+                .count());
+        assertEquals(1, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
+                .distinct()
+                .count());
+        assertEquals(162, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
+                .distinct()
+                .count());
+    }
+
+    @Test
+    public void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        assertEquals(25216, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .distinct()
+                .count());
+        assertEquals(2, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
+                .distinct()
+                .count());
+        assertEquals(528, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
+                .distinct()
+                .count());
+    }
+
+    @Test
+    public void whenReadingRenumbered200l_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        assertEquals(5951,  residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .distinct()
+                .count());
+        assertEquals(1, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
+                .distinct()
+                .count());
+        assertEquals(162, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
+                .distinct()
+                .count());
+    }
+
+    @Test
+    public void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        assertEquals(25189, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .distinct()
+                .count());
+        assertEquals(2, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
+                .distinct()
+                .count());
+        assertEquals(528, residueGraph.residuePairOccurrencesParallel()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getLabelSeqId)
+                .distinct()
+                .count());
+    }
+
+    private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
+            ResidueType.ARGININE,
+            DistanceType.D15,
+            DistanceType.D14,
+            AngleType.A80);
+
+    @Test
+    public void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
+        List<ResiduePairDescriptor> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toList());
+        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF);
+
+        List<ResiduePairIdentifier> identifiers = residueGraph.residuePairOccurrencesParallel()
+                .filter(wordOccurrence -> residuePairDescriptors.contains(wordOccurrence.getResiduePairDescriptor()))
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .collect(Collectors.toList());
+        assertFalse(identifiers.isEmpty());
+        assertTrue(identifiers.stream()
+                .flatMap(ResiduePairIdentifier::labelSelections)
+                .map(LabelSelection::getStructOperId)
+                .anyMatch(id -> !id.equals("1")));
+    }
+
+    @Test
+    public void whenFlippedDirectory_thenAngle180() {
+        // pointing away
+        float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { -1, 0, 0 });
+        assertEquals(180, angle, 0.001);
+    }
+
+    @Test
+    public void whenIdentical_thenAngle0() {
+        // same
+        float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { 1, 0, 0 });
+        assertEquals(0, angle, 0.001);
+    }
+
+    @Test
+    public void whenOrthogonalInXy_thenAngle90() {
+        // right 1
+        float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { 0, 1, 0 });
+        assertEquals(90, angle, 0.001);
+    }
+
+    @Test
+    public void whenOrthogonalInXz_thenAngle90() {
+        // right 2
+        float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { 0, 0, 1 });
+        assertEquals(90, angle, 0.001);
+    }
+
+    @Test
+    public void whenOrderSwapped_thenAngleSame() {
+        for (int i = 0; i < 10; i++) {
+            float[] v1 = new float[] {(float) Math.random(), (float) Math.random(), (float) Math.random()};
+            Algebra.normalize3d(v1, v1);
+            float[] v2 = new float[] {(float) Math.random(), (float) Math.random(), (float) Math.random()};
+            Algebra.normalize3d(v2, v2);
+            float a1 = ResidueGraph.angle(v1, v2);
+            float a2 = ResidueGraph.angle(v2, v1);
+            assertEquals(a1, a2, 0.001f, "order of angle calculation must not matter");
+        }
+    }
+}

@@ -190,7 +190,7 @@ public enum DistanceType {
      * @return the corresponding bin
      */
     public static DistanceType ofDistance(float distance) {
-        int i = (int) Math.round(distance / BIN_SIZE);
+        int i = Math.round(distance / BIN_SIZE);
         if (i < 0) {
             return DistanceType.D0;
         } else if (i >= DistanceType.values().length) {

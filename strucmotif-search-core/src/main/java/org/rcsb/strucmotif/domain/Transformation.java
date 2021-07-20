@@ -19,6 +19,7 @@ public class Transformation {
     };
     public static final Transformation IDENTITY_TRANSFORMATION = new Transformation(IDENTITY_MATRIX_4D);
     private final float[][] transformation;
+    private final boolean identity;
 
     /**
      * Construct a transformation from translation and rotation.
@@ -26,6 +27,7 @@ public class Transformation {
      */
     public Transformation(float[][] transformation) {
         this.transformation = transformation;
+        this.identity = Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation);
     }
 
     /**
@@ -55,6 +57,7 @@ public class Transformation {
      * @param v the vector to transform
      */
     public void transform(float[] out, float[] v) {
+        if (identity) return;
         Algebra.multiply4d(out, transformation, v);
     }
 
@@ -62,7 +65,7 @@ public class Transformation {
      * <code>true</code> if this is the identity matrix
      * @return a boolean
      */
-    public boolean isNeutral() {
-        return Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation);
+    public boolean isIdentity() {
+        return identity;
     }
 }

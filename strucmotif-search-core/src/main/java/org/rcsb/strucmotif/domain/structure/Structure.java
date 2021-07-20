@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class Structure {
     private final Map<LabelSelection, Integer> residueMapping;
@@ -74,16 +76,13 @@ public class Structure {
         return transformations.get(structOperIdentifier);
     }
 
-    public Map<String, float[]> manifestResidue(String labelAsymId, int labelSeqId) {
-        return manifestResidue(getResidueIndex(labelAsymId, labelSeqId));
-    }
-
-    public Map<String, float[]> manifestResidue(String labelAsymId, String structOperIdentifier, int labelSeqId) {
-        return manifestResidue(getResidueIndex(labelAsymId, labelSeqId), structOperIdentifier);
-    }
-
     public Map<String, float[]> manifestResidue(LabelSelection labelSelection) {
-        return manifestResidue(labelSelection.getLabelAsymId(), labelSelection.getStructOperId(), labelSelection.getLabelSeqId());
+        return manifestResidue(getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId()), labelSelection.getStructOperId());
+    }
+
+    public Map<LabelSelection, Map<String, float[]>> manifestResidues(List<LabelSelection> labelSelections) {
+        return labelSelections.stream()
+                .collect(Collectors.toMap(Function.identity(), this::manifestResidue));
     }
 
     public Map<String, float[]> manifestResidue(int residueIndex) {
@@ -103,12 +102,7 @@ public class Structure {
                     y[i],
                     z[i]
             };
-
-            // TODO need to check for identity oper here?
-            if (!"1".equals(structOperIdentifier)) {
-                transformation.transform(v, v);
-            }
-
+            transformation.transform(v, v);
             out.put(labelAtomId, v);
         }
         return out;

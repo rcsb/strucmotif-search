@@ -14,7 +14,7 @@ public class Helpers {
     public static final double DELTA = 0.001;
 
     public static InputStream getOriginalBcif(String pdbId) {
-        return getResource("orig/" + pdbId + ".bcif");
+        return getResource("orig/" + pdbId.toLowerCase() + ".bcif");
     }
 
     public static InputStream getRenumberedBcif(String pdbId) {

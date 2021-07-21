@@ -252,13 +252,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
         } catch (UncheckedIOException e) {
-            // can 'safely' happen when obsolete entry was dropped from bcif data but still lingers in list
-            logger.warn("[{}] [{}] Source file missing unexpectedly - obsolete entry?",
-                    context.partitionContext,
-                    structureContext,
-                    e);
-            return;
-        } catch (UnsupportedOperationException e) {
             logger.warn("[{}] [{}] No valid polymer chains",
                     context.partitionContext,
                     structureContext);

@@ -220,7 +220,9 @@ public class StructureReaderImpl implements StructureReader {
                     String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
                     String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
                     List<String> operList = getOperList(operExpression, asymIdList);
-                    assemblyInformation.put(assemblyId, operList);
+
+                    List<String> chains = assemblyInformation.computeIfAbsent(assemblyId, e -> new ArrayList<>());
+                    chains.addAll(operList);
                 }
             }
             return assemblyInformation;

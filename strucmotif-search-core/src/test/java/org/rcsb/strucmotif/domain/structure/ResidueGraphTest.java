@@ -248,6 +248,14 @@ class ResidueGraphTest {
     }
 
     @Test
+    public void whenReadingRNA_thenContactsFound() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
+        ResidueGraph residueGraph = new ResidueGraph(structure, 15 * 15, false);
+
+        assertTrue(residueGraph.getNumberOfPairings() > 0);
+    }
+
+    @Test
     public void whenFlippedDirectory_thenAngle180() {
         // pointing away
         float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { -1, 0, 0 });

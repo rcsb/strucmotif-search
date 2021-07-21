@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -21,6 +22,18 @@ class StructureReaderImplTest {
     @BeforeEach
     public void init() {
         this.structureReader = new StructureReaderImpl();
+    }
+
+    @Test
+    public void whenReadingRNA_thenAssembliesParsedCorrectly() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
+        assertEquals(2, structure.getAssemblies()
+                .values()
+                .stream()
+                .flatMap(Collection::stream)
+                .map(oper -> oper.split("_")[1])
+                .distinct()
+                .count());
     }
 
     @Test

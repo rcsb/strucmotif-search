@@ -6,7 +6,7 @@ import java.util.Objects;
  * Identifies a residue unambiguously by label_asym_id, struct_oper_id, and label_seq_id. Basically the 'natural' way to
  * reference residues.
  */
-public class LabelSelection {
+public class LabelSelection implements Selection {
     private final String labelAsymId;
     private final String structOperId;
     private final int labelSeqId;
@@ -35,6 +35,7 @@ public class LabelSelection {
         return labelAsymId;
     }
 
+    @Override
     public String getStructOperId() {
         return structOperId;
     }
@@ -45,10 +46,6 @@ public class LabelSelection {
      */
     public int getLabelSeqId() {
         return labelSeqId;
-    }
-
-    public boolean test(String labelAsymId, int labelSeqId) {
-        return this.labelSeqId == labelSeqId && this.labelAsymId.equals(labelAsymId);
     }
 
     @Override

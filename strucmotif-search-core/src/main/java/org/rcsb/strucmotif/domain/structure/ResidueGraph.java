@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.LabelSelectionResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.IndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -28,9 +28,9 @@ import static org.rcsb.strucmotif.math.Algebra.*;
  */
 public class ResidueGraph {
     private final Structure structure;
-    private final Map<LabelSelection, Map<LabelSelection, Float>> backboneDistances;
-    private final Map<LabelSelection, Map<LabelSelection, Float>> sideChainDistances;
-    private final Map<LabelSelection, Map<LabelSelection, Float>> angles;
+    private final Map<IndexSelection, Map<IndexSelection, Float>> backboneDistances;
+    private final Map<IndexSelection, Map<IndexSelection, Float>> sideChainDistances;
+    private final Map<IndexSelection, Map<IndexSelection, Float>> angles;
     private final int numberOfPairings;
 
     public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues, float squaredCutoff, boolean allowTransformed) {
@@ -39,18 +39,15 @@ public class ResidueGraph {
         this.sideChainDistances = new HashMap<>();
         this.angles = new HashMap<>();
 
-        // sort residues into chains
-        // ${label_asym_id}: ${label_asym_id}-${label_seq_id}
-        Map<String, List<LabelSelection>> chainMap = labelSelections.stream()
-                .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
-
-        Map<LabelSelection, float[]> normalVectorMap = new LinkedHashMap<>();
-        Map<LabelSelection, float[]> backboneVectors = new LinkedHashMap<>();
-        Map<LabelSelection, float[]> sideChainVectors = new LinkedHashMap<>();
+        Map<IndexSelection, float[]> normalVectorMap = new LinkedHashMap<>();
+        Map<IndexSelection, float[]> backboneVectors = new LinkedHashMap<>();
+        Map<IndexSelection, float[]> sideChainVectors = new LinkedHashMap<>();
+        List<IndexSelection> indexSelections = new ArrayList<>();
         for (int i = 0; i < labelSelections.size(); i++) {
             LabelSelection labelSelection = labelSelections.get(i);
             Map<String, float[]> residue = residues.get(i);
             int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
+            IndexSelection indexSelection = new IndexSelection(labelSelection.getStructOperId(), residueIndex);
             ResidueType residueType = structure.getResidueType(residueIndex);
 
             float[] backbone = getBackboneCoords(residue);
@@ -65,12 +62,13 @@ public class ResidueGraph {
                 continue;
             }
 
-            backboneVectors.put(labelSelection, backbone);
-            sideChainVectors.put(labelSelection, sideChain);
-            normalVectorMap.put(labelSelection, normalVector(backbone, sideChain));
+            indexSelections.add(indexSelection);
+            backboneVectors.put(indexSelection, backbone);
+            sideChainVectors.put(indexSelection, sideChain);
+            normalVectorMap.put(indexSelection, normalVector(backbone, sideChain));
         }
 
-        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, labelSelections, squaredCutoff, allowTransformed);
+        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, squaredCutoff, allowTransformed);
     }
 
     /**
@@ -114,11 +112,11 @@ public class ResidueGraph {
                 .distinct()
                 .collect(Collectors.toList());
 
-        // ${label_asym_id}-${label_seq_id}: float[]
-        List<LabelSelection> residueKeys = new ArrayList<>();
-        Map<LabelSelection, float[]> normalVectorMap = new LinkedHashMap<>();
-        Map<LabelSelection, float[]> transformedBackboneVectors = new LinkedHashMap<>();
-        Map<LabelSelection, float[]> transformedSideChainVectors = new LinkedHashMap<>();
+        // ${struct_oper_id}-${index}: float[]
+        List<IndexSelection> residueKeys = new ArrayList<>();
+        Map<IndexSelection, float[]> normalVectorMap = new LinkedHashMap<>();
+        Map<IndexSelection, float[]> transformedBackboneVectors = new LinkedHashMap<>();
+        Map<IndexSelection, float[]> transformedSideChainVectors = new LinkedHashMap<>();
         for (String a : assemblyInformation) {
             String[] split = a.split("_");
             String labelAsymId = split[0];
@@ -137,7 +135,7 @@ public class ResidueGraph {
                     continue;
                 }
 
-                LabelSelection key = new LabelSelection(labelSelection.getLabelAsymId(), oper, labelSelection.getLabelSeqId());
+                IndexSelection key = new IndexSelection(oper, residueIndex);
                 residueKeys.add(key);
                 float[] backbone = new float[3];
                 float[] sideChain = new float[3];
@@ -153,7 +151,7 @@ public class ResidueGraph {
         this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, squaredCutoff, allowTransformed);
     }
 
-    private int fillResidueGrid(Map<LabelSelection, float[]> backboneVectors, Map<LabelSelection, float[]> sideChainVectors, Map<LabelSelection, float[]> normalVectorMap, List<LabelSelection> labelSelections, float squaredCutoff, boolean allowTransformed) {
+    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed) {
         // temporary ResidueGrid to efficient distance calculation
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
 
@@ -164,14 +162,14 @@ public class ResidueGraph {
                 continue;
             }
 
-            LabelSelection residueKey1 = labelSelections.get(residueContact.getI());
+            IndexSelection residueKey1 = indexSelections.get(residueContact.getI());
             // 'dominant' residue has to be original by contract
             if (!allowTransformed && !residueKey1.getStructOperId().equals("1")) {
                 continue;
             }
 
             float distance = residueContact.getDistance();
-            LabelSelection residueKey2 = labelSelections.get(residueContact.getJ());
+            IndexSelection residueKey2 = indexSelections.get(residueContact.getJ());
             float[] normalVector1 = normalVectorMap.get(residueKey1);
             float[] normalVector2 = normalVectorMap.get(residueKey2);
 
@@ -182,13 +180,13 @@ public class ResidueGraph {
                 continue;
             }
 
-            Map<LabelSelection, Float> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
+            Map<IndexSelection, Float> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
             innerPolymerAnchorMap.put(residueKey2, distance);
 
-            Map<LabelSelection, Float> innerInteractionCenterMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
+            Map<IndexSelection, Float> innerInteractionCenterMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
             innerInteractionCenterMap.put(residueKey2, distance3d(sideChainCoordinates1, sideChainCoordinates2));
 
-            Map<LabelSelection, Float> innerAngleMap = angles.computeIfAbsent(residueKey1, key -> new HashMap<>());
+            Map<IndexSelection, Float> innerAngleMap = angles.computeIfAbsent(residueKey1, key -> new HashMap<>());
             innerAngleMap.put(residueKey2, angle(normalVector1, normalVector2));
 
             size++;
@@ -264,7 +262,7 @@ public class ResidueGraph {
      * @param residue2 second
      * @return the distance
      */
-    public float getBackboneDistance(LabelSelection residue1, LabelSelection residue2) {
+    public float getBackboneDistance(IndexSelection residue1, IndexSelection residue2) {
         try {
             return backboneDistances.get(residue1).get(residue2);
         } catch (NullPointerException e1) {
@@ -282,7 +280,7 @@ public class ResidueGraph {
      * @param residue2 second
      * @return the distance
      */
-    public float getSideChainDistance(LabelSelection residue1, LabelSelection residue2) {
+    public float getSideChainDistance(IndexSelection residue1, IndexSelection residue2) {
         try {
             return sideChainDistances.get(residue1).get(residue2);
         } catch (NullPointerException e1) {
@@ -300,7 +298,7 @@ public class ResidueGraph {
      * @param residue2 second
      * @return the angle
      */
-    public float getAngle(LabelSelection residue1, LabelSelection residue2) {
+    public float getAngle(IndexSelection residue1, IndexSelection residue2) {
         try {
             return angles.get(residue1).get(residue2);
         } catch (NullPointerException e1) {
@@ -324,7 +322,7 @@ public class ResidueGraph {
      * Allows to sequentially traverse all pairings.
      * @return a stream of residue pairs
      */
-    public Stream<Pair<LabelSelection, LabelSelection>> pairingsSequential() {
+    public Stream<Pair<IndexSelection, IndexSelection>> pairingsSequential() {
         // parallel streaming here will cause shuffling of motif descriptors and lead to alignment errors because correspondence cannot be asserted
         return backboneDistances.keySet()
                 .stream()
@@ -335,7 +333,7 @@ public class ResidueGraph {
      * Allows to traverse all pairings.
      * @return a stream of residue pairs
      */
-    public Stream<Pair<LabelSelection, LabelSelection>> pairingsParallel() {
+    public Stream<Pair<IndexSelection, IndexSelection>> pairingsParallel() {
         return backboneDistances.keySet()
                 .parallelStream()
                 .flatMap(e -> pairs(e, true));
@@ -359,24 +357,22 @@ public class ResidueGraph {
                 .map(this::createMotifOccurrence);
     }
 
-    private ResiduePairOccurrence createMotifOccurrence(Pair<LabelSelection, LabelSelection> pair) {
-        LabelSelection labelSelection1 = pair.getFirst();
-        int residueIndex1 = structure.getResidueIndex(labelSelection1.getLabelAsymId(), labelSelection1.getLabelSeqId());
-        LabelSelection labelSelection2 = pair.getSecond();
-        int residueIndex2 = structure.getResidueIndex(labelSelection2.getLabelAsymId(), labelSelection2.getLabelSeqId());
+    private ResiduePairOccurrence createMotifOccurrence(Pair<IndexSelection, IndexSelection> pair) {
+        IndexSelection indexSelection1 = pair.getFirst();
+        IndexSelection indexSelection2 = pair.getSecond();
 
-        ResidueType residueType1 = structure.getResidueType(residueIndex1);
-        ResidueType residueType2 = structure.getResidueType(residueIndex2);
+        ResidueType residueType1 = structure.getResidueType(indexSelection1.getIndex());
+        ResidueType residueType2 = structure.getResidueType(indexSelection2.getIndex());
 
         // first residue must have lower one-letter code - if not: flip
         if (residueType1.getOneLetterCode().compareTo(residueType2.getOneLetterCode()) > 0) {
-            return createMotifOccurrence(new Pair<>(labelSelection2, labelSelection1));
+            return createMotifOccurrence(new Pair<>(indexSelection2, indexSelection1));
         }
 
         // determine values
-        DistanceType backboneDistance = DistanceType.ofDistance(getBackboneDistance(labelSelection1, labelSelection2));
-        DistanceType sideChainDistance = DistanceType.ofDistance(getSideChainDistance(labelSelection1, labelSelection2));
-        AngleType angle = AngleType.ofAngle(getAngle(labelSelection1, labelSelection2));
+        DistanceType backboneDistance = DistanceType.ofDistance(getBackboneDistance(indexSelection1, indexSelection2));
+        DistanceType sideChainDistance = DistanceType.ofDistance(getSideChainDistance(indexSelection1, indexSelection2));
+        AngleType angle = AngleType.ofAngle(getAngle(indexSelection1, indexSelection2));
 
         ResiduePairDescriptor residuePairDescriptor = new ResiduePairDescriptor(residueType1,
                 residueType2,
@@ -384,12 +380,12 @@ public class ResidueGraph {
                 sideChainDistance,
                 angle);
         // LabelSelection is needed to be able to map position-specific exchanges accurately
-        ResiduePairIdentifier residuePairIdentifier = new LabelSelectionResiduePairIdentifier(labelSelection1,
-                labelSelection2);
+        ResiduePairIdentifier residuePairIdentifier = new IndexResiduePairIdentifier(indexSelection1,
+                indexSelection2);
         return new ResiduePairOccurrence(residuePairDescriptor, residuePairIdentifier);
     }
 
-    private Stream<Pair<LabelSelection, LabelSelection>> pairs(LabelSelection residue1, boolean parallel) {
+    private Stream<Pair<IndexSelection, IndexSelection>> pairs(IndexSelection residue1, boolean parallel) {
         try {
             // retrieve all neighbors for id
             if (parallel) {

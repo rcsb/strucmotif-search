@@ -120,7 +120,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         logger.info("[{}] Query: {} with {}",
                 query.hashCode(),
                 queryStructure.getStructureIdentifier(),
-                queryStructure.getLabelSelections());
+                queryStructure.getIndexSelections());
         logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
                 query.hashCode(),
                 query.getExchanges(),

@@ -2,10 +2,12 @@ package org.rcsb.strucmotif.domain.result;
 
 import org.rcsb.strucmotif.core.HitScorer;
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
+import org.rcsb.strucmotif.core.TargetAssembler;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -27,7 +29,7 @@ import java.util.stream.Stream;
  * paths).
  * <p>
  * Each instances represents one structure in the archive in which a motif could occur. It builds up all valid paths and
- * omits stale paths as greedily as possible. Realized with help of a {@link org.rcsb.strucmotif2.core.TargetAssembler}.
+ * omits stale paths as greedily as possible. Realized with help of a {@link TargetAssembler}.
  * For efficiency, one target structures handles all potential paths in a structure.
  * <p>
  * The constructor and {@link TargetStructure#consume(ResiduePairIdentifier[], Overlap[])} iteratively builds up paths
@@ -124,7 +126,13 @@ public class TargetStructure {
     }
 
     private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository) {
-        List<LabelSelection> labelSelections = orderLabelSelections(identifiers, residueIndexSwaps);
+        List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
+        List<LabelSelection> labelSelections = indexSelections.stream()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
+                .collect(Collectors.toList());
 
         try {
             // determine all assembly ids that this collection of label selections appears in
@@ -146,8 +154,7 @@ public class TargetStructure {
                         Map<String, float[]>[] residues = new Map[residueCount];
 
                         for (int i = 0; i < residueCount; i++) {
-                            LabelSelection labelSelection = labelSelections.get(i);
-                            int index = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
+                            int index = indexSelections.get(i).getIndex();
                             residueTypes[i] = structure.getResidueType(index);
                             residues[i] = structure.manifestResidue(index);
                         }
@@ -167,16 +174,16 @@ public class TargetStructure {
         }
     }
 
-    private List<LabelSelection> orderLabelSelections(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps) {
+    private List<IndexSelection> orderIndexSelections(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps) {
         try {
             // ensure correct 'human-readable' order of residues
-            List<LabelSelection> shuffledLabelSelections = Arrays.stream(identifiers)
-                    .flatMap(ResiduePairIdentifier::labelSelections)
+            List<IndexSelection> shuffledIndexSelections = Arrays.stream(identifiers)
+                    .flatMap(ResiduePairIdentifier::indexSelections)
                     .distinct()
                     .collect(Collectors.toList());
 
             return residueIndexSwaps.stream()
-                    .map(shuffledLabelSelections::get)
+                    .map(shuffledIndexSelections::get)
                     .collect(Collectors.toList());
         } catch (IndexOutOfBoundsException e) {
             // this indicates that fewer residues are present in the result than specified by the query

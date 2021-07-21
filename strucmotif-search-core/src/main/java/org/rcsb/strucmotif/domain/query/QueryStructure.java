@@ -4,6 +4,7 @@ import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 public class QueryStructure {
     private final String structureIdentifier;
     private final Structure structure;
-    private final List<LabelSelection> labelSelections;
+    private final List<IndexSelection> indexSelections;
     private final List<Map<String, float[]>> residues;
     private final List<ResiduePairOccurrence> residuePairOccurrences;
     private final List<ResiduePairIdentifier> residuePairIdentifiers;
@@ -47,18 +48,24 @@ public class QueryStructure {
 
         // explode query into motifs and get entities by that - this provides the correct order of entities so that the
         // alignment routine does not have to care about finding correspondence
-        this.labelSelections = residuePairIdentifiers.stream()
-                .flatMap(ResiduePairIdentifier::labelSelections)
+        this.indexSelections = residuePairIdentifiers.stream()
+                .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .collect(Collectors.toList());
 
-        if (labelSelections.size() != originalResidues.size()) {
+        if (indexSelections.size() != originalResidues.size()) {
             // this indicates that fewer residues are present in the result than specified by the query
             throw new IllegalQueryDefinitionException("Query violates distance threshold");
         }
 
-        this.residueIndexSwaps = originalLabelSelections.stream()
-                .map(labelSelections::indexOf)
+        List<IndexSelection> originalIndexSelections = originalLabelSelections.stream()
+                .map(labelSelection -> {
+                    int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
+                    return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
+                })
+                .collect(Collectors.toList());
+        this.residueIndexSwaps = originalIndexSelections.stream()
+                .map(indexSelections::indexOf)
                 .collect(Collectors.toList());
         this.residues = residueIndexSwaps.stream()
                 .map(originalResidues::get)
@@ -100,10 +107,10 @@ public class QueryStructure {
      * @return true if describing an overlapping selection
      */
     private boolean match(ResiduePairIdentifier sortedWordResiduePairIdentifier, ResiduePairIdentifier candidateIdentifier) {
-        return sortedWordResiduePairIdentifier.getLabelSelection1().equals(candidateIdentifier.getLabelSelection1()) ||
-                sortedWordResiduePairIdentifier.getLabelSelection1().equals(candidateIdentifier.getLabelSelection2()) ||
-                sortedWordResiduePairIdentifier.getLabelSelection2().equals(candidateIdentifier.getLabelSelection1()) ||
-                sortedWordResiduePairIdentifier.getLabelSelection2().equals(candidateIdentifier.getLabelSelection2());
+        return sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection1()) ||
+                sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection2()) ||
+                sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection1()) ||
+                sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection2());
     }
 
     public String getStructureIdentifier() {
@@ -148,10 +155,10 @@ public class QueryStructure {
 
     /**
      * All selections of this query structure.
-     * @return a collection of LabelSelections
+     * @return a collection of IndexSelections
      */
-    public List<LabelSelection> getLabelSelections() {
-        return labelSelections;
+    public List<IndexSelection> getIndexSelections() {
+        return indexSelections;
     }
 
     /**

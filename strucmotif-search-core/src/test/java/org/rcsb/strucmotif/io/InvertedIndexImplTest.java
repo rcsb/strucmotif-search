@@ -46,7 +46,7 @@ public class InvertedIndexImplTest {
         assertTrue(invertedIndex.select(BIN_WITH_ASSEMBLY)
                 .map(Pair::getSecond)
                 .flatMap(Arrays::stream)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
                 .anyMatch(indexSelector -> !indexSelector.getStructOperId().equals("1")));
     }
 }

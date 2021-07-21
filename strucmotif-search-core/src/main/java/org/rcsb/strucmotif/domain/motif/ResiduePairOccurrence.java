@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.motif;
 
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.util.ArrayList;
@@ -75,10 +75,10 @@ public class ResiduePairOccurrence {
     public Stream<ResiduePairDescriptor> residuePairDescriptorsByTolerance(int backboneTolerance,
                                                                            int sideChainTolerance,
                                                                            int angleTolerance,
-                                                                           Map<LabelSelection, Set<ResidueType>> exchanges) {
+                                                                           Map<IndexSelection, Set<ResidueType>> exchanges) {
         // we assign current component type for components without exchanges
-        Set<ResidueType> residueTypes1 = exchanges.getOrDefault(residuePairIdentifier.getLabelSelection1(), Set.of(residuePairDescriptor.getResidueType1()));
-        Set<ResidueType> residueTypes2 = exchanges.getOrDefault(residuePairIdentifier.getLabelSelection2(), Set.of(residuePairDescriptor.getResidueType2()));
+        Set<ResidueType> residueTypes1 = exchanges.getOrDefault(residuePairIdentifier.getIndexSelection1(), Set.of(residuePairDescriptor.getResidueType1()));
+        Set<ResidueType> residueTypes2 = exchanges.getOrDefault(residuePairIdentifier.getIndexSelection2(), Set.of(residuePairDescriptor.getResidueType2()));
 
         int backboneDistance = residuePairDescriptor.getBackboneDistance().ordinal();
         int sideChainDistance = residuePairDescriptor.getSideChainDistance().ordinal();

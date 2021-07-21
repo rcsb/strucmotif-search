@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -49,23 +50,23 @@ public class KruskalMotifPruner implements MotifPruner {
     }
 
     private List<ResiduePairOccurrence> kruskal(List<ResiduePairOccurrence> residuePairOccurrences) {
-        List<Set<LabelSelection>> coveredSelectors = new ArrayList<>();
+        List<Set<IndexSelection>> coveredSelectors = new ArrayList<>();
         List<ResiduePairOccurrence> result = new ArrayList<>();
         // sort all edges by weight
         residuePairOccurrences.sort(Comparator.comparingInt(mo -> mo.getResiduePairDescriptor().getBackboneDistance().ordinal()));
 
         while (residuePairOccurrences.size() > 0) {
             ResiduePairOccurrence best = residuePairOccurrences.remove(0);
-            LabelSelection id1 = best.getResidueIdentifier().getLabelSelection1();
-            LabelSelection id2 = best.getResidueIdentifier().getLabelSelection2();
+            IndexSelection id1 = best.getResidueIdentifier().getIndexSelection1();
+            IndexSelection id2 = best.getResidueIdentifier().getIndexSelection2();
 
             // prevent formation of circles
-            Set<LabelSelection> set1 = find(coveredSelectors, id1);
-            Set<LabelSelection> set2 = find(coveredSelectors, id2);
+            Set<IndexSelection> set1 = find(coveredSelectors, id1);
+            Set<IndexSelection> set2 = find(coveredSelectors, id2);
             if (set1 == null || !set1.equals(set2)) {
                 result.add(best);
 
-                Set<LabelSelection> updated = new HashSet<>();
+                Set<IndexSelection> updated = new HashSet<>();
                 if (set1 != null) {
                     coveredSelectors.remove(set1);
                     updated.addAll(set1);
@@ -83,7 +84,7 @@ public class KruskalMotifPruner implements MotifPruner {
         return result;
     }
 
-    private Set<LabelSelection> find(List<Set<LabelSelection>> selectors, LabelSelection selector) {
+    private Set<IndexSelection> find(List<Set<IndexSelection>> selectors, IndexSelection selector) {
         return selectors.stream()
                 .filter(list -> list.contains(selector))
                 .findFirst()

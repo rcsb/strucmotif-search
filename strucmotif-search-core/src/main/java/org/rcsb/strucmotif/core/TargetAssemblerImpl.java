@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.motif.LabelSelectionResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.IndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -11,6 +11,7 @@ import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
+import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.InvertedIndex;
@@ -23,6 +24,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +55,14 @@ public class TargetAssemblerImpl implements TargetAssembler {
         int backboneDistanceTolerance = parameters.getBackboneDistanceTolerance();
         int sideChainDistanceTolerance = parameters.getSideChainDistanceTolerance();
         int angleTolerance = parameters.getAngleTolerance();
-        Map<LabelSelection, Set<ResidueType>> exchanges = query.getExchanges();
+        Map<LabelSelection, Set<ResidueType>> labelSelectionExchanges = query.getExchanges();
+        Map<IndexSelection, Set<ResidueType>> exchanges = labelSelectionExchanges.entrySet()
+                .stream()
+                .collect(Collectors.toMap(entry -> {
+                    LabelSelection labelSelection = entry.getKey();
+                    queryStructure.getStructure().getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
+                    return new IndexSelection(labelSelection.getStructOperId(), 0);
+                }, Map.Entry::getValue));
         boolean whitelist = !query.getWhitelist().isEmpty();
         boolean blacklist = !query.getBlacklist().isEmpty();
 
@@ -124,7 +133,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             Overlap[] overlapProfile = new Overlap[pathGeneration];
             for (int i = 0; i < pathGeneration; i++) {
                 // defined by query structure, known LabelSelections
-                overlapProfile[i] = Overlap.ofResiduePairIdentifiers((LabelSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(i), (LabelSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(pathGeneration));
+                overlapProfile[i] = Overlap.ofResiduePairIdentifiers((IndexResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(i), (IndexResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(pathGeneration));
             }
 
             // focus on valid target structures as this set should be smaller

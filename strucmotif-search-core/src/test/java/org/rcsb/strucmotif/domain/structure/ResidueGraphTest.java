@@ -67,8 +67,12 @@ class ResidueGraphTest {
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
                 .map(LabelSelection::getLabelAsymId)
                 .distinct()
                 // .peek(System.out::println)
@@ -86,8 +90,12 @@ class ResidueGraphTest {
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
                 // keep only freakish chain
                 .filter(labelSelection -> labelSelection.getLabelAsymId().equals("C"))
                 // map back to unique groups
@@ -112,13 +120,18 @@ class ResidueGraphTest {
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
-                .map(LabelSelection::getStructOperId)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .map(IndexSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(162, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .distinct()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
                 .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
@@ -136,13 +149,18 @@ class ResidueGraphTest {
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
-                .map(LabelSelection::getStructOperId)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .map(IndexSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(528, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .distinct()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
                 .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
@@ -160,13 +178,18 @@ class ResidueGraphTest {
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
-                .map(LabelSelection::getStructOperId)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .map(IndexSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(162, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .distinct()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
                 .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
@@ -184,13 +207,18 @@ class ResidueGraphTest {
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
-                .map(LabelSelection::getStructOperId)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .map(IndexSelection::getStructOperId)
                 .distinct()
                 .count());
         assertEquals(528, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::labelSelections)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .distinct()
+                .map(indexSelection -> {
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
+                })
                 .map(LabelSelection::getLabelSeqId)
                 .distinct()
                 .count());
@@ -214,8 +242,8 @@ class ResidueGraphTest {
                 .collect(Collectors.toList());
         assertFalse(identifiers.isEmpty());
         assertTrue(identifiers.stream()
-                .flatMap(ResiduePairIdentifier::labelSelections)
-                .map(LabelSelection::getStructOperId)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .map(IndexSelection::getStructOperId)
                 .anyMatch(id -> !id.equals("1")));
     }
 

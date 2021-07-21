@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -226,34 +226,20 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     private Object[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
-        LabelSelection identifier1 = residuePairIdentifier.getLabelSelection1();
-        int seqId1 = identifier1.getLabelSeqId();
-        String asymId1 = identifier1.getLabelAsymId();
+        IndexSelection identifier1 = residuePairIdentifier.getIndexSelection1();
+        int index1 = identifier1.getIndex();
         String structOperId1 = identifier1.getStructOperId();
-        LabelSelection identifier2 = residuePairIdentifier.getLabelSelection2();
-        int seqId2 = identifier2.getLabelSeqId();
-        String asymId2 = identifier2.getLabelAsymId();
+        IndexSelection identifier2 = residuePairIdentifier.getIndexSelection2();
+        int index2 = identifier2.getIndex();
         String structOperId2 = identifier2.getStructOperId();
 
         // implicitly: don't write struct_oper_id if identity
         if ("1".equals(structOperId1) && "1".equals(structOperId2)) {
-            // implicitly: collapse same asym_ids
-            if (asymId1.equals(asymId2)) {
-                // length 3
-                return new Object[] { seqId1, seqId2, asymId1 };
-            } else {
-                // length 4
-                return new Object[] { seqId1, seqId2, asymId1, asymId2 };
-            }
+            // length 2
+            return new Object[] { index1, index2 };
         } else {
-            // implicitly: collapse same asym_ids
-            if (asymId1.equals(asymId2)) {
-                // length 5
-                return new Object[] { seqId1, seqId2, asymId1, structOperId1, structOperId2 };
-            } else {
-                // length 6
-                return new Object[] { seqId1, seqId2, asymId1, asymId2, structOperId1, structOperId2 };
-            }
+            // length 4
+            return new Object[] { index1, index2, structOperId1, structOperId2 };
         }
     }
 }

@@ -200,6 +200,10 @@ public class StructureWriterImpl implements StructureWriter {
         Map<LabelSelection, ResidueType> residueTypes = new HashMap<>();
         Map<LabelSelection, Set<String>> presentAtoms = new HashMap<>();
         for (int row = 0; row < atomSite.getRowCount(); row++) {
+            if (atomSite.getLabelSeqId().getValueKind(row) != ValueKind.PRESENT) {
+                continue;
+            }
+
             LabelSelection labelSelection = new LabelSelection(atomSite.getLabelAsymId().get(row), "1", atomSite.getLabelSeqId().get(row));
             residueTypes.put(labelSelection, ResidueType.ofThreeLetterCode(atomSite.getLabelCompId().get(row)));
             Set<String> atoms = presentAtoms.computeIfAbsent(labelSelection, e -> new HashSet<>());

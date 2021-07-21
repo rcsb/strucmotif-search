@@ -171,8 +171,9 @@ public class QueryBuilder {
          * @param rmsdCutoff the RMSD cutoff above which hits are filtered
          * @return this builder
          */
-        public MandatoryBuilder rmsdCutoff(float rmsdCutoff) {
-            this.rmsdCutoff = rmsdCutoff;
+        public MandatoryBuilder rmsdCutoff(double rmsdCutoff) {
+            // TODO expose only doubles to define inputs
+            this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 

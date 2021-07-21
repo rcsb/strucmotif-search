@@ -6,19 +6,18 @@ import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
-import org.rcsb.strucmotif2.config.MotifSearchConfig;
-import org.rcsb.strucmotif2.core.ThreadPool;
-import org.rcsb.strucmotif2.domain.ResidueGraph;
-import org.rcsb.strucmotif2.domain.Revision;
-import org.rcsb.strucmotif2.domain.StructureInformation;
-import org.rcsb.strucmotif2.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif2.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif2.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif2.domain.structure.Structure;
-import org.rcsb.strucmotif2.io.StructureDataProvider;
-import org.rcsb.strucmotif2.math.Partition;
-import org.rcsb.strucmotif2.persistence.InvertedIndex;
-import org.rcsb.strucmotif2.persistence.StateRepository;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.core.ThreadPool;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
+import org.rcsb.strucmotif.domain.structure.Revision;
+import org.rcsb.strucmotif.domain.structure.StructureInformation;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.math.Partition;
+import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.StateRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,17 +113,17 @@ public class MotifSearchUpdate implements CommandLineRunner {
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = Operation.resolve(args[0]);
         String[] ids = new String[args.length - 1];
-        List<StructureIdentifier> requested;
+        List<String> requested;
         System.arraycopy(args, 1, ids, 0, ids.length);
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
         } else {
-            requested = Arrays.stream(ids).map(StructureIdentifier::new).collect(Collectors.toList());
+            requested = Arrays.asList(ids);
         }
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {
-            Collection<StructureIdentifier> dirtyStructureIdentifiers = stateRepository.selectDirty();
+            Collection<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
             if (dirtyStructureIdentifiers.size() > 0) {
                 logger.warn("Update state is dirty - problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
@@ -138,7 +137,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 requested.size(),
                 requested.stream()
                         .limit(5)
-                        .map(id -> "\"" + id.getPdbId() + "\"")
+                        .map(id -> "\"" + id + "\"")
                         .collect(Collectors.joining(", ",
                                 "[",
                                 requested.size() > 5 ? ", ...]" : "]")));
@@ -164,11 +163,11 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @throws ExecutionException update failure
      * @throws InterruptedException update failure
      */
-    public void add(Collection<StructureIdentifier> identifiers) throws ExecutionException, InterruptedException {
+    public void add(Collection<String> identifiers) throws ExecutionException, InterruptedException {
         long target = identifiers.size();
         logger.info("{} files to process in total", target);
 
-        Partition<StructureIdentifier> partitions = new Partition<>(identifiers, motifSearchConfig.getUpdateChunkSize());
+        Partition<String> partitions = new Partition<>(identifiers, motifSearchConfig.getUpdateChunkSize());
         logger.info("Formed {} partitions of {} structures",
                 partitions.size(),
                 motifSearchConfig.getUpdateChunkSize());
@@ -179,7 +178,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         for (int i = 0; i < partitions.size(); i++) {
             context.partitionContext = (i + 1) + " / " + partitions.size();
 
-            List<StructureIdentifier> partition = partitions.get(i);
+            List<String> partition = partitions.get(i);
             logger.info("[{}] Start processing partition", context.partitionContext);
 
             context.structureCounter = new AtomicInteger();
@@ -198,7 +197,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
     static class Context {
         final Set<StructureInformation> processed;
         String partitionContext;
-        Map<ResiduePairDescriptor, Map<StructureIdentifier, Collection<ResiduePairIdentifier>>> buffer;
+        Map<ResiduePairDescriptor, Map<String, Collection<ResiduePairIdentifier>>> buffer;
         AtomicInteger structureCounter;
 
         public Context() {
@@ -206,7 +205,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    private void handleStructureIdentifier(StructureIdentifier structureIdentifier, Context context) {
+    private void handleStructureIdentifier(String structureIdentifier, Context context) {
         int maxRetries = motifSearchConfig.getDownloadTries();
         for (int i = 1; i <= maxRetries; i++) {
             try {
@@ -219,7 +218,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 }
 
                 int count = context.structureCounter.get();
-                String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier.getPdbId();
+                String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
                 logger.warn("[{}] [{}] [try: {} / {}] Failed to download source file - {}",
                         context.partitionContext,
                         structureContext,
@@ -230,7 +229,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    private void handleStructureIdentifierInternal(StructureIdentifier structureIdentifier, Context context) {
+    private void handleStructureIdentifierInternal(String structureIdentifier, Context context) {
         try {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
@@ -246,7 +245,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier.getPdbId();
+        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;
@@ -267,7 +266,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         try {
-            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), false);
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
@@ -277,7 +276,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                             ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
                             ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
 
-                            Map<StructureIdentifier, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
+                            Map<String, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
                             Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
                             targetIdentifiers.add(targetIdentifier);
                             structureMotifCounter.incrementAndGet();
@@ -393,7 +392,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         threadPool.submit(() -> {
             context.buffer.entrySet().parallelStream().forEach(entry -> {
                 ResiduePairDescriptor full = entry.getKey();
-                Map<StructureIdentifier, Collection<ResiduePairIdentifier>> output = entry.getValue();
+                Map<String, Collection<ResiduePairIdentifier>> output = entry.getValue();
 
                 if (bufferCount.incrementAndGet() % 100000 == 0) {
                     logger.info("[{}] {} / {}",
@@ -422,9 +421,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * 'REMOVE' operation.
      * @param identifiers set of identifiers to remove
      */
-    public void remove(Collection<StructureIdentifier> identifiers) {
+    public void remove(Collection<String> identifiers) {
         AtomicInteger counter = new AtomicInteger();
-        for (StructureIdentifier structureIdentifier : identifiers) {
+        for (String structureIdentifier : identifiers) {
             logger.info("[{}] Removing renumbered structure for entry: {}",
                     counter.incrementAndGet() + " / " + identifiers.size(),
                     structureIdentifier);
@@ -447,7 +446,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @return collection of structure identifiers
      * @throws IOException connection failure
      */
-    public List<StructureIdentifier> getAllIdentifiers() throws IOException {
+    public List<String> getAllIdentifiers() throws IOException {
         logger.info("Retrieving current entry list from {}", MotifSearchConfig.RCSB_ENTRY_LIST);
         String response;
         try (InputStream inputStream = new URL(MotifSearchConfig.RCSB_ENTRY_LIST).openStream()) {
@@ -458,8 +457,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         return ENTRY_ID_PATTERN.matcher(response)
                 .results()
                 .map(MatchResult::group)
-                .map(String::toLowerCase)
-                .map(StructureIdentifier::new)
+                .map(String::toUpperCase)
                 .collect(Collectors.toList());
     }
 
@@ -468,8 +466,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param requested the requested update
      * @return array of IDs that need to be processed for the given context
      */
-    public Collection<StructureIdentifier> getDeltaPlusIdentifiers(Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
+    public Collection<String> getDeltaPlusIdentifiers(Collection<String> requested) {
+        Collection<String> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
         if (known.isEmpty()) {
             logger.warn("No existing data - starting from scratch");
             return requested;
@@ -485,8 +483,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param requested the requested update
      * @return array of IDs that need to be remove for the given context
      */
-    public Collection<StructureIdentifier> getDeltaMinusIdentifiers(Collection<StructureIdentifier> requested) {
-        Collection<StructureIdentifier> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
+    public Collection<String> getDeltaMinusIdentifiers(Collection<String> requested) {
+        Collection<String> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
         if (known.isEmpty()) {
             logger.warn("No existing data - no need for cleanup of obsolete entries");
             return Collections.emptySet();

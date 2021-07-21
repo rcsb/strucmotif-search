@@ -2,19 +2,21 @@ package org.rcsb.strucmotif.benchmark;
 
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.rcsb.strucmotif2.MotifSearch;
-import org.rcsb.strucmotif2.Motifs;
-import org.rcsb.strucmotif2.config.MotifSearchConfig;
-import org.rcsb.strucmotif2.domain.identifier.StructureIdentifier;
-import org.rcsb.strucmotif2.domain.query.QueryBuilder;
-import org.rcsb.strucmotif2.domain.structure.Structure;
-import org.rcsb.strucmotif2.io.read.StructureReaderImpl;
+import org.rcsb.strucmotif.MotifSearch;
+import org.rcsb.strucmotif.Motifs;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.query.QueryBuilder;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,7 +29,7 @@ public class MyState {
     private final MotifSearchConfig config = new MotifSearchConfig();
     private final StructureReaderImpl structureReader = new StructureReaderImpl();
     public final QueryBuilder queryBuilder = MotifSearch.newQuery();
-    public final Map<Motifs, Structure> structureMap;
+    public final Map<Motifs, Pair<Structure, List<LabelSelection>>> structureMap;
 
     /**
      * Create state.
@@ -37,18 +39,18 @@ public class MyState {
                 .collect(Collectors.toMap(Function.identity(), this::createStructure));
     }
 
-    private Structure createStructure(Motifs motif) {
+    private Pair<Structure, List<LabelSelection>> createStructure(Motifs motif) {
         try {
             URL url = new URL(prepareUri(config.getCifFetchUrl(), motif.getStructureIdentifier()));
             InputStream inputStream = url.openStream();
-            return structureReader.readFromInputStream(inputStream, motif.getSelection());
+            return new Pair<>(structureReader.readFromInputStream(inputStream), motif.getLabelSelections());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    private String prepareUri(String raw, StructureIdentifier structureIdentifier) {
-        String pdbId = structureIdentifier.getPdbId().toLowerCase();
+    private String prepareUri(String raw, String structureIdentifier) {
+        String pdbId = structureIdentifier.toLowerCase();
         String PDBID = pdbId.toUpperCase();
         String middle = pdbId.substring(1, 3);
         String MIDDLE = middle.toUpperCase();

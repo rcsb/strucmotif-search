@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.rcsb.strucmotif2.Helpers.getOriginalBcif;
+import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
 @SpringBootTest
 public class MotifSearchIntegrationTest {

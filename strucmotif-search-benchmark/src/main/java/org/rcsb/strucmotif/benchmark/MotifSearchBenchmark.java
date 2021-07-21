@@ -8,11 +8,14 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.rcsb.strucmotif2.Motifs;
-import org.rcsb.strucmotif2.domain.AtomPairingScheme;
-import org.rcsb.strucmotif2.domain.query.ScoringStrategy;
-import org.rcsb.strucmotif2.domain.result.MotifSearchResult;
-import org.rcsb.strucmotif2.domain.structure.Structure;
+import org.rcsb.strucmotif.Motifs;
+import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.Structure;
+
+import java.util.List;
 
 /**
  * Generic benchmark via JMH.
@@ -84,11 +87,10 @@ public class MotifSearchBenchmark {
     }
 
     private MotifSearchResult run(Motifs motif, MyState state) {
-        Structure structure = state.structureMap.get(motif);
-        return state.queryBuilder.defineByStructure(structure)
-                .scoringStrategy(ScoringStrategy.ALIGNMENT)
+        Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
+        return state.queryBuilder.defineByStructure(motif.getStructureIdentifier(), structure.getFirst(), structure.getSecond())
                 .atomPairingScheme(AtomPairingScheme.ALL)
-                .rmsdCutoff(2.0)
+                .rmsdCutoff(2.0f)
                 .buildParameters()
                 .buildQuery()
                 .run();

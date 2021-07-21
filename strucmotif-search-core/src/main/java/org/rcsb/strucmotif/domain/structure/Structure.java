@@ -96,9 +96,14 @@ public class Structure {
         int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomId.length : residueOffsets[residueIndex + 1];
         Transformation transformation = transformations.get(structOperIdentifier);
 
+        // happens e.g. for 7a3x, there assembly '1' references opers '2' and '3'
+        if (transformation == null) {
+            transformation = Transformation.IDENTITY_TRANSFORMATION;
+        }
+
         for (int i = offsetStart; i < offsetEnd; i++) {
             String labelAtomId = this.labelAtomId[i];
-            float[] v = new float[]{
+            float[] v = new float[] {
                     x[i],
                     y[i],
                     z[i]

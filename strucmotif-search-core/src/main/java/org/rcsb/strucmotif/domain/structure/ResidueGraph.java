@@ -14,9 +14,11 @@ import org.rcsb.strucmotif.math.Algebra;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -155,6 +157,20 @@ public class ResidueGraph {
         // temporary ResidueGrid to efficient distance calculation
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
 
+        Set<String> acceptedChains = new HashSet<>();
+        Set<String> acceptedOperators = new HashSet<>();
+        if (!allowTransformed) {
+            for (List<String> chainExprs : structure.getAssemblies().values()) {
+                for (String chainExpr : chainExprs) {
+                    String chain = chainExpr.split("_")[0];
+                    if (!acceptedChains.contains(chain)) {
+                        acceptedChains.add(chain);
+                        acceptedOperators.add(chainExpr);
+                    }
+                }
+            }
+        }
+
         int size = 0;
         for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
             // avoid symmetry/duplicates
@@ -163,8 +179,9 @@ public class ResidueGraph {
             }
 
             IndexSelection residueKey1 = indexSelections.get(residueContact.getI());
+            String chainExpr = structure.getLabelSelections().get(residueKey1.getIndex()).getLabelAsymId() + "_" + residueKey1.getStructOperId();
             // 'dominant' residue has to be original by contract
-            if (!allowTransformed && !residueKey1.getStructOperId().equals("1")) {
+            if (!allowTransformed && !acceptedOperators.contains(chainExpr)) {
                 continue;
             }
 

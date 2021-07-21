@@ -10,7 +10,6 @@ import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.math.Algebra;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -95,7 +94,7 @@ public class QuaternionAlignmentService implements AlignmentService {
         List<float[]> candidatePoints = atomCorrespondence.getCenteredCandidateVectors();
         float[] candidateCentroid = atomCorrespondence.getCandidateCentroid();
 
-        Pair<Transformation, Double> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
+        Pair<Transformation, Float> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
 
         return new AlignmentResultImpl(alignment.getFirst(), new RootMeanSquareDeviation(alignment.getSecond()));
     }
@@ -109,7 +108,7 @@ public class QuaternionAlignmentService implements AlignmentService {
      * @return pair of transformation and RMSD
      */
     @SuppressWarnings("Duplicates")
-    public static Pair<Transformation, Double> align(List<float[]> referencePoints, float[] referenceCentroid, List<float[]> candidatePoints, float[] candidateCentroid) {
+    public static Pair<Transformation, Float> align(List<float[]> referencePoints, float[] referenceCentroid, List<float[]> candidatePoints, float[] candidateCentroid) {
         float[][] rot = new float[3][3];
 
         // inner product
@@ -320,7 +319,7 @@ public class QuaternionAlignmentService implements AlignmentService {
         float[] translation = new float[3];
         Algebra.subtract3d(translation, referenceCentroid, candidateCentroid);
         float[][] transformation = composeTransformationMatrix(rot, translation);
-        return new Pair<>(new Transformation(transformation), rms);
+        return new Pair<>(new Transformation(transformation), (float) rms);
     }
 
     /**

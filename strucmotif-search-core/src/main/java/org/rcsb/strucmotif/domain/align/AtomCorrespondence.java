@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.align;
 
+import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.math.Algebra;
 
 import java.util.ArrayList;
@@ -82,10 +83,8 @@ public class AtomCorrespondence {
         return mapping;
     }
 
-    // see Coutsias, 2019
-    private static final Set<String> AMBIGUOUS_LABEL_ATOM_IDS = Set.of("NH1", "NH2", "OD1", "OD2", "OE1", "OE2", "CD1", "CD2", "CE1", "CE2", "OG1", "OG2");
     private static boolean ambiguous(String referenceLabel) {
-        return AMBIGUOUS_LABEL_ATOM_IDS.contains(referenceLabel);
+        return AlignmentService.AMBIGUOUS_LABEL_ATOM_IDS.contains(referenceLabel);
     }
 
     /**

@@ -33,17 +33,48 @@ public class ResidueGraph {
     private final Map<LabelSelection, Map<LabelSelection, Float>> angles;
     private final int numberOfPairings;
 
-    /**
-     * Construct a residue graph from a structure.
-     * @param structure the structure to process
-     * @param squaredCutoff maximum squared residue distance
-     */
-    public ResidueGraph(Structure structure, float squaredCutoff) {
-        this(structure, squaredCutoff, false);
+    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues, float squaredCutoff, boolean allowTransformed) {
+        this.structure = structure;
+        this.backboneDistances = new HashMap<>();
+        this.sideChainDistances = new HashMap<>();
+        this.angles = new HashMap<>();
+
+        // sort residues into chains
+        // ${label_asym_id}: ${label_asym_id}-${label_seq_id}
+        Map<String, List<LabelSelection>> chainMap = labelSelections.stream()
+                .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
+
+        Map<LabelSelection, float[]> normalVectorMap = new LinkedHashMap<>();
+        Map<LabelSelection, float[]> backboneVectors = new LinkedHashMap<>();
+        Map<LabelSelection, float[]> sideChainVectors = new LinkedHashMap<>();
+        for (int i = 0; i < labelSelections.size(); i++) {
+            LabelSelection labelSelection = labelSelections.get(i);
+            Map<String, float[]> residue = residues.get(i);
+            int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
+            ResidueType residueType = structure.getResidueType(residueIndex);
+
+            float[] backbone = getBackboneCoords(residue);
+            float[] sideChain;
+            if (residueType == ResidueType.GLYCINE) {
+                sideChain = getVirtualCB(residue);
+            } else {
+                sideChain = getSideChainCoords(residue);
+            }
+
+            if (backbone == null || sideChain == null) {
+                continue;
+            }
+
+            backboneVectors.put(labelSelection, backbone);
+            sideChainVectors.put(labelSelection, sideChain);
+            normalVectorMap.put(labelSelection, normalVector(backbone, sideChain));
+        }
+
+        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, labelSelections, squaredCutoff, allowTransformed);
     }
 
     /**
-     * Construct a new residue graph.
+     * Construct a new residue graph from a full structure.
      * @param structure data
      * @param squaredCutoff maximum dot product between atoms to consider
      * @param allowTransformed set to true during QueryStructure evaluation
@@ -56,7 +87,7 @@ public class ResidueGraph {
 
         // sort residues into chains
         // ${label_asym_id}: ${label_asym_id}-${label_seq_id}
-        Map<String, List<LabelSelection>> chainMap = structure.getResidueIdentifiers()
+        Map<String, List<LabelSelection>> chainMap = structure.getLabelSelections()
                 .stream()
                 .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
         // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
@@ -119,8 +150,12 @@ public class ResidueGraph {
             }
         }
 
+        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, squaredCutoff, allowTransformed);
+    }
+
+    private int fillResidueGrid(Map<LabelSelection, float[]> backboneVectors, Map<LabelSelection, float[]> sideChainVectors, Map<LabelSelection, float[]> normalVectorMap, List<LabelSelection> labelSelections, float squaredCutoff, boolean allowTransformed) {
         // temporary ResidueGrid to efficient distance calculation
-        ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(transformedBackboneVectors.values()), squaredCutoff);
+        ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
 
         int size = 0;
         for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
@@ -129,20 +164,20 @@ public class ResidueGraph {
                 continue;
             }
 
-            LabelSelection residueKey1 = residueKeys.get(residueContact.getI());
+            LabelSelection residueKey1 = labelSelections.get(residueContact.getI());
             // 'dominant' residue has to be original by contract
             if (!allowTransformed && !residueKey1.getStructOperId().equals("1")) {
                 continue;
             }
 
             float distance = residueContact.getDistance();
-            LabelSelection residueKey2 = residueKeys.get(residueContact.getJ());
+            LabelSelection residueKey2 = labelSelections.get(residueContact.getJ());
             float[] normalVector1 = normalVectorMap.get(residueKey1);
             float[] normalVector2 = normalVectorMap.get(residueKey2);
 
             // ensure that side-chain atoms are available
-            float[] sideChainCoordinates1 = transformedSideChainVectors.get(residueKey1);
-            float[] sideChainCoordinates2 = transformedSideChainVectors.get(residueKey2);
+            float[] sideChainCoordinates1 = sideChainVectors.get(residueKey1);
+            float[] sideChainCoordinates2 = sideChainVectors.get(residueKey2);
             if (sideChainCoordinates1 == null || sideChainCoordinates2 == null) {
                 continue;
             }
@@ -158,9 +193,8 @@ public class ResidueGraph {
 
             size++;
         }
-        this.numberOfPairings = size;
+        return size;
     }
-
 
     // already centered coordinates to save operations
     private static final List<float[]> REFERENCE_BACKBONE = List.of(new float[] { -0.698f, 0.184f, 1.008f }, // N

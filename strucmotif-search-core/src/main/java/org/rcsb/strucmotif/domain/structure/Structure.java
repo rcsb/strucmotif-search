@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Structure {
@@ -44,11 +43,12 @@ public class Structure {
         this.transformations = transformations;
     }
 
-    public List<LabelSelection> getResidueIdentifiers() {
+    public List<LabelSelection> getLabelSelections() {
         return new ArrayList<>(residueMapping.keySet());
     }
 
     public int getResidueIndex(String labelAsymId, int labelSeqId) {
+        // this must be accessed with struct_oper_id = 1
         return residueMapping.get(new LabelSelection(labelAsymId, "1", labelSeqId));
     }
 
@@ -80,9 +80,10 @@ public class Structure {
         return manifestResidue(getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId()), labelSelection.getStructOperId());
     }
 
-    public Map<LabelSelection, Map<String, float[]>> manifestResidues(List<LabelSelection> labelSelections) {
+    public List<Map<String, float[]>> manifestResidues(List<LabelSelection> labelSelections) {
         return labelSelections.stream()
-                .collect(Collectors.toMap(Function.identity(), this::manifestResidue));
+                .map(this::manifestResidue)
+                .collect(Collectors.toList());
     }
 
     public Map<String, float[]> manifestResidue(int residueIndex) {

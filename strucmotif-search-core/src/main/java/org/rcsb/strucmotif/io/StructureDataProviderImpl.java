@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -39,7 +38,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final String extension;
     private boolean paths;
     private boolean caching;
-    // keys must be lower-case
+    // keys must be upper-case
     private Map<String, Structure> structureCache;
 
     /**
@@ -101,11 +100,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     private Path getRenumberedStructurePath(String structureIdentifier) {
-        return renumberedPath.resolve(structureIdentifier.toLowerCase() + extension);
+        return renumberedPath.resolve(structureIdentifier + extension);
     }
 
     private InputStream getRenumberedInputStream(String structureIdentifier) {
         try {
+            // TODO unify usage of UPPER_CASE throughout project, avoid String manipulation
             return Files.newInputStream(getRenumberedStructurePath(structureIdentifier));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -124,7 +124,6 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             logger.info("Structure data will be kept in memory - start loading...");
 
             this.caching = true;
-            AtomicInteger count = new AtomicInteger();
             List<Path> paths = Files.walk(renumberedPath)
                     .parallel()
                     .filter(path -> !Files.isDirectory(path))
@@ -153,13 +152,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
             long time = (System.nanoTime() - start) / 1000 / 1000 / 1000 / 60;
 
-            logger.info("Done caching structure data in {} minutes - {} structures held in memory", time, count.get());
+            logger.info("Done caching structure data in {} minutes - {} structures held in memory", time, structureCache.size());
         }
     }
 
     private Pair<String, Structure> loadRenumberedStructure(Path path) {
         try {
-            String pdbId = path.toFile().getName().toLowerCase();
+            String pdbId = path.toFile().getName().split("\\.")[0];
             Structure structure = readFromInputStream(Files.newInputStream(path));
             return new Pair<>(pdbId, structure);
         } catch (IOException e) {
@@ -189,7 +188,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     @Override
     public Structure readRenumbered(String structureIdentifier) {
         if (caching) {
-            return structureCache.get(structureIdentifier.toLowerCase());
+            return structureCache.get(structureIdentifier);
         }
         return readFromInputStream(getRenumberedInputStream(structureIdentifier));
     }

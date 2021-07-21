@@ -6,7 +6,7 @@ package org.rcsb.strucmotif.domain.score;
 public interface Score {
     /**
      * Get the actual score.
-     * @return a double value
+     * @return a float value
      */
-    double value();
+    float value();
 }

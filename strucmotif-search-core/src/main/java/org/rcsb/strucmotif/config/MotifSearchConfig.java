@@ -16,7 +16,7 @@ public class MotifSearchConfig {
      * index and can appear as search results. Lower values ease storage requirements and improve speed of update
      * operations.
      */
-    private double distanceCutoff = 15;
+    private float distanceCutoff = 15;
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */
@@ -99,7 +99,7 @@ public class MotifSearchConfig {
      * Maximum distance of residue pairs.
      * @return threshold in Angstrom
      */
-    public double getDistanceCutoff() {
+    public float getDistanceCutoff() {
         return distanceCutoff;
     }
 
@@ -107,7 +107,7 @@ public class MotifSearchConfig {
      * Set maximum distance of residue pairs.
      * @param distanceCutoff threshold in Angstrom
      */
-    public void setDistanceCutoff(double distanceCutoff) {
+    public void setDistanceCutoff(float distanceCutoff) {
         this.distanceCutoff = distanceCutoff;
     }
 
@@ -263,9 +263,9 @@ public class MotifSearchConfig {
 
     /**
      * Convenience method to get squared distance cutoff.
-     * @return a double
+     * @return a float
      */
-    public double getSquaredDistanceCutoff() {
+    public float getSquaredDistanceCutoff() {
         return distanceCutoff * distanceCutoff;
     }
 

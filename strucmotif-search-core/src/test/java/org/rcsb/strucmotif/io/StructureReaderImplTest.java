@@ -208,7 +208,7 @@ class StructureReaderImplTest {
     }
 
     private long chainCount(Structure structure) {
-        return structure.getResidueIdentifiers()
+        return structure.getLabelSelections()
                 .stream()
                 .map(LabelSelection::getLabelAsymId)
                 .distinct()

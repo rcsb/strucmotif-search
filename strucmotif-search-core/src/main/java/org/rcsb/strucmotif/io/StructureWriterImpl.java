@@ -18,6 +18,7 @@ import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
+import org.rcsb.strucmotif.align.AlignmentService;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -125,6 +126,12 @@ public class StructureWriterImpl implements StructureWriter {
             int currentLabelSeqId = atomSite.getLabelSeqId().get(row);
             String currentLabelAtomId = atomSite.getLabelAtomId().get(row);
             String labelAltId = atomSite.getLabelAltId().get(row);
+
+            // skip atoms that will be ambiguous during alignment
+            if (AlignmentService.AMBIGUOUS_LABEL_ATOM_IDS.contains(currentLabelAtomId)) {
+                continue;
+            }
+
             // skip non-first alt-locs
             if (!labelAltId.isEmpty() &&
                     // if label atom id matches the last one accepted (and component didnt change) we are in trouble

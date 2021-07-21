@@ -19,10 +19,5 @@ public class Demo {
                 .buildQuery()
                 // execute query
                 .run();
-
-//        HDS - grouped BCIF : 12339.8 ms
-//        HDS - in-memory index + structures: 12351.5 ms
-//        HDS - disk index + in-memory structures: 6831.6 ms up to 12079.0 ms - has some serious GC spikes
-//        HDS - disk index + in-memory structures + single thread: 3627.5 ms // TODO investigate thread-count impact on prod system
     }
 }

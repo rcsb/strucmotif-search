@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -60,8 +59,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
                 .stream()
                 .collect(Collectors.toMap(entry -> {
                     LabelSelection labelSelection = entry.getKey();
-                    queryStructure.getStructure().getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
-                    return new IndexSelection(labelSelection.getStructOperId(), 0);
+                    int residueIndex = queryStructure.getStructure().getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
+                    return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
         boolean whitelist = !query.getWhitelist().isEmpty();
         boolean blacklist = !query.getBlacklist().isEmpty();

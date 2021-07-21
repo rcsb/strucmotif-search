@@ -129,6 +129,9 @@ public class MotifSearchIntegrationTest {
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
 
         MotifSearchResult response = buildParameters.buildQuery().run();
+
+        assertEquals(420, response.getHits().size());
+
         List<String> observedExchanges = response.getHits()
                 .stream()
                 .map(Hit::getResidueTypes)

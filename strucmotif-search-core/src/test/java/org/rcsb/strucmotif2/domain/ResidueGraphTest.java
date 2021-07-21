@@ -47,6 +47,7 @@ public class ResidueGraphTest {
             ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff());
             Set<String> descriptors = residueGraph.residuePairOccurrencesSequential()
                     .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                    .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
                     .map(desc -> desc.getBackboneDistance().ordinal() + "-" + desc.getSideChainDistance().ordinal() + "-" + desc.getAngle().ordinal())
                     .collect(Collectors.toSet());
             for (String desc : descriptors) {
@@ -111,6 +112,7 @@ public class ResidueGraphTest {
 
         assertEquals(5939, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
                 .distinct()
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
@@ -134,6 +136,7 @@ public class ResidueGraphTest {
 
         assertEquals(25230, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
                 .distinct()
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
@@ -157,6 +160,7 @@ public class ResidueGraphTest {
 
         assertEquals(5947,  residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
                 .distinct()
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
@@ -180,6 +184,7 @@ public class ResidueGraphTest {
 
         assertEquals(25196, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
                 .distinct()
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()

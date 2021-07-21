@@ -57,7 +57,10 @@ public class Transformation {
      * @param v the vector to transform
      */
     public void transform(float[] out, float[] v) {
-        if (identity) return;
+        if (identity) {
+            System.arraycopy(v, 0, out, 0, 3);
+            return;
+        }
         Algebra.multiply4d(out, transformation, v);
     }
 

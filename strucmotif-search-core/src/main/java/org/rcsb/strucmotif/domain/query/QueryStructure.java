@@ -47,17 +47,19 @@ public class QueryStructure {
 
         // explode query into motifs and get entities by that - this provides the correct order of entities so that the
         // alignment routine does not have to care about finding correspondence
-        List<LabelSelection> derivedLabelSelections = residuePairIdentifiers.stream()
+        this.labelSelections = residuePairIdentifiers.stream()
                 .flatMap(ResiduePairIdentifier::labelSelections)
                 .distinct()
                 .collect(Collectors.toList());
-        this.residueIndexSwaps = originalLabelSelections.stream()
-                .map(derivedLabelSelections::indexOf)
-                .collect(Collectors.toList());
-        this.labelSelections = residueIndexSwaps.stream()
-                .map(originalLabelSelections::get)
-                .collect(Collectors.toList());
 
+        if (labelSelections.size() != originalResidues.size()) {
+            // this indicates that fewer residues are present in the result than specified by the query
+            throw new IllegalQueryDefinitionException("Query violates distance threshold");
+        }
+
+        this.residueIndexSwaps = originalLabelSelections.stream()
+                .map(labelSelections::indexOf)
+                .collect(Collectors.toList());
         this.residues = residueIndexSwaps.stream()
                 .map(originalResidues::get)
                 .collect(Collectors.toList());

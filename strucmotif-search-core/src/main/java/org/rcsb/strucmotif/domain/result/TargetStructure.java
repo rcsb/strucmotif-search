@@ -128,7 +128,6 @@ public class TargetStructure {
 
         try {
             // determine all assembly ids that this collection of label selections appears in
-            // S - H - D
             int residueCount = labelSelections.size();
             Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
             Map<String, Long> assemblyCounts = labelSelections.stream()

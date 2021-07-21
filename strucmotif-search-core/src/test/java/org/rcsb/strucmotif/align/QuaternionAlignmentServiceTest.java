@@ -189,7 +189,7 @@ public class QuaternionAlignmentServiceTest {
         Structure structure2 = structureReader.readFromInputStream(getOriginalBcif("3pei"));
         List<Map<String, float[]>> residues2 = Stream.of("A-251", "A-256", "A-274", "A-333", "A-335")
                 .map(id -> id.split("-"))
-                .map(split -> structure1.getResidueIndex(split[0], Integer.parseInt(split[1])))
+                .map(split -> structure2.getResidueIndex(split[0], Integer.parseInt(split[1])))
                 .map(structure2::manifestResidue)
                 .collect(Collectors.toList());
 

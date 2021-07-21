@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif2;
 
 import org.rcsb.strucmotif2.domain.query.ScoringStrategy;
+import org.rcsb.strucmotif2.domain.result.TransformedHit;
 import org.rcsb.strucmotif2.domain.selection.LabelSelection;
 
 import java.util.Set;
@@ -20,7 +21,15 @@ public class Demo {
                 // retrieve container with complete query
                 .buildQuery()
                 // execute query
-                .run();
+                .run()
+                .getHits()
+                .stream()
+                .limit(1)
+                .map(TransformedHit.class::cast)
+                .forEach(h -> {
+                    System.out.println(h.getSelection());
+                    System.out.println(h.getResidueTypes());
+                });
 
 //        List<Long> times = new ArrayList<>();
 //        for (int i = 0; i < 10; i++) {

@@ -118,7 +118,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
         } else {
-            requested = Arrays.asList(ids);
+            requested = Arrays.stream(ids).map(String::toUpperCase).collect(Collectors.toList());
         }
 
         // check for sanity of internal state

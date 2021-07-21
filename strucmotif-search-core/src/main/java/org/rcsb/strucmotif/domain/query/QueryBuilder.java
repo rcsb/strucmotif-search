@@ -172,7 +172,6 @@ public class QueryBuilder {
          * @return this builder
          */
         public MandatoryBuilder rmsdCutoff(double rmsdCutoff) {
-            // TODO expose only doubles to define inputs
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }

@@ -69,7 +69,7 @@ public enum Motifs {
     private final PositionSpecificExchange[] positionSpecificExchanges;
 
     Motifs(String pdbId, List<LabelSelection> labelSelections, PositionSpecificExchange... positionSpecificExchanges) {
-        this.structureIdentifier = pdbId.toLowerCase();
+        this.structureIdentifier = pdbId.toUpperCase();
         this.labelSelections = labelSelections;
         this.positionSpecificExchanges = positionSpecificExchanges;
     }

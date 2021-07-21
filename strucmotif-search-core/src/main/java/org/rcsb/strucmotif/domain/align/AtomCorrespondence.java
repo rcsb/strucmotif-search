@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.align;
 
-import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.math.Algebra;
 
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A wrapper which describes the correspondence between two collections of residues. Internally takes care of
@@ -61,7 +59,6 @@ public class AtomCorrespondence {
 
             for (Map.Entry<String, float[]> referenceAtom : referenceGroup.entrySet()) {
                 String referenceLabel = referenceAtom.getKey();
-                if (ambiguous(referenceLabel)) continue;
                 float[] referenceVector = referenceAtom.getValue();
 
                 // if using a subset and if this is not an allowed name: continue
@@ -81,10 +78,6 @@ public class AtomCorrespondence {
         }
 
         return mapping;
-    }
-
-    private static boolean ambiguous(String referenceLabel) {
-        return AlignmentService.AMBIGUOUS_LABEL_ATOM_IDS.contains(referenceLabel);
     }
 
     /**

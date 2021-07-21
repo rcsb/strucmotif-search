@@ -18,13 +18,17 @@ import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
-import org.rcsb.strucmotif.align.AlignmentService;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -64,12 +68,15 @@ public class StructureWriterImpl implements StructureWriter {
 
     @Override
     public void write(MmCifFile source, Path destination) {
+        // TODO impl
+        Map<LabelSelection, List<String>> presentAtoms = new HashMap<>();
+
         MmCifBlock block = source.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         Struct struct = block.getStruct();
         AtomSite atomSite = block.getAtomSite();
-        String pdbId = block.getBlockHeader().toLowerCase();
+        String pdbId = block.getBlockHeader().toUpperCase();
 
         MmCifBlockBuilder outputBuilder = CifBuilder.enterFile(StandardSchemata.MMCIF)
                 .enterBlock(pdbId.toUpperCase());
@@ -127,8 +134,11 @@ public class StructureWriterImpl implements StructureWriter {
             String currentLabelAtomId = atomSite.getLabelAtomId().get(row);
             String labelAltId = atomSite.getLabelAltId().get(row);
 
+            // skip residues without CA or CB (or equivalent)
+
             // skip atoms that will be ambiguous during alignment
-            if (AlignmentService.AMBIGUOUS_LABEL_ATOM_IDS.contains(currentLabelAtomId)) {
+            ResidueType residueType = ResidueType.ofThreeLetterCode(atomSite.getLabelCompId().get(row));
+            if (ambiguousAtom(residueType, currentLabelAtomId)) {
                 continue;
             }
 
@@ -177,6 +187,46 @@ public class StructureWriterImpl implements StructureWriter {
             CifIO.writeBinary(outputFile, destination, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Determine if atoms of a certain name are useful to find the best alignment. Ambiguous atom names cause serious
+     * problems. Strategy: Ignore them!
+     * @param residueType reference residue type
+     * @param labelAtomId the atom name to process
+     * @return true if this atom is useless for RMSD calculations
+     */
+    private static boolean ambiguousAtom(ResidueType residueType, String labelAtomId) {
+        // see Coutsias, 2019
+        switch (residueType) {
+            case ARGININE:
+                if (labelAtomId.equals("NH1") || labelAtomId.equals("NH2")) {
+                    return true;
+                }
+            case ASPARTIC_ACID:
+                if (labelAtomId.equals("OD1") || labelAtomId.equals("OD2")) {
+                    return true;
+                }
+            case GLUTAMIC_ACID:
+                if (labelAtomId.equals("OE1") || labelAtomId.equals("OE2")) {
+                    return true;
+                }
+            case LEUCINE:
+                if (labelAtomId.equals("OD1") || labelAtomId.equals("OD2")) {
+                    return true;
+                }
+            case PHENYLALANINE: case TYROSINE:
+                if (labelAtomId.equals("CD1") || labelAtomId.equals("CD2") || labelAtomId.equals("CE1") ||
+                        labelAtomId.equals("CE2")) {
+                    return true;
+                }
+            case  VALINE:
+                if (labelAtomId.equals("OG1") || labelAtomId.equals("OG2")) {
+                    return true;
+                }
+            default:
+                return false;
         }
     }
 }

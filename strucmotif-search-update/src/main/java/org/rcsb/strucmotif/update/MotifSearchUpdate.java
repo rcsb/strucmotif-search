@@ -120,6 +120,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         } else {
             requested = Arrays.stream(ids).map(String::toUpperCase).collect(Collectors.toList());
         }
+        Collections.shuffle(requested);
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {

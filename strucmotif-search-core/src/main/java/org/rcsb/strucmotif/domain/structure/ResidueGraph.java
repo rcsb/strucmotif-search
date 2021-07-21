@@ -158,6 +158,7 @@ public class ResidueGraph {
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
 
         // if needed: check for first occurrence of chain (which may or may not be identity transform)
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         Set<String> acceptedChains = new HashSet<>();
         Set<String> acceptedOperators = new HashSet<>();
         if (!allowTransformed) {
@@ -180,7 +181,7 @@ public class ResidueGraph {
             }
 
             IndexSelection residueKey1 = indexSelections.get(residueContact.getI());
-            String chainExpr1 = structure.getLabelSelections().get(residueKey1.getIndex()).getLabelAsymId() + "_" + residueKey1.getStructOperId();
+            String chainExpr1 = labelSelections.get(residueKey1.getIndex()).getLabelAsymId() + "_" + residueKey1.getStructOperId();
             // 'dominant' residue has to be original by contract
             if (!allowTransformed && !acceptedOperators.contains(chainExpr1)) {
                 continue;
@@ -188,7 +189,7 @@ public class ResidueGraph {
 
             float distance = residueContact.getDistance();
             IndexSelection residueKey2 = indexSelections.get(residueContact.getJ());
-            String chainExpr2 = structure.getLabelSelections().get(residueKey2.getIndex()).getLabelAsymId() + "_" + residueKey2.getStructOperId();
+            String chainExpr2 = labelSelections.get(residueKey2.getIndex()).getLabelAsymId() + "_" + residueKey2.getStructOperId();
 
             // ensure that both chainExpressions occur in the same assembly
             if (structure.getAssemblies().values().stream().noneMatch(opers -> opers.contains(chainExpr1) && opers.contains(chainExpr2))) {

@@ -105,7 +105,6 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     private InputStream getRenumberedInputStream(String structureIdentifier) {
         try {
-            // TODO unify usage of UPPER_CASE throughout project, avoid String manipulation
             return Files.newInputStream(getRenumberedStructurePath(structureIdentifier));
         } catch (IOException e) {
             throw new UncheckedIOException(e);

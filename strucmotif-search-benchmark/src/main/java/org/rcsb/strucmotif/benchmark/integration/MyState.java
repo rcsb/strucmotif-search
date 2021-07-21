@@ -1,4 +1,4 @@
-package org.rcsb.strucmotif.benchmark;
+package org.rcsb.strucmotif.benchmark.integration;
 
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;

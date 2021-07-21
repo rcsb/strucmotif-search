@@ -14,6 +14,7 @@ import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -179,7 +180,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenAminopeptidaseExample_thenRmsdMatches() {
+    public void whenAminopeptidaseExampleWithAllAtoms_thenRmsdInflated() {
         Structure structure1 = structureReader.readFromInputStream(getOriginalBcif("1lap"));
         List<Map<String, float[]>> residues1 = Stream.of("A-250", "A-255", "A-273", "A-332", "A-334")
                 .map(id -> id.split("-"))
@@ -191,6 +192,30 @@ public class QuaternionAlignmentServiceTest {
                 .map(id -> id.split("-"))
                 .map(split -> structure2.getResidueIndex(split[0], Integer.parseInt(split[1])))
                 .map(structure2::manifestResidue)
+                .collect(Collectors.toList());
+
+        AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
+        assertEquals(3.167, result.getRootMeanSquareDeviation().value(), Helpers.DELTA);
+    }
+
+    @Test
+    public void whenAminopeptidaseExampleWithNonAmbiguous_thenRmsdMatches() {
+        Set<String> ambiguous = Set.of("OD1", "OD2", "OE1", "OE2");
+        Structure structure1 = structureReader.readFromInputStream(getOriginalBcif("1lap"));
+        List<Map<String, float[]>> residues1 = Stream.of("A-250", "A-255", "A-273", "A-332", "A-334")
+                .map(id -> id.split("-"))
+                .map(split -> structure1.getResidueIndex(split[0], Integer.parseInt(split[1])))
+                .map(structure1::manifestResidue)
+                // manually filter away ambiguous atoms of GLU
+                .map(map -> map.entrySet().stream().filter(entry -> !ambiguous.contains(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                .collect(Collectors.toList());
+        Structure structure2 = structureReader.readFromInputStream(getOriginalBcif("3pei"));
+        List<Map<String, float[]>> residues2 = Stream.of("A-251", "A-256", "A-274", "A-333", "A-335")
+                .map(id -> id.split("-"))
+                .map(split -> structure2.getResidueIndex(split[0], Integer.parseInt(split[1])))
+                .map(structure2::manifestResidue)
+                // manually filter away ambiguous atoms of GLU
+                .map(map -> map.entrySet().stream().filter(entry -> !ambiguous.contains(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
                 .collect(Collectors.toList());
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);

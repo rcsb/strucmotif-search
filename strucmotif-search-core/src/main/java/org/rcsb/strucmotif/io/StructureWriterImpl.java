@@ -19,12 +19,14 @@ import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.cif.schema.mm.Struct;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,9 +70,6 @@ public class StructureWriterImpl implements StructureWriter {
 
     @Override
     public void write(MmCifFile source, Path destination) {
-        // TODO impl
-        Map<LabelSelection, List<String>> presentAtoms = new HashMap<>();
-
         MmCifBlock block = source.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
@@ -96,6 +95,9 @@ public class StructureWriterImpl implements StructureWriter {
                     .leaveColumn()
                     .leaveCategory();
         }
+
+        // ensure that all needed atoms are present to make this residue useful during indexing
+        List<LabelSelection> validResidues = determineValidResidues(atomSite);
 
         MmCifCategoryBuilder.AtomSiteBuilder atomSiteBuilder = outputBuilder.enterAtomSite();
         StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelAtomId = atomSiteBuilder.enterLabelAtomId();
@@ -132,18 +134,22 @@ public class StructureWriterImpl implements StructureWriter {
             String currentLabelAsymId = atomSite.getLabelAsymId().get(row);
             int currentLabelSeqId = atomSite.getLabelSeqId().get(row);
             String currentLabelAtomId = atomSite.getLabelAtomId().get(row);
-            String labelAltId = atomSite.getLabelAltId().get(row);
-
-            // skip residues without CA or CB (or equivalent)
+            String currentLabelAltId = atomSite.getLabelAltId().get(row);
+            String currentLabelCompId = atomSite.getLabelCompId().get(row);
 
             // skip atoms that will be ambiguous during alignment
-            ResidueType residueType = ResidueType.ofThreeLetterCode(atomSite.getLabelCompId().get(row));
+            ResidueType residueType = ResidueType.ofThreeLetterCode(currentLabelCompId);
             if (ambiguousAtom(residueType, currentLabelAtomId)) {
                 continue;
             }
 
+            // skip residues without CA or CB (or equivalent)
+            if (!validResidues.contains(new LabelSelection(currentLabelAsymId, "1", currentLabelSeqId))) {
+                continue;
+            }
+
             // skip non-first alt-locs
-            if (!labelAltId.isEmpty() &&
+            if (!currentLabelAltId.isEmpty() &&
                     // if label atom id matches the last one accepted (and component didnt change) we are in trouble
                     currentLabelAsymId.equals(lastAcceptedLabelAsymId) &&
                     currentLabelSeqId == lastAcceptedLabelSeqId &&
@@ -168,7 +174,7 @@ public class StructureWriterImpl implements StructureWriter {
             lastAcceptedLabelAsymId = currentLabelAsymId;
 
             labelAtomId.add(currentLabelAtomId);
-            labelCompId.add(atomSite.getLabelCompId().get(row));
+            labelCompId.add(currentLabelCompId);
             labelAsymId.add(currentLabelAsymId);
             labelSeqId.add(currentLabelSeqId);
             cartnX.add(atomSite.getCartnX().get(row));
@@ -188,6 +194,39 @@ public class StructureWriterImpl implements StructureWriter {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    private List<LabelSelection> determineValidResidues(AtomSite atomSite) {
+        Map<LabelSelection, ResidueType> residueTypes = new HashMap<>();
+        Map<LabelSelection, Set<String>> presentAtoms = new HashMap<>();
+        for (int row = 0; row < atomSite.getRowCount(); row++) {
+            LabelSelection labelSelection = new LabelSelection(atomSite.getLabelAsymId().get(row), "1", atomSite.getLabelSeqId().get(row));
+            residueTypes.put(labelSelection, ResidueType.ofThreeLetterCode(atomSite.getLabelCompId().get(row)));
+            Set<String> atoms = presentAtoms.computeIfAbsent(labelSelection, e -> new HashSet<>());
+            atoms.add(atomSite.getLabelAtomId().get(row));
+        }
+        List<LabelSelection> validResidues = new ArrayList<>();
+        for (Map.Entry<LabelSelection, ResidueType> entry : residueTypes.entrySet()) {
+            LabelSelection labelSelection = entry.getKey();
+            ResidueType residueType = residueTypes.get(labelSelection);
+            Set<String> atoms = presentAtoms.get(labelSelection);
+            if (residueType.getPolymerType() == PolymerType.AMINO_ACID) {
+                if (residueType != ResidueType.GLYCINE) {
+                    if (atoms.contains("CA") && atoms.contains("CB")) {
+                        validResidues.add(labelSelection);
+                    }
+                } else {
+                    if (atoms.contains("N") && atoms.contains("CA") && atoms.contains("C")) {
+                        validResidues.add(labelSelection);
+                    }
+                }
+            } else {
+                if (atoms.contains("C4'") && atoms.contains("C1'")) {
+                    validResidues.add(labelSelection);
+                }
+            }
+        }
+        return validResidues;
     }
 
     /**

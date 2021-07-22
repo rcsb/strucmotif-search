@@ -235,7 +235,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
             Revision revision = getRevision(mmCifFile);
-            Map<String, List<String>> assemblyInformation = getAssemblyInformation(mmCifFile);
+            Map<String, Set<String>> assemblyInformation = getAssemblyInformation(mmCifFile);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
             context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
         } catch (IOException e) {
@@ -291,7 +291,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    private Map<String, List<String>> getAssemblyInformation(MmCifFile mmCifFile) {
+    private Map<String, Set<String>> getAssemblyInformation(MmCifFile mmCifFile) {
         // TODO maybe this functionality should be part of Structures?
         /*
         loop_
@@ -308,7 +308,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         #
          */
         PdbxStructAssemblyGen pdbxStructAssemblyGen = mmCifFile.getFirstBlock().getPdbxStructAssemblyGen();
-        Map<String, List<String>> assemblyInformation = new LinkedHashMap<>();
+        Map<String, Set<String>> assemblyInformation = new LinkedHashMap<>();
         if (pdbxStructAssemblyGen.isDefined()) {
             for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
                 String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
@@ -316,8 +316,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
                 List<String> operList = getOperList(operExpression, asymIdList);
 
-                List<String> sorted = assemblyInformation.computeIfAbsent(assemblyId, e -> new ArrayList<>());
-                operList.stream().filter(o -> !sorted.contains(o)).forEach(sorted::add);
+                Set<String> sorted = assemblyInformation.computeIfAbsent(assemblyId, e -> new HashSet<>());
+                sorted.addAll(operList);
             }
         }
         return assemblyInformation;

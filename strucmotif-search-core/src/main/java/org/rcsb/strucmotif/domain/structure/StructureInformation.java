@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.structure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Reports global properties of a structure.
@@ -9,7 +10,7 @@ import java.util.Map;
 public class StructureInformation {
     private final String structureIdentifier;
     private final Revision revision;
-    private final Map<String, List<String>> assemblyInformation;
+    private final Map<String, Set<String>> assemblyInformation;
 
     /**
      * Wraps info on a structure.
@@ -17,7 +18,7 @@ public class StructureInformation {
      * @param revision version
      * @param assemblyInformation present assemblies
      */
-    public StructureInformation(String structureIdentifier, Revision revision, Map<String, List<String>> assemblyInformation) {
+    public StructureInformation(String structureIdentifier, Revision revision, Map<String, Set<String>> assemblyInformation) {
         this.structureIdentifier = structureIdentifier;
         this.revision = revision;
         this.assemblyInformation = assemblyInformation;
@@ -43,7 +44,7 @@ public class StructureInformation {
      * Reports present assemblies and the struct_oper_ids needed to create them.
      * @return a map between assembly id and a collection of struct_oper_ids (or combinations thereof).
      */
-    public Map<String, List<String>> getAssemblyInformation() {
+    public Map<String, Set<String>> getAssemblyInformation() {
         return assemblyInformation;
     }
 }

@@ -51,9 +51,9 @@ public class StateRepositoryImpl implements StateRepository {
         return data.stream()
                 .map(s -> {
                     String structureIdentifier = s.getStructureIdentifier();
-                    Map<String, List<String>> assemblyInformation = s.getAssemblyInformation();
+                    Map<String, Set<String>> assemblyInformation = s.getAssemblyInformation();
                     Map<String, Set<String>> reversed = new HashMap<>();
-                    for (Map.Entry<String, List<String>> partial : assemblyInformation.entrySet()) {
+                    for (Map.Entry<String, Set<String>> partial : assemblyInformation.entrySet()) {
                         String assemblyId = partial.getKey();
                         for (String structOperId : partial.getValue()) {
                             Set<String> mappedAssemblyIds = reversed.computeIfAbsent(structOperId, e -> new HashSet<>());
@@ -91,12 +91,12 @@ public class StateRepositoryImpl implements StateRepository {
     protected StructureInformation handleKnownSplit(String[] split) {
         String structureIdentifier = new String(split[0]);
         Revision revision = new Revision(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        Map<String, List<String>> assemblyInformation = IntStream.range(3, split.length)
+        Map<String, Set<String>> assemblyInformation = IntStream.range(3, split.length)
                 .mapToObj(i -> {
                     String[] assemblySplit = split[i].split(ASSEMBLY_INFORMATION_DELIMITER);
                     String assemblyId = assemblySplit[0];
-                    List<String> operList = Arrays.stream(assemblySplit, 1, assemblySplit.length)
-                            .collect(Collectors.toList());
+                    Set<String> operList = Arrays.stream(assemblySplit, 1, assemblySplit.length)
+                            .collect(Collectors.toSet());
                     return new Pair<>(assemblyId, operList);
                 })
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));

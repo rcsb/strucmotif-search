@@ -135,44 +135,39 @@ public class TargetStructure {
                 })
                 .collect(Collectors.toList());
 
-        try {
-            // determine all assembly ids that this collection of label selections appears in
-            int residueCount = labelSelections.size();
-            Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
-            Map<String, Long> assemblyCounts = labelSelections.stream()
-                    .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
-                    .map(assemblyMap::get)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        // determine all assembly ids that this collection of label selections appears in
+        int residueCount = labelSelections.size();
+        Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
+        Map<String, Long> assemblyCounts = labelSelections.stream()
+                .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
+                .map(assemblyMap::get)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-            return assemblyCounts.entrySet()
-                    .stream()
-                    // this assembly must be valid for all residues
-                    .filter(entry -> entry.getValue() == residueCount)
-                    .map(entry -> {
-                        ResidueType[] residueTypes = new ResidueType[residueCount];
-                        @SuppressWarnings("unchecked")
-                        Map<String, float[]>[] residues = new Map[residueCount];
+        return assemblyCounts.entrySet()
+                .stream()
+                // this assembly must be valid for all residues
+                .filter(entry -> entry.getValue() == residueCount)
+                .map(entry -> {
+                    ResidueType[] residueTypes = new ResidueType[residueCount];
+                    @SuppressWarnings("unchecked")
+                    Map<String, float[]>[] residues = new Map[residueCount];
 
-                        for (int i = 0; i < residueCount; i++) {
-                            int index = indexSelections.get(i).getIndex();
-                            residueTypes[i] = structure.getResidueType(index);
-                            residues[i] = structure.manifestResidue(index);
-                        }
+                    for (int i = 0; i < residueCount; i++) {
+                        int index = indexSelections.get(i).getIndex();
+                        residueTypes[i] = structure.getResidueType(index);
+                        residues[i] = structure.manifestResidue(index);
+                    }
 
-                        AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));
+                    AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));
 
-                        return new Hit(structureIdentifier,
-                                entry.getKey(),
-                                labelSelections,
-                                Arrays.asList(residueTypes),
-                                alignmentResult.getRootMeanSquareDeviation(),
-                                alignmentResult.getTransformation());
-                    });
-        } catch (NullPointerException e) {
-            // happens if assembly information is missing in source file - these hits will be omitted by RCSB decision
-            return Stream.empty();
-        }
+                    return new Hit(structureIdentifier,
+                            entry.getKey(),
+                            labelSelections,
+                            Arrays.asList(residueTypes),
+                            alignmentResult.getRootMeanSquareDeviation(),
+                            alignmentResult.getTransformation());
+                });
     }
 
     private List<IndexSelection> orderIndexSelections(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps) {

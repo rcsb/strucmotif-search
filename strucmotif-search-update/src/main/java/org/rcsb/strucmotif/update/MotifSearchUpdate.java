@@ -315,7 +315,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
                 String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
                 List<String> operList = getOperList(operExpression, asymIdList);
-                assemblyInformation.put(assemblyId, operList);
+
+                List<String> sorted = assemblyInformation.computeIfAbsent(assemblyId, e -> new ArrayList<>());
+                operList.stream().filter(o -> !sorted.contains(o)).forEach(sorted::add);
             }
         }
         return assemblyInformation;

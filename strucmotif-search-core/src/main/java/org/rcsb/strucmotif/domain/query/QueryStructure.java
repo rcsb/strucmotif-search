@@ -67,9 +67,7 @@ public class QueryStructure {
         this.residueIndexSwaps = originalIndexSelections.stream()
                 .map(indexSelections::indexOf)
                 .collect(Collectors.toList());
-        this.residues = residueIndexSwaps.stream()
-                .map(originalResidues::get)
-                .collect(Collectors.toList());
+        this.residues = originalResidues;
     }
 
     /**

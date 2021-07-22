@@ -68,7 +68,7 @@ public class QueryBuilder {
      * @param selection which components to select to define the motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByFileAndSelection(String structureIdentifier, InputStream inputStream, List<LabelSelection> selection) {
+    public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         return defineByStructure(structure, selection);
     }

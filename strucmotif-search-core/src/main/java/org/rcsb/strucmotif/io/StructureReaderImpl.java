@@ -107,7 +107,7 @@ public class StructureReaderImpl implements StructureReader {
                 if (chainChange || residueChange) {
                     lastLabelAsymId = labelAsymId;
                     lastLabelSeqId = labelSeqId;
-                    residueIdentifiers.put(new LabelSelection(labelAsymId, "1", labelSeqId), residue);
+                    residueIdentifiers.put(new LabelSelection(labelAsymId, null, labelSeqId), residue);
                     residueOffsets.add(row);
                     residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
                     residue++;

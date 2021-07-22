@@ -88,7 +88,7 @@ public class MotifSearchBenchmark {
 
     private MotifSearchResult run(Motifs motif, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        return state.queryBuilder.defineByStructure(motif.getStructureIdentifier(), structure.getFirst(), structure.getSecond())
+        return state.queryBuilder.defineByStructure(structure.getFirst(), structure.getSecond())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
                 .buildParameters()

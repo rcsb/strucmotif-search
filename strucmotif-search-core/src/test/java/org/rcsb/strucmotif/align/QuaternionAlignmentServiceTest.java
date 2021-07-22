@@ -35,7 +35,8 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenOriginalExample_thenRmsdMatches() {
         // https://theobald.brandeis.edu/qcp/main.c
-        Structure structure1 = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure1 = new Structure("1tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2,
                 new LabelSelection("A", 4), 3,
@@ -51,7 +52,8 @@ public class QuaternionAlignmentServiceTest {
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
-        Structure structure2 = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure2 = new Structure("2tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2,
                 new LabelSelection("A", 4), 3,
@@ -76,7 +78,8 @@ public class QuaternionAlignmentServiceTest {
 
     @Test
     public void whenSelfAlign_thenRmsdIsZeroAndTransformationIsIdentity() {
-        Structure structure = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure = new Structure("1tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2),
                 new int[] { 0, 1, 2 },
@@ -103,7 +106,8 @@ public class QuaternionAlignmentServiceTest {
 
     @Test
     public void whenAlign1And2_thenRmsdAndTransformationMatches() {
-        Structure structure1 = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure1 = new Structure("1tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2),
                 new int[] { 0, 1, 2 },
@@ -114,7 +118,8 @@ public class QuaternionAlignmentServiceTest {
                 new float[]{42.405f, 48.266f, 42.050f},
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
-        Structure structure2 = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure2 = new Structure("2tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2),
                 new int[] { 0, 1, 2 },
@@ -142,7 +147,8 @@ public class QuaternionAlignmentServiceTest {
 
     @Test
     public void whenAlign3And4_thenRmsdAndTransformationMatches() {
-        Structure structure3 = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure3 = new Structure("1tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2),
                 new int[] { 0, 1, 2 },
@@ -153,7 +159,8 @@ public class QuaternionAlignmentServiceTest {
                 new float[]{22.585f, 20.325f, 17.385f},
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
-        Structure structure4 = new Structure(Map.of(new LabelSelection("A", 1), 0,
+        Structure structure4 = new Structure("2tst",
+                Map.of(new LabelSelection("A", 1), 0,
                 new LabelSelection("A", 2), 1,
                 new LabelSelection("A", 3), 2),
                 new int[] { 0, 1, 2 },

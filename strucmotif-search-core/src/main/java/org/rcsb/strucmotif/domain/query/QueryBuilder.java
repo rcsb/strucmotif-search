@@ -53,13 +53,13 @@ public class QueryBuilder {
 
     /**
      * Define a motif based on the id of the reference structure and a selection of components.
-     * @param pdbId the id to acquire
+     * @param structureIdentifier the id to acquire
      * @param selection which components to select to define the motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByPdbIdAndSelection(String pdbId, List<LabelSelection> selection) {
-        Structure structure = structureDataProvider.readSome(pdbId);
-        return defineByStructure(pdbId, structure, selection);
+    public MandatoryBuilder defineByPdbIdAndSelection(String structureIdentifier, List<LabelSelection> selection) {
+        Structure structure = structureDataProvider.readSome(structureIdentifier);
+        return defineByStructure(structure, selection);
     }
 
     /**
@@ -70,18 +70,17 @@ public class QueryBuilder {
      */
     public MandatoryBuilder defineByFileAndSelection(String structureIdentifier, InputStream inputStream, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        return defineByStructure(structureIdentifier, structure, selection);
+        return defineByStructure(structure, selection);
     }
 
     /**
      * Routine if structure files contains extracted motif. Checks that the structure contains a reasonable number of
      * components to rule out erroneous arguments.
-     * @param structureIdentifier the PDB-ID
      * @param structure the file to ready - all components are considered the motif
      * @param labelSelections the residues of interest
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByStructure(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections) {
+    public MandatoryBuilder defineByStructure(Structure structure, List<LabelSelection> labelSelections) {
         List<Map<String, float[]>> residues = structure.manifestResidues(labelSelections);
 
         if (residues.size() > motifSearchConfig.getMaxMotifSize()) {
@@ -89,7 +88,8 @@ public class QueryBuilder {
                     "file contains " + residues.size() + " residues");
         }
 
-        return new MandatoryBuilder(structureIdentifier.toUpperCase(), structure, labelSelections, residues);
+        String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
+        return new MandatoryBuilder(structureIdentifier, structure, labelSelections, residues);
     }
 
     /**
@@ -97,10 +97,10 @@ public class QueryBuilder {
      * @param inputStream the data to ready - all components are considered the motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByFile(String structureIdentifier, InputStream inputStream) {
+    public MandatoryBuilder defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        return defineByStructure(structureIdentifier, structure, labelSelections);
+        return defineByStructure(structure, labelSelections);
     }
 
     /**

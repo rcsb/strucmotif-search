@@ -17,7 +17,6 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
-import org.rcsb.cif.schema.mm.Struct;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -73,7 +72,6 @@ public class StructureWriterImpl implements StructureWriter {
         MmCifBlock block = source.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
-        Struct struct = block.getStruct();
         AtomSite atomSite = block.getAtomSite();
         String pdbId = block.getBlockHeader().toUpperCase();
 

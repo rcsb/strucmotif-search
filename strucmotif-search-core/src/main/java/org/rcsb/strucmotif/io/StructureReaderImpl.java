@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.AtomSite;
+import org.rcsb.cif.schema.mm.Entry;
 import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
@@ -41,6 +42,7 @@ public class StructureReaderImpl implements StructureReader {
 
     static class StructureReaderState {
         // all relevant categories
+        private final Entry entry;
         private final AtomSite atomSite;
         private final PdbxStructAssemblyGen pdbxStructAssemblyGen;
         private final PdbxStructOperList pdbxStructOperList;
@@ -67,6 +69,8 @@ public class StructureReaderImpl implements StructureReader {
          */
         private StructureReaderState(MmCifFile mmCifFile) {
             MmCifBlock block = mmCifFile.getFirstBlock();
+
+            this.entry = block.getEntry();
 
             this.atomSite = block.getAtomSite();
             this.pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
@@ -96,6 +100,8 @@ public class StructureReaderImpl implements StructureReader {
         }
 
         private Structure build() {
+            String structureIdentifier = entry.getId().get(0);
+
             int residue = 0;
             for (int row = 0; row < atomSite.getRowCount(); row++) {
                 String labelAsymId = this.labelAsymId[row];
@@ -114,7 +120,8 @@ public class StructureReaderImpl implements StructureReader {
 
             Map<String, Transformation> transformations = buildTransformations();
             Map<String, List<String>> assemblies = buildAssemblies();
-            return new Structure(residueIdentifiers,
+            return new Structure(structureIdentifier,
+                    residueIdentifiers,
                     residueOffsets.stream().mapToInt(i -> i).toArray(),
                     residueTypes.toArray(ResidueType[]::new),
                     labelAtomId, x, y, z,

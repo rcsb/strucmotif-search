@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Structure {
+    private final String structureIdentifier;
     private final Map<LabelSelection, Integer> residueMapping;
     private final int[] residueOffsets;
     private final int residueCount;
@@ -21,7 +22,8 @@ public class Structure {
     private final Map<String, List<String>> assemblies;
     private final Map<String, Transformation> transformations;
 
-    public Structure(Map<LabelSelection, Integer> residueMapping,
+    public Structure(String structureIdentifier,
+                     Map<LabelSelection, Integer> residueMapping,
                      int[] residueOffsets,
                      ResidueType[] residueTypes,
                      String[] labelAtomId,
@@ -30,6 +32,7 @@ public class Structure {
                      float[] z,
                      Map<String, List<String>> assemblies,
                      Map<String, Transformation> transformations) {
+        this.structureIdentifier = structureIdentifier;
         this.residueMapping = residueMapping;
         this.residueOffsets = residueOffsets;
         this.residueTypes = residueTypes;
@@ -41,6 +44,10 @@ public class Structure {
         this.z = z;
         this.assemblies = assemblies;
         this.transformations = transformations;
+    }
+
+    public String getStructureIdentifier() {
+        return structureIdentifier;
     }
 
     public List<LabelSelection> getLabelSelections() {

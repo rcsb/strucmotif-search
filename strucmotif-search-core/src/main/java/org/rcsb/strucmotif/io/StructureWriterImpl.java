@@ -88,14 +88,6 @@ public class StructureWriterImpl implements StructureWriter {
             outputBuilder.addCategory(pdbxStructOperList);
         }
 
-        if (struct.isDefined() && struct.getTitle().isDefined()) {
-            outputBuilder.enterStruct()
-                    .enterTitle()
-                    .add(struct.getTitle().get(0))
-                    .leaveColumn()
-                    .leaveCategory();
-        }
-
         // ensure that all needed atoms are present to make this residue useful during indexing
         List<LabelSelection> validResidues = determineValidResidues(atomSite);
 

@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.domain.result;
 
 import org.rcsb.strucmotif.domain.Transformation;
-import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
@@ -15,7 +14,7 @@ public class Hit {
     private final String assemblyIdentifier;
     private final List<LabelSelection> labelSelections;
     private final List<ResidueType> residueTypes;
-    private final RootMeanSquareDeviation rootMeanSquareDeviation;
+    private final float rmsd;
     private final Transformation transformation;
 
     /**
@@ -24,20 +23,20 @@ public class Hit {
      * @param assemblyIdentifier the assembly ID
      * @param labelSelections selections for each matched residue
      * @param residueTypes mapped residue types
-     * @param rootMeanSquareDeviation the alignment score
+     * @param rmsd the alignment score
      * @param transformation the transformation determined by the alignment
      */
     public Hit(String structureIdentifier,
                String assemblyIdentifier,
                List<LabelSelection> labelSelections,
                List<ResidueType> residueTypes,
-               RootMeanSquareDeviation rootMeanSquareDeviation,
+               float rmsd,
                Transformation transformation) {
         this.structureIdentifier = structureIdentifier;
         this.assemblyIdentifier = assemblyIdentifier;
         this.labelSelections = labelSelections;
         this.residueTypes = residueTypes;
-        this.rootMeanSquareDeviation = rootMeanSquareDeviation;
+        this.rmsd = rmsd;
         this.transformation = transformation;
     }
 
@@ -63,10 +62,10 @@ public class Hit {
 
     /**
      * Returns the RMSD of this hit.
-     * @return a score object
+     * @return a float
      */
-    public RootMeanSquareDeviation getRootMeanSquareDeviation() {
-        return rootMeanSquareDeviation;
+    public float getRootMeanSquareDeviation() {
+        return rmsd;
     }
 
     /**

@@ -1,23 +1,22 @@
 package org.rcsb.strucmotif.domain.align;
 
 import org.rcsb.strucmotif.domain.Transformation;
-import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
 
 /**
  * The result of an alignment.
  */
 public class AlignmentResultImpl implements AlignmentResult {
     private final Transformation transformation;
-    private final RootMeanSquareDeviation rootMeanSquareDeviation;
+    private final float rmsd;
 
     /**
      * Construct an alignment result.
      * @param transformation applied transformation
-     * @param rootMeanSquareDeviation achieved score
+     * @param rmsd achieved score
      */
-    public AlignmentResultImpl(Transformation transformation, RootMeanSquareDeviation rootMeanSquareDeviation) {
+    public AlignmentResultImpl(Transformation transformation, float rmsd) {
         this.transformation = transformation;
-        this.rootMeanSquareDeviation = rootMeanSquareDeviation;
+        this.rmsd = rmsd;
     }
 
     @Override
@@ -26,7 +25,7 @@ public class AlignmentResultImpl implements AlignmentResult {
     }
 
     @Override
-    public RootMeanSquareDeviation getRootMeanSquareDeviation() {
-        return rootMeanSquareDeviation;
+    public float getRootMeanSquareDeviation() {
+        return rmsd;
     }
 }

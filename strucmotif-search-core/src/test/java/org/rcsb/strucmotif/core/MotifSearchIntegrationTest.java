@@ -33,8 +33,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
@@ -161,9 +160,9 @@ public class MotifSearchIntegrationTest {
         assertFalse(swaps.isEmpty(), "didn't observe swaps");
 
         // print all results
-        response.getHits().stream()
-                .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier() + " : " + hit.getLabelSelections())
-                .forEach(System.out::println);
+        assertTrue(response.getHits().stream()
+                .map(Hit::getRootMeanSquareDeviation)
+                .anyMatch(s -> s < 0.5), "no low-RMSD hits observed");
     }
 
     /**

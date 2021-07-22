@@ -154,7 +154,7 @@ public class MotifSearchQuery {
 
         return hit.getStructureIdentifier() + COLUMN_DELIMITER +
                 hit.getAssemblyIdentifier() + COLUMN_DELIMITER +
-                truncate(hit.getRootMeanSquareDeviation().value(), scorePlaces) + COLUMN_DELIMITER +
+                truncate(hit.getRootMeanSquareDeviation(), scorePlaces) + COLUMN_DELIMITER +
                 toString(hit.getLabelSelections()) + COLUMN_DELIMITER +
                 toString(hit.getResidueTypes()) + COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();

@@ -160,7 +160,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                     Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
                     return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository);
                 })
-                .filter(hit -> hit.getRootMeanSquareDeviation().value() <= parameters.getRmsdCutoff())
+                .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                 .limit(limit)
                 .collect(Collectors.toList())).get();
 
@@ -183,7 +183,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                         Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
                         return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository);
                     })
-                    .filter(hit -> hit.getRootMeanSquareDeviation().value() <= parameters.getRmsdCutoff())
+                    .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                     .forEach(hit -> {
                         hits.incrementAndGet();
                         consumer.accept(hit);

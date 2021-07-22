@@ -73,7 +73,7 @@ public class QuaternionAlignmentServiceTest {
         List<Map<String, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
         List<Map<String, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).collect(Collectors.toList());
         AlignmentResult alignmentResult = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation().value(), Helpers.DELTA); // 0.001 precision
+        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation(), Helpers.DELTA); // 0.001 precision
     }
 
     @Test
@@ -95,7 +95,7 @@ public class QuaternionAlignmentServiceTest {
         List<Map<String, float[]>> residues = indices.stream().map(structure::manifestResidue).collect(Collectors.toList());
         AlignmentResult alignment11 = alignmentService.align(residues, residues, AtomPairingScheme.ALL);
 
-        double rmsd11 = alignment11.getRootMeanSquareDeviation().value();
+        double rmsd11 = alignment11.getRootMeanSquareDeviation();
         float[] transformation11 = alignment11.getTransformation().getFlattenedTransformation();
         assertArrayEquals(new float[] { 1, 0, 0, 0,
                 0, 1, 0, 0,
@@ -136,7 +136,7 @@ public class QuaternionAlignmentServiceTest {
         List<Map<String, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).collect(Collectors.toList());
         AlignmentResult alignment12 = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
 
-        double rmsd12 = alignment12.getRootMeanSquareDeviation().value();
+        double rmsd12 = alignment12.getRootMeanSquareDeviation();
         float[] transformation12 = alignment12.getTransformation().getFlattenedTransformation();
         assertArrayEquals(new float[] { -0.0400830537616845f, -0.7695568423369796f, 0.6373190843003801f, 20.360654211896712f,
                 -0.997265515423408f, 0.07044448040859017f, 0.022339805891020748f, 11.603075263299026f,
@@ -177,7 +177,7 @@ public class QuaternionAlignmentServiceTest {
         List<Map<String, float[]>> residues2 = indices.stream().map(structure4::manifestResidue).collect(Collectors.toList());
         AlignmentResult alignment34 = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
 
-        double rmsd34 = alignment34.getRootMeanSquareDeviation().value();
+        double rmsd34 = alignment34.getRootMeanSquareDeviation();
         float[] transformation34 = alignment34.getTransformation().getFlattenedTransformation();
         assertArrayEquals(new float[] { 0.9999999693395323f, 2.476156855096834E-4f, 2.7214443547168843E-6f, -0.018765917915588126f,
                 -2.4761583288007705E-4f, 0.9999999678697555f, 5.428524155062786E-5f, 4.2976537221761646E-4f,
@@ -202,7 +202,7 @@ public class QuaternionAlignmentServiceTest {
                 .collect(Collectors.toList());
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(3.167, result.getRootMeanSquareDeviation().value(), Helpers.DELTA);
+        assertEquals(3.167, result.getRootMeanSquareDeviation(), Helpers.DELTA);
     }
 
     @Test
@@ -226,6 +226,6 @@ public class QuaternionAlignmentServiceTest {
                 .collect(Collectors.toList());
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(2.211, result.getRootMeanSquareDeviation().value(), Helpers.DELTA);
+        assertEquals(2.211, result.getRootMeanSquareDeviation(), Helpers.DELTA);
     }
 }

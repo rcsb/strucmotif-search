@@ -6,7 +6,6 @@ import org.rcsb.strucmotif.domain.align.AtomCorrespondence;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
-import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
 import org.rcsb.strucmotif.math.Algebra;
 import org.springframework.stereotype.Service;
 
@@ -96,7 +95,7 @@ public class QuaternionAlignmentService implements AlignmentService {
 
         Pair<Transformation, Float> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
 
-        return new AlignmentResultImpl(alignment.getFirst(), new RootMeanSquareDeviation(alignment.getSecond()));
+        return new AlignmentResultImpl(alignment.getFirst(), alignment.getSecond());
     }
 
     /**

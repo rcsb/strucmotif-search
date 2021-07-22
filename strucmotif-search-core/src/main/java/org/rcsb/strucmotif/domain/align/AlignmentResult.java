@@ -1,9 +1,6 @@
 package org.rcsb.strucmotif.domain.align;
 
 import org.rcsb.strucmotif.domain.Transformation;
-import org.rcsb.strucmotif.domain.score.RootMeanSquareDeviation;
-
-import java.util.List;
 
 /**
  * The result of an alignment.
@@ -17,7 +14,7 @@ public interface AlignmentResult {
 
     /**
      * The score of this superposition.
-     * @return an {@link RootMeanSquareDeviation}
+     * @return a float
      */
-    RootMeanSquareDeviation getRootMeanSquareDeviation();
+    float getRootMeanSquareDeviation();
 }

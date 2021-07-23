@@ -58,7 +58,7 @@ public class StructureReaderImpl implements StructureReader {
         // the 'state'
         private String lastLabelAsymId;
         private int lastLabelSeqId;
-        private final Map<LabelSelection, Integer> residueIdentifiers;
+        private final Map<LabelSelection.SparseLabelSelection, Integer> residueIdentifiers;
         private final List<Integer> residueOffsets;
         private final List<ResidueType> residueTypes;
 
@@ -107,7 +107,7 @@ public class StructureReaderImpl implements StructureReader {
                 if (chainChange || residueChange) {
                     lastLabelAsymId = labelAsymId;
                     lastLabelSeqId = labelSeqId;
-                    residueIdentifiers.put(new LabelSelection(labelAsymId, null, labelSeqId), residue);
+                    residueIdentifiers.put(new LabelSelection.SparseLabelSelection(labelAsymId, labelSeqId), residue);
                     residueOffsets.add(row);
                     residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
                     residue++;

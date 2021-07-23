@@ -87,9 +87,9 @@ public class ResidueGraph {
 
         // sort residues into chains
         // ${label_asym_id}: ${label_asym_id}-${label_seq_id}
-        Map<String, List<LabelSelection>> chainMap = structure.getLabelSelections()
+        Map<String, List<LabelSelection.SparseLabelSelection>> chainMap = structure.getSparseLabelSelections()
                 .stream()
-                .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
+                .collect(Collectors.groupingBy(LabelSelection.SparseLabelSelection::getLabelAsymId));
         // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
         Map<String, List<String>> assemblyMap = structure.getAssemblies();
 
@@ -128,7 +128,7 @@ public class ResidueGraph {
             // happens for non-polymer chains
             if (!chainMap.containsKey(labelAsymId)) continue;
 
-            for (LabelSelection labelSelection : chainMap.get(labelAsymId)) {
+            for (LabelSelection.SparseLabelSelection labelSelection : chainMap.get(labelAsymId)) {
                 int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
 
                 float[] originalBackbone = originalBackboneVectors.get(residueIndex);
@@ -158,7 +158,7 @@ public class ResidueGraph {
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
 
         // if needed: check for first occurrence of chain (which may or may not be identity transform)
-        List<LabelSelection> labelSelections = structure.getLabelSelections();
+        List<LabelSelection.SparseLabelSelection> labelSelections = structure.getSparseLabelSelections();
         Set<String> acceptedChains = new HashSet<>();
         Set<String> acceptedOperators = new HashSet<>();
         if (!allowTransformed) {

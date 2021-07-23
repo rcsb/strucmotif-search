@@ -70,7 +70,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelAsymId)
@@ -93,7 +93,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 // keep only freakish chain
@@ -129,7 +129,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)
@@ -158,7 +158,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)
@@ -187,7 +187,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)
@@ -216,7 +216,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)

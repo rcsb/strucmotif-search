@@ -22,6 +22,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The entry point to create {@link MotifSearchQuery} instances.
@@ -99,7 +100,10 @@ public class QueryBuilder {
      */
     public MandatoryBuilder defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        List<LabelSelection> labelSelections = structure.getLabelSelections();
+        List<LabelSelection> labelSelections = structure.getSparseLabelSelections()
+                .stream()
+                .map(l -> new LabelSelection(l.getLabelAsymId(), "1", l.getLabelSeqId()))
+                .collect(Collectors.toList());
         return defineByStructure(structure, labelSelections);
     }
 

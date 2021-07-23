@@ -38,7 +38,7 @@ class StructureReaderImplTest {
     @Test
     public void whenAssemblySelection_thenReturnNoDuplicates() {
         // e.g. for 3vk6 (A_2-61, A_1-80, A_1-85) will return 6 residues
-        Collection<LabelSelection> selection = List.of(new LabelSelection("A", 61), new LabelSelection("A", 80), new LabelSelection("A", 85));
+        Collection<LabelSelection> selection = List.of(new LabelSelection("A", "1", 61), new LabelSelection("A", "1", 80), new LabelSelection("A", "1", 85));
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vk6"));
         List<Map<String, float[]>> residues = selection.stream()
                 .map(structure::manifestResidue)
@@ -84,7 +84,7 @@ class StructureReaderImplTest {
     public void whenMicroheterogeneityInRenumberedFile_thenAtomCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("2bwx"));
         // group contains alt locs and microheterogeneity
-        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", 249));
+        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
         // should report all unique atom names
         assertEquals(7, residue.size());
         // should report OD only present in hetatm
@@ -117,7 +117,7 @@ class StructureReaderImplTest {
         ATOM   75   C  CD1 A ILE A 1 9   ? 48.524 16.563  9.024   0.60 23.19 ? 9    ILE A CD1 1
         ATOM   76   C  CD1 B ILE A 1 9   ? 49.568 16.907  8.941   0.40 21.29 ? 9    ILE A CD1 1
          */
-        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A",  9));
+        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 9));
         float[] c1 = residue.values().stream().findFirst().orElseThrow();
         assertArrayEquals(new float[] { 50.0f, 12.6f, 9.9f }, c1);
         float[] c2 = residue.values().stream().skip(1).findFirst().orElseThrow();
@@ -183,7 +183,7 @@ class StructureReaderImplTest {
     public void whenMicroheterogeneityInOriginalFile_thenAtomCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2bwx"));
         // group contains alt locs and microheterogeneity
-        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", 249));
+        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
         // should report all unique atom names
         assertEquals(7, residue.size());
         // should report OD only present in hetatm
@@ -220,9 +220,9 @@ class StructureReaderImplTest {
     }
 
     private long chainCount(Structure structure) {
-        return structure.getLabelSelections()
+        return structure.getSparseLabelSelections()
                 .stream()
-                .map(LabelSelection::getLabelAsymId)
+                .map(LabelSelection.SparseLabelSelection::getLabelAsymId)
                 .distinct()
                 .count();
     }

@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class Structure {
     private final String structureIdentifier;
-    private final Map<LabelSelection, Integer> residueMapping;
+    private final Map<LabelSelection.SparseLabelSelection, Integer> residueMapping;
     private final int[] residueOffsets;
     private final int residueCount;
     private final int atomCount;
@@ -23,7 +23,7 @@ public class Structure {
     private final Map<String, Transformation> transformations;
 
     public Structure(String structureIdentifier,
-                     Map<LabelSelection, Integer> residueMapping,
+                     Map<LabelSelection.SparseLabelSelection, Integer> residueMapping,
                      int[] residueOffsets,
                      ResidueType[] residueTypes,
                      String[] labelAtomId,
@@ -50,13 +50,13 @@ public class Structure {
         return structureIdentifier;
     }
 
-    public List<LabelSelection> getLabelSelections() {
+    public List<LabelSelection.SparseLabelSelection> getSparseLabelSelections() {
         return new ArrayList<>(residueMapping.keySet());
     }
 
     public int getResidueIndex(String labelAsymId, int labelSeqId) {
         // this must be accessed without struct_oper_id
-        return residueMapping.get(new LabelSelection(labelAsymId, null, labelSeqId));
+        return residueMapping.get(new LabelSelection.SparseLabelSelection(labelAsymId,  labelSeqId));
     }
 
     public int getResidueCount() {

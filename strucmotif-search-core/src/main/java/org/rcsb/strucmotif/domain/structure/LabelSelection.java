@@ -11,10 +11,6 @@ public class LabelSelection implements Selection {
     private final String structOperId;
     private final int labelSeqId;
 
-    public LabelSelection(String labelAsymId, int labelSeqId) {
-        this(labelAsymId, "1", labelSeqId);
-    }
-
     /**
      * Construct a label selection.
      * @param labelAsymId the chain of interest
@@ -66,5 +62,45 @@ public class LabelSelection implements Selection {
     @Override
     public String toString() {
         return labelAsymId + "_" + structOperId + "-" + labelSeqId;
+    }
+
+    /**
+     * A LabelSelection without any transformation, used internally.
+     */
+    public static class SparseLabelSelection {
+        private final String labelAsymId;
+        private final int labelSeqId;
+
+        public SparseLabelSelection(String labelAsymId, int labelSeqId) {
+            this.labelAsymId = labelAsymId;
+            this.labelSeqId = labelSeqId;
+        }
+
+        public String getLabelAsymId() {
+            return labelAsymId;
+        }
+
+        public int getLabelSeqId() {
+            return labelSeqId;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SparseLabelSelection that = (SparseLabelSelection) o;
+            return labelSeqId == that.labelSeqId &&
+                    Objects.equals(labelAsymId, that.labelAsymId);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(labelAsymId, labelSeqId);
+        }
+
+        @Override
+        public String toString() {
+            return labelAsymId + "-" + labelSeqId;
+        }
     }
 }

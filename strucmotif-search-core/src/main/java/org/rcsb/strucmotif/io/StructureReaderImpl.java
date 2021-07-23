@@ -51,9 +51,9 @@ public class StructureReaderImpl implements StructureReader {
         private final String[] labelCompId;
         private final String[] labelAsymId;
         private final int[] labelSeqId;
-        private final float[] x;
-        private final float[] y;
-        private final float[] z;
+        private final short[] x;
+        private final short[] y;
+        private final short[] z;
 
         // the 'state'
         private String lastLabelAsymId;
@@ -89,10 +89,10 @@ public class StructureReaderImpl implements StructureReader {
             this.residueTypes = new ArrayList<>();
         }
 
-        private float[] convert(double[] array) {
-            float[] out = new float[array.length];
+        private short[] convert(double[] array) {
+            short[] out = new short[array.length];
             for (int i = 0; i < out.length; i++) {
-                out[i] = (float) array[i];
+                out[i] = (short) Math.round(array[i] * 10);
             }
             return out;
         }

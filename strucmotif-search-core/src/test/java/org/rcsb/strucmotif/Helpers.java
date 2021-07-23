@@ -11,7 +11,16 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 public class Helpers {
-    public static final double DELTA = 0.001;
+    public static final float DELTA = 0.001f;
+    public static final float RELAXED_DELTA = 0.1f;
+
+    public static short[] convertCoordsToShort(double[] array) {
+        short[] out = new short[array.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (short) Math.round(array[i] * 10);
+        }
+        return out;
+    }
 
     public static InputStream getOriginalBcif(String pdbId) {
         return getResource("orig/" + pdbId.toLowerCase() + ".bcif");

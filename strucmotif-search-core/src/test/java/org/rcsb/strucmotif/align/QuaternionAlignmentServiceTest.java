@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -46,9 +47,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2, 3, 4, 5, 6 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[]{ "CA", "CA", "CA", "CA", "CA", "CA", "CA" },
-                new float[]{-2.803f, 0.893f, 1.368f, -1.651f, -0.440f, 2.551f, 0.105f},
-                new float[]{-15.373f, -16.062f, -12.371f, -12.153f, -15.218f, -13.273f, -11.330f},
-                new float[]{24.556f, 25.147f, 25.885f, 28.177f, 30.068f, 31.372f, 33.567f },
+                Helpers.convertCoordsToShort(new double[]{-2.803, 0.893, 1.368, -1.651, -0.440, 2.551, 0.105}),
+                Helpers.convertCoordsToShort(new double[]{-15.373, -16.062, -12.371, -12.153, -15.218, -13.273, -11.330}),
+                Helpers.convertCoordsToShort(new double[]{24.556, 25.147, 25.885, 28.177, 30.068, 31.372, 33.567 }),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
@@ -63,9 +64,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2, 3, 4, 5, 6 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[]{ "CA", "CA", "CA", "CA", "CA", "CA", "CA" },
-                new float[]{-14.739f, -12.473f, -14.802f, -17.782f, -16.124f, -15.029f, -18.577f},
-                new float[]{-18.673f, -15.810f, -13.307f, -14.852f, -14.617f, -11.037f, -10.001f},
-                new float[]{15.040f, 16.074f, 14.408f, 16.171f, 19.584f, 18.902f, 17.996f },
+                Helpers.convertCoordsToShort(new double[]{-14.739, -12.473, -14.802, -17.782, -16.124, -15.029, -18.577}),
+                Helpers.convertCoordsToShort(new double[]{-18.673, -15.810, -13.307, -14.852, -14.617, -11.037, -10.001}),
+                Helpers.convertCoordsToShort(new double[]{15.040, 16.074, 14.408, 16.171, 19.584f, 18.902, 17.996}),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
@@ -73,7 +74,7 @@ public class QuaternionAlignmentServiceTest {
         List<Map<String, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
         List<Map<String, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).collect(Collectors.toList());
         AlignmentResult alignmentResult = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation(), Helpers.DELTA); // 0.001 precision
+        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA);
     }
 
     @Test
@@ -85,9 +86,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[]{ "CA", "CA", "CA" },
-                new float[]{6.994f, 9.429f, 5.547f},
-                new float[]{8.354f, 7.479f, 0.158f},
-                new float[]{42.405f, 48.266f, 42.050f},
+                Helpers.convertCoordsToShort(new double[]{6.994, 9.429, 5.547}),
+                Helpers.convertCoordsToShort(new double[]{8.354, 7.479, 0.158}),
+                Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
@@ -100,8 +101,8 @@ public class QuaternionAlignmentServiceTest {
         assertArrayEquals(new float[] { 1, 0, 0, 0,
                 0, 1, 0, 0,
                 0, 0, 1, 0,
-                0, 0, 0, 1 }, transformation11, (float) Helpers.DELTA);
-        assertEquals(0.0, rmsd11, Helpers.DELTA);
+                0, 0, 0, 1 }, transformation11, Helpers.RELAXED_DELTA);
+        assertEquals(0.0, rmsd11, Helpers.RELAXED_DELTA);
     }
 
     @Test
@@ -113,9 +114,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[]{ "CA", "CA", "CA" },
-                new float[]{6.994f, 9.429f, 5.547f},
-                new float[]{8.354f, 7.479f, 0.158f},
-                new float[]{42.405f, 48.266f, 42.050f},
+                Helpers.convertCoordsToShort(new double[]{6.994, 9.429, 5.547}),
+                Helpers.convertCoordsToShort(new double[]{8.354, 7.479, 0.158}),
+                Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
         Structure structure2 = new Structure("2tst",
@@ -125,9 +126,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[]{ "CA", "CA", "CA" },
-                new float[]{3.908f, 4.588f, 12.080f},
-                new float[]{12.066f, 6.531f, 12.645f},
-                new float[]{-6.159f, -9.119f, -7.073f},
+                Helpers.convertCoordsToShort(new double[]{3.908, 4.588, 12.080}),
+                Helpers.convertCoordsToShort(new double[]{12.066, 6.531, 12.645}),
+                Helpers.convertCoordsToShort(new double[]{-6.159, -9.119, -7.073}),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
@@ -138,11 +139,12 @@ public class QuaternionAlignmentServiceTest {
 
         double rmsd12 = alignment12.getRootMeanSquareDeviation();
         float[] transformation12 = alignment12.getTransformation().getFlattenedTransformation();
-        assertArrayEquals(new float[] { -0.0400830537616845f, -0.7695568423369796f, 0.6373190843003801f, 20.360654211896712f,
-                -0.997265515423408f, 0.07044448040859017f, 0.022339805891020748f, 11.603075263299026f,
-                -0.062087362227933755f, -0.6346808974534377f, -0.7702761309162296f, 45.53692278711121f,
-                0, 0, 0, 1 }, transformation12, (float) Helpers.DELTA); // 0.001
-        assertEquals(0.19986, rmsd12, Helpers.DELTA); // 0.001
+        System.out.println(Arrays.toString(transformation12));
+        assertArrayEquals(new float[] { -0.054316826f, -0.7567086f, 0.65149194f, 20.407219f,
+                -0.9968595f, 0.07874857f, 0.008355401f, 11.455171f,
+                -0.057626665f, -0.6489921f, -0.75860953f, 45.747604f,
+                0.0f, 0.0f, 0.0f, 1.0f }, transformation12, Helpers.RELAXED_DELTA);
+        assertEquals(0.19986, rmsd12, Helpers.RELAXED_DELTA);
     }
 
     @Test
@@ -154,9 +156,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[] { "CA", "CA", "CA" },
-                new float[]{5.055f, 7.320f, 6.021f},
-                new float[]{74.865f, 76.960f, 74.874f},
-                new float[]{22.585f, 20.325f, 17.385f},
+                Helpers.convertCoordsToShort(new double[]{5.055, 7.320, 6.021}),
+                Helpers.convertCoordsToShort(new double[]{74.865, 76.960, 74.874}),
+                Helpers.convertCoordsToShort(new double[]{22.585, 20.325, 17.385}),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
         Structure structure4 = new Structure("2tst",
@@ -166,9 +168,9 @@ public class QuaternionAlignmentServiceTest {
                 new int[] { 0, 1, 2 },
                 new ResidueType[] { ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE },
                 new String[]{ "CA", "CA", "CA" },
-                new float[]{5.055f, 7.321f, 6.020f},
-                new float[]{74.864f, 76.962f, 74.873f},
-                new float[]{22.583f, 20.326f, 17.386f},
+                Helpers.convertCoordsToShort(new double[]{5.055, 7.321, 6.020}),
+                Helpers.convertCoordsToShort(new double[]{74.864, 76.962, 74.873}),
+                Helpers.convertCoordsToShort(new double[]{22.583, 20.326, 17.386}),
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
@@ -182,8 +184,8 @@ public class QuaternionAlignmentServiceTest {
         assertArrayEquals(new float[] { 0.9999999693395323f, 2.476156855096834E-4f, 2.7214443547168843E-6f, -0.018765917915588126f,
                 -2.4761583288007705E-4f, 0.9999999678697555f, 5.428524155062786E-5f, 4.2976537221761646E-4f,
                 -2.70800238995339E-6f, -5.428591375893077E-5f, 0.9999999985228533f, 0.004118822613254025f,
-                0, 0, 0, 1 }, transformation34, (float) Helpers.DELTA); // 0.001
-        assertEquals(0.0021, rmsd34, Helpers.DELTA); // 0.001
+                0, 0, 0, 1 }, transformation34, Helpers.RELAXED_DELTA);
+        assertEquals(0.0021, rmsd34, Helpers.RELAXED_DELTA);
     }
 
     @Test
@@ -226,6 +228,6 @@ public class QuaternionAlignmentServiceTest {
                 .collect(Collectors.toList());
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(2.211, result.getRootMeanSquareDeviation(), Helpers.DELTA);
+        assertEquals(2.211, result.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA);
     }
 }

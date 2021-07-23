@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.io;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -119,9 +120,9 @@ class StructureReaderImplTest {
          */
         Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 9));
         float[] c1 = residue.values().stream().findFirst().orElseThrow();
-        assertArrayEquals(new float[] { 50.0f, 12.6f, 9.9f }, c1);
+        assertArrayEquals(new float[] { 50.0f, 12.6f, 9.9f }, c1, Helpers.DELTA);
         float[] c2 = residue.values().stream().skip(1).findFirst().orElseThrow();
-        assertArrayEquals(new float[] { 49.8f, 12.9f, 8.4f }, c2);
+        assertArrayEquals(new float[] { 49.8f, 12.9f, 8.4f }, c2, Helpers.DELTA);
     }
 
     @Test

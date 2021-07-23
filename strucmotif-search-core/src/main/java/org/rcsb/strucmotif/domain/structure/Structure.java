@@ -15,9 +15,9 @@ public class Structure {
     private final int residueCount;
     private final int atomCount;
     private final String[] labelAtomId;
-    private final float[] x;
-    private final float[] y;
-    private final float[] z;
+    private final short[] x;
+    private final short[] y;
+    private final short[] z;
     private final ResidueType[] residueTypes;
     private final Map<String, List<String>> assemblies;
     private final Map<String, Transformation> transformations;
@@ -27,9 +27,9 @@ public class Structure {
                      int[] residueOffsets,
                      ResidueType[] residueTypes,
                      String[] labelAtomId,
-                     float[] x,
-                     float[] y,
-                     float[] z,
+                     short[] x,
+                     short[] y,
+                     short[] z,
                      Map<String, List<String>> assemblies,
                      Map<String, Transformation> transformations) {
         this.structureIdentifier = structureIdentifier;
@@ -111,9 +111,9 @@ public class Structure {
         for (int i = offsetStart; i < offsetEnd; i++) {
             String labelAtomId = this.labelAtomId[i];
             float[] v = new float[] {
-                    x[i],
-                    y[i],
-                    z[i]
+                    x[i] * 0.1f,
+                    y[i] * 0.1f,
+                    z[i] * 0.1f
             };
             transformation.transform(v, v);
             out.put(labelAtomId, v);

@@ -319,6 +319,6 @@ public class QuaternionAlignmentService implements AlignmentService {
         float[] translation = new float[3];
         Algebra.subtract3d(translation, referenceCentroid, candidateCentroid);
         float[][] transformation = Algebra.composeTransformationMatrix(rot, translation);
-        return new Pair<>(new Transformation(transformation), (float) rms);
+        return new Pair<>(Transformation.of(transformation), (float) rms);
     }
 }

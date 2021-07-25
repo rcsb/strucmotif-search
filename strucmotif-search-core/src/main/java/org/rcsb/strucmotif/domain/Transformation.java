@@ -25,10 +25,17 @@ public class Transformation {
      * Construct a transformation from translation and rotation.
      * @param transformation 4x4 matrix
      */
-    public Transformation(float[][] transformation) {
+    private Transformation(float[][] transformation) {
         this.transformation = transformation;
-        // TODO force re-use of identity instance via factory method
         this.identity = Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation);
+    }
+
+    public static Transformation of(float[][] transformation) {
+        if (Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation)) {
+            return IDENTITY_TRANSFORMATION;
+        }
+
+        return new Transformation(transformation);
     }
 
     /**
@@ -63,13 +70,5 @@ public class Transformation {
             return;
         }
         Algebra.multiply4d(out, transformation, v);
-    }
-
-    /**
-     * <code>true</code> if this is the identity matrix
-     * @return a boolean
-     */
-    public boolean isIdentity() {
-        return identity;
     }
 }

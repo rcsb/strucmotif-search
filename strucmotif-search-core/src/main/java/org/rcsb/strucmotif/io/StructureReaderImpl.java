@@ -159,13 +159,13 @@ public class StructureReaderImpl implements StructureReader {
                 List<String> ids2 = extractTransformationIds(split[1]);
                 for (String id1 : ids1) {
                     for (String id2 : ids2) {
-                        composedTransformations.put(id1 + "x" + id2, new Transformation(Algebra.multiply4d(transformations.get(id1), transformations.get(id2))));
+                        composedTransformations.put(id1 + "x" + id2, Transformation.of(Algebra.multiply4d(transformations.get(id1), transformations.get(id2))));
                     }
                 }
             } else {
                 List<String> ids = extractTransformationIds(operations);
                 for (String id : ids) {
-                    composedTransformations.put(id, new Transformation(transformations.get(id)));
+                    composedTransformations.put(id, Transformation.of(transformations.get(id)));
                 }
             }
 

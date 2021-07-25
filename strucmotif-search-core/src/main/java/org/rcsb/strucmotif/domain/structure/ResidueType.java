@@ -1,5 +1,10 @@
 package org.rcsb.strucmotif.domain.structure;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * Registry of known residues. Provides mapping between enum representation and one- and three-letter codes as well as
  * polymer type.
@@ -124,7 +129,6 @@ public enum ResidueType {
     // joker categories
 //    LIGAND("LIG", "l"),
 
-    // stuff to ignore for hashCode creation
     /**
      * Some unknown amino acid.
      */
@@ -174,161 +178,27 @@ public enum ResidueType {
         return polymerType;
     }
 
+    private static final Map<String, ResidueType> TLC_MAPPING = Arrays.stream(ResidueType.values())
+            .collect(Collectors.toMap(ResidueType::getThreeLetterCode, Function.identity()));
     /**
      * Maps labelCompId values to the correct {@link ResidueType}.
      * @param labelCompId three-letter code to process
      * @return the matching type - if argument is null or fail to find: return UNKNOWN_AMINO_ACID
      */
     public static ResidueType ofThreeLetterCode(String labelCompId) {
-        if (labelCompId == null) {
-            return UNKNOWN_COMPONENT;
-        }
-
-        switch (labelCompId) {
-            case "ALA":
-                return ALANINE;
-            case "ARG":
-                return ARGININE;
-            case "ASN":
-                return ASPARAGINE;
-            case "ASP":
-                return ASPARTIC_ACID;
-            case "CYS":
-                return CYSTEINE;
-            case "GLU":
-                return GLUTAMIC_ACID;
-            case "GLN":
-                return GLUTAMINE;
-            case "GLY":
-                return GLYCINE;
-            case "HIS":
-                return HISTIDINE;
-            case "ILE":
-                return ISOLEUCINE;
-            case "LEU":
-                return LEUCINE;
-            case "LYS":
-                return LYSINE;
-            case "MET":
-                return METHIONINE;
-            case "PHE":
-                return PHENYLALANINE;
-            case "PRO":
-                return PROLINE;
-            case "SER":
-                return SERINE;
-            case "THR":
-                return THREONINE;
-            case "TRP":
-                return TRYPTOPHAN;
-            case "TYR":
-                return TYROSINE;
-            case "VAL":
-                return VALINE;
-
-            case "A":
-                return ADENOSINE;
-            case "C":
-                return CYTIDINE;
-            case "DA":
-                return DEOXYADENOSINE;
-            case "DC":
-                return DEOXYCYTIDINE;
-            case "DG":
-                return DEOXYGUANOSINE;
-            case "G":
-                return GUANOSINE;
-            case "T":
-                return THYMIDINE;
-            case "U":
-                return URIDINE;
-
-
-            case "UNK":
-                return UNKNOWN_AMINO_ACID;
-            case "N":
-                return UNKNOWN_NUCLEOTIDE;
-            default:
-                return UNKNOWN_COMPONENT;
-        }
+        ResidueType residueType = TLC_MAPPING.get(labelCompId);
+        return residueType != null ? residueType : ResidueType.UNKNOWN_COMPONENT;
     }
 
+    private static final Map<String, ResidueType> OLC_MAPPING = Arrays.stream(ResidueType.values())
+            .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
     /**
      * Resolve a one-letter-code.
      * @param oneLetterCode the one-letter-code (as defined in this implementation)
      * @return a residue type or null
      */
     public static ResidueType ofOneLetterCode(String oneLetterCode) {
-        if (oneLetterCode == null) {
-            return UNKNOWN_COMPONENT;
-        }
-
-        switch (oneLetterCode) {
-            case "A":
-                return ALANINE;
-            case "R":
-                return ARGININE;
-            case "N":
-                return ASPARAGINE;
-            case "D":
-                return ASPARTIC_ACID;
-            case "C":
-                return CYSTEINE;
-            case "E":
-                return GLUTAMIC_ACID;
-            case "Q":
-                return GLUTAMINE;
-            case "G":
-                return GLYCINE;
-            case "H":
-                return HISTIDINE;
-            case "I":
-                return ISOLEUCINE;
-            case "L":
-                return LEUCINE;
-            case "K":
-                return LYSINE;
-            case "M":
-                return METHIONINE;
-            case "F":
-                return PHENYLALANINE;
-            case "P":
-                return PROLINE;
-            case "S":
-                return SERINE;
-            case "T":
-                return THREONINE;
-            case "W":
-                return TRYPTOPHAN;
-            case "Y":
-                return TYROSINE;
-            case "V":
-                return VALINE;
-
-            case "0":
-                return ADENOSINE;
-            case "1":
-                return CYTIDINE;
-            case "2":
-                return DEOXYADENOSINE;
-            case "3":
-                return DEOXYCYTIDINE;
-            case "4":
-                return DEOXYGUANOSINE;
-            case "5":
-                return GUANOSINE;
-            case "6":
-                return THYMIDINE;
-            case "7":
-                return URIDINE;
-
-
-            case "X":
-                return UNKNOWN_AMINO_ACID;
-            case "Z":
-                return UNKNOWN_NUCLEOTIDE;
-            default:
-                return UNKNOWN_COMPONENT;
-        }
+        ResidueType residueType = OLC_MAPPING.get(oneLetterCode);
+        return residueType != null ? residueType : ResidueType.UNKNOWN_COMPONENT;
     }
 }

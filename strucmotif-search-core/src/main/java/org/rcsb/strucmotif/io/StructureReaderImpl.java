@@ -58,7 +58,7 @@ public class StructureReaderImpl implements StructureReader {
         // the 'state'
         private String lastLabelAsymId;
         private int lastLabelSeqId;
-        private final Map<LabelSelection.SparseLabelSelection, Integer> residueIdentifiers;
+        private final Map<LabelSelection.SparseLabelSelection, Integer> residueMapping;
         private final List<Integer> residueOffsets;
         private final List<ResidueType> residueTypes;
 
@@ -84,7 +84,7 @@ public class StructureReaderImpl implements StructureReader {
 
             this.lastLabelAsymId = null;
             this.lastLabelSeqId = -1;
-            this.residueIdentifiers = new LinkedHashMap<>();
+            this.residueMapping = new LinkedHashMap<>();
             this.residueOffsets = new ArrayList<>();
             this.residueTypes = new ArrayList<>();
         }
@@ -107,7 +107,7 @@ public class StructureReaderImpl implements StructureReader {
                 if (chainChange || residueChange) {
                     lastLabelAsymId = labelAsymId;
                     lastLabelSeqId = labelSeqId;
-                    residueIdentifiers.put(new LabelSelection.SparseLabelSelection(labelAsymId, labelSeqId), residue);
+                    residueMapping.put(new LabelSelection.SparseLabelSelection(labelAsymId, labelSeqId), residue);
                     residueOffsets.add(row);
                     residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
                     residue++;
@@ -117,7 +117,7 @@ public class StructureReaderImpl implements StructureReader {
             Map<String, Transformation> transformations = buildTransformations();
             Map<String, List<String>> assemblies = buildAssemblies();
             return new Structure(structureIdentifier,
-                    residueIdentifiers,
+                    residueMapping,
                     residueOffsets.stream().mapToInt(i -> i).toArray(),
                     residueTypes.toArray(ResidueType[]::new),
                     labelAtomId, x, y, z,

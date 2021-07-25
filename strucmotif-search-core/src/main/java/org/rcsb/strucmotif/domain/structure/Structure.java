@@ -56,7 +56,7 @@ public class Structure {
 
     public int getResidueIndex(String labelAsymId, int labelSeqId) {
         // this must be accessed without struct_oper_id
-        return residueMapping.get(new LabelSelection.SparseLabelSelection(labelAsymId,  labelSeqId));
+        return residueMapping.get(new LabelSelection.SparseLabelSelection(labelAsymId, labelSeqId));
     }
 
     public int getResidueCount() {

@@ -138,6 +138,7 @@ public class TargetStructure {
 
         // determine all assembly ids that this collection of label selections appears in
         int residueCount = labelSelections.size();
+        // this is the inverted mapping from opers to assemblies that contain this expression - can't use structure map here
         Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
         Map<String, Long> assemblyCounts = labelSelections.stream()
                 .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())

@@ -17,9 +17,13 @@ public class Transformation {
             { 0, 0, 1, 0 },
             { 0, 0, 0, 1 }
     };
-    public static final Transformation IDENTITY_TRANSFORMATION = new Transformation(IDENTITY_MATRIX_4D);
+    public static final Transformation IDENTITY_TRANSFORMATION = new Transformation(IDENTITY_MATRIX_4D) {
+        @Override
+        public void transform(float[] out, float[] v) {
+            System.arraycopy(v, 0, out, 0, 3);
+        }
+    };
     private final float[][] transformation;
-    private final boolean identity;
 
     /**
      * Construct a transformation from translation and rotation.
@@ -27,7 +31,6 @@ public class Transformation {
      */
     private Transformation(float[][] transformation) {
         this.transformation = transformation;
-        this.identity = Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation);
     }
 
     public static Transformation of(float[][] transformation) {
@@ -65,10 +68,6 @@ public class Transformation {
      * @param v the vector to transform
      */
     public void transform(float[] out, float[] v) {
-        if (identity) {
-            System.arraycopy(v, 0, out, 0, 3);
-            return;
-        }
         Algebra.multiply4d(out, transformation, v);
     }
 }

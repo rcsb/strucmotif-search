@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.core;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -35,7 +36,7 @@ public class KruskalMotifPruner implements MotifPruner {
     }
 
     @Override
-    public List<ResiduePairOccurrence> prune(Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues) {
+    public List<ResiduePairOccurrence> prune(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
         ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig.getSquaredDistanceCutoff(), true);
 
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()

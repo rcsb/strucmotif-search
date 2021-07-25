@@ -5,6 +5,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -21,13 +22,13 @@ public class QueryStructure {
     private final String structureIdentifier;
     private final Structure structure;
     private final List<IndexSelection> indexSelections;
-    private final List<Map<String, float[]>> residues;
+    private final List<Map<LabelAtomId, float[]>> residues;
     private final List<ResiduePairOccurrence> residuePairOccurrences;
     private final List<ResiduePairIdentifier> residuePairIdentifiers;
     private final List<ResiduePairDescriptor> residuePairDescriptors;
     private final List<Integer> residueIndexSwaps;
 
-    QueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<String, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences) {
+    QueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {
@@ -147,7 +148,7 @@ public class QueryStructure {
         return residuePairDescriptors;
     }
 
-    public List<Map<String, float[]>> getResidues() {
+    public List<Map<LabelAtomId, float[]>> getResidues() {
         return residues;
     }
 

@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -41,7 +42,7 @@ class StructureReaderImplTest {
         // e.g. for 3vk6 (A_2-61, A_1-80, A_1-85) will return 6 residues
         Collection<LabelSelection> selection = List.of(new LabelSelection("A", "1", 61), new LabelSelection("A", "1", 80), new LabelSelection("A", "1", 85));
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vk6"));
-        List<Map<String, float[]>> residues = selection.stream()
+        List<Map<LabelAtomId, float[]>> residues = selection.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
         assertTrue(residues.size() < 4, "contains duplicates");
@@ -85,11 +86,9 @@ class StructureReaderImplTest {
     public void whenMicroheterogeneityInRenumberedFile_thenAtomCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("2bwx"));
         // group contains alt locs and microheterogeneity
-        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
-        // should report all unique atom names
-        assertEquals(7, residue.size());
-        // should report OD only present in hetatm
-        assertTrue(residue.containsKey("OD"));
+        Map<LabelAtomId, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
+        // should report all unique atom names, but won't report non-standard OD
+        assertEquals(6, residue.size());
     }
 
     @Test
@@ -118,9 +117,9 @@ class StructureReaderImplTest {
         ATOM   75   C  CD1 A ILE A 1 9   ? 48.524 16.563  9.024   0.60 23.19 ? 9    ILE A CD1 1
         ATOM   76   C  CD1 B ILE A 1 9   ? 49.568 16.907  8.941   0.40 21.29 ? 9    ILE A CD1 1
          */
-        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 9));
+        Map<LabelAtomId, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 9));
         float[] c1 = residue.values().stream().findFirst().orElseThrow();
-        assertArrayEquals(new float[] { 50.0f, 12.6f, 9.9f }, c1, Helpers.DELTA);
+        assertArrayEquals(new float[] { 50.7f, 12.1f, 7.6f }, c1, Helpers.DELTA);
         float[] c2 = residue.values().stream().skip(1).findFirst().orElseThrow();
         assertArrayEquals(new float[] { 49.8f, 12.9f, 8.4f }, c2, Helpers.DELTA);
     }
@@ -184,11 +183,9 @@ class StructureReaderImplTest {
     public void whenMicroheterogeneityInOriginalFile_thenAtomCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2bwx"));
         // group contains alt locs and microheterogeneity
-        Map<String, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
-        // should report all unique atom names
-        assertEquals(7, residue.size());
-        // should report OD only present in hetatm
-        assertTrue(residue.containsKey("OD"));
+        Map<LabelAtomId, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
+        // should report all unique atom names, but won't report non-standard OD
+        assertEquals(6, residue.size());
     }
 
     @Test

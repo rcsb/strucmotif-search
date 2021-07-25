@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -82,7 +83,7 @@ public class QueryBuilder {
      * @return mandatory parameter step
      */
     public MandatoryBuilder defineByStructure(Structure structure, List<LabelSelection> labelSelections) {
-        List<Map<String, float[]>> residues = structure.manifestResidues(labelSelections);
+        List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
 
         if (residues.size() > motifSearchConfig.getMaxMotifSize()) {
             throw new IllegalArgumentException("maximum motif size is " + motifSearchConfig.getMaxMotifSize() + " - " +
@@ -116,7 +117,7 @@ public class QueryBuilder {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<LabelSelection> labelSelections;
-        private final List<Map<String, float[]>> residues;
+        private final List<Map<LabelAtomId, float[]>> residues;
         private int backboneDistanceTolerance;
         private int sideChainDistanceTolerance;
         private int angleTolerance;
@@ -125,7 +126,7 @@ public class QueryBuilder {
         private MotifPruner motifPruner;
         private int limit;
 
-        MandatoryBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues) {
+        MandatoryBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.labelSelections = labelSelections;
@@ -252,13 +253,13 @@ public class QueryBuilder {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<LabelSelection> labelSelections;
-        private final List<Map<String, float[]>> residues;
+        private final List<Map<LabelAtomId, float[]>> residues;
         private final Parameters parameters;
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<String> whitelist;
         private final Set<String> blacklist;
 
-        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues, Parameters parameters) {
+        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, Parameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.labelSelections = labelSelections;

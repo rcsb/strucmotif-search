@@ -74,4 +74,12 @@ public class Helpers {
 
         return combinations.stream();
     }
+
+    public static byte[] convertEnumToByte(Enum<?>... array) {
+        byte[] out = new byte[array.length];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (byte) array[i].ordinal();
+        }
+        return out;
+    }
 }

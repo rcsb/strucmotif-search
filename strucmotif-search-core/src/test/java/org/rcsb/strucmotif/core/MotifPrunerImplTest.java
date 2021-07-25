@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureReader;
@@ -36,7 +37,7 @@ public class MotifPrunerImplTest {
         List<LabelSelection> labelSelections = List.of(new LabelSelection("B", "1", 42), // H
                 new LabelSelection("B", "1", 87), // D
                 new LabelSelection("C", "1", 47)); // S
-        List<Map<String, float[]>> residues = labelSelections.stream()
+        List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
 
@@ -57,7 +58,7 @@ public class MotifPrunerImplTest {
                         new LabelSelection("D", "1", 37), // Q, D40
                         new LabelSelection("D", "1", 38), // I, D41
                         new LabelSelection("D", "1", 51)); // R, D54
-        List<Map<String, float[]>> residues = labelSelections.stream()
+        List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
 

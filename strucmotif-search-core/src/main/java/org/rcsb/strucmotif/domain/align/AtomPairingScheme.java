@@ -1,12 +1,14 @@
 package org.rcsb.strucmotif.domain.align;
 
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+
 import java.util.function.Predicate;
 
 /**
  * Schemes on which atoms (by name) to use to align residues. Each entry is actually a {@link Predicate} which tests
  * atom names and returns true if fall into that particular scheme.
  */
-public enum AtomPairingScheme implements Predicate<String> {
+public enum AtomPairingScheme implements Predicate<LabelAtomId> {
     /**
      * Use everything.
      */
@@ -14,36 +16,39 @@ public enum AtomPairingScheme implements Predicate<String> {
     /**
      * Use alpha carbons only.
      */
-    ALPHA_CARBON(s -> s.equals("CA") ||
-            s.equals("C4'")),
+    ALPHA_CARBON(s -> s.equals(LabelAtomId.CA) ||
+            s.equals(LabelAtomId.C4_PRIME)),
     /**
      * Use beta carbons only.
      */
-    BETA_CARBON(s -> s.equals("CB") ||
-            s.equals("C1'")),
+    BETA_CARBON(s -> s.equals(LabelAtomId.CB) ||
+            s.equals(LabelAtomId.C1_PRIME)),
     /**
      * Use backbone atoms only.
      */
-    BACKBONE(s -> s.equals("N") || s.equals("CA") || s.equals("C") || s.equals("O") ||
-            s.equals("P") || s.equals("OP1") || s.equals("OP2") || s.equals("C2'") || s.equals("C3'") || s.equals("O3'") || s.equals("C4'") || s.equals("O4'") || s.equals("C5'") || s.equals("O5'")),
+    BACKBONE(s -> s.equals(LabelAtomId.N) || s.equals(LabelAtomId.CA) || s.equals(LabelAtomId.C) ||
+            s.equals(LabelAtomId.O) || s.equals(LabelAtomId.P) || s.equals(LabelAtomId.OP1) ||
+            s.equals(LabelAtomId.OP2) || s.equals(LabelAtomId.C2_PRIME) || s.equals(LabelAtomId.C3_PRIME) ||
+            s.equals(LabelAtomId.O3_PRIME) || s.equals(LabelAtomId.C4_PRIME) || s.equals(LabelAtomId.O4_PRIME) ||
+            s.equals(LabelAtomId.C5_PRIME) || s.equals(LabelAtomId.O5_PRIME)),
     /**
      * Use side-chain atoms only.
      */
     SIDE_CHAIN(BACKBONE.predicate.negate()),
     /**
-     * Use pseudo-atoms defined by {@link org.rcsb.strucmotif2.domain.motif.ResiduePairDescriptor}.
+     * Use pseudo-atoms defined by {@link org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor}.
      */
-    PSEUDO_ATOMS(s -> s.equals("CA") || s.equals("CB") ||
-            s.equals("C4'") || s.equals("C1'"));
+    PSEUDO_ATOMS(s -> s.equals(LabelAtomId.CA) || s.equals(LabelAtomId.CB) ||
+            s.equals(LabelAtomId.C4_PRIME) || s.equals(LabelAtomId.C1_PRIME));
 
-    private final Predicate<String> predicate;
+    private final Predicate<LabelAtomId> predicate;
 
-    AtomPairingScheme(Predicate<String> predicate) {
+    AtomPairingScheme(Predicate<LabelAtomId> predicate) {
         this.predicate = predicate;
     }
 
     @Override
-    public boolean test(String s) {
+    public boolean test(LabelAtomId s) {
         return predicate.test(s);
     }
 }

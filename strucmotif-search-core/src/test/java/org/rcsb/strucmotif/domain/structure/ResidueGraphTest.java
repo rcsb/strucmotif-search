@@ -23,10 +23,10 @@ import static org.rcsb.strucmotif.Helpers.*;
 class ResidueGraphTest {
     @Test
     public void whenGlycine_thenCreateVirtualBetaCarbon() {
-        Map<String, float[]> residue = Map.of("N", new float[] { -0.966f, 0.493f, 1.500f },
-                "CA", new float[] { 0.257f, 0.418f, 0.692f },
-                "C", new float[] { -0.094f, 0.017f, -0.716f },
-                "O", new float[] { -1.056f, -0.682f, -0.923f });
+        Map<LabelAtomId, float[]> residue = Map.of(LabelAtomId.N, new float[] { -0.966f, 0.493f, 1.500f },
+                LabelAtomId.CA, new float[] { 0.257f, 0.418f, 0.692f },
+                LabelAtomId.C, new float[] { -0.094f, 0.017f, -0.716f },
+                LabelAtomId.O, new float[] { -1.056f, -0.682f, -0.923f });
 
         float[] betaCarbon = ResidueGraph.getVirtualCB(residue);
         assertArrayEquals(new float[]{1.204f, -0.620f, 1.296f}, betaCarbon, 0.01f);

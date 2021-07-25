@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.align;
 
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.math.Algebra;
 
 import java.util.ArrayList;
@@ -25,8 +26,8 @@ public class AtomCorrespondence {
      * @param candidate candidate container
      * @param atomPairingScheme how to pair atoms?
      */
-    public AtomCorrespondence(List<Map<String, float[]>> reference,
-                              List<Map<String, float[]>> candidate,
+    public AtomCorrespondence(List<Map<LabelAtomId, float[]>> reference,
+                              List<Map<LabelAtomId, float[]>> candidate,
                               AtomPairingScheme atomPairingScheme) {
         Map<float[], float[]> mapping = pairAtomsByName(reference, candidate, atomPairingScheme);
 
@@ -47,18 +48,18 @@ public class AtomCorrespondence {
      * @throws IllegalStateException when no atoms were paired - this should not happen
      * @return correspondence between atoms of reference and candidate - may ignore some atoms - present as Map
      */
-    private static Map<float[], float[]> pairAtomsByName(List<Map<String, float[]>> reference,
-                                                         List<Map<String, float[]>> candidate,
+    private static Map<float[], float[]> pairAtomsByName(List<Map<LabelAtomId, float[]>> reference,
+                                                         List<Map<LabelAtomId, float[]>> candidate,
                                                          AtomPairingScheme atomPairingScheme) {
         Map<float[], float[]> mapping = new LinkedHashMap<>();
         boolean schemeRequiresSubset = atomPairingScheme != AtomPairingScheme.ALL;
 
         for (int i = 0; i < reference.size(); i++) {
-            Map<String, float[]> referenceGroup = reference.get(i);
-            Map<String, float[]> candidateGroup = candidate.get(i);
+            Map<LabelAtomId, float[]> referenceGroup = reference.get(i);
+            Map<LabelAtomId, float[]> candidateGroup = candidate.get(i);
 
-            for (Map.Entry<String, float[]> referenceAtom : referenceGroup.entrySet()) {
-                String referenceLabel = referenceAtom.getKey();
+            for (Map.Entry<LabelAtomId, float[]> referenceAtom : referenceGroup.entrySet()) {
+                LabelAtomId referenceLabel = referenceAtom.getKey();
                 float[] referenceVector = referenceAtom.getValue();
 
                 // if using a subset and if this is not an allowed name: continue

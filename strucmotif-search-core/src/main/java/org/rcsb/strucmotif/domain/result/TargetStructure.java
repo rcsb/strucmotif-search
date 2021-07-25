@@ -8,6 +8,7 @@ import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -151,7 +152,7 @@ public class TargetStructure {
                 .map(entry -> {
                     ResidueType[] residueTypes = new ResidueType[residueCount];
                     @SuppressWarnings("unchecked")
-                    Map<String, float[]>[] residues = new Map[residueCount];
+                    Map<LabelAtomId, float[]>[] residues = new Map[residueCount];
 
                     for (int i = 0; i < residueCount; i++) {
                         int index = indexSelections.get(i).getIndex();

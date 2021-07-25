@@ -5,6 +5,7 @@ import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -41,7 +42,7 @@ public class MotifSearchQuery {
                      String structureIdentifier,
                      Structure structure,
                      List<LabelSelection> labelSelections,
-                     List<Map<String, float[]>> residues,
+                     List<Map<LabelAtomId, float[]>> residues,
                      Parameters parameters,
                      Map<LabelSelection, Set<ResidueType>> exchanges,
                      Collection<String> whitelist,

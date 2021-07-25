@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -89,7 +88,7 @@ public class StateRepositoryImpl implements StateRepository {
      * @return a structure information container
      */
     protected StructureInformation handleKnownSplit(String[] split) {
-        String structureIdentifier = new String(split[0]);
+        String structureIdentifier = split[0];
         Revision revision = new Revision(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
         Map<String, Set<String>> assemblyInformation = IntStream.range(3, split.length)
                 .mapToObj(i -> {

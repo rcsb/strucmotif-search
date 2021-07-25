@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 

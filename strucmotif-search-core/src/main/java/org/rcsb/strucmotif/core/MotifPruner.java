@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -19,5 +20,5 @@ public interface MotifPruner {
      * @param residues the manifested residues to work with, a subset of the structure
      * @return the set of occurrences which describe this structure
      */
-    List<ResiduePairOccurrence> prune(Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues);
+    List<ResiduePairOccurrence> prune(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues);
 }

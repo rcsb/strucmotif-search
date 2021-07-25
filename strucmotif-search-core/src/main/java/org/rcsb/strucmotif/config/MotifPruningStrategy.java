@@ -9,7 +9,7 @@ public enum MotifPruningStrategy {
      */
     KRUSKAL,
     /**
-     * Merely extract {@link org.rcsb.strucmotif2.domain.motif.ResiduePairOccurrence}.
+     * Merely extract {@link org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence}.
      */
     NONE
 }

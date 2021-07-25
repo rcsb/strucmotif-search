@@ -35,7 +35,7 @@ public class ResidueGraph {
     private final Map<IndexSelection, Map<IndexSelection, Float>> angles;
     private final int numberOfPairings;
 
-    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<String, float[]>> residues, float squaredCutoff, boolean allowTransformed) {
+    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, float squaredCutoff, boolean allowTransformed) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -47,7 +47,7 @@ public class ResidueGraph {
         List<IndexSelection> indexSelections = new ArrayList<>();
         for (int i = 0; i < labelSelections.size(); i++) {
             LabelSelection labelSelection = labelSelections.get(i);
-            Map<String, float[]> residue = residues.get(i);
+            Map<LabelAtomId, float[]> residue = residues.get(i);
             int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
             IndexSelection indexSelection = new IndexSelection(labelSelection.getStructOperId(), residueIndex);
             ResidueType residueType = structure.getResidueType(residueIndex);
@@ -97,7 +97,7 @@ public class ResidueGraph {
         List<float[]> originalSideChainVectors = new ArrayList<>();
         for (int i = 0; i < structure.getResidueCount(); i++) {
             ResidueType residueType = structure.getResidueType(i);
-            Map<String, float[]> residue = structure.manifestResidue(i);
+            Map<LabelAtomId, float[]> residue = structure.manifestResidue(i);
 
             originalBackboneVectors.add(getBackboneCoords(residue));
             if (residueType == ResidueType.GLYCINE) {
@@ -227,10 +227,10 @@ public class ResidueGraph {
     private static final float[] REFERENCE_CB = new float[] { 1.472f, -0.929f, 0.804f };
     private static final float[] REFERENCE_CENTROID = new float[3];
 
-    static float[] getVirtualCB(Map<String, float[]> residue) {
-        float[] n = residue.get("N");
-        float[] ca = residue.get("CA");
-        float[] c = residue.get("C");
+    static float[] getVirtualCB(Map<LabelAtomId, float[]> residue) {
+        float[] n = residue.get(LabelAtomId.N);
+        float[] ca = residue.get(LabelAtomId.CA);
+        float[] c = residue.get(LabelAtomId.C);
         if (n == null || ca == null || c == null) {
             return null;
         }
@@ -243,22 +243,22 @@ public class ResidueGraph {
         return v;
     }
 
-    private static float[] getBackboneCoords(Map<String, float[]> residue) {
-        if (residue.containsKey("CA")) {
-            return residue.get("CA");
+    private static float[] getBackboneCoords(Map<LabelAtomId, float[]> residue) {
+        if (residue.containsKey(LabelAtomId.CA)) {
+            return residue.get(LabelAtomId.CA);
         }
-        if (residue.containsKey("C4'")) {
-            return residue.get("C4'");
+        if (residue.containsKey(LabelAtomId.C4_PRIME)) {
+            return residue.get(LabelAtomId.C4_PRIME);
         }
         return null;
     }
 
-    private static float[] getSideChainCoords(Map<String, float[]> residue) {
-        if (residue.containsKey("CB")) {
-            return residue.get("CB");
+    private static float[] getSideChainCoords(Map<LabelAtomId, float[]> residue) {
+        if (residue.containsKey(LabelAtomId.CB)) {
+            return residue.get(LabelAtomId.CB);
         }
-        if (residue.containsKey("C1'")) {
-            return residue.get("C1'");
+        if (residue.containsKey(LabelAtomId.C1_PRIME)) {
+            return residue.get(LabelAtomId.C1_PRIME);
         }
         return null;
     }

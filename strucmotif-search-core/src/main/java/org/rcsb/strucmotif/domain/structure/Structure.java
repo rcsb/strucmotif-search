@@ -3,7 +3,7 @@ package org.rcsb.strucmotif.domain.structure;
 import org.rcsb.strucmotif.domain.Transformation;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,22 +11,22 @@ import java.util.stream.Collectors;
 public class Structure {
     private final String structureIdentifier;
     private final Map<LabelSelection.SparseLabelSelection, Integer> residueMapping;
-    private final int[] residueOffsets;
     private final int residueCount;
     private final int atomCount;
-    private final String[] labelAtomId;
+    private final int[] residueOffsets;
+    private final byte[] residueTypes;
+    private final byte[] labelAtomId;
     private final short[] x;
     private final short[] y;
     private final short[] z;
-    private final ResidueType[] residueTypes;
     private final Map<String, List<String>> assemblies;
     private final Map<String, Transformation> transformations;
 
     public Structure(String structureIdentifier,
                      Map<LabelSelection.SparseLabelSelection, Integer> residueMapping,
                      int[] residueOffsets,
-                     ResidueType[] residueTypes,
-                     String[] labelAtomId,
+                     byte[] residueTypes,
+                     byte[] labelAtomId,
                      short[] x,
                      short[] y,
                      short[] z,
@@ -68,7 +68,7 @@ public class Structure {
     }
 
     public ResidueType getResidueType(int residueIndex) {
-        return residueTypes[residueIndex];
+        return ResidueType.values()[residueTypes[residueIndex]];
     }
 
     public Map<String, List<String>> getAssemblies() {
@@ -83,22 +83,22 @@ public class Structure {
         return transformations.get(structOperIdentifier);
     }
 
-    public Map<String, float[]> manifestResidue(LabelSelection labelSelection) {
+    public Map<LabelAtomId, float[]> manifestResidue(LabelSelection labelSelection) {
         return manifestResidue(getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId()), labelSelection.getStructOperId());
     }
 
-    public List<Map<String, float[]>> manifestResidues(List<LabelSelection> labelSelections) {
+    public List<Map<LabelAtomId, float[]>> manifestResidues(List<LabelSelection> labelSelections) {
         return labelSelections.stream()
                 .map(this::manifestResidue)
                 .collect(Collectors.toList());
     }
 
-    public Map<String, float[]> manifestResidue(int residueIndex) {
+    public Map<LabelAtomId, float[]> manifestResidue(int residueIndex) {
         return manifestResidue(residueIndex, "1");
     }
 
-    public Map<String, float[]> manifestResidue(int residueIndex, String structOperIdentifier) {
-        Map<String, float[]> out = new LinkedHashMap<>();
+    public Map<LabelAtomId, float[]> manifestResidue(int residueIndex, String structOperIdentifier) {
+        Map<LabelAtomId, float[]> out = new EnumMap<>(LabelAtomId.class);
         int offsetStart = residueOffsets[residueIndex];
         int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomId.length : residueOffsets[residueIndex + 1];
         Transformation transformation = transformations.get(structOperIdentifier);
@@ -109,7 +109,12 @@ public class Structure {
         }
 
         for (int i = offsetStart; i < offsetEnd; i++) {
-            String labelAtomId = this.labelAtomId[i];
+            LabelAtomId labelAtomId = LabelAtomId.values()[this.labelAtomId[i]];
+            // ignore 'non-standard' atoms
+            if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
+                continue;
+            }
+
             float[] v = new float[] {
                     x[i] * 0.1f,
                     y[i] * 0.1f,

@@ -27,6 +27,7 @@ public class Transformation {
      */
     public Transformation(float[][] transformation) {
         this.transformation = transformation;
+        // TODO force re-use of identity instance via factory method
         this.identity = Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation);
     }
 

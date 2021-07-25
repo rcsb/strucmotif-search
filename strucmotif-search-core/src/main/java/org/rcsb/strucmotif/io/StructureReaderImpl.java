@@ -8,6 +8,7 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.domain.Transformation;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -46,8 +47,7 @@ public class StructureReaderImpl implements StructureReader {
         private final PdbxStructAssemblyGen pdbxStructAssemblyGen;
         private final PdbxStructOperList pdbxStructOperList;
 
-        // handles to binary data array in atom site
-        private final String[] labelAtomId;
+        private final byte[] labelAtomId;
         private final String[] labelCompId;
         private final String[] labelAsymId;
         private final int[] labelSeqId;
@@ -74,13 +74,13 @@ public class StructureReaderImpl implements StructureReader {
             this.pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
             this.pdbxStructOperList = block.getPdbxStructOperList();
 
-            this.labelAtomId = atomSite.getLabelAtomId().getArray();
+            this.labelAtomId = convertLabelAtomId(atomSite.getLabelAtomId().getArray());
             this.labelCompId = atomSite.getLabelCompId().getArray();
             this.labelAsymId = atomSite.getLabelAsymId().getArray();
             this.labelSeqId = atomSite.getLabelSeqId().getArray();
-            this.x = convert(atomSite.getCartnX().getArray());
-            this.y = convert(atomSite.getCartnY().getArray());
-            this.z = convert(atomSite.getCartnZ().getArray());
+            this.x = convertCoords(atomSite.getCartnX().getArray());
+            this.y = convertCoords(atomSite.getCartnY().getArray());
+            this.z = convertCoords(atomSite.getCartnZ().getArray());
 
             this.lastLabelAsymId = null;
             this.lastLabelSeqId = -1;
@@ -89,10 +89,34 @@ public class StructureReaderImpl implements StructureReader {
             this.residueTypes = new ArrayList<>();
         }
 
-        private short[] convert(double[] array) {
+        private short[] convertCoords(double[] array) {
             short[] out = new short[array.length];
             for (int i = 0; i < out.length; i++) {
                 out[i] = (short) Math.round(array[i] * 10);
+            }
+            return out;
+        }
+
+        private byte[] convertLabelAtomId(String[] array) {
+            byte[] out = new byte[array.length];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = (byte) LabelAtomId.ofLabelAtomId(array[i]).ordinal();
+            }
+            return out;
+        }
+
+        private byte[] convertResidueTypes(List<ResidueType> residueTypes) {
+            byte[] out = new byte[residueTypes.size()];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = (byte) residueTypes.get(i).ordinal();
+            }
+            return out;
+        }
+
+        private int[] convertOffsets(List<Integer> residueOffsets) {
+            int[] out = new int[residueOffsets.size()];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = residueOffsets.get(i);
             }
             return out;
         }
@@ -118,9 +142,10 @@ public class StructureReaderImpl implements StructureReader {
             Map<String, List<String>> assemblies = buildAssemblies();
             return new Structure(structureIdentifier,
                     residueMapping,
-                    residueOffsets.stream().mapToInt(i -> i).toArray(),
-                    residueTypes.toArray(ResidueType[]::new),
-                    labelAtomId, x, y, z,
+                    convertOffsets(residueOffsets),
+                    convertResidueTypes(residueTypes),
+                    labelAtomId,
+                    x, y, z,
                     assemblies, transformations);
         }
 

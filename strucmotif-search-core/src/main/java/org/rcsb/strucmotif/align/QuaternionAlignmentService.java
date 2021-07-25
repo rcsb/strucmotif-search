@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.domain.align.AtomCorrespondence;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.math.Algebra;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +27,7 @@ public class QuaternionAlignmentService implements AlignmentService {
     };
 
     @Override
-    public AlignmentResult align(List<Map<String, float[]>> reference, List<Map<String, float[]>> candidate, AtomPairingScheme atomPairingScheme) {
+    public AlignmentResult align(List<Map<LabelAtomId, float[]>> reference, List<Map<LabelAtomId, float[]>> candidate, AtomPairingScheme atomPairingScheme) {
         // validate parameters
         if (reference.size() != candidate.size()) {
             throw new IllegalArgumentException("cannot align containers of unequal size - " + reference.size()
@@ -317,26 +318,7 @@ public class QuaternionAlignmentService implements AlignmentService {
         Algebra.multiply3d(candidateCentroid, Algebra.transpose3d(rot), candidateCentroid);
         float[] translation = new float[3];
         Algebra.subtract3d(translation, referenceCentroid, candidateCentroid);
-        float[][] transformation = composeTransformationMatrix(rot, translation);
+        float[][] transformation = Algebra.composeTransformationMatrix(rot, translation);
         return new Pair<>(new Transformation(transformation), (float) rms);
-    }
-
-    /**
-     * Combine a rotation matrix and a translation vector into a 4x4 transformation matrix.
-     * @param rotation3x3 a 3x3 rotation matrix
-     * @param translation3d a 3-element translation vector
-     * @return a transformation matrix
-     */
-    private static float[][] composeTransformationMatrix(float[][] rotation3x3, float[] translation3d) {
-        float[][] matrix = new float[4][];
-
-        for (int i = 0; i < 3; i++) {
-            matrix[i] = new float[4];
-            System.arraycopy(rotation3x3[i], 0, matrix[i], 0, 3);
-            matrix[i][3] = translation3d[i];
-        }
-        matrix[3] = new float[] { 0, 0, 0, 1 };
-
-        return matrix;
     }
 }

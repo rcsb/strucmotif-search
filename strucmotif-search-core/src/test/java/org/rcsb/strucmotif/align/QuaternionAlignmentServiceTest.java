@@ -38,13 +38,7 @@ public class QuaternionAlignmentServiceTest {
     public void whenOriginalExample_thenRmsdMatches() {
         // https://theobald.brandeis.edu/qcp/main.c
         Structure structure1 = new Structure("1tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2,
-                new LabelSelection.SparseLabelSelection("A", 4), 3,
-                new LabelSelection.SparseLabelSelection("A", 5), 4,
-                new LabelSelection.SparseLabelSelection("A", 6), 5,
-                new LabelSelection.SparseLabelSelection("A", 7), 6),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6)),
                 new int[] { 0, 1, 2, 3, 4, 5, 6 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),
@@ -55,13 +49,7 @@ public class QuaternionAlignmentServiceTest {
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
         Structure structure2 = new Structure("2tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2,
-                new LabelSelection.SparseLabelSelection("A", 4), 3,
-                new LabelSelection.SparseLabelSelection("A", 5), 4,
-                new LabelSelection.SparseLabelSelection("A", 6), 5,
-                new LabelSelection.SparseLabelSelection("A", 7), 6),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6)),
                 new int[] { 0, 1, 2, 3, 4, 5, 6 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),
@@ -81,9 +69,7 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenSelfAlign_thenRmsdIsZeroAndTransformationIsIdentity() {
         Structure structure = new Structure("1tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2)),
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),
@@ -109,9 +95,7 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenAlign1And2_thenRmsdAndTransformationMatches() {
         Structure structure1 = new Structure("1tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2)),
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),
@@ -121,9 +105,7 @@ public class QuaternionAlignmentServiceTest {
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
         Structure structure2 = new Structure("2tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2)),
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),
@@ -151,9 +133,7 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenAlign3And4_thenRmsdAndTransformationMatches() {
         Structure structure3 = new Structure("1tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2)),
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),
@@ -163,9 +143,7 @@ public class QuaternionAlignmentServiceTest {
                 Map.of("1", List.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
         Structure structure4 = new Structure("2tst",
-                Map.of(new LabelSelection.SparseLabelSelection("A", 1), 0,
-                new LabelSelection.SparseLabelSelection("A", 2), 1,
-                new LabelSelection.SparseLabelSelection("A", 3), 2),
+                Map.of("A", Map.of(1, 0, 2, 1, 3, 2)),
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
                 Helpers.convertEnumToByte(LabelAtomId.CA, LabelAtomId.CA, LabelAtomId.CA),

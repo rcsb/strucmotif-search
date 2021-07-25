@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.domain.structure;
 
 import org.rcsb.strucmotif.domain.Transformation;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class Structure {
     private final String structureIdentifier;
-    private final Map<LabelSelection.SparseLabelSelection, Integer> residueMapping;
+    private final Map<String, Map<Integer, Integer>> residueMapping;
     private final int residueCount;
     private final int atomCount;
     private final int[] residueOffsets;
@@ -23,7 +22,7 @@ public class Structure {
     private final Map<String, Transformation> transformations;
 
     public Structure(String structureIdentifier,
-                     Map<LabelSelection.SparseLabelSelection, Integer> residueMapping,
+                     Map<String, Map<Integer, Integer>> residueMapping,
                      int[] residueOffsets,
                      byte[] residueTypes,
                      byte[] labelAtomId,
@@ -36,7 +35,7 @@ public class Structure {
         this.residueMapping = residueMapping;
         this.residueOffsets = residueOffsets;
         this.residueTypes = residueTypes;
-        this.residueCount = residueMapping.size();
+        this.residueCount = residueOffsets.length;
         this.atomCount = labelAtomId.length;
         this.labelAtomId = labelAtomId;
         this.x = x;
@@ -51,12 +50,17 @@ public class Structure {
     }
 
     public List<LabelSelection.SparseLabelSelection> getSparseLabelSelections() {
-        return new ArrayList<>(residueMapping.keySet());
+        return residueMapping.entrySet()
+                .stream()
+                .flatMap(entry -> entry.getValue()
+                        .keySet()
+                        .stream()
+                        .map(integer -> new LabelSelection.SparseLabelSelection(entry.getKey(), integer)))
+                .collect(Collectors.toList());
     }
 
     public int getResidueIndex(String labelAsymId, int labelSeqId) {
-        // this must be accessed without struct_oper_id
-        return residueMapping.get(new LabelSelection.SparseLabelSelection(labelAsymId, labelSeqId));
+        return residueMapping.get(labelAsymId).get(labelSeqId);
     }
 
     public int getResidueCount() {

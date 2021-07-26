@@ -27,6 +27,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+/**
+ * A simple structure reader that parses CIF data into structure instances.
+ */
 @Service
 public class StructureReaderImpl implements StructureReader {
     @Override

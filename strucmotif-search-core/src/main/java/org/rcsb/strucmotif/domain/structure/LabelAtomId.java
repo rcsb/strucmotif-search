@@ -5,6 +5,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Enumerates all 'common' atoms by name.
+ */
 public enum LabelAtomId {
     C("C"),
     C1_PRIME("C1'"),

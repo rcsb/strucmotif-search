@@ -35,6 +35,14 @@ public class ResidueGraph {
     private final Map<IndexSelection, Map<IndexSelection, Float>> angles;
     private final int numberOfPairings;
 
+    /**
+     * Construct a residue graph.
+     * @param structure the context
+     * @param labelSelections residue keys (may be subset, may be all)
+     * @param residues residue coordinates (may be subset, may be all)
+     * @param squaredCutoff maximum distance of residue pairs to index
+     * @param allowTransformed allow pairs between 2 transformed chains?
+     */
     public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, float squaredCutoff, boolean allowTransformed) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();

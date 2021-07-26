@@ -2,10 +2,18 @@ package org.rcsb.strucmotif.domain.structure;
 
 import java.util.Objects;
 
+/**
+ * Selects a residue by its index in the source structure file.
+ */
 public class IndexSelection implements Selection {
     private final String structOperId;
     private final int index;
 
+    /**
+     * Constructs an IndexSelection.
+     * @param structOperId the operator
+     * @param index the index
+     */
     public IndexSelection(String structOperId, int index) {
         this.structOperId = structOperId;
         this.index = index;
@@ -16,6 +24,10 @@ public class IndexSelection implements Selection {
         return structOperId;
     }
 
+    /**
+     * The index of the referenced residue.
+     * @return an int
+     */
     public int getIndex() {
         return index;
     }

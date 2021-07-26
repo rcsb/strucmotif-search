@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Superimpose 2 sets of residues.
+ * Superimpose sets of residues.
  */
 public interface AlignmentService {
     /**

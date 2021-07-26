@@ -2,10 +2,18 @@ package org.rcsb.strucmotif.domain.motif;
 
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
 
+/**
+ * A {@link ResiduePairIdentifier} defined by data from the inverted index. Just a wrapper for the raw data array.
+ */
 public class InvertedIndexResiduePairIdentifier implements ResiduePairIdentifier {
     private final Object[] data;
     private final boolean flipped;
 
+    /**
+     * Construct an identifier based on raw data.
+     * @param data an Object[] from the inverted index
+     * @param flipped true iff positions are flipped by the contract of {@link ResiduePairDescriptor}
+     */
     public InvertedIndexResiduePairIdentifier(Object[] data, boolean flipped) {
         // length 2: { index1, index2 };
         // length 4: { index1, index2, structOperId1, structOperId2 };

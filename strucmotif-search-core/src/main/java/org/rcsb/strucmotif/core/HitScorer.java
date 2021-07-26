@@ -28,10 +28,19 @@ public class HitScorer {
         this.alignmentService = alignmentService;
     }
 
+    /**
+     * Returns the used atom pairing scheme (e.g., all-atoms, side-chain, ...)
+     * @return an {@link AtomPairingScheme} value
+     */
     public AtomPairingScheme getAtomPairingScheme() {
         return atomPairingScheme;
     }
 
+    /**
+     * Align a set of residues to the reference.
+     * @param targetResidues collection of residues
+     * @return an {@link AlignmentResult}
+     */
     public AlignmentResult alignToReference(List<Map<LabelAtomId, float[]>> targetResidues) {
         return alignmentService.align(queryResidues, targetResidues, atomPairingScheme);
     }

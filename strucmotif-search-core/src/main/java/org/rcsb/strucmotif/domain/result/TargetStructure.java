@@ -127,11 +127,11 @@ public class TargetStructure {
     }
 
     private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository) {
-        List<LabelSelection.SparseLabelSelection> originalLabelSelections = structure.getSparseLabelSelections();
+        List<LabelSelection> originalLabelSelections = structure.getLabelSelections();
         List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = indexSelections.stream()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = originalLabelSelections.get(indexSelection.getIndex());
+                    LabelSelection labelSelection = originalLabelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .collect(Collectors.toList());

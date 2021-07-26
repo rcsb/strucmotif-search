@@ -20,8 +20,5 @@ public class Demo {
                 .buildQuery()
                 // execute query
                 .run();
-
-        // TODO 32 KB residueMapping
-        System.out.println(run); // 61.61 KB
     }
 }

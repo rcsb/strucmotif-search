@@ -101,7 +101,7 @@ public class QueryBuilder {
      */
     public MandatoryBuilder defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        List<LabelSelection> labelSelections = structure.getSparseLabelSelections()
+        List<LabelSelection> labelSelections = structure.getLabelSelections()
                 .stream()
                 .map(l -> new LabelSelection(l.getLabelAsymId(), "1", l.getLabelSeqId()))
                 .collect(Collectors.toList());

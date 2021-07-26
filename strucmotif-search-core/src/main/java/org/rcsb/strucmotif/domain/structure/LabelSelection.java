@@ -63,44 +63,4 @@ public class LabelSelection implements Selection {
     public String toString() {
         return labelAsymId + "_" + structOperId + "-" + labelSeqId;
     }
-
-    /**
-     * A LabelSelection without any transformation, used internally.
-     */
-    public static class SparseLabelSelection {
-        private final String labelAsymId;
-        private final int labelSeqId;
-
-        public SparseLabelSelection(String labelAsymId, int labelSeqId) {
-            this.labelAsymId = labelAsymId;
-            this.labelSeqId = labelSeqId;
-        }
-
-        public String getLabelAsymId() {
-            return labelAsymId;
-        }
-
-        public int getLabelSeqId() {
-            return labelSeqId;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            SparseLabelSelection that = (SparseLabelSelection) o;
-            return labelSeqId == that.labelSeqId &&
-                    Objects.equals(labelAsymId, that.labelAsymId);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(labelAsymId, labelSeqId);
-        }
-
-        @Override
-        public String toString() {
-            return labelAsymId + "-" + labelSeqId;
-        }
-    }
 }

@@ -9,7 +9,6 @@ import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.math.Algebra;
@@ -92,6 +91,7 @@ public class StructureReaderImpl implements StructureReader {
         private short[] convertCoords(double[] array) {
             short[] out = new short[array.length];
             for (int i = 0; i < out.length; i++) {
+                // TODO need underflow/overflow check here? 3j3q e.g. is in range of [0, 1100] and more than safe
                 out[i] = (short) Math.round(array[i] * 10);
             }
             return out;
@@ -131,7 +131,7 @@ public class StructureReaderImpl implements StructureReader {
                 if (chainChange || residueChange) {
                     lastLabelAsymId = labelAsymId;
                     lastLabelSeqId = labelSeqId;
-                    Map<Integer, Integer> map = residueMapping.computeIfAbsent(labelAsymId, e -> new LinkedHashMap<>());
+                    Map<Integer, Integer> map = residueMapping.computeIfAbsent(labelAsymId, e -> new HashMap<>());
                     map.put(labelSeqId, residue);
                     residueOffsets.add(row);
                     residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
@@ -200,7 +200,7 @@ public class StructureReaderImpl implements StructureReader {
          * @return all transformations, identified by their structOperIdentifier
          */
         private Map<String, Transformation> buildTransformations() {
-            Map<String, Transformation> transformations = new LinkedHashMap<>();
+            Map<String, Transformation> transformations = new HashMap<>();
             Map<String, float[][]> matrices = IntStream.range(0, pdbxStructOperList.getRowCount())
                     .boxed()
                     .collect(Collectors.toMap(row -> pdbxStructOperList.getId().get(row),

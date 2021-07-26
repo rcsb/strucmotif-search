@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.structure;
 
 import org.rcsb.strucmotif.domain.Transformation;
 
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class Structure {
     private final Map<String, Transformation> transformations;
 
     public Structure(String structureIdentifier,
+                     // [label_asym_id: [label_seq_id: index]]
                      Map<String, Map<Integer, Integer>> residueMapping,
                      int[] residueOffsets,
                      byte[] residueTypes,
@@ -49,13 +51,21 @@ public class Structure {
         return structureIdentifier;
     }
 
-    public List<LabelSelection.SparseLabelSelection> getSparseLabelSelections() {
+    /**
+     * Access to all unique (label_asym_id, label_seq_id) pairs that exist in this structure. This call is expensive and
+     * will traverse all internally registered chains and sequence positions and create a collection of associated
+     * LabelSelection instances.<p>
+     * Make sure to reuse the result returned by this call. Never call in a loop!
+     * @return a sorted list of all LabelSelection instances that exist for this structure
+     */
+    public List<LabelSelection> getLabelSelections() {
         return residueMapping.entrySet()
                 .stream()
                 .flatMap(entry -> entry.getValue()
                         .keySet()
                         .stream()
-                        .map(integer -> new LabelSelection.SparseLabelSelection(entry.getKey(), integer)))
+                        .sorted()
+                        .map(integer -> new LabelSelection(entry.getKey(), null, integer)))
                 .collect(Collectors.toList());
     }
 

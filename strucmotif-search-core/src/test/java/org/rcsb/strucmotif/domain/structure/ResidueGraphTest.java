@@ -63,6 +63,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingRenumbered3vvk_then6Valid() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false);
 
         long c = residueGraph.residuePairOccurrencesSequential()
@@ -70,7 +71,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = labelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelAsymId)
@@ -86,6 +87,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingRenumbered1dsd_then8ValidInChainC() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false);
 
         long c = residueGraph.residuePairOccurrencesSequential()
@@ -93,7 +95,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = labelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 // keep only freakish chain
@@ -111,6 +113,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingOriginal200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false);
 
         assertEquals(5949, residueGraph.residuePairOccurrencesParallel()
@@ -129,7 +132,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = labelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)
@@ -140,6 +143,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false);
 
         assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
@@ -158,7 +162,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = labelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)
@@ -169,6 +173,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingRenumbered200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false);
 
         assertEquals(5949,  residueGraph.residuePairOccurrencesParallel()
@@ -187,7 +192,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = labelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)
@@ -198,6 +203,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
+        List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false);
 
         assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
@@ -216,7 +222,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection.SparseLabelSelection labelSelection = structure.getSparseLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)

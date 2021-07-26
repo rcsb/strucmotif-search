@@ -70,6 +70,9 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             Parameters parameters = query.getParameters();
             MotifSearchResult result = createResultContainer(query, queryStructure, parameters);
 
+            // get all valid targets
+            targetAssembler.assemble(result);
+
             List<Hit> hits = scoreHits(parameters, result, queryStructure.getResidueIndexSwaps());
             logger.info("[{}] Accepted {} hits in {} ms",
                     query.hashCode(),
@@ -101,6 +104,9 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             Parameters parameters = query.getParameters();
             MotifSearchResult result = createResultContainer(query, queryStructure, parameters);
 
+            // get all valid targets
+            targetAssembler.assemble(result);
+
             int hits = scoreHits(parameters, result, consumer, queryStructure.getResidueIndexSwaps());
             logger.info("[{}] Accepted {} hits in {} ms",
                     query.hashCode(),
@@ -129,12 +135,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 parameters.getAngleTolerance(),
                 parameters.getRmsdCutoff());
 
-        MotifSearchResult result = new MotifSearchResult(query);
-
-        // get all valid targets
-        targetAssembler.assemble(result);
-
-        return result;
+        return new MotifSearchResult(query);
     }
 
     private static Throwable unwrapException(Throwable throwable) {

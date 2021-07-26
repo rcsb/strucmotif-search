@@ -149,9 +149,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
                 this.structureCache.putAll(buffer);
             }
 
-            long time = (System.nanoTime() - start) / 1000 / 1000 / 1000 / 60;
+            long time = (System.nanoTime() - start) / 1000 / 1000 / 1000;
 
-            logger.info("Done caching structure data in {} minutes - {} structures held in memory", time, structureCache.size());
+            logger.info("Done caching structure data in {} seconds - {} structures held in memory", time, structureCache.size());
         }
     }
 

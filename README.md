@@ -13,7 +13,7 @@ insights into the function(s) of previously uncharacterized proteins.
 
 Technically, this remains an extremely challenging problem because of the size of the Protein
 Data Bank (PDB) archive. We have developed a new approach that uses an inverted index strategy
-capable of analyzing >170,000 PDB structures with unmatched speed. The efficiency of our 
+capable of analyzing >180,000 PDB structures with unmatched speed. The efficiency of our 
 inverted index method depends critically on identifying the small number of structures 
 containing the query motif and ignoring most of the structures that are irrelevant. Our 
 approach enables real-time retrieval and superposition of structural motifs, either extracted
@@ -23,18 +23,22 @@ from a reference structure or uploaded by the user.
 Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search/advanced-search/structural-motif-search).
 
 ## Performance
-Current benchmark times to search in `180,207` structures as of `7/14/21`.
+Current benchmark times to search in `180,419` structures as of `7/26/21`, 6 cores with 64 GB memory holding all
+structure data in memory.
 
-TODO update values
-
-| Motif | Hits | Time | Units |
+| Motif | Assemblies | 'Paths' Time [ms] | 'Score' Time [ms] |
 | --- | --- | --- | --- |
-| Serine Protease (HDS) | 3,498 | 0.92 | s/op |
-| Aminopeptidase (KDDDE) | 350 | 0.46 | s/op |
-| Zinc Fingers (CCH) | 1,056 | 0.13 | s/op |
-| Enolase Superfamily (KDEEH) | 288 | 0.36 | s/op |
-| Enolase Superfamily (KDEEH, exchanges) | 308 | 0.87 | s/op |
-| RNA G-Quadruplex (GGGG) | 84 | 1.10 | s/op | 
+| Serine Protease (HDS) | 4,830 | 776 | 316 |
+| Aminopeptidase (KDDDE) | 81 | 563 | 32 |
+| Zinc Fingers (CCH) | 446 | 90 | 25 |
+| Enolase Superfamily (KDEEH) | 172 | 579 | 11 |
+| Enolase Superfamily (KDEEH, exchanges) | 182 | 1,283 | 37 |
+| RNA G-Quadruplex (GGGG) | 33 | 1,990 | 1,873 | 
+
+Search for all assemblies that contain hits with an RMSD <1 Å.
+'Paths' refers to the time spent on inverted index operations, which identify all candidate structures that contain the 
+motif.
+'Score' refers to the time spent on aligning candidate structures to the query and computing RMSD values.
 
 ## Features
 - nucleotide support
@@ -48,7 +52,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.11.2</version>
+  <version>0.12.0</version>
 </dependency>
 ```
 
@@ -63,7 +67,7 @@ class Demo {
                 // several ways can be used to define the query motif - e.g., specify an entry id
                 .defineByPdbIdAndSelection("4cha",
                         // and a collection of sequence positions to extract residues
-                        Set.of(new LabelSelection("B", "1", 42), // HIS
+                        List.of(new LabelSelection("B", "1", 42), // HIS
                                new LabelSelection("B", "1", 87), // ASP
                                new LabelSelection("C", "1", 47))) // SER
                 // parameters are considered mandatory arguments
@@ -90,7 +94,7 @@ class Demo {
 ```
 
 Supported operations are `ADD` and `REMOVE`. Either process all current PDB structures (`full`) or provide an array of 
-entry IDs you want to process (e.g., `"4hhb", "1muw", "1exr"`).
+entry IDs you want to process (e.g., `"4HHB", "1MUW", "1EXR"`).
 
 ## Getting started by cloning
 An alternative way to use the library is cloning this repository and building the corresponding Maven modules.

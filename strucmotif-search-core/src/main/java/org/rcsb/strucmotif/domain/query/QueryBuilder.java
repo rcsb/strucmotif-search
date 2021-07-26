@@ -61,7 +61,7 @@ public class QueryBuilder {
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String structureIdentifier, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readSome(structureIdentifier);
-        return defineByStructure(structure, selection);
+        return defineByStructureAndSelection(structure, selection);
     }
 
     /**
@@ -72,7 +72,7 @@ public class QueryBuilder {
      */
     public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        return defineByStructure(structure, selection);
+        return defineByStructureAndSelection(structure, selection);
     }
 
     /**
@@ -82,7 +82,7 @@ public class QueryBuilder {
      * @param labelSelections the residues of interest
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByStructure(Structure structure, List<LabelSelection> labelSelections) {
+    public MandatoryBuilder defineByStructureAndSelection(Structure structure, List<LabelSelection> labelSelections) {
         List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
 
         if (residues.size() > motifSearchConfig.getMaxMotifSize()) {
@@ -105,7 +105,7 @@ public class QueryBuilder {
                 .stream()
                 .map(l -> new LabelSelection(l.getLabelAsymId(), "1", l.getLabelSeqId()))
                 .collect(Collectors.toList());
-        return defineByStructure(structure, labelSelections);
+        return defineByStructureAndSelection(structure, labelSelections);
     }
 
     /**

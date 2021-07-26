@@ -101,7 +101,7 @@ public class MotifSearchIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 62), // K
                             new LabelSelection("A", "1", 245), // E
                             new LabelSelection("A", "1", 295)); // H
-            queryBuilder.defineByStructure(structure, labelSelections).buildParameters().buildQuery().run();
+            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery().run();
         });
     }
 
@@ -118,7 +118,7 @@ public class MotifSearchIntegrationTest {
                         new LabelSelection("A", "1", 245), // E
                         new LabelSelection("A", "1", 295)); // H
 
-        QueryBuilder.OptionalStepBuilder buildParameters = queryBuilder.defineByStructure(structure, labelSelections)
+        QueryBuilder.OptionalStepBuilder buildParameters = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
@@ -178,7 +178,7 @@ public class MotifSearchIntegrationTest {
                         new LabelSelection("C", "2", 45),
                         new LabelSelection("C", "2", 49));
 
-        MotifSearchQuery motifSearchQuery = queryBuilder.defineByStructure(structure, labelSelections).buildParameters().buildQuery();
+        MotifSearchQuery motifSearchQuery = queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery();
         assertEquals(6, motifSearchQuery.getQueryStructure().getResidues().size(), "not all residues present");
     }
 }

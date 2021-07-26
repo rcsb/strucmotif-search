@@ -137,7 +137,7 @@ public class QueryBuilder {
             this.rmsdCutoff = Float.MAX_VALUE;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
-            this.motifPruner = QueryBuilder.this.noOperationMotifPruner;
+            this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
         }
 

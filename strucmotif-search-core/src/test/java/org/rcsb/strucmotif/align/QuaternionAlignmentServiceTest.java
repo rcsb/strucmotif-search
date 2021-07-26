@@ -122,7 +122,6 @@ public class QuaternionAlignmentServiceTest {
 
         double rmsd12 = alignment12.getRootMeanSquareDeviation();
         float[] transformation12 = alignment12.getTransformation().getFlattenedTransformation();
-        System.out.println(Arrays.toString(transformation12));
         assertArrayEquals(new float[] { -0.054316826f, -0.7567086f, 0.65149194f, 20.407219f,
                 -0.9968595f, 0.07874857f, 0.008355401f, 11.455171f,
                 -0.057626665f, -0.6489921f, -0.75860953f, 45.747604f,

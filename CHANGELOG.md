@@ -1,6 +1,15 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.12.0
+-------------
+### Breaking changes
+- all of them - inverted index and structure files are incompatible to previous versions
+- reintroduce IndexSelection and build index upon on them
+- remove geometric scores - compute RMSD for all hits - remove associated parameters
+- replace Set/Collection with List in places where order (e.g. of residue) matters
+- a whole lotta internal changes
+
 strucmotif-search 0.11.2
 -------------
 ### Bug fix

@@ -33,26 +33,26 @@ import java.util.stream.Stream;
  * omits stale paths as greedily as possible. Realized with help of a {@link TargetAssembler}.
  * For efficiency, one target structures handles all potential paths in a structure.
  * <p>
- * The constructor and {@link TargetStructure#consume(ResiduePairIdentifier[], Overlap[])} iteratively builds up paths
+ * The constructor and {@link TargetStructure#consume(InvertedIndexResiduePairIdentifier[], Overlap[])} iteratively builds up paths
  * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
     private final String structureIdentifier;
     // non-final fields to achieve the lazy behavior - tread lightly
-    private List<ResiduePairIdentifier[]> paths;
+    private List<InvertedIndexResiduePairIdentifier[]> paths;
 
     /**
      * Construct a target structure instance.
      * @param structureIdentifier its identifier
      * @param residuePairIdentifiers all first-generation residue pairs
      */
-    public TargetStructure(String structureIdentifier, ResiduePairIdentifier[] residuePairIdentifiers) {
+    public TargetStructure(String structureIdentifier, InvertedIndexResiduePairIdentifier[] residuePairIdentifiers) {
         this.structureIdentifier = structureIdentifier;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
         this.paths = new ArrayList<>(residuePairIdentifiers.length);
-        for (ResiduePairIdentifier residuePairIdentifier : residuePairIdentifiers) {
-            paths.add(new ResiduePairIdentifier[] { residuePairIdentifier });
+        for (InvertedIndexResiduePairIdentifier residuePairIdentifier : residuePairIdentifiers) {
+            paths.add(new InvertedIndexResiduePairIdentifier[] { residuePairIdentifier });
         }
     }
 
@@ -79,20 +79,21 @@ public class TargetStructure {
      * @param overlapProfile query motif overlap profile - needed to ensure compatibility
      * @return true if this target still contains at least one valid path
      */
-    public boolean consume(ResiduePairIdentifier[] residuePairIdentifiers, Overlap[] overlapProfile) {
-        List<ResiduePairIdentifier[]> extendedPaths = new ArrayList<>();
+    public boolean consume(InvertedIndexResiduePairIdentifier[] residuePairIdentifiers, Overlap[] overlapProfile) {
+        List<InvertedIndexResiduePairIdentifier[]> extendedPaths = new ArrayList<>();
 
+        // TODO this can probably get optimized some more by avoid Overlap.of
         // for each possibly extending candidate:
-        for (ResiduePairIdentifier candidateResiduePairIdentifier : residuePairIdentifiers) {
+        for (InvertedIndexResiduePairIdentifier candidateResiduePairIdentifier : residuePairIdentifiers) {
             // form cartesian product with each possible path to extend:
             p:
-            for (ResiduePairIdentifier[] path : paths) {
+            for (InvertedIndexResiduePairIdentifier[] path : paths) {
                 // this path must allow for the same overlap profile as query
                 for (int k = 0; k < overlapProfile.length; k++) {
-                    ResiduePairIdentifier previousResiduePairIdentifier = path[k];
+                    InvertedIndexResiduePairIdentifier previousResiduePairIdentifier = path[k];
 
                     Overlap queryOverlap = overlapProfile[k];
-                    Overlap targetOverlap = Overlap.ofResiduePairIdentifiers((InvertedIndexResiduePairIdentifier) previousResiduePairIdentifier, (InvertedIndexResiduePairIdentifier) candidateResiduePairIdentifier);
+                    Overlap targetOverlap = Overlap.ofResiduePairIdentifiers(previousResiduePairIdentifier, candidateResiduePairIdentifier);
                     if (queryOverlap != targetOverlap) {
                         continue p;
                     }
@@ -100,7 +101,7 @@ public class TargetStructure {
 
                 // if loop didn't break: residuePairIdentifier is valid extension of this path: propagate to next
                 // generation
-                ResiduePairIdentifier[] extendedPath = Arrays.copyOf(path, path.length + 1);
+                InvertedIndexResiduePairIdentifier[] extendedPath = Arrays.copyOf(path, path.length + 1);
                 extendedPath[path.length] = candidateResiduePairIdentifier;
                 extendedPaths.add(extendedPath);
             }

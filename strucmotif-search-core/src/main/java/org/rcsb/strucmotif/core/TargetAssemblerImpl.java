@@ -2,9 +2,9 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.motif.IndexResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
@@ -68,10 +68,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
         response.getTimings().pathsStart();
         // retrieve target identifiers per query motif descriptor
         for (ResiduePairOccurrence residuePairOccurrence : queryStructure.getResiduePairOccurrences()) {
+            long s = System.nanoTime();
             ResiduePairDescriptor residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
-            Map<String, ResiduePairIdentifier[]> residuePairIdentifiers;
+            Map<String, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers;
             // asked to honor entry-level white- or blacklist
             if (whitelist || blacklist) {
                 residuePairIdentifiers = residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
@@ -91,9 +92,10 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // consume by target structures
             consume(response, residuePairIdentifiers);
 
-            logger.debug("[{}] Consumed {} - {} valid target structures remaining",
+            logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",
                     response.getQuery().hashCode(),
                     residuePairDescriptor,
+                    (System.nanoTime() - s) / 1000 / 1000,
                     response.getTargetStructures().size());
         }
         response.getTimings().pathsStop();
@@ -115,7 +117,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return result;
     }
 
-    private void consume(MotifSearchResult response, Map<String, ResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
+    private void consume(MotifSearchResult response, Map<String, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
         Map<String, TargetStructure> targetStructures = response.getTargetStructures();
         QueryStructure queryStructure = response.getQuery().getQueryStructure();
 
@@ -139,7 +141,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             response.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
                     .parallelStream()
                     .filter(entry -> {
-                        ResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());
+                        InvertedIndexResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());
                         // candidate must have valid path to extend from previous generation
                         if (residuePairIdentifiers == null) {
                             return false;

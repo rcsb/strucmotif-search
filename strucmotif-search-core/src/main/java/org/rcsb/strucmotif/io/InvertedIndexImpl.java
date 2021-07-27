@@ -83,7 +83,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public Stream<Pair<String, ResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor) {
+    public Stream<Pair<String, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor) {
         try {
             InputStream inputStream = getInputStream(residuePairDescriptor);
 
@@ -94,12 +94,12 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
     }
 
-    private Stream<Pair<String, ResiduePairIdentifier[]>> getPairs(InputStream inputStream, ResiduePairDescriptor residuePairDescriptor) throws IOException {
+    private Stream<Pair<String, InvertedIndexResiduePairIdentifier[]>> getPairs(InputStream inputStream, ResiduePairDescriptor residuePairDescriptor) throws IOException {
         return getData(inputStream)
                 .map(entry -> {
                     String id = entry.getKey();
                     Object[] array = (Object[]) entry.getValue();
-                    ResiduePairIdentifier[] value = new ResiduePairIdentifier[array.length];
+                    InvertedIndexResiduePairIdentifier[] value = new InvertedIndexResiduePairIdentifier[array.length];
                     for (int i = 0; i < array.length; i++) {
                         value[i] = createResiduePairIdentifier(array[i], residuePairDescriptor);
                     }
@@ -107,7 +107,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                 });
     }
 
-    private ResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
+    private InvertedIndexResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
         Object[] data = (Object[]) raw;
         return new InvertedIndexResiduePairIdentifier(data, residuePairDescriptor.isFlipped());
     }

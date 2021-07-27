@@ -150,8 +150,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             }
 
             long time = (System.nanoTime() - start) / 1000 / 1000 / 1000;
+            long atoms = structureCache.values()
+                    .stream()
+                    .mapToLong(Structure::getAtomCount)
+                    .sum();
 
-            logger.info("Done caching structure data in {} seconds - {} structures held in memory", time, structureCache.size());
+            logger.info("Done caching structure data in {} seconds - {} atoms in {} structures held in memory", time, atoms, structureCache.size());
         }
     }
 

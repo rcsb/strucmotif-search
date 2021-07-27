@@ -50,7 +50,7 @@ public class MotifSearchQuery {
                      MotifSearchConfig config) {
         this.motifSearchRuntime = motifSearchRuntime;
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(structure, labelSelections, residues);
-        this.queryStructure = new QueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences);
+        this.queryStructure = new QueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;
         this.exchanges = exchanges;
         this.whitelist = whitelist;

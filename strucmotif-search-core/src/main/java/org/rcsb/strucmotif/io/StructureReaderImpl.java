@@ -96,7 +96,7 @@ public class StructureReaderImpl implements StructureReader {
         private short[] convertCoords(double[] array) {
             short[] out = new short[array.length];
             for (int i = 0; i < out.length; i++) {
-                // TODO need underflow/overflow check here? 3j3q e.g. is in range of [0, 1100] and more than safe
+                // TODO need underflow/overflow check here? 3j3q e.g. is in range of [0.0, 1100.0] and more than safe
                 out[i] = (short) Math.round(array[i] * 10);
             }
             return out;

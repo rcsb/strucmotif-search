@@ -7,11 +7,15 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -28,7 +32,7 @@ public class QueryStructure {
     private final List<ResiduePairDescriptor> residuePairDescriptors;
     private final List<Integer> residueIndexSwaps;
 
-    QueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences) {
+    QueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {
@@ -37,7 +41,7 @@ public class QueryStructure {
 
         // sort occurrences to ensure that no dangling words are encountered during path assembly
         // this prevents spikes in runtime where no checks can be performed and the number of paths to evaluate subsequently explodes
-        List<ResiduePairOccurrence> connectedResiduePairs = getPathOfConnectedResiduePairs(residuePairOccurrences);
+        List<ResiduePairOccurrence> connectedResiduePairs = getPathOfConnectedResiduePairs(residuePairOccurrences, exchanges);
 
         this.residuePairOccurrences = connectedResiduePairs;
         this.residuePairIdentifiers = connectedResiduePairs.stream()
@@ -75,28 +79,51 @@ public class QueryStructure {
      * Determine an unique path through this structure which captures/passes all residue pairs. Each residue must be
      * present at least once.
      * @param residuePairOccurrences the collection of residue pair occurrences to process
+     * @param exchanges set of exchanges (exchange-heavy residues will get evaluated late/last)
      * @return a filtered collection of residue pair occurrences
      */
-    private List<ResiduePairOccurrence> getPathOfConnectedResiduePairs(List<ResiduePairOccurrence> residuePairOccurrences) {
-        // TODO prolly is beneficial to move most connected words to the front
-        List<ResiduePairOccurrence> sorted = new ArrayList<>();
-        List<ResiduePairOccurrence> toConsume = new ArrayList<>(residuePairOccurrences);
-        // assign 'random' word as start
-        sorted.add(toConsume.remove(0));
+    private List<ResiduePairOccurrence> getPathOfConnectedResiduePairs(List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
+        Map<IndexSelection, Integer> exchangeCounts = residuePairOccurrences.stream()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .distinct()
+                .collect(Collectors.toMap(Function.identity(), i -> exchangeCount(i, exchanges)));
+        Map<IndexSelection, Long> connectionCounts = residuePairOccurrences.stream()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .flatMap(ResiduePairIdentifier::indexSelections)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
-        while (toConsume.size() > 0) {
-            for (int i = 0; i < toConsume.size(); i++) {
-                ResiduePairOccurrence candidateResiduePair = toConsume.get(i);
+        List<ResiduePairOccurrence> sparse = new ArrayList<>();
+        List<ResiduePairOccurrence> sorted = residuePairOccurrences.stream()
+                // have pairs with many exchanges last (as they are expensive to evaluate)
+                .sorted(Comparator.comparingInt((ResiduePairOccurrence o) -> exchangeCounts.get(o.getResidueIdentifier().getIndexSelection1()) + exchangeCounts.get(o.getResidueIdentifier().getIndexSelection2()))
+                        // move pairs with many connections to the front
+                        .thenComparing((ResiduePairOccurrence o) -> connectionCounts.get(o.getResidueIdentifier().getIndexSelection1()) + connectionCounts.get(o.getResidueIdentifier().getIndexSelection2())))
+                .collect(Collectors.toList());
+        // assign 'random' word as start
+        sparse.add(sorted.remove(0));
+
+        while (sorted.size() > 0) {
+            for (int i = 0; i < sorted.size(); i++) {
+                ResiduePairOccurrence candidateResiduePair = sorted.get(i);
                 ResiduePairIdentifier candidateIdentifier = candidateResiduePair.getResidueIdentifier();
-                if (sorted.stream()
+                if (sparse.stream()
+                        // check for overlap with already accepted word
                         .anyMatch(sortedResiduePair -> match(sortedResiduePair.getResidueIdentifier(), candidateIdentifier))) {
-                    sorted.add(toConsume.remove(i));
+                    sparse.add(sorted.remove(i));
                     break;
                 }
             }
         }
 
-        return sorted;
+        return sparse;
+    }
+
+    private int exchangeCount(IndexSelection indexSelection, Map<LabelSelection, Set<ResidueType>> exchanges) {
+        LabelSelection l = structure.getLabelSelection(indexSelection.getIndex());
+        LabelSelection labelSelection = new LabelSelection(l.getLabelAsymId(), indexSelection.getStructOperId(), l.getLabelSeqId());
+
+        return (exchanges.containsKey(labelSelection) ? exchanges.get(labelSelection).size() : 0);
     }
 
     /**

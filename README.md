@@ -23,19 +23,19 @@ from a reference structure or uploaded by the user.
 Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search/advanced-search/structural-motif-search).
 
 ## Performance
-Current benchmark times to search in `180,419` structures as of `7/26/21`, 6 cores with 64 GB memory holding all
-structure data in memory.
+Current benchmark times to search in `180,419` structures as of `7/26/21`, obtained on an instance with 6 cores and 64 
+GB memory. All structure data is held in memory, inverted index data is read from an SSD.
 
 | Motif | Assemblies | 'Paths' Time [ms] | 'Score' Time [ms] |
 | --- | --- | --- | --- |
-| Serine Protease (HDS) | 4,830 | 776 | 316 |
-| Aminopeptidase (KDDDE) | 81 | 563 | 32 |
-| Zinc Fingers (CCH) | 446 | 90 | 25 |
-| Enolase Superfamily (KDEEH) | 172 | 579 | 11 |
-| Enolase Superfamily (KDEEH, exchanges) | 182 | 1,283 | 37 |
-| RNA G-Quadruplex (GGGG) | 33 | 1,990 | 1,873 | 
+| Serine Protease (HDS) | 4,830 | 712 | 51 |
+| Aminopeptidase (KDDDE) | 81 | 550 | 2 |
+| Zinc Fingers (CCH) | 446 | 89 | 4 |
+| Enolase Superfamily (KDEEH) | 172 | 421 | 2 |
+| Enolase Superfamily (KDEEH, exchanges) | 182 | 1,238 | 5 |
+| RNA G-Quadruplex (GGGG) | 33 | 1,465 | 96 | 
 
-Search for all assemblies that contain hits with an RMSD <1 Å.
+Search for all assemblies that contain hits with an RMSD <2 Å.
 'Paths' refers to the time spent on inverted index operations, which identify all candidate structures that contain the 
 motif.
 'Score' refers to the time spent on aligning candidate structures to the query and computing RMSD values.
@@ -65,7 +65,7 @@ class Demo {
         // the entry point for all things motif search - #newQuery() starts building a new query
         MotifSearch.newQuery()
                 // several ways can be used to define the query motif - e.g., specify an entry id
-                .defineByPdbIdAndSelection("4cha",
+                .defineByPdbIdAndSelection("4CHA",
                         // and a collection of sequence positions to extract residues
                         List.of(new LabelSelection("B", "1", 42), // HIS
                                new LabelSelection("B", "1", 87), // ASP

@@ -2,17 +2,22 @@ package org.rcsb.strucmotif.domain.structure;
 
 import org.rcsb.strucmotif.domain.Transformation;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * The structure object wraps categories of a mmCIF file and allows access via some utility methods.
  */
 public class Structure {
     private final String structureIdentifier;
-    private final Map<String, Map<Integer, Integer>> residueMapping;
+    private final Map<String, int[]> chainOffsets;
+    private final int[] labelSeqId;
+    private final int chainCount;
     private final int residueCount;
     private final int atomCount;
     private final int[] residueOffsets;
@@ -27,7 +32,8 @@ public class Structure {
     /**
      * Create a structure view.
      * @param structureIdentifier the identifier
-     * @param residueMapping internal residue mapping, from 'LabelSelection's to residue indices
+     * @param chainOffsets residue indices where label_asym_id changes
+     * @param labelSeqId array of all label_seq_id
      * @param residueOffsets the offset of each residue in the atom_site category
      * @param residueTypes the type of each residue
      * @param labelAtomId the type of each atom
@@ -38,8 +44,8 @@ public class Structure {
      * @param transformations all transformations
      */
     public Structure(String structureIdentifier,
-                     // [label_asym_id: [label_seq_id: index]]
-                     Map<String, Map<Integer, Integer>> residueMapping,
+                     Map<String, int[]> chainOffsets,
+                     int[] labelSeqId,
                      int[] residueOffsets,
                      byte[] residueTypes,
                      byte[] labelAtomId,
@@ -49,9 +55,11 @@ public class Structure {
                      Map<String, List<String>> assemblies,
                      Map<String, Transformation> transformations) {
         this.structureIdentifier = structureIdentifier;
-        this.residueMapping = residueMapping;
+        this.chainOffsets = chainOffsets;
+        this.labelSeqId = labelSeqId;
         this.residueOffsets = residueOffsets;
         this.residueTypes = residueTypes;
+        this.chainCount = chainOffsets.size();
         this.residueCount = residueOffsets.length;
         this.atomCount = labelAtomId.length;
         this.labelAtomId = labelAtomId;
@@ -78,13 +86,8 @@ public class Structure {
      * @return a sorted list of all LabelSelection instances that exist for this structure
      */
     public List<LabelSelection> getLabelSelections() {
-        return residueMapping.entrySet()
-                .stream()
-                .flatMap(entry -> entry.getValue()
-                        .keySet()
-                        .stream()
-                        .sorted()
-                        .map(integer -> new LabelSelection(entry.getKey(), null, integer)))
+        return IntStream.range(0, residueCount)
+                .mapToObj(this::getLabelSelection)
                 .collect(Collectors.toList());
     }
 
@@ -95,11 +98,42 @@ public class Structure {
      * @return the index of the residue
      */
     public int getResidueIndex(String labelAsymId, int labelSeqId) {
-        return residueMapping.get(labelAsymId).get(labelSeqId);
+        if (!chainOffsets.containsKey(labelAsymId)) {
+            throw new NoSuchElementException("Didn't find chain: " + labelAsymId);
+        }
+
+        int[] chainOffset = chainOffsets.get(labelAsymId);
+        // on the sub-array binary search works
+        return Arrays.binarySearch(this.labelSeqId, chainOffset[0], chainOffset[1] + 1, labelSeqId);
+    }
+
+    public LabelSelection getLabelSelection(int residueIndex) {
+        String labelAsymId = null;
+        for (Map.Entry<String, int[]> entry : chainOffsets.entrySet()) {
+            int[] offsets =  entry.getValue();
+            if (residueIndex >= offsets[0] && residueIndex <= offsets[1]) {
+                labelAsymId = entry.getKey();
+            }
+        }
+
+        if (labelAsymId == null) {
+            throw new NoSuchElementException("Didn't find chain that contains residue index: " + residueIndex);
+        }
+
+        int labelSeqId = this.labelSeqId[residueIndex];
+        return new LabelSelection(labelAsymId, null, labelSeqId);
     }
 
     /**
-     * Count of all residues in the original CIF file.
+     * Count of all chains in the source CIF file.
+     * @return an int
+     */
+    public int getChainCount() {
+        return chainCount;
+    }
+
+    /**
+     * Count of all residues in the source CIF file.
      * @return an int
      */
     public int getResidueCount() {
@@ -107,7 +141,7 @@ public class Structure {
     }
 
     /**
-     * Count of all atoms/rows in the original CIF file.
+     * Count of all atoms/rows in the source CIF file.
      * @return an int
      */
     public int getAtomCount() {

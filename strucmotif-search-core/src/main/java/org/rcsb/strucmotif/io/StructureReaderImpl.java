@@ -60,7 +60,8 @@ public class StructureReaderImpl implements StructureReader {
         // the 'state'
         private String lastLabelAsymId;
         private int lastLabelSeqId;
-        private final Map<String, Map<Integer, Integer>> residueMapping;
+        private final Map<String, int[]> chainOffsets;
+        private final List<Integer> labelSeqIdCollapsed;
         private final List<Integer> residueOffsets;
         private final List<ResidueType> residueTypes;
 
@@ -86,7 +87,8 @@ public class StructureReaderImpl implements StructureReader {
 
             this.lastLabelAsymId = null;
             this.lastLabelSeqId = -1;
-            this.residueMapping = new LinkedHashMap<>();
+            this.chainOffsets = new LinkedHashMap<>();
+            this.labelSeqIdCollapsed = new ArrayList<>();
             this.residueOffsets = new ArrayList<>();
             this.residueTypes = new ArrayList<>();
         }
@@ -116,36 +118,42 @@ public class StructureReaderImpl implements StructureReader {
             return out;
         }
 
-        private int[] convertOffsets(List<Integer> residueOffsets) {
-            int[] out = new int[residueOffsets.size()];
+        private int[] convertOffsets(List<Integer> offsets) {
+            int[] out = new int[offsets.size()];
             for (int i = 0; i < out.length; i++) {
-                out[i] = residueOffsets.get(i);
+                out[i] = offsets.get(i);
             }
             return out;
         }
 
         private Structure build() {
-            int residue = 0;
+            int residueIndex = 0;
             for (int row = 0; row < atomSite.getRowCount(); row++) {
                 String labelAsymId = this.labelAsymId[row];
                 int labelSeqId = this.labelSeqId[row];
                 boolean chainChange = !labelAsymId.equals(lastLabelAsymId);
                 boolean residueChange = labelSeqId != lastLabelSeqId;
+
+                if (chainChange) {
+                    chainOffsets.put(labelAsymId, new int[] { residueIndex, residueIndex });
+                }
+
                 if (chainChange || residueChange) {
                     lastLabelAsymId = labelAsymId;
                     lastLabelSeqId = labelSeqId;
-                    Map<Integer, Integer> map = residueMapping.computeIfAbsent(labelAsymId, e -> new HashMap<>());
-                    map.put(labelSeqId, residue);
+                    chainOffsets.get(labelAsymId)[1] = residueIndex;
+                    labelSeqIdCollapsed.add(labelSeqId);
                     residueOffsets.add(row);
                     residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
-                    residue++;
+                    residueIndex++;
                 }
             }
 
             Map<String, Transformation> transformations = buildTransformations();
             Map<String, List<String>> assemblies = buildAssemblies();
             return new Structure(structureIdentifier,
-                    residueMapping,
+                    chainOffsets,
+                    convertOffsets(labelSeqIdCollapsed),
                     convertOffsets(residueOffsets),
                     convertResidueTypes(residueTypes),
                     labelAtomId,

@@ -3,11 +3,14 @@ package org.rcsb.strucmotif;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Helpers {
@@ -81,5 +84,11 @@ public class Helpers {
             out[i] = (byte) array[i].ordinal();
         }
         return out;
+    }
+
+    public static List<LabelSelection> createLabelSelections(String labelAsymId, int... labelSeqIds) {
+        return Arrays.stream(labelSeqIds)
+                .mapToObj(i -> new LabelSelection(labelAsymId, null, i))
+                .collect(Collectors.toList());
     }
 }

@@ -3,36 +3,96 @@ package org.rcsb.strucmotif.domain.motif;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 
+import java.util.function.BiPredicate;
+
 /**
  * Describes the overlap between two {@link org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier} instances. Done by determining whether
  * {@link LabelSelection} instances equal. Can be no overlap or both overlapping. Interesting case is when 1 pair
  * overlaps. Can be LEFT_LEFT (left/first identifier of first word paired to left/first of second word) and so on.
  */
-public enum Overlap {
+public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, InvertedIndexResiduePairIdentifier> {
     /**
      * No overlap.
      */
-    NONE,
+    NONE {
+        @Override
+        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+            IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
+            IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
+            IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
+            IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
+            return !testInternal(indexSelection11, indexSelection21) && !testInternal(indexSelection12, indexSelection22) &&
+                    !testInternal(indexSelection11, indexSelection22) && !testInternal(indexSelection12, indexSelection21);
+        }
+    },
     /**
      * Left identifier of first word corresponds to left identifier of second word.
      */
-    LEFT_LEFT,
+    LEFT_LEFT {
+        @Override
+        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+            IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
+            IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
+            return testInternal(indexSelection11, indexSelection21);
+        }
+    },
     /**
      * Left identifier of first word corresponds to right identifier of second word.
      */
-    LEFT_RIGHT,
+    LEFT_RIGHT {
+        @Override
+        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+            IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
+            IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
+            return testInternal(indexSelection11, indexSelection22);
+        }
+    },
     /**
      * Right identifier of first word corresponds to left identifier of second word.
      */
-    RIGHT_LEFT,
+    RIGHT_LEFT {
+        @Override
+        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+            IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
+            IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
+            return testInternal(indexSelection12, indexSelection21);
+        }
+    },
     /**
      * Right identifier of first word corresponds to right identifier of second word.
      */
-    RIGHT_RIGHT,
+    RIGHT_RIGHT {
+        @Override
+        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+            IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
+            IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
+            return testInternal(indexSelection12, indexSelection22);
+        }
+    },
     /**
      * Both sides overlap.
      */
-    BOTH;
+    BOTH {
+        @Override
+        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+            IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
+            IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
+            IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
+            IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
+            return (testInternal(indexSelection11, indexSelection21) && testInternal(indexSelection12, indexSelection22)) ||
+                    (testInternal(indexSelection11, indexSelection22) && testInternal(indexSelection12, indexSelection21));
+        }
+    };
+
+    private static boolean testInternal(IndexSelection indexSelection1, IndexSelection indexSelection2) {
+        return indexSelection1.getIndex() == indexSelection2.getIndex() &&
+                indexSelection1.getStructOperId().equals(indexSelection2.getStructOperId());
+    }
+
+    @Override
+    public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
+        throw new UnsupportedOperationException("Not implemented");
+    }
 
     /**
      * Determines the overlap between 2 {@link IndexResiduePairIdentifier} instances.
@@ -41,58 +101,28 @@ public enum Overlap {
      * @return a description of the observed overlap
      */
     public static Overlap ofResiduePairIdentifiers(IndexResiduePairIdentifier residuePairIdentifier1, IndexResiduePairIdentifier residuePairIdentifier2) {
-        IndexSelection indexSelection1Left = residuePairIdentifier1.getIndexSelection1();
-        IndexSelection indexSelection1Right = residuePairIdentifier1.getIndexSelection2();
-        IndexSelection indexSelection2Left = residuePairIdentifier2.getIndexSelection1();
-        IndexSelection indexSelection2Right = residuePairIdentifier2.getIndexSelection2();
+        IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
+        IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
+        IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
+        IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
 
-        boolean equal1Left2Left = indexSelection1Left.equals(indexSelection2Left);
-        boolean equal1Left2Right = indexSelection1Left.equals(indexSelection2Right);
-        boolean equal2Left1Right = indexSelection1Right.equals(indexSelection2Left);
-        boolean equal2Left2Right = indexSelection1Right.equals(indexSelection2Right);
+        boolean equal1112 = indexSelection11.equals(indexSelection21);
+        boolean equal1122 = indexSelection11.equals(indexSelection22);
+        boolean equal1221 = indexSelection12.equals(indexSelection21);
+        boolean equal1222 = indexSelection12.equals(indexSelection22);
 
-        if (!equal1Left2Left && !equal1Left2Right && !equal2Left1Right && !equal2Left2Right) {
+        if (!equal1112 && !equal1122 && !equal1221 && !equal1222) {
             return NONE;
-        } else if ((equal1Left2Left && equal2Left2Right) || (equal1Left2Right && equal2Left1Right)) {
+        } else if ((equal1112 && equal1222) || (equal1122 && equal1221)) {
             return BOTH;
-        } else if (equal1Left2Left) {
+        } else if (equal1112) {
             return LEFT_LEFT;
-        } else if (equal2Left2Right) {
+        } else if (equal1222) {
             return RIGHT_RIGHT;
-        } else if (equal1Left2Right) {
+        } else if (equal1122) {
             return LEFT_RIGHT;
         } else {
             return RIGHT_LEFT;
         }
-    }
-
-    /**
-     * Determines the overlap between 2 {@link InvertedIndexResiduePairIdentifier} instances.
-     * @param residuePairIdentifier1 the first instance
-     * @param residuePairIdentifier2 the second instance
-     * @return a description of the observed overlap
-     */
-    public static Overlap ofResiduePairIdentifiers(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
-        if (residuePairIdentifier1.getIndex1() == residuePairIdentifier2.getIndex1() &&
-                residuePairIdentifier1.getStructOperId1().equals(residuePairIdentifier2.getStructOperId1())) {
-            return LEFT_LEFT;
-        }
-
-        if (residuePairIdentifier1.getIndex2() == residuePairIdentifier2.getIndex2() &&
-                residuePairIdentifier1.getStructOperId2().equals(residuePairIdentifier2.getStructOperId2())) {
-            return RIGHT_RIGHT;
-        }
-
-        if (residuePairIdentifier1.getIndex1() == residuePairIdentifier2.getIndex2() &&
-                residuePairIdentifier1.getStructOperId1().equals(residuePairIdentifier2.getStructOperId2())) {
-            return LEFT_RIGHT;
-        }
-
-        if (residuePairIdentifier1.getIndex2() == residuePairIdentifier2.getIndex1() &&
-                residuePairIdentifier1.getStructOperId2().equals(residuePairIdentifier2.getStructOperId1())) {
-            return RIGHT_LEFT;
-        }
-
-        return NONE;
     }
 }

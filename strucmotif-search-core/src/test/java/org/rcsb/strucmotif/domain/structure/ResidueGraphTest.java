@@ -222,7 +222,7 @@ class ResidueGraphTest {
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
                 .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelections().get(indexSelection.getIndex());
+                    LabelSelection labelSelection = labelSelections.get(indexSelection.getIndex());
                     return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
                 })
                 .map(LabelSelection::getLabelSeqId)

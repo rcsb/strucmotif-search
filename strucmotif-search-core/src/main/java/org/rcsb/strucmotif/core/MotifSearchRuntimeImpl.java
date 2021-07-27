@@ -122,7 +122,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
     }
 
-    private MotifSearchResult createResultContainer(MotifSearchQuery query, QueryStructure queryStructure, Parameters parameters) throws ExecutionException, InterruptedException {
+    private MotifSearchResult createResultContainer(MotifSearchQuery query, QueryStructure queryStructure, Parameters parameters) {
         logger.info("[{}] Query: {} with {}",
                 query.hashCode(),
                 queryStructure.getStructureIdentifier(),

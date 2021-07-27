@@ -82,7 +82,6 @@ public class TargetStructure {
     public boolean consume(InvertedIndexResiduePairIdentifier[] residuePairIdentifiers, Overlap[] overlapProfile) {
         List<InvertedIndexResiduePairIdentifier[]> extendedPaths = new ArrayList<>();
 
-        // TODO this can probably get optimized some more by avoid Overlap.of
         // for each possibly extending candidate:
         for (InvertedIndexResiduePairIdentifier candidateResiduePairIdentifier : residuePairIdentifiers) {
             // form cartesian product with each possible path to extend:

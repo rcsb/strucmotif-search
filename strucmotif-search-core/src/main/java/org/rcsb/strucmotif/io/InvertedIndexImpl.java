@@ -70,7 +70,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             Map<String, Object> map = getMap(residuePairDescriptor);
 
             // read already present target identifiers and add to list to write
-            map.forEach(data::put);
+            data.putAll(map);
 
             // serialize message
             byte[] bytes = MessagePackCodec.encode(data);

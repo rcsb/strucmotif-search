@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.12.2
+-------------
+### Bug fix
+- throw `IllegalQueryDefinitionException` if requested chain/residue isn't found, part 2
+
 strucmotif-search 0.12.1
 -------------
 ### Bug fix

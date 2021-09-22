@@ -157,7 +157,7 @@ public class MotifSearchConfig {
 
     /**
      * Set how many threads to use?
-     * @param numberThreads an int >0
+     * @param numberThreads an int greater than 0
      */
     public void setNumberThreads(int numberThreads) {
         this.numberThreads = numberThreads;

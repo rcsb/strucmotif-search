@@ -13,6 +13,7 @@ public interface StructureDataProvider {
     /**
      * If `strucmotif.in-memory-strategy` is active: Initialize caching by reading all structures and keeping them in
      * memory for fast access.
+     * @throws IOException reading of structure data failed
      */
     void initializeRenumberedStructureCache() throws IOException;
 

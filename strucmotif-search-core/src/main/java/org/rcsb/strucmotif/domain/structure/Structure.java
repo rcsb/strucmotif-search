@@ -104,7 +104,11 @@ public class Structure {
 
         int[] chainOffset = chainOffsets.get(labelAsymId);
         // on the sub-array binary search works
-        return Arrays.binarySearch(this.labelSeqId, chainOffset[0], chainOffset[1] + 1, labelSeqId);
+        int index = Arrays.binarySearch(this.labelSeqId, chainOffset[0], chainOffset[1] + 1, labelSeqId);
+        if (index == -1) {
+            throw new NoSuchElementException("Didn't find residue with label_seq_id " + labelSeqId + " in chain " + labelAsymId);
+        }
+        return index;
     }
 
     public LabelSelection getLabelSelection(int residueIndex) {

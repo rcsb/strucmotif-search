@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.config.MotifPruningStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -58,6 +60,7 @@ public class QueryBuilder {
      * @param structureIdentifier the id to acquire
      * @param selection which components to select to define the motif
      * @return mandatory parameter step
+     * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String structureIdentifier, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readSome(structureIdentifier);
@@ -69,6 +72,7 @@ public class QueryBuilder {
      * @param inputStream the data to read
      * @param selection which components to select to define the motif
      * @return mandatory parameter step
+     * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
     public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
@@ -81,17 +85,23 @@ public class QueryBuilder {
      * @param structure the file to ready - all components are considered the motif
      * @param labelSelections the residues of interest
      * @return mandatory parameter step
+     * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
     public MandatoryBuilder defineByStructureAndSelection(Structure structure, List<LabelSelection> labelSelections) {
-        List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
+        try {
+            List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
 
-        if (residues.size() > motifSearchConfig.getMaxMotifSize()) {
-            throw new IllegalArgumentException("maximum motif size is " + motifSearchConfig.getMaxMotifSize() + " - " +
-                    "file contains " + residues.size() + " residues");
+            if (residues.size() > motifSearchConfig.getMaxMotifSize()) {
+                throw new IllegalArgumentException("maximum motif size is " + motifSearchConfig.getMaxMotifSize() + " - " +
+                        "file contains " + residues.size() + " residues");
+            }
+
+            String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
+            return new MandatoryBuilder(structureIdentifier, structure, labelSelections, residues);
+        } catch (NoSuchElementException e) {
+            // this happens when trying to access residues that are not part of the structure
+            throw new IllegalQueryDefinitionException(e.getMessage());
         }
-
-        String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
-        return new MandatoryBuilder(structureIdentifier, structure, labelSelections, residues);
     }
 
     /**

@@ -94,6 +94,17 @@ public class MotifSearchIntegrationTest {
     }
 
     @Test
+    public void whenResidueSelectionOutOfBounds_thenThrowIllegalQueryException() {
+        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> {
+            Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+            List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", -62),
+                    new LabelSelection("A", "1", -245),
+                    new LabelSelection("A", "1", -295));
+            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery().run();
+        });
+    }
+
+    @Test
     public void whenFailLateWithMalformedQuery_thenThrowIllegalQueryException() {
         Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> {
             // this will pass initial checks and fail later in the computation

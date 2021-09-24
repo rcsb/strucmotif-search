@@ -42,8 +42,9 @@ public class ResidueGraph {
      * @param residues residue coordinates (may be subset, may be all)
      * @param squaredCutoff maximum distance of residue pairs to index
      * @param allowTransformed allow pairs between 2 transformed chains?
+     * @param allowUndefinedAssemblies set to true for computed structure models
      */
-    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, float squaredCutoff, boolean allowTransformed) {
+    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, float squaredCutoff, boolean allowTransformed, boolean allowUndefinedAssemblies) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -78,7 +79,17 @@ public class ResidueGraph {
             normalVectorMap.put(indexSelection, normalVector(backbone, sideChain));
         }
 
-        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, squaredCutoff, allowTransformed);
+        Map<String, Set<String>> assemblyMap = structure.getAssemblies();
+        // handle case where undefined assemblies are allowed and no assembly info is present
+        if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
+            Set<String> chains = structure.getLabelSelections()
+                    .stream()
+                    .map(LabelSelection::getLabelAsymId)
+                    .collect(Collectors.toSet());
+            assemblyMap.put("0", chains.stream().map(c -> c + "_1").collect(Collectors.toSet()));
+        }
+
+        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, squaredCutoff, allowTransformed, assemblyMap);
     }
 
     /**
@@ -102,6 +113,11 @@ public class ResidueGraph {
         // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
         Map<String, Set<String>> assemblyMap = structure.getAssemblies();
 
+        // handle case where undefined assemblies are allowed and no assembly info is present
+        if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
+            assemblyMap.put("0", chainMap.keySet().stream().map(c -> c + "_1").collect(Collectors.toSet()));
+        }
+
         List<float[]> originalBackboneVectors = new ArrayList<>();
         List<float[]> originalSideChainVectors = new ArrayList<>();
         for (int i = 0; i < structure.getResidueCount(); i++) {
@@ -122,14 +138,6 @@ public class ResidueGraph {
                 .flatMap(Collection::stream)
                 .distinct()
                 .collect(Collectors.toList());
-
-        // handle case where undefined assemblies are allowed and no assembly info is present
-        if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
-            assemblyInformation = chainMap.keySet()
-                    .stream()
-                    .map(labelAsymId -> labelAsymId + "_1")
-                    .collect(Collectors.toList());
-        }
 
         // ${struct_oper_id}-${index}: float[]
         List<IndexSelection> residueKeys = new ArrayList<>();
@@ -168,10 +176,10 @@ public class ResidueGraph {
             }
         }
 
-        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, squaredCutoff, allowTransformed);
+        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, squaredCutoff, allowTransformed, assemblyMap);
     }
 
-    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed) {
+    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed, Map<String, Set<String>> assemblyMap) {
         // temporary ResidueGrid to efficient distance calculation
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
 
@@ -180,7 +188,7 @@ public class ResidueGraph {
         Set<String> acceptedChains = new HashSet<>();
         Set<String> acceptedOperators = new HashSet<>();
         if (!allowTransformed) {
-            for (Set<String> chainExprs : structure.getAssemblies().values()) {
+            for (Set<String> chainExprs : assemblyMap.values()) {
                 for (String chainExpr : chainExprs) {
                     String chain = chainExpr.split("_")[0];
                     if (!acceptedChains.contains(chain)) {
@@ -210,7 +218,7 @@ public class ResidueGraph {
             String chainExpr2 = labelSelections.get(residueKey2.getIndex()).getLabelAsymId() + "_" + residueKey2.getStructOperId();
 
             // ensure that both chainExpressions occur in the same assembly
-            if (structure.getAssemblies().values().stream().noneMatch(opers -> opers.contains(chainExpr1) && opers.contains(chainExpr2))) {
+            if (assemblyMap.values().stream().noneMatch(opers -> opers.contains(chainExpr1) && opers.contains(chainExpr2))) {
                 continue;
             }
 

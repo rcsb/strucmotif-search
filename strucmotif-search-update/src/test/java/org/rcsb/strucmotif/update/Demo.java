@@ -11,7 +11,13 @@ class Demo {
                 "https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif",
                 "https://alphafold.ebi.ac.uk/files/AF-Q8W3K0-F1-model_v1.cif",
                 "https://alphafold.ebi.ac.uk/files/AF-Q5VSL9-F1-model_v1.cif",
-                "https://alphafold.ebi.ac.uk/files/AF-P26646-F1-model_v1.cif"
+                "https://alphafold.ebi.ac.uk/files/AF-P26646-F1-model_v1.cif",
+                "https://alphafold.ebi.ac.uk/files/AF-P07478-F1-model_v1.cif",
+                "https://alphafold.ebi.ac.uk/files/AF-Q9CPN7-F1-model_v1.cif",
+                "https://alphafold.ebi.ac.uk/files/AF-Q9CPN9-F1-model_v1.cif",
+                "https://alphafold.ebi.ac.uk/files/AF-P07477-F1-model_v1.cif",
+                "https://alphafold.ebi.ac.uk/files/AF-Q8NHM4-F1-model_v1.cif",
+                "file:///Users/sebastian/Downloads/ma-9z55z.cif"
         });
     }
 }

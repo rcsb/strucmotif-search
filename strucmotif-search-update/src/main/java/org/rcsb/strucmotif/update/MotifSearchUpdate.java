@@ -171,7 +171,11 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 partitions.size(),
                 motifSearchConfig.getUpdateChunkSize());
 
-        Context context = new Context();
+        Set<String> known = stateRepository.selectKnown()
+                .stream()
+                .map(StructureInformation::getStructureIdentifier)
+                .collect(Collectors.toSet());
+        Context context = new Context(known);
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
@@ -188,18 +192,25 @@ public class MotifSearchUpdate implements CommandLineRunner {
             }).get();
 
             // mark as dirty only around index update
-            stateRepository.insertDirty(partition);
+            Set<String> dirty = context.processed.stream()
+                    .map(StructureInformation::getStructureIdentifier)
+                    // ignore items detected as known after reading entry.id (happens when processing URLs)
+                    .filter(id -> !known.contains(id))
+                    .collect(Collectors.toSet());
+            stateRepository.insertDirty(dirty);
             persist(context);
         }
     }
 
     static class Context {
+        final Set<String> known;
         final Set<StructureInformation> processed;
         String partitionContext;
         Map<ResiduePairDescriptor, Map<String, Collection<ResiduePairIdentifier>>> buffer;
         AtomicInteger structureCounter;
 
-        public Context() {
+        public Context(Set<String> known) {
+            this.known = known;
             this.processed = Collections.synchronizedSet(new HashSet<>());
         }
     }
@@ -236,6 +247,16 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // get some clean metadata
             MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
             entryId = mmCifFile.getFirstBlock().getEntry().getId().get(0).toUpperCase();
+            // TODO route for provided entry_id
+            logger.info("Determined name: {}", entryId);
+
+            // skip if entry.id parsed from URL is actually known
+            if (context.known.contains(entryId)) {
+                logger.info("skipping {}", entryId);
+                return;
+            }
+
+            // TODO route for provided revision data
             Revision revision = new Revision(mmCifFile);
             Map<String, Set<String>> assemblyInformation = AssemblyInformation.of(mmCifFile);
 
@@ -282,7 +303,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                             ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
 
                             Map<String, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
-                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
+                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(entryId, k -> Collections.synchronizedSet(new HashSet<>()));
                             targetIdentifiers.add(targetIdentifier);
                             structureMotifCounter.incrementAndGet();
                         });

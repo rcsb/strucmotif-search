@@ -140,15 +140,21 @@ public class TargetStructure {
         int residueCount = labelSelections.size();
         // this is the inverted mapping from opers to assemblies that contain this expression - can't use structure map here
         Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
-        Map<String, Long> assemblyCounts = labelSelections.stream()
-                .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
-                .map(assemblyMap::get)
-                .flatMap(Collection::stream)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        Map<String, Long> assemblyCounts;
 
-        // only allow hits in 'default'/fallback assembly if flag active and actually no information present
-        if (undefinedAssemblies && assemblyCounts.isEmpty()) {
-            assemblyCounts.put(AssemblyInformation.UNKNOWN_ASSEMBLY_IDENTIFIER, (long) residueCount);
+        if (assemblyMap.isEmpty()) {
+            // only allow hits in 'default'/fallback assembly if flag active and actually no information present
+            if (!undefinedAssemblies) {
+                return Stream.empty();
+            }
+
+            assemblyCounts = Map.of(AssemblyInformation.UNKNOWN_ASSEMBLY_IDENTIFIER, (long) residueCount);
+        } else {
+            assemblyCounts = labelSelections.stream()
+                    .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
+                    .map(assemblyMap::get)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         }
 
         return assemblyCounts.entrySet()

@@ -70,7 +70,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             Map<String, Object> map = getMap(residuePairDescriptor);
 
             // read already present target identifiers and add to list to write
-            map.forEach(data::put);
+            data.putAll(map);
 
             // serialize message
             byte[] bytes = MessagePackCodec.encode(data);
@@ -143,6 +143,10 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     @Override
     public void delete(Collection<String> removals) {
+        if (!Files.exists(basePath)) {
+            return;
+        }
+
         try {
             logger.info("Removing {} structures from inverted index", removals.size());
 
@@ -180,7 +184,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         try {
             Map<String, Object> map = getMap(residuePairDescriptor);
 
-            // if no entry would be removed: dont bother and return
+            // if no entry would be removed: don't bother and return
             if (removals.stream().noneMatch(map::containsKey)) {
                 return;
             }

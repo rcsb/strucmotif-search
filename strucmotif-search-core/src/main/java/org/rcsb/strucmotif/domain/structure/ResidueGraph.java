@@ -86,8 +86,9 @@ public class ResidueGraph {
      * @param structure data
      * @param squaredCutoff maximum dot product between atoms to consider
      * @param allowTransformed set to true during QueryStructure evaluation
+     * @param allowUndefinedAssemblies set to true for computed structure models
      */
-    public ResidueGraph(Structure structure, float squaredCutoff, boolean allowTransformed) {
+    public ResidueGraph(Structure structure, float squaredCutoff, boolean allowTransformed, boolean allowUndefinedAssemblies) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -122,6 +123,14 @@ public class ResidueGraph {
                 .distinct()
                 .collect(Collectors.toList());
 
+        // handle case where undefined assemblies are allowed and no assembly info is present
+        if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
+            assemblyInformation = chainMap.keySet()
+                    .stream()
+                    .map(labelAsymId -> labelAsymId + "_1")
+                    .collect(Collectors.toList());
+        }
+
         // ${struct_oper_id}-${index}: float[]
         List<IndexSelection> residueKeys = new ArrayList<>();
         Map<IndexSelection, float[]> normalVectorMap = new LinkedHashMap<>();
@@ -131,6 +140,7 @@ public class ResidueGraph {
             String[] split = a.split("_");
             String labelAsymId = split[0];
             String oper = split[1];
+            // oper with ID '1' will be identity operation if nothing was defined in the source file
             Transformation transformation = structure.getTransformation(oper);
 
             // happens for non-polymer chains

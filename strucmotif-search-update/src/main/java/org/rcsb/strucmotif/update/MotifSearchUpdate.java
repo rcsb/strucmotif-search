@@ -113,7 +113,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
         } else {
-            requested = Arrays.stream(ids).map(String::toUpperCase).collect(Collectors.toList());
+            requested = Arrays.stream(ids)
+                    // upper-case PDB-IDs, leave URLs be
+                    .map(id -> id.length() == 4 ? id.toUpperCase() : id)
+                    .collect(Collectors.toList());
         }
         Collections.shuffle(requested);
 
@@ -121,7 +124,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         if (operation != Operation.RECOVER) {
             Collection<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
             if (dirtyStructureIdentifiers.size() > 0) {
-                logger.warn("Update state is dirty - problematic identifiers:\n{}",
+                logger.warn("Update state is dirty - Problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
                 logger.info("Recovering from dirty state");
                 remove(stateRepository.selectDirty());
@@ -226,29 +229,35 @@ public class MotifSearchUpdate implements CommandLineRunner {
     }
 
     private void handleStructureIdentifierInternal(String structureIdentifier, Context context) {
+        String entryId;
         try {
-            // write renumbered structure
-            MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
+            InputStream inputStream = handleInputStream(structureIdentifier, context);
+
+            // get some clean metadata
+            MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
+            entryId = mmCifFile.getFirstBlock().getEntry().getId().get(0).toUpperCase();
             Revision revision = new Revision(mmCifFile);
             Map<String, Set<String>> assemblyInformation = AssemblyInformation.of(mmCifFile);
-            structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
-            context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
+
+            // write renumbered structure
+            structureDataProvider.writeRenumbered(entryId, mmCifFile);
+            context.processed.add(new StructureInformation(entryId, revision, assemblyInformation));
         } catch (IOException e) {
-            throw new UncheckedIOException("cif parsing failed for " + structureIdentifier, e);
+            throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
         } catch (ParsingException e) {
-            logger.info("cif parsing failed for " + structureIdentifier, e);
+            logger.warn("Cif parsing failed for " + structureIdentifier, e);
             throw e;
         }
 
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
+        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + entryId;
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;
         try {
-            structure = structureDataProvider.readRenumbered(structureIdentifier);
+            structure = structureDataProvider.readRenumbered(entryId);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] [{}] No valid polymer chains",
+            logger.warn("[{}] [{}] No valid polymer chain(s) - Skipping",
                     context.partitionContext,
                     structureContext);
             return;
@@ -262,7 +271,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         try {
-            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), false);
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), false, motifSearchConfig.isUndefinedAssemblies());
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
@@ -291,6 +300,21 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // fail complete update
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Acquire an input stream for the requested item. Simple case is a 4-character PDB-ID. Might also be a URL.
+     * @param id request
+     * @param context context for logging purposes
+     * @return an InputStream
+     */
+    private InputStream handleInputStream(String id, Context context) throws IOException {
+        if (id.length() == 4) {
+            return structureDataProvider.getOriginalInputStream(id);
+        }
+
+        logger.info("[{}] Downloading from {}", context.partitionContext, id);
+        return new URL(id).openStream();
     }
 
     private void persist(Context context) throws ExecutionException, InterruptedException {

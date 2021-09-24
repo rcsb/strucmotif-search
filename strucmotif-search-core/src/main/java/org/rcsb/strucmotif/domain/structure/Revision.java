@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.domain.structure;
 
+import org.rcsb.cif.schema.mm.MmCifFile;
+import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
+
 import java.util.Objects;
 
 /**
@@ -17,6 +20,17 @@ public class Revision {
     public Revision(int major, int minor) {
         this.major = major;
         this.minor = minor;
+    }
+
+    /**
+     * Parse revision information from a file.
+     * @param mmCifFile the source file
+     */
+    public Revision(MmCifFile mmCifFile) {
+        PdbxAuditRevisionHistory pdbxAuditRevisionHistory = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory();
+        int last = pdbxAuditRevisionHistory.getRowCount() - 1;
+        this.major = pdbxAuditRevisionHistory.getMajorRevision().get(last);
+        this.minor = pdbxAuditRevisionHistory.getMinorRevision().get(last);
     }
 
     /**

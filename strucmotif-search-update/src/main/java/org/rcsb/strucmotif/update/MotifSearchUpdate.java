@@ -4,20 +4,19 @@ import org.rcsb.cif.CifIO;
 import org.rcsb.cif.ParsingException;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
-import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.domain.structure.ResidueGraph;
-import org.rcsb.strucmotif.domain.structure.Revision;
-import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
+import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.StructureDataProvider;
-import org.rcsb.strucmotif.math.Partition;
+import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StateRepository;
+import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.math.Partition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -234,7 +233,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         try {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
-            Revision revision = getRevision(mmCifFile);
+            Revision revision = new Revision(mmCifFile);
             Map<String, Set<String>> assemblyInformation = getAssemblyInformation(mmCifFile);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
             context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
@@ -370,12 +369,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
             return IntStream.range(Integer.parseInt(s[0]), Integer.parseInt(s[1]) + 1)
                     .mapToObj(String::valueOf);
         }
-    }
-
-    private Revision getRevision(MmCifFile mmCifFile) {
-        PdbxAuditRevisionHistory pdbxAuditRevisionHistory = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory();
-        int last = pdbxAuditRevisionHistory.getRowCount() - 1;
-        return new Revision(pdbxAuditRevisionHistory.getMajorRevision().get(last), pdbxAuditRevisionHistory.getMinorRevision().get(last));
     }
 
     private void persist(Context context) throws ExecutionException, InterruptedException {

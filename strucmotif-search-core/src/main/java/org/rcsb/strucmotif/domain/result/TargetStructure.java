@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -119,13 +120,14 @@ public class TargetStructure {
      * @param structure provides assembly information
      * @param hitScorer the hit scorer
      * @param stateRepository provides prepared assembly information
+     * @param undefinedAssemblies allow hits without assembly?
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository) {
-        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, hitScorer, stateRepository));
+    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository, boolean undefinedAssemblies) {
+        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, hitScorer, stateRepository, undefinedAssemblies));
     }
 
-    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository) {
+    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository, boolean undefinedAssemblies) {
         List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = indexSelections.stream()
                 .map(indexSelection -> {
@@ -143,6 +145,11 @@ public class TargetStructure {
                 .map(assemblyMap::get)
                 .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        // only allow hits in 'default'/fallback assembly if flag active and actually no information present
+        if (undefinedAssemblies && assemblyCounts.isEmpty()) {
+            assemblyCounts.put(AssemblyInformation.UNKNOWN_ASSEMBLY_IDENTIFIER, (long) residueCount);
+        }
 
         return assemblyCounts.entrySet()
                 .stream()

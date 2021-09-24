@@ -159,7 +159,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 .parallelStream()
                 .flatMap(targetStructure -> {
                     Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
-                    return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository);
+                    return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository, motifSearchConfig.isUndefinedAssemblies());
                 })
                 .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                 .limit(limit)
@@ -182,7 +182,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                     .parallelStream()
                     .flatMap(targetStructure -> {
                         Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
-                        return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository);
+                        return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository, motifSearchConfig.isUndefinedAssemblies());
                     })
                     .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                     .forEach(hit -> {

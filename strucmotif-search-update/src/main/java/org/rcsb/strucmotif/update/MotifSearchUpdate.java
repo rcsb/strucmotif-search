@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,20 +103,37 @@ public class MotifSearchUpdate implements CommandLineRunner {
             System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
             System.out.println("If you want to update entries you have to explicitly remove them first");
             System.out.println("Example: java -Xmx12G -jar update.jar ADD 1acj 1exr 4hhb");
+            System.out.println("You can also provide URLs to index non-archived CIF files, in that case you must provide a unique, preferably namespaced identifier which will be used to index this item");
+            System.out.println("Example: java -Xmx12G -jar update.jar ADD AF-Q76EI6-F1,https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif MA-9Z55Z,file:///path/to/ma-9z55z.cif");
             return;
         }
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = Operation.resolve(args[0]);
         String[] ids = new String[args.length - 1];
-        List<String> requested;
+        List<UpdateItem> requested;
         System.arraycopy(args, 1, ids, 0, ids.length);
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
         } else {
             requested = Arrays.stream(ids)
                     // upper-case PDB-IDs, leave URLs be
-                    .map(id -> id.length() == 4 ? id.toUpperCase() : id)
+                    .map(id -> {
+                        String[] split = id.split(",");
+                        if (id.length() == 4) {
+                            return new UpdateItem(id.toUpperCase());
+                        } else if (split.length == 2) {
+                            try {
+                                String key = split[0].toUpperCase();
+                                URL url = new URL(split[1]);
+                                return new UpdateItem(key, url);
+                            } catch (MalformedURLException e) {
+                                throw new IllegalArgumentException("Cannot parse line: '" + id + "' - not a valid URL");
+                            }
+                        } else {
+                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-digit-entryId}' or '${identifier},${url}'");
+                        }
+                    })
                     .collect(Collectors.toList());
         }
         Collections.shuffle(requested);
@@ -136,10 +154,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 requested.size(),
                 requested.stream()
                         .limit(5)
-                        .map(id -> "\"" + id + "\"")
-                        .collect(Collectors.joining(", ",
-                                "[",
-                                requested.size() > 5 ? ", ...]" : "]")));
+                        .map(item -> "\"" + item.getStructureIdentifier() + "\"")
+                        .collect(Collectors.joining(", ", "[",  requested.size() > 5 ? ", ...]" : "]")));
 
         switch (operation) {
             case ADD:
@@ -158,15 +174,15 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     /**
      * The 'ADD' operation.
-     * @param identifiers set of identifiers to add
+     * @param items set of UpdateItems to add
      * @throws ExecutionException update failure
      * @throws InterruptedException update failure
      */
-    public void add(Collection<String> identifiers) throws ExecutionException, InterruptedException {
-        long target = identifiers.size();
+    public void add(Collection<UpdateItem> items) throws ExecutionException, InterruptedException {
+        long target = items.size();
         logger.info("{} files to process in total", target);
 
-        Partition<String> partitions = new Partition<>(identifiers, motifSearchConfig.getUpdateChunkSize());
+        Partition<UpdateItem> partitions = new Partition<>(items, motifSearchConfig.getUpdateChunkSize());
         logger.info("Formed {} partitions of {} structures",
                 partitions.size(),
                 motifSearchConfig.getUpdateChunkSize());
@@ -181,13 +197,13 @@ public class MotifSearchUpdate implements CommandLineRunner {
         for (int i = 0; i < partitions.size(); i++) {
             context.partitionContext = (i + 1) + " / " + partitions.size();
 
-            List<String> partition = partitions.get(i);
+            List<UpdateItem> partition = partitions.get(i);
             logger.info("[{}] Start processing partition", context.partitionContext);
 
             context.structureCounter = new AtomicInteger();
             context.buffer = new ConcurrentHashMap<>();
             threadPool.submit(() -> {
-                partition.parallelStream().forEach(id -> handleStructureIdentifier(id, context));
+                partition.parallelStream().forEach(item -> handleUpdateItem(item, context));
                 return null;
             }).get();
 
@@ -202,24 +218,11 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    static class Context {
-        final Set<String> known;
-        final Set<StructureInformation> processed;
-        String partitionContext;
-        Map<ResiduePairDescriptor, Map<String, Collection<ResiduePairIdentifier>>> buffer;
-        AtomicInteger structureCounter;
-
-        public Context(Set<String> known) {
-            this.known = known;
-            this.processed = Collections.synchronizedSet(new HashSet<>());
-        }
-    }
-
-    private void handleStructureIdentifier(String structureIdentifier, Context context) {
+    private void handleUpdateItem(UpdateItem item, Context context) {
         int maxRetries = motifSearchConfig.getDownloadTries();
         for (int i = 1; i <= maxRetries; i++) {
             try {
-                handleStructureIdentifierInternal(structureIdentifier, context);
+                handleUpdateItemInternal(item, context);
                 break;
             } catch (UncheckedIOException e) {
                 if (i >= maxRetries) {
@@ -228,7 +231,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 }
 
                 int count = context.structureCounter.get();
-                String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
+                String source = item.getUrl() != null ? item.getUrl().toString() : item.getStructureIdentifier();
+                String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + source;
                 logger.warn("[{}] [{}] [try: {} / {}] Failed to download source file - {}",
                         context.partitionContext,
                         structureContext,
@@ -239,30 +243,22 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
     }
 
-    private void handleStructureIdentifierInternal(String structureIdentifier, Context context) {
-        String entryId;
+    private void handleUpdateItemInternal(UpdateItem item, Context context) {
+        String structureIdentifier = item.getStructureIdentifier();
         try {
-            InputStream inputStream = handleInputStream(structureIdentifier, context);
+            InputStream inputStream = handleInputStream(item, context);
 
             // get some clean metadata
             MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
-            entryId = mmCifFile.getFirstBlock().getEntry().getId().get(0).toUpperCase();
-            // TODO route for provided entry_id
-            logger.info("Determined name: {}", entryId);
 
-            // skip if entry.id parsed from URL is actually known
-            if (context.known.contains(entryId)) {
-                logger.info("skipping {}", entryId);
-                return;
-            }
-
-            // TODO route for provided revision data
-            Revision revision = new Revision(mmCifFile);
+            boolean hasRevision = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory().isDefined();
+            // if revision isn't set (happens e.g. for ModelArchive files) then set to 1.0 by default
+            Revision revision = hasRevision ? new Revision(mmCifFile) : new Revision(1, 0);
             Map<String, Set<String>> assemblyInformation = AssemblyInformation.of(mmCifFile);
 
             // write renumbered structure
-            structureDataProvider.writeRenumbered(entryId, mmCifFile);
-            context.processed.add(new StructureInformation(entryId, revision, assemblyInformation));
+            structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
+            context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
         } catch (IOException e) {
             throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
         } catch (ParsingException e) {
@@ -271,12 +267,12 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + entryId;
+        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;
         try {
-            structure = structureDataProvider.readRenumbered(entryId);
+            structure = structureDataProvider.readRenumbered(structureIdentifier);
         } catch (UncheckedIOException e) {
             logger.warn("[{}] [{}] No valid polymer chain(s) - Skipping",
                     context.partitionContext,
@@ -303,7 +299,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                             ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
 
                             Map<String, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
-                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(entryId, k -> Collections.synchronizedSet(new HashSet<>()));
+                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
                             targetIdentifiers.add(targetIdentifier);
                             structureMotifCounter.incrementAndGet();
                         });
@@ -325,17 +321,18 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     /**
      * Acquire an input stream for the requested item. Simple case is a 4-character PDB-ID. Might also be a URL.
-     * @param id request
+     * @param item request
      * @param context context for logging purposes
      * @return an InputStream
      */
-    private InputStream handleInputStream(String id, Context context) throws IOException {
-        if (id.length() == 4) {
-            return structureDataProvider.getOriginalInputStream(id);
+    private InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
+        if (item.getUrl() != null) {
+            URL url = item.getUrl();
+            logger.info("[{}] [{}] Downloading from {}", context.partitionContext, item.getStructureIdentifier(), url);
+            return url.openStream();
         }
 
-        logger.info("[{}] Downloading from {}", context.partitionContext, id);
-        return new URL(id).openStream();
+        return structureDataProvider.getOriginalInputStream(item.getStructureIdentifier());
     }
 
     private void persist(Context context) throws ExecutionException, InterruptedException {
@@ -399,10 +396,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     /**
      * Reports all structures currently present in the PDB archive.
-     * @return collection of structure identifiers
+     * @return collection of update items
      * @throws IOException connection failure
      */
-    public List<String> getAllIdentifiers() throws IOException {
+    public List<UpdateItem> getAllIdentifiers() throws IOException {
         logger.info("Retrieving current entry list from {}", MotifSearchConfig.RCSB_ENTRY_LIST);
         String response;
         try (InputStream inputStream = new URL(MotifSearchConfig.RCSB_ENTRY_LIST).openStream()) {
@@ -414,22 +411,23 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 .results()
                 .map(MatchResult::group)
                 .map(String::toUpperCase)
+                .map(UpdateItem::new)
                 .collect(Collectors.toList());
     }
 
     /**
      * Determine all IDs that need to be added to the archive.
      * @param requested the requested update
-     * @return array of IDs that need to be processed for the given context
+     * @return UpdateItem collection that need to be processed for the given context
      */
-    public Collection<String> getDeltaPlusIdentifiers(Collection<String> requested) {
-        Collection<String> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
+    public Collection<UpdateItem> getDeltaPlusIdentifiers(Collection<UpdateItem> requested) {
+        Collection<String> known = getKnown();
         if (known.isEmpty()) {
-            logger.warn("No existing data - starting from scratch");
+            logger.warn("No existing data - Starting from scratch");
             return requested;
         } else {
             return requested.stream()
-                    .filter(id -> !known.contains(id))
+                    .filter(item -> !known.contains(item.getStructureIdentifier()))
                     .collect(Collectors.toSet());
         }
     }
@@ -437,17 +435,27 @@ public class MotifSearchUpdate implements CommandLineRunner {
     /**
      * Determine all IDs that need to be removed from the archive.
      * @param requested the requested update
-     * @return array of IDs that need to be remove for the given context
+     * @return UpdateItem collection that need to be removed for the given context
      */
-    public Collection<String> getDeltaMinusIdentifiers(Collection<String> requested) {
-        Collection<String> known = stateRepository.selectKnown().stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet());
+    public Collection<String> getDeltaMinusIdentifiers(Collection<UpdateItem> requested) {
+        Collection<String> known = getKnown();
         if (known.isEmpty()) {
             logger.warn("No existing data - no need for cleanup of obsolete entries");
             return Collections.emptySet();
         } else {
+            Collection<String> unwrapped = requested.stream()
+                    .map(UpdateItem::getStructureIdentifier)
+                    .collect(Collectors.toSet());
             return known.stream()
-                    .filter(requested::contains)
+                    .filter(unwrapped::contains)
                     .collect(Collectors.toSet());
         }
+    }
+
+    private Collection<String> getKnown() {
+        return stateRepository.selectKnown()
+                .stream()
+                .map(StructureInformation::getStructureIdentifier)
+                .collect(Collectors.toSet());
     }
 }

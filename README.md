@@ -129,6 +129,7 @@ See the Configuration section for other parameters.
 ## Configuration
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
+| `b-factor-cutoff` | Maximum B-factor of a residue to include, leave at 0 to not filter | `0.0` |
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |

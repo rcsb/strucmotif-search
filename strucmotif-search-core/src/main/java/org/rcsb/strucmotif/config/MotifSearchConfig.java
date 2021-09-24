@@ -80,6 +80,10 @@ public class MotifSearchConfig {
      */
     private boolean undefinedAssemblies = false;
     /**
+     * Ignore residues if their B-factor exists and is below a certain threshold. Set to 0.0 to not filter.
+     */
+    private float bFactorCutoff = 0.0f;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -352,5 +356,21 @@ public class MotifSearchConfig {
      */
     public void setUndefinedAssemblies(boolean undefinedAssemblies) {
         this.undefinedAssemblies = undefinedAssemblies;
+    }
+
+    /**
+     * Ignore residues with B-factors above this threshold.
+     * @return a float value
+     */
+    public float getbFactorCutoff() {
+        return bFactorCutoff;
+    }
+
+    /**
+     * Set the maximum B-factor to include residues.
+     * @param bFactorCutoff the maximum B-factor allowed
+     */
+    public void setbFactorCutoff(float bFactorCutoff) {
+        this.bFactorCutoff = bFactorCutoff;
     }
 }

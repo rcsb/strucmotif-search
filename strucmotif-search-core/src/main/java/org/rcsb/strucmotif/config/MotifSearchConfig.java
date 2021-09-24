@@ -75,6 +75,11 @@ public class MotifSearchConfig {
      */
     private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
     /**
+     * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
+     * Hits without assembly are report as '0'.
+     */
+    private boolean undefinedAssemblies = false;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -331,5 +336,21 @@ public class MotifSearchConfig {
      */
     public void setInMemoryStrategy(InMemoryStrategy inMemoryStrategy) {
         this.inMemoryStrategy = inMemoryStrategy;
+    }
+
+    /**
+     * Are hits without assembly allowed?
+     * @return a Boolean
+     */
+    public boolean isUndefinedAssemblies() {
+        return undefinedAssemblies;
+    }
+
+    /**
+     * Set if hits without assembly are allowed.
+     * @param undefinedAssemblies true to allow
+     */
+    public void setUndefinedAssemblies(boolean undefinedAssemblies) {
+        this.undefinedAssemblies = undefinedAssemblies;
     }
 }

@@ -254,6 +254,13 @@ public class MotifSearchUpdate implements CommandLineRunner {
             return;
         }
 
+        if (!motifSearchConfig.isUndefinedAssemblies() && structure.getAssemblies().isEmpty()) {
+            logger.warn("[{}] [{}] No assembly information - Configured to skip",
+                    context.partitionContext,
+                    structureContext);
+            return;
+        }
+
         try {
             ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), false);
 

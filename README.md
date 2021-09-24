@@ -142,6 +142,7 @@ See the Configuration section for other parameters.
 | `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
 | `renumbered-gzip` | Gzip BinaryCIF files? | `true` |
 | `root-path` | Path where data files will be written | `/opt/data/` |
+| `undefined-assemblies` | Allow hits without assembly information? | `false` |
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
 
 Configure by placing your `application.properties` on the classpath.

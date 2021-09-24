@@ -44,7 +44,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{-2.803, 0.893, 1.368, -1.651, -0.440, 2.551, 0.105}),
                 Helpers.convertCoordsToShort(new double[]{-15.373, -16.062, -12.371, -12.153, -15.218, -13.273, -11.330}),
                 Helpers.convertCoordsToShort(new double[]{24.556, 25.147, 25.885, 28.177, 30.068, 31.372, 33.567 }),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
         Structure structure2 = new Structure("2tst",
@@ -56,7 +56,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{-14.739, -12.473, -14.802, -17.782, -16.124, -15.029, -18.577}),
                 Helpers.convertCoordsToShort(new double[]{-18.673, -15.810, -13.307, -14.852, -14.617, -11.037, -10.001}),
                 Helpers.convertCoordsToShort(new double[]{15.040, 16.074, 14.408, 16.171, 19.584f, 18.902, 17.996}),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
         List<Integer> indices = List.of(0, 1, 2, 3, 4, 5, 6);
@@ -77,7 +77,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{6.994, 9.429, 5.547}),
                 Helpers.convertCoordsToShort(new double[]{8.354, 7.479, 0.158}),
                 Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
         List<Integer> indices = List.of(0, 1, 2);
@@ -104,7 +104,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{6.994, 9.429, 5.547}),
                 Helpers.convertCoordsToShort(new double[]{8.354, 7.479, 0.158}),
                 Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
         Structure structure2 = new Structure("2tst",
                 Map.of("A", new int[] { 0, 2 }),
@@ -115,7 +115,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{3.908, 4.588, 12.080}),
                 Helpers.convertCoordsToShort(new double[]{12.066, 6.531, 12.645}),
                 Helpers.convertCoordsToShort(new double[]{-6.159, -9.119, -7.073}),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
         List<Integer> indices = List.of(0, 1, 2);
@@ -143,7 +143,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{5.055, 7.320, 6.021}),
                 Helpers.convertCoordsToShort(new double[]{74.865, 76.960, 74.874}),
                 Helpers.convertCoordsToShort(new double[]{22.585, 20.325, 17.385}),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
         Structure structure4 = new Structure("2tst",
                 Map.of("A", new int[] { 0, 2 }),
@@ -154,7 +154,7 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{5.055, 7.321, 6.020}),
                 Helpers.convertCoordsToShort(new double[]{74.864, 76.962, 74.873}),
                 Helpers.convertCoordsToShort(new double[]{22.583, 20.326, 17.386}),
-                Map.of("1", List.of("A")),
+                Map.of("1", Set.of("A")),
                 Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
 
         List<Integer> indices = List.of(0, 1, 2);

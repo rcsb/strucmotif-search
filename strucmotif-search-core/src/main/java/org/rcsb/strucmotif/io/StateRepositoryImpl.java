@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
 import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.springframework.stereotype.Service;

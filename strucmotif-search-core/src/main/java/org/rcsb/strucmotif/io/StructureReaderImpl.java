@@ -8,6 +8,7 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.domain.Transformation;
+import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -43,6 +45,8 @@ public class StructureReaderImpl implements StructureReader {
     }
 
     static class StructureReaderState {
+        private final MmCifFile mmCifFile;
+
         // all relevant categories
         private final String structureIdentifier;
         private final AtomSite atomSite;
@@ -67,9 +71,11 @@ public class StructureReaderImpl implements StructureReader {
 
         /**
          * Initialize a new reading operation.
-         * @param mmCifFile data source in binary format
+         * @param mmCifFile data source
          */
         private StructureReaderState(MmCifFile mmCifFile) {
+            this.mmCifFile = mmCifFile;
+
             MmCifBlock block = mmCifFile.getFirstBlock();
             this.structureIdentifier = block.getBlockHeader();
 
@@ -150,7 +156,7 @@ public class StructureReaderImpl implements StructureReader {
             }
 
             Map<String, Transformation> transformations = buildTransformations();
-            Map<String, List<String>> assemblies = buildAssemblies();
+            Map<String, Set<String>> assemblies = AssemblyInformation.of(mmCifFile);
             return new Structure(structureIdentifier,
                     chainOffsets,
                     convertOffsets(labelSeqIdCollapsed),
@@ -236,62 +242,6 @@ public class StructureReaderImpl implements StructureReader {
             }
 
             return transformations;
-        }
-
-        private Map<String, List<String>> buildAssemblies() {
-            /*
-            loop_
-            _pdbx_struct_assembly_gen.assembly_id
-            _pdbx_struct_assembly_gen.oper_expression
-            _pdbx_struct_assembly_gen.asym_id_list
-            1 '(1-60)(61-88)'           A,B,C
-            2 '(61-88)'                 A,B,C
-            3 '(1-5)(61-88)'            A,B,C
-            4 '(1,2,6,10,23,24)(61-88)' A,B,C
-            5 '(1-5)(63-68)'            A,B,C
-            6 '(1,10,23)(61,62,69-88)'  A,B,C
-            7 '(P)(61-88)'              A,B,C
-            #
-             */
-            Map<String, List<String>> assemblyInformation = new LinkedHashMap<>();
-            if (pdbxStructAssemblyGen.isDefined()) {
-                for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
-                    String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
-                    String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
-                    String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
-                    List<String> operList = getOperList(operExpression, asymIdList);
-
-                    List<String> chains = assemblyInformation.computeIfAbsent(assemblyId, e -> new ArrayList<>());
-                    chains.addAll(operList);
-                }
-            }
-            return assemblyInformation;
-        }
-
-        private static final Pattern LIST_PATTERN = Pattern.compile(",");
-        private List<String> getOperList(String operExpression, String asymIdList) {
-            List<String> operations = new ArrayList<>();
-            List<String> chains = LIST_PATTERN.splitAsStream(asymIdList).collect(Collectors.toList());
-            String[] split = OPERATION_PATTERN.split(operExpression);
-            if (split.length > 1) {
-                List<String> ids1 = extractTransformationIds(split[0]);
-                List<String> ids2 = extractTransformationIds(split[1]);
-                for (String id1 : ids1) {
-                    for (String id2 : ids2) {
-                        for (String chain : chains) {
-                            operations.add(chain + "_" + id1 + "x" + id2);
-                        }
-                    }
-                }
-            } else {
-                for (String id : extractTransformationIds(operExpression)) {
-                    for (String chain : chains) {
-                        operations.add(chain + "_" + id);
-                    }
-                }
-            }
-
-            return operations;
         }
     }
 }

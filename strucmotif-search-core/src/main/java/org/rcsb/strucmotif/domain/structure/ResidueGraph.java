@@ -99,7 +99,7 @@ public class ResidueGraph {
                 .stream()
                 .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
         // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
-        Map<String, List<String>> assemblyMap = structure.getAssemblies();
+        Map<String, Set<String>> assemblyMap = structure.getAssemblies();
 
         List<float[]> originalBackboneVectors = new ArrayList<>();
         List<float[]> originalSideChainVectors = new ArrayList<>();
@@ -170,7 +170,7 @@ public class ResidueGraph {
         Set<String> acceptedChains = new HashSet<>();
         Set<String> acceptedOperators = new HashSet<>();
         if (!allowTransformed) {
-            for (List<String> chainExprs : structure.getAssemblies().values()) {
+            for (Set<String> chainExprs : structure.getAssemblies().values()) {
                 for (String chainExpr : chainExprs) {
                     String chain = chainExpr.split("_")[0];
                     if (!acceptedChains.contains(chain)) {

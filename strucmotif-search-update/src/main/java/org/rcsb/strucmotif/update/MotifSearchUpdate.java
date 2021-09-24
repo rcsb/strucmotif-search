@@ -4,11 +4,11 @@ import org.rcsb.cif.CifIO;
 import org.rcsb.cif.ParsingException;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
-import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -34,13 +34,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,8 +48,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Runs strucmotif updates from the command-line.
@@ -234,7 +230,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             // write renumbered structure
             MmCifFile mmCifFile = CifIO.readFromInputStream(structureDataProvider.getOriginalInputStream(structureIdentifier)).as(StandardSchemata.MMCIF);
             Revision revision = new Revision(mmCifFile);
-            Map<String, Set<String>> assemblyInformation = getAssemblyInformation(mmCifFile);
+            Map<String, Set<String>> assemblyInformation = AssemblyInformation.of(mmCifFile);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
             context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
         } catch (IOException e) {
@@ -287,87 +283,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
                     e);
             // fail complete update
             throw new RuntimeException(e);
-        }
-    }
-
-    private Map<String, Set<String>> getAssemblyInformation(MmCifFile mmCifFile) {
-        // TODO maybe this functionality should be part of Structures?
-        /*
-        loop_
-        _pdbx_struct_assembly_gen.assembly_id
-        _pdbx_struct_assembly_gen.oper_expression
-        _pdbx_struct_assembly_gen.asym_id_list
-        1 '(1-60)(61-88)'           A,B,C
-        2 '(61-88)'                 A,B,C
-        3 '(1-5)(61-88)'            A,B,C
-        4 '(1,2,6,10,23,24)(61-88)' A,B,C
-        5 '(1-5)(63-68)'            A,B,C
-        6 '(1,10,23)(61,62,69-88)'  A,B,C
-        7 '(P)(61-88)'              A,B,C
-        #
-         */
-        PdbxStructAssemblyGen pdbxStructAssemblyGen = mmCifFile.getFirstBlock().getPdbxStructAssemblyGen();
-        Map<String, Set<String>> assemblyInformation = new LinkedHashMap<>();
-        if (pdbxStructAssemblyGen.isDefined()) {
-            for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
-                String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
-                String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
-                String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
-                List<String> operList = getOperList(operExpression, asymIdList);
-
-                Set<String> sorted = assemblyInformation.computeIfAbsent(assemblyId, e -> new HashSet<>());
-                sorted.addAll(operList);
-            }
-        }
-        return assemblyInformation;
-    }
-
-    private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
-    private static final Pattern LIST_PATTERN = Pattern.compile(",");
-    private List<String> getOperList(String operExpression, String asymIdList) {
-        List<String> operations = new ArrayList<>();
-        List<String> chains = LIST_PATTERN.splitAsStream(asymIdList).collect(Collectors.toList());
-        String[] split = OPERATION_PATTERN.split(operExpression);
-        if (split.length > 1) {
-            List<String> ids1 = extractTransformationIds(split[0]);
-            List<String> ids2 = extractTransformationIds(split[1]);
-            for (String id1 : ids1) {
-                for (String id2 : ids2) {
-                    for (String chain : chains) {
-                        operations.add(chain + "_" + id1 + "x" + id2);
-                    }
-                }
-            }
-        } else {
-            for (String id : extractTransformationIds(operExpression)) {
-                for (String chain : chains) {
-                    operations.add(chain + "_" + id);
-                }
-            }
-        }
-
-        return operations;
-    }
-
-    private static final Pattern COMMA_PATTERN = Pattern.compile(",");
-    private List<String> extractTransformationIds(String rawOperation) {
-        String prepared = rawOperation.replace("(", "")
-                .replace(")", "")
-                .replace("'", "");
-
-        return COMMA_PATTERN.splitAsStream(prepared)
-                .flatMap(this::extractTransformationRanges)
-                .collect(Collectors.toList());
-    }
-
-    private static final Pattern RANGE_PATTERN = Pattern.compile("-");
-    private Stream<String> extractTransformationRanges(String raw) {
-        String[] s = RANGE_PATTERN.split(raw);
-        if (s.length == 1) {
-            return Stream.of(raw);
-        } else {
-            return IntStream.range(Integer.parseInt(s[0]), Integer.parseInt(s[1]) + 1)
-                    .mapToObj(String::valueOf);
         }
     }
 

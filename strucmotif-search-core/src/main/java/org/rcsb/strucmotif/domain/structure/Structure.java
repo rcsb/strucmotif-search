@@ -7,6 +7,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -26,7 +27,7 @@ public class Structure {
     private final short[] x;
     private final short[] y;
     private final short[] z;
-    private final Map<String, List<String>> assemblies;
+    private final Map<String, Set<String>> assemblies;
     private final Map<String, Transformation> transformations;
 
     /**
@@ -52,7 +53,7 @@ public class Structure {
                      short[] x,
                      short[] y,
                      short[] z,
-                     Map<String, List<String>> assemblies,
+                     Map<String, Set<String>> assemblies,
                      Map<String, Transformation> transformations) {
         this.structureIdentifier = structureIdentifier;
         this.chainOffsets = chainOffsets;
@@ -161,7 +162,7 @@ public class Structure {
      * Access to assembly information.
      * @return Map of all assemblies [assemblyId, (label_asym_id x struct_oper_id)[]]
      */
-    public Map<String, List<String>> getAssemblies() {
+    public Map<String, Set<String>> getAssemblies() {
         return assemblies;
     }
 

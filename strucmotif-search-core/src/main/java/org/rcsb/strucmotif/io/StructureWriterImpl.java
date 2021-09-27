@@ -17,6 +17,8 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.ResidueQualityStrategy;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -53,18 +55,23 @@ import java.util.Set;
 @Service
 public class StructureWriterImpl implements StructureWriter {
     private final CifOptions options;
+    private final ResidueQualityStrategy residueQualityStrategy;
+    private final double residueQualityCutoff;
 
     /**
      * Construct a writer.
      */
-    public StructureWriterImpl() {
-        int precision = 1;
+    public StructureWriterImpl(MotifSearchConfig motifSearchConfig) {
+        int precision = motifSearchConfig.getRenumberedCoordinatePrecision();
+        boolean gzipped = motifSearchConfig.isRenumberedGzip();
         this.options = CifOptions.builder()
                 .encodingStrategyHint("atom_site", "Cartn_x", "delta", precision)
                 .encodingStrategyHint("atom_site", "Cartn_y", "delta", precision)
                 .encodingStrategyHint("atom_site", "Cartn_z", "delta", precision)
-                .gzip(true)
+                .gzip(gzipped)
                 .build();
+        this.residueQualityStrategy = motifSearchConfig.getResidueQualityStrategy();
+        this.residueQualityCutoff = motifSearchConfig.getResidueQualityCutoff();
     }
 
     @Override
@@ -119,6 +126,13 @@ public class StructureWriterImpl implements StructureWriter {
             // skip non-polymer
             if (atomSite.getLabelSeqId().getValueKind(row) != ValueKind.PRESENT) {
                 continue;
+            }
+
+            // filter away residues with low confidence, if requested
+            if (atomSite.getBIsoOrEquiv().isDefined() && residueQualityStrategy != ResidueQualityStrategy.NONE) {
+                if (!residueQualityStrategy.test(atomSite.getBIsoOrEquiv().get(row), this.residueQualityCutoff)) {
+                    continue;
+                }
             }
 
             String currentLabelAsymId = atomSite.getLabelAsymId().get(row);

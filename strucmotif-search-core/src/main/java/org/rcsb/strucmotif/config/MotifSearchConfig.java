@@ -20,7 +20,7 @@ public class MotifSearchConfig {
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */
-    private String rootPath = "/opt/data/";
+    private String rootPath = "/opt/data-af/";
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
      * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
@@ -48,7 +48,7 @@ public class MotifSearchConfig {
      * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
      * speed substantially. A value of 400 works good with 12GB of heap, the higher the faster.
      */
-    private int updateChunkSize = 400;
+    private int updateChunkSize = 1600;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -78,11 +78,16 @@ public class MotifSearchConfig {
      * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
      * Hits without assembly are report as '0'.
      */
-    private boolean undefinedAssemblies = false;
+    private boolean undefinedAssemblies = true;
     /**
-     * Ignore residues if their B-factor exists and is below a certain threshold. Set to 0.0 to not filter.
+     * Filter for residues with a certain quality/confidence. Only relevant when combined with
+     * {@link ResidueQualityStrategy}.
      */
-    private float bFactorCutoff = 0.0f;
+    private float residueQualityCutoff = 70.0f;
+    /**
+     * Filter for residues with a certain quality/confidence. Update 'qualityThreshold' accordingly to use this.
+     */
+    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.NONE;
     /**
      * List of all identifiers ever registered.
      */
@@ -359,18 +364,35 @@ public class MotifSearchConfig {
     }
 
     /**
-     * Ignore residues with B-factors above this threshold.
+     * Filter residues with 'quality' at this threshold. Will evaluate values written to the B-Factor column in the
+     * source CIF.
      * @return a float value
      */
-    public float getbFactorCutoff() {
-        return bFactorCutoff;
+    public float getResidueQualityCutoff() {
+        return residueQualityCutoff;
     }
 
     /**
-     * Set the maximum B-factor to include residues.
-     * @param bFactorCutoff the maximum B-factor allowed
+     * Set the 'quality' filter threshold.
+     * @param residueQualityCutoff the value that separates meaningful and to-be-ignored residues
      */
-    public void setbFactorCutoff(float bFactorCutoff) {
-        this.bFactorCutoff = bFactorCutoff;
+    public void setResidueQualityCutoff(float residueQualityCutoff) {
+        this.residueQualityCutoff = residueQualityCutoff;
+    }
+
+    /**
+     * The used quality strategy.
+     * @return ResidueQualityStrategy
+     */
+    public ResidueQualityStrategy getResidueQualityStrategy() {
+        return residueQualityStrategy;
+    }
+
+    /**
+     * Update the quality strategy.
+     * @param residueQualityStrategy the new value
+     */
+    public void setResidueQualityStrategy(ResidueQualityStrategy residueQualityStrategy) {
+        this.residueQualityStrategy = residueQualityStrategy;
     }
 }

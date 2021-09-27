@@ -328,7 +328,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
     private InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
         if (item.getUrl() != null) {
             URL url = item.getUrl();
-            logger.info("[{}] [{}] Downloading from {}", context.partitionContext, item.getStructureIdentifier(), url);
+            logger.info("[{}] [{}] Processing {}", context.partitionContext, item.getStructureIdentifier(), url);
             return url.openStream();
         }
 

@@ -19,7 +19,7 @@ containing the query motif and ignoring most of the structures that are irreleva
 approach enables real-time retrieval and superposition of structural motifs, either extracted
 from a reference structure or uploaded by the user.
 
-## See it in action
+## See it in Action
 Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-motif-search).
 
 ## Performance
@@ -47,7 +47,7 @@ motif.
 - modified residues
 - support for computed structure models, like from AlphaFold
 
-## Getting started with a dependency
+## Getting Started with a Dependency
 strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
 ```xml
 <dependency>
@@ -57,10 +57,10 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 </dependency>
 ```
 
-## Getting started by cloning
+## Getting Started by Cloning
 An alternative way to use the library is cloning this repository and building the corresponding Maven modules.
 
-## Search for structural motifs
+## Search for Structural Motifs
 The `MotifSearch` class provides a fluent API to process structural motif queries.
 
 ```java

@@ -45,6 +45,7 @@ motif.
 - inter-chain & assembly support
 - position-specific exchanges
 - modified residues
+- support for computed structure models, like from AlphaFold
 
 ## Getting started with a dependency
 strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:
@@ -56,7 +57,10 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 </dependency>
 ```
 
-### Search for structural motifs
+## Getting started by cloning
+An alternative way to use the library is cloning this repository and building the corresponding Maven modules.
+
+## Search for structural motifs
 The `MotifSearch` class provides a fluent API to process structural motif queries.
 
 ```java
@@ -80,73 +84,26 @@ class Demo {
 }
 ```
 
-### Update structure and inverted index data
-Before searching, you need to add structure and inverted index data. Use the `MotifSearchUpdate` class to perform an 
-update.
-
-```java
-class Demo {
-    public static void main(String[] args) {
-        // perform a full load of all structures in RCSB PDB with default configuration
-        MotifSearchUpdate.main(new String[] { "ADD", "full" });
-    }
-}
-```
-
-Supported operations are `ADD` and `REMOVE`. Either process all current PDB structures (`full`) or provide an array of 
-entry IDs you want to process (e.g., `"4HHB", "1MUW", "1EXR"`).
-
-## Getting started by cloning
-An alternative way to use the library is cloning this repository and building the corresponding Maven modules.
-
-### Update structure and inverted index data
-Like before, you will need run a local update to get results from a search. To do so, build the project and execute the 
-packaged update jar:
-```shell
-java -jar -Xmx12G strucmotif-search-update/dist/strucmotif-update.jar ADD full
-```
-
-Specify the heap parameter `-Xmx` as roughly 75% of the available memory on your system for optimal performance.
-
-### Controlling application properties during update
-Application properties during the update process can be controlled by placing a file with the name 
-`application.properties` in the directory from which the update will be executed. The file can be used to override 
-default configurations.
-
-```yaml
-strucmotif.root-path=/Users/rcsb/strucmotif-data/
-strucmotif.update-chunk-size=400
-```
-
-Use `root-path` to specify the directory to which structure and inverted index data will be written.
-
-Set the `update-chunk-size` to a value that matches the `-Xmx` parameter. 400 works well with 12 GB of heap, 1,200 works
-well with 24 GB. Decrease the chunk size if less memory is available, increase if more memory can be used. High values 
-result in faster updates.
-
-See the Configuration section for other parameters.
-
 ## Configuration
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
-| `b-factor-cutoff` | Maximum B-factor of a residue to include, leave at 0 to not filter | `0.0` |
-| `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
-| `data-source` | Path to local CIF archive | cif-fetch-url |
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
-| `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
-| `download-tries` | Number of tries to download structure data during update | `1` |
-| `in-memory-strategy` | Either `OFF` or `HEAP` | `OFF` |
+| `in-memory-strategy` | Preload structure data for increased performance? | `OFF` |
 | `max-results` | Maximum number of results that will be returned | `10000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
-| `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
-| `renumbered-gzip` | Gzip BinaryCIF files? | `true` |
-| `root-path` | Path where data files will be written | `/opt/data/` |
-| `undefined-assemblies` | Allow hits without assembly information? | `false` |
-| `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
+| `root-path` | Path where data files are read from | `/opt/data/` |
+| `undefined-assemblies` | Return hits without assembly information? | `false` |
 
 Configure by placing your `application.properties` on the classpath.
+
+## Index Structure Data and Run Updates
+You will need to process your corpus of structure data before using the service. This will create an optized version of
+all structure files and add them to an inverted index that allows efficient searching.
+
+Details can be found in:
+https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md
 
 ## Publication
 Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

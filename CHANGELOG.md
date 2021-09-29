@@ -5,7 +5,9 @@ Unreleased
 -------------
 ### Added
 - support hits without assembly information (`strucmotif.undefined-assemblies` must be true)
-- support 
+- optionally, index only residues with 'good quality' (e.g., based on B-factor values)
+- make `StructureWriterImpl` configurable
+- support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein) 
 
 ### Bug fix
 - compute correct transformation & RMSD for transformed residues
@@ -84,9 +86,6 @@ strucmotif-search 0.9.10
 -------------
 ### General
 - support queries from transformed coordinates
-- index only residues with 'good quality' (e.g., based on B-factor values)
-- make `StructureWriterImpl` configurable
-- support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein)
 
 strucmotif-search 0.9.9
 -------------

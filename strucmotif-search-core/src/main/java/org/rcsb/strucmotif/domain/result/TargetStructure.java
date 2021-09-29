@@ -167,9 +167,10 @@ public class TargetStructure {
                     Map<LabelAtomId, float[]>[] residues = new Map[residueCount];
 
                     for (int i = 0; i < residueCount; i++) {
-                        int index = indexSelections.get(i).getIndex();
+                        IndexSelection indexSelection = indexSelections.get(i);
+                        int index = indexSelection.getIndex();
                         residueTypes[i] = structure.getResidueType(index);
-                        residues[i] = structure.manifestResidue(index);
+                        residues[i] = structure.manifestResidue(index, indexSelection.getStructOperId());
                     }
 
                     AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));

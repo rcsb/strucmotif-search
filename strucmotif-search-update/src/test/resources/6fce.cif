@@ -1,0 +1,1708 @@
+data_6FCE
+# 
+_entry.id   6FCE 
+# 
+_audit_conform.dict_name       mmcif_pdbx.dic 
+_audit_conform.dict_version    5.294 
+_audit_conform.dict_location   http://mmcif.pdb.org/dictionaries/ascii/mmcif_pdbx.dic 
+# 
+loop_
+_database_2.database_id 
+_database_2.database_code 
+PDB   6FCE         
+WWPDB D_1200008071 
+BMRB  34222        
+# 
+_pdbx_database_related.db_name        BMRB 
+_pdbx_database_related.details        
+;NMR ensemble of Macrocyclic Peptidomimetic Containing Constrained a,a-dialkylated Amino Acids with Potent and Selective Activity at Human Melanocortin Receptors
+;
+_pdbx_database_related.db_id          34222 
+_pdbx_database_related.content_type   unspecified 
+# 
+_pdbx_database_status.status_code                     REL 
+_pdbx_database_status.status_code_sf                  ? 
+_pdbx_database_status.status_code_mr                  REL 
+_pdbx_database_status.entry_id                        6FCE 
+_pdbx_database_status.recvd_initial_deposition_date   2017-12-20 
+_pdbx_database_status.SG_entry                        N 
+_pdbx_database_status.deposit_site                    PDBE 
+_pdbx_database_status.process_site                    PDBE 
+_pdbx_database_status.status_code_cs                  REL 
+_pdbx_database_status.methods_development_category    ? 
+_pdbx_database_status.pdb_format_compatible           Y 
+# 
+loop_
+_audit_author.name 
+_audit_author.pdbx_ordinal 
+_audit_author.identifier_ORCID 
+'Brancaccio, D.' 1  ? 
+'Carotenuto, A.' 2  ? 
+'Grieco, P.'     3  ? 
+'Merlino, F.'    4  ? 
+'Zhou, Y.'       5  ? 
+'Cai, M.'        6  ? 
+'Yousif, A.M.'   7  ? 
+'Di Maro, S.'    8  ? 
+'Novellino, E.'  9  ? 
+'Hruby, V.J.'    10 ? 
+# 
+_citation.abstract                  ? 
+_citation.abstract_id_CAS           ? 
+_citation.book_id_ISBN              ? 
+_citation.book_publisher            ? 
+_citation.book_publisher_city       ? 
+_citation.book_title                ? 
+_citation.coordinate_linkage        ? 
+_citation.country                   US 
+_citation.database_id_Medline       ? 
+_citation.details                   ? 
+_citation.id                        primary 
+_citation.journal_abbrev            'J. Med. Chem.' 
+_citation.journal_id_ASTM           JMCMAR 
+_citation.journal_id_CSD            0151 
+_citation.journal_id_ISSN           1520-4804 
+_citation.journal_full              ? 
+_citation.journal_issue             ? 
+_citation.journal_volume            61 
+_citation.language                  ? 
+_citation.page_first                4263 
+_citation.page_last                 4269 
+_citation.title                     
+;Development of Macrocyclic Peptidomimetics Containing Constrained alpha , alpha-Dialkylated Amino Acids with Potent and Selective Activity at Human Melanocortin Receptors.
+;
+_citation.year                      2018 
+_citation.database_id_CSD           ? 
+_citation.pdbx_database_id_DOI      10.1021/acs.jmedchem.8b00488 
+_citation.pdbx_database_id_PubMed   29660981 
+_citation.unpublished_flag          ? 
+# 
+loop_
+_citation_author.citation_id 
+_citation_author.name 
+_citation_author.ordinal 
+primary 'Merlino, F.'    1  
+primary 'Zhou, Y.'       2  
+primary 'Cai, M.'        3  
+primary 'Carotenuto, A.' 4  
+primary 'Yousif, A.M.'   5  
+primary 'Brancaccio, D.' 6  
+primary 'Di Maro, S.'    7  
+primary 'Zappavigna, S.' 8  
+primary 'Limatola, A.'   9  
+primary 'Novellino, E.'  10 
+primary 'Grieco, P.'     11 
+primary 'Hruby, V.J.'    12 
+# 
+_entity.id                         1 
+_entity.type                       polymer 
+_entity.src_method                 syn 
+_entity.pdbx_description           ACP-HIS-DPHE-ARG-TRP-ASP-NH2 
+_entity.formula_weight             870.977 
+_entity.pdbx_number_of_molecules   1 
+_entity.pdbx_ec                    ? 
+_entity.pdbx_mutation              ? 
+_entity.pdbx_fragment              ? 
+_entity.details                    ? 
+# 
+_entity_poly.entity_id                      1 
+_entity_poly.type                           'polypeptide(L)' 
+_entity_poly.nstd_linkage                   no 
+_entity_poly.nstd_monomer                   yes 
+_entity_poly.pdbx_seq_one_letter_code       '(AC5)H(DPN)RWD(NH2)' 
+_entity_poly.pdbx_seq_one_letter_code_can   XHFRWDX 
+_entity_poly.pdbx_strand_id                 A 
+_entity_poly.pdbx_target_identifier         ? 
+# 
+loop_
+_entity_poly_seq.entity_id 
+_entity_poly_seq.num 
+_entity_poly_seq.mon_id 
+_entity_poly_seq.hetero 
+1 1 AC5 n 
+1 2 HIS n 
+1 3 DPN n 
+1 4 ARG n 
+1 5 TRP n 
+1 6 ASP n 
+1 7 NH2 n 
+# 
+_pdbx_entity_src_syn.entity_id              1 
+_pdbx_entity_src_syn.pdbx_src_id            1 
+_pdbx_entity_src_syn.pdbx_alt_source_flag   sample 
+_pdbx_entity_src_syn.pdbx_beg_seq_num       1 
+_pdbx_entity_src_syn.pdbx_end_seq_num       7 
+_pdbx_entity_src_syn.organism_scientific    'synthetic construct' 
+_pdbx_entity_src_syn.organism_common_name   ? 
+_pdbx_entity_src_syn.ncbi_taxonomy_id       32630 
+_pdbx_entity_src_syn.details                ? 
+# 
+_struct_ref.id                         1 
+_struct_ref.db_name                    PDB 
+_struct_ref.db_code                    6FCE 
+_struct_ref.pdbx_db_accession          6FCE 
+_struct_ref.pdbx_db_isoform            ? 
+_struct_ref.entity_id                  1 
+_struct_ref.pdbx_seq_one_letter_code   ? 
+_struct_ref.pdbx_align_begin           1 
+# 
+_struct_ref_seq.align_id                      1 
+_struct_ref_seq.ref_id                        1 
+_struct_ref_seq.pdbx_PDB_id_code              6FCE 
+_struct_ref_seq.pdbx_strand_id                A 
+_struct_ref_seq.seq_align_beg                 1 
+_struct_ref_seq.pdbx_seq_align_beg_ins_code   ? 
+_struct_ref_seq.seq_align_end                 7 
+_struct_ref_seq.pdbx_seq_align_end_ins_code   ? 
+_struct_ref_seq.pdbx_db_accession             6FCE 
+_struct_ref_seq.db_align_beg                  5 
+_struct_ref_seq.pdbx_db_align_beg_ins_code    ? 
+_struct_ref_seq.db_align_end                  11 
+_struct_ref_seq.pdbx_db_align_end_ins_code    ? 
+_struct_ref_seq.pdbx_auth_seq_align_beg       5 
+_struct_ref_seq.pdbx_auth_seq_align_end       11 
+# 
+loop_
+_chem_comp.id 
+_chem_comp.type 
+_chem_comp.mon_nstd_flag 
+_chem_comp.name 
+_chem_comp.pdbx_synonyms 
+_chem_comp.formula 
+_chem_comp.formula_weight 
+AC5 'peptide linking'   . '1-AMINOCYCLOPENTANECARBOXYLIC ACID' CYCLO-LEUCINE 'C6 H11 N O2'    129.157 
+ARG 'L-peptide linking' y ARGININE                             ?             'C6 H15 N4 O2 1' 175.209 
+ASP 'L-peptide linking' y 'ASPARTIC ACID'                      ?             'C4 H7 N O4'     133.103 
+DPN 'D-peptide linking' . D-PHENYLALANINE                      ?             'C9 H11 N O2'    165.189 
+HIS 'L-peptide linking' y HISTIDINE                            ?             'C6 H10 N3 O2 1' 156.162 
+NH2 non-polymer         . 'AMINO GROUP'                        ?             'H2 N'           16.023  
+TRP 'L-peptide linking' y TRYPTOPHAN                           ?             'C11 H12 N2 O2'  204.225 
+# 
+loop_
+_pdbx_nmr_exptl.experiment_id 
+_pdbx_nmr_exptl.conditions_id 
+_pdbx_nmr_exptl.solution_id 
+_pdbx_nmr_exptl.type 
+_pdbx_nmr_exptl.spectrometer_id 
+_pdbx_nmr_exptl.sample_state 
+1 1 1 '1D 1H'          1 isotropic 
+2 1 1 '2D 1H-1H TOCSY' 1 isotropic 
+3 1 1 '2D 1H-1H NOESY' 1 isotropic 
+4 1 1 '2D DQF-COSY'    1 isotropic 
+# 
+_pdbx_nmr_exptl_sample_conditions.conditions_id          1 
+_pdbx_nmr_exptl_sample_conditions.temperature            298 
+_pdbx_nmr_exptl_sample_conditions.pressure_units         atm 
+_pdbx_nmr_exptl_sample_conditions.pressure               1 
+_pdbx_nmr_exptl_sample_conditions.pH                     5.5 
+_pdbx_nmr_exptl_sample_conditions.ionic_strength         0 
+_pdbx_nmr_exptl_sample_conditions.details                ? 
+_pdbx_nmr_exptl_sample_conditions.ionic_strength_err     ? 
+_pdbx_nmr_exptl_sample_conditions.ionic_strength_units   mM 
+_pdbx_nmr_exptl_sample_conditions.label                  conditions_1 
+_pdbx_nmr_exptl_sample_conditions.pH_err                 ? 
+_pdbx_nmr_exptl_sample_conditions.pH_units               pH 
+_pdbx_nmr_exptl_sample_conditions.pressure_err           ? 
+_pdbx_nmr_exptl_sample_conditions.temperature_err        ? 
+_pdbx_nmr_exptl_sample_conditions.temperature_units      K 
+# 
+_pdbx_nmr_sample_details.solution_id      1 
+_pdbx_nmr_sample_details.contents         
+'2.0 mM Peptide, 10 % v/v [U-99% 2H] D2O, 0.1 mM TSP, 200 mM [U-100% 2H] DPC, 90% H2O/10% D2O' 
+_pdbx_nmr_sample_details.solvent_system   '90% H2O/10% D2O' 
+_pdbx_nmr_sample_details.label            1H_sample 
+_pdbx_nmr_sample_details.type             micelle 
+_pdbx_nmr_sample_details.details          ? 
+# 
+_pdbx_nmr_spectrometer.spectrometer_id   1 
+_pdbx_nmr_spectrometer.model             INOVA 
+_pdbx_nmr_spectrometer.type              ? 
+_pdbx_nmr_spectrometer.manufacturer      Varian 
+_pdbx_nmr_spectrometer.field_strength    700 
+_pdbx_nmr_spectrometer.details           ? 
+# 
+_pdbx_nmr_refine.entry_id           6FCE 
+_pdbx_nmr_refine.method             'simulated annealing' 
+_pdbx_nmr_refine.details            ? 
+_pdbx_nmr_refine.software_ordinal   2 
+# 
+_pdbx_nmr_ensemble.entry_id                                      6FCE 
+_pdbx_nmr_ensemble.conformers_calculated_total_number            100 
+_pdbx_nmr_ensemble.conformers_submitted_total_number             10 
+_pdbx_nmr_ensemble.conformer_selection_criteria                  'structures with the lowest energy' 
+_pdbx_nmr_ensemble.representative_conformer                      ? 
+_pdbx_nmr_ensemble.average_constraints_per_residue               ? 
+_pdbx_nmr_ensemble.average_constraint_violations_per_residue     ? 
+_pdbx_nmr_ensemble.maximum_distance_constraint_violation         ? 
+_pdbx_nmr_ensemble.average_distance_constraint_violation         ? 
+_pdbx_nmr_ensemble.maximum_upper_distance_constraint_violation   ? 
+_pdbx_nmr_ensemble.maximum_lower_distance_constraint_violation   ? 
+_pdbx_nmr_ensemble.distance_constraint_violation_method          ? 
+_pdbx_nmr_ensemble.maximum_torsion_angle_constraint_violation    ? 
+_pdbx_nmr_ensemble.average_torsion_angle_constraint_violation    ? 
+_pdbx_nmr_ensemble.torsion_angle_constraint_violation_method     ? 
+# 
+_pdbx_nmr_representative.entry_id             6FCE 
+_pdbx_nmr_representative.conformer_id         1 
+_pdbx_nmr_representative.selection_criteria   'lowest energy' 
+# 
+loop_
+_pdbx_nmr_software.ordinal 
+_pdbx_nmr_software.classification 
+_pdbx_nmr_software.name 
+_pdbx_nmr_software.version 
+_pdbx_nmr_software.authors 
+1 'chemical shift assignment' XEASY   ? 'Bartels et al.'                                    
+2 'structure calculation'     CYANA   ? 'Guntert, Mumenthaler and Wuthrich'                 
+3 processing                  NMRDraw ? 'Delaglio, Grzesiek, Vuister, Zhu, Pfeifer and Bax' 
+# 
+_exptl.absorpt_coefficient_mu     ? 
+_exptl.absorpt_correction_T_max   ? 
+_exptl.absorpt_correction_T_min   ? 
+_exptl.absorpt_correction_type    ? 
+_exptl.absorpt_process_details    ? 
+_exptl.entry_id                   6FCE 
+_exptl.crystals_number            ? 
+_exptl.details                    ? 
+_exptl.method                     'SOLUTION NMR' 
+_exptl.method_details             ? 
+# 
+_struct.entry_id                     6FCE 
+_struct.title                        
+;NMR ensemble of Macrocyclic Peptidomimetic Containing Constrained a,a-dialkylated Amino Acids with Potent and Selective Activity at Human Melanocortin Receptors
+;
+_struct.pdbx_descriptor              ACP-HIS-DPHE-ARG-TRP-ASP-NH2 
+_struct.pdbx_model_details           ? 
+_struct.pdbx_formula_weight          ? 
+_struct.pdbx_formula_weight_method   ? 
+_struct.pdbx_model_type_details      ? 
+_struct.pdbx_CASP_flag               N 
+# 
+_struct_keywords.entry_id        6FCE 
+_struct_keywords.text            'Melanocortin, Peptidomimetics, Amino acid, dialkylated, de novo protein' 
+_struct_keywords.pdbx_keywords   'DE NOVO PROTEIN' 
+# 
+_struct_asym.id                            A 
+_struct_asym.pdbx_blank_PDB_chainid_flag   N 
+_struct_asym.pdbx_modified                 N 
+_struct_asym.entity_id                     1 
+_struct_asym.details                       ? 
+# 
+loop_
+_struct_conn.id 
+_struct_conn.conn_type_id 
+_struct_conn.pdbx_leaving_atom_flag 
+_struct_conn.pdbx_PDB_id 
+_struct_conn.ptnr1_label_asym_id 
+_struct_conn.ptnr1_label_comp_id 
+_struct_conn.ptnr1_label_seq_id 
+_struct_conn.ptnr1_label_atom_id 
+_struct_conn.pdbx_ptnr1_label_alt_id 
+_struct_conn.pdbx_ptnr1_PDB_ins_code 
+_struct_conn.pdbx_ptnr1_standard_comp_id 
+_struct_conn.ptnr1_symmetry 
+_struct_conn.ptnr2_label_asym_id 
+_struct_conn.ptnr2_label_comp_id 
+_struct_conn.ptnr2_label_seq_id 
+_struct_conn.ptnr2_label_atom_id 
+_struct_conn.pdbx_ptnr2_label_alt_id 
+_struct_conn.pdbx_ptnr2_PDB_ins_code 
+_struct_conn.ptnr1_auth_asym_id 
+_struct_conn.ptnr1_auth_comp_id 
+_struct_conn.ptnr1_auth_seq_id 
+_struct_conn.ptnr2_auth_asym_id 
+_struct_conn.ptnr2_auth_comp_id 
+_struct_conn.ptnr2_auth_seq_id 
+_struct_conn.ptnr2_symmetry 
+_struct_conn.pdbx_ptnr3_label_atom_id 
+_struct_conn.pdbx_ptnr3_label_seq_id 
+_struct_conn.pdbx_ptnr3_label_comp_id 
+_struct_conn.pdbx_ptnr3_label_asym_id 
+_struct_conn.pdbx_ptnr3_label_alt_id 
+_struct_conn.pdbx_ptnr3_PDB_ins_code 
+_struct_conn.details 
+_struct_conn.pdbx_dist_value 
+_struct_conn.pdbx_value_order 
+covale1 covale one  ? A AC5 1 N ? ? ? 1_555 A ASP 6 CG ? ? A AC5 5  A ASP 10 1_555 ? ? ? ? ? ? ? 1.341 ? 
+covale2 covale both ? A AC5 1 C ? ? ? 1_555 A HIS 2 N  ? ? A AC5 5  A HIS 6  1_555 ? ? ? ? ? ? ? 1.332 ? 
+covale3 covale both ? A HIS 2 C ? ? ? 1_555 A DPN 3 N  ? ? A HIS 6  A DPN 7  1_555 ? ? ? ? ? ? ? 1.345 ? 
+covale4 covale both ? A DPN 3 C ? ? ? 1_555 A ARG 4 N  ? ? A DPN 7  A ARG 8  1_555 ? ? ? ? ? ? ? 1.344 ? 
+covale5 covale both ? A ASP 6 C ? ? ? 1_555 A NH2 7 N  ? ? A ASP 10 A NH2 11 1_555 ? ? ? ? ? ? ? 1.320 ? 
+# 
+_struct_conn_type.id          covale 
+_struct_conn_type.criteria    ? 
+_struct_conn_type.reference   ? 
+# 
+_atom_sites.entry_id                    6FCE 
+_atom_sites.fract_transf_matrix[1][1]   1.000000 
+_atom_sites.fract_transf_matrix[1][2]   0.000000 
+_atom_sites.fract_transf_matrix[1][3]   0.000000 
+_atom_sites.fract_transf_matrix[2][1]   0.000000 
+_atom_sites.fract_transf_matrix[2][2]   1.000000 
+_atom_sites.fract_transf_matrix[2][3]   0.000000 
+_atom_sites.fract_transf_matrix[3][1]   0.000000 
+_atom_sites.fract_transf_matrix[3][2]   0.000000 
+_atom_sites.fract_transf_matrix[3][3]   1.000000 
+_atom_sites.fract_transf_vector[1]      0.00000 
+_atom_sites.fract_transf_vector[2]      0.00000 
+_atom_sites.fract_transf_vector[3]      0.00000 
+# 
+loop_
+_atom_type.symbol 
+C 
+H 
+N 
+O 
+# 
+loop_
+_atom_site.group_PDB 
+_atom_site.id 
+_atom_site.type_symbol 
+_atom_site.label_atom_id 
+_atom_site.label_alt_id 
+_atom_site.label_comp_id 
+_atom_site.label_asym_id 
+_atom_site.label_entity_id 
+_atom_site.label_seq_id 
+_atom_site.pdbx_PDB_ins_code 
+_atom_site.Cartn_x 
+_atom_site.Cartn_y 
+_atom_site.Cartn_z 
+_atom_site.occupancy 
+_atom_site.B_iso_or_equiv 
+_atom_site.pdbx_formal_charge 
+_atom_site.auth_seq_id 
+_atom_site.auth_comp_id 
+_atom_site.auth_asym_id 
+_atom_site.auth_atom_id 
+_atom_site.pdbx_PDB_model_num 
+HETATM 1    N N    . AC5 A 1 1 ? 0.636  -4.615 0.232  1.00 0.00 ? 5  AC5 A N    1  
+HETATM 2    O O    . AC5 A 1 1 ? -2.100 -4.714 2.817  1.00 0.00 ? 5  AC5 A O    1  
+HETATM 3    C CA   . AC5 A 1 1 ? -0.297 -5.290 1.209  1.00 0.00 ? 5  AC5 A CA   1  
+HETATM 4    C C    . AC5 A 1 1 ? -1.011 -4.404 2.323  1.00 0.00 ? 5  AC5 A C    1  
+HETATM 5    C CB1  . AC5 A 1 1 ? -1.287 -6.145 0.389  1.00 0.00 ? 5  AC5 A CB1  1  
+HETATM 6    C CB2  . AC5 A 1 1 ? 0.514  -6.420 1.894  1.00 0.00 ? 5  AC5 A CB2  1  
+HETATM 7    C CG1  . AC5 A 1 1 ? -0.631 -7.486 0.017  1.00 0.00 ? 5  AC5 A CG1  1  
+HETATM 8    C CG2  . AC5 A 1 1 ? 0.570  -7.638 0.956  1.00 0.00 ? 5  AC5 A CG2  1  
+HETATM 9    H H    . AC5 A 1 1 ? 1.418  -5.149 -0.143 1.00 0.00 ? 5  AC5 A H    1  
+HETATM 10   H HB11 . AC5 A 1 1 ? -1.653 -5.583 -0.489 1.00 0.00 ? 5  AC5 A HB11 1  
+HETATM 11   H HB12 . AC5 A 1 1 ? -2.177 -6.343 1.005  1.00 0.00 ? 5  AC5 A HB12 1  
+HETATM 12   H HB21 . AC5 A 1 1 ? 0.008  -6.736 2.829  1.00 0.00 ? 5  AC5 A HB21 1  
+HETATM 13   H HB22 . AC5 A 1 1 ? 1.521  -6.085 2.215  1.00 0.00 ? 5  AC5 A HB22 1  
+HETATM 14   H HG11 . AC5 A 1 1 ? -1.345 -8.326 0.119  1.00 0.00 ? 5  AC5 A HG11 1  
+HETATM 15   H HG12 . AC5 A 1 1 ? -0.300 -7.482 -1.039 1.00 0.00 ? 5  AC5 A HG12 1  
+HETATM 16   H HG21 . AC5 A 1 1 ? 1.513  -7.639 0.376  1.00 0.00 ? 5  AC5 A HG21 1  
+HETATM 17   H HG22 . AC5 A 1 1 ? 0.546  -8.593 1.516  1.00 0.00 ? 5  AC5 A HG22 1  
+ATOM   18   N N    . HIS A 1 2 ? -0.348 -3.322 2.728  1.00 0.00 ? 6  HIS A N    1  
+ATOM   19   C CA   . HIS A 1 2 ? -0.885 -2.314 3.694  1.00 0.00 ? 6  HIS A CA   1  
+ATOM   20   C C    . HIS A 1 2 ? -1.362 -0.938 3.092  1.00 0.00 ? 6  HIS A C    1  
+ATOM   21   O O    . HIS A 1 2 ? -1.830 -0.075 3.840  1.00 0.00 ? 6  HIS A O    1  
+ATOM   22   C CB   . HIS A 1 2 ? 0.229  -2.165 4.774  1.00 0.00 ? 6  HIS A CB   1  
+ATOM   23   C CG   . HIS A 1 2 ? -0.231 -1.673 6.138  1.00 0.00 ? 6  HIS A CG   1  
+ATOM   24   N ND1  . HIS A 1 2 ? -0.212 -0.362 6.563  1.00 0.00 ? 6  HIS A ND1  1  
+ATOM   25   C CD2  . HIS A 1 2 ? -0.672 -2.506 7.169  1.00 0.00 ? 6  HIS A CD2  1  
+ATOM   26   C CE1  . HIS A 1 2 ? -0.687 -0.521 7.838  1.00 0.00 ? 6  HIS A CE1  1  
+ATOM   27   N NE2  . HIS A 1 2 ? -0.986 -1.776 8.307  1.00 0.00 ? 6  HIS A NE2  1  
+ATOM   28   H H    . HIS A 1 2 ? 0.409  -3.177 2.054  1.00 0.00 ? 6  HIS A H    1  
+ATOM   29   H HA   . HIS A 1 2 ? -1.788 -2.723 4.185  1.00 0.00 ? 6  HIS A HA   1  
+ATOM   30   H HB2  . HIS A 1 2 ? 0.745  -3.129 4.946  1.00 0.00 ? 6  HIS A HB2  1  
+ATOM   31   H HB3  . HIS A 1 2 ? 1.029  -1.503 4.408  1.00 0.00 ? 6  HIS A HB3  1  
+ATOM   32   H HD1  . HIS A 1 2 ? -0.030 0.491  6.025  1.00 0.00 ? 6  HIS A HD1  1  
+ATOM   33   H HD2  . HIS A 1 2 ? -0.734 -3.579 7.070  1.00 0.00 ? 6  HIS A HD2  1  
+ATOM   34   H HE1  . HIS A 1 2 ? -0.845 0.338  8.476  1.00 0.00 ? 6  HIS A HE1  1  
+HETATM 35   N N    . DPN A 1 3 ? -1.239 -0.708 1.773  1.00 0.00 ? 7  DPN A N    1  
+HETATM 36   C CA   . DPN A 1 3 ? -1.493 0.608  1.124  1.00 0.00 ? 7  DPN A CA   1  
+HETATM 37   C C    . DPN A 1 3 ? -0.304 0.943  0.164  1.00 0.00 ? 7  DPN A C    1  
+HETATM 38   O O    . DPN A 1 3 ? 0.143  0.113  -0.635 1.00 0.00 ? 7  DPN A O    1  
+HETATM 39   C CB   . DPN A 1 3 ? -2.867 0.562  0.409  1.00 0.00 ? 7  DPN A CB   1  
+HETATM 40   C CG   . DPN A 1 3 ? -3.378 1.926  -0.084 1.00 0.00 ? 7  DPN A CG   1  
+HETATM 41   C CD1  . DPN A 1 3 ? -4.029 2.794  0.799  1.00 0.00 ? 7  DPN A CD1  1  
+HETATM 42   C CD2  . DPN A 1 3 ? -3.171 2.323  -1.409 1.00 0.00 ? 7  DPN A CD2  1  
+HETATM 43   C CE1  . DPN A 1 3 ? -4.465 4.044  0.363  1.00 0.00 ? 7  DPN A CE1  1  
+HETATM 44   C CE2  . DPN A 1 3 ? -3.607 3.574  -1.844 1.00 0.00 ? 7  DPN A CE2  1  
+HETATM 45   C CZ   . DPN A 1 3 ? -4.252 4.431  -0.957 1.00 0.00 ? 7  DPN A CZ   1  
+HETATM 46   H H    . DPN A 1 3 ? -0.972 -1.548 1.241  1.00 0.00 ? 7  DPN A H    1  
+HETATM 47   H HA   . DPN A 1 3 ? -1.552 1.395  1.905  1.00 0.00 ? 7  DPN A HA   1  
+HETATM 48   H HB2  . DPN A 1 3 ? -2.810 -0.157 -0.427 1.00 0.00 ? 7  DPN A HB2  1  
+HETATM 49   H HB3  . DPN A 1 3 ? -3.629 0.126  1.087  1.00 0.00 ? 7  DPN A HB3  1  
+HETATM 50   H HD1  . DPN A 1 3 ? -4.197 2.505  1.828  1.00 0.00 ? 7  DPN A HD1  1  
+HETATM 51   H HD2  . DPN A 1 3 ? -2.665 1.667  -2.103 1.00 0.00 ? 7  DPN A HD2  1  
+HETATM 52   H HE1  . DPN A 1 3 ? -4.968 4.711  1.047  1.00 0.00 ? 7  DPN A HE1  1  
+HETATM 53   H HE2  . DPN A 1 3 ? -3.444 3.876  -2.869 1.00 0.00 ? 7  DPN A HE2  1  
+HETATM 54   H HZ   . DPN A 1 3 ? -4.593 5.400  -1.297 1.00 0.00 ? 7  DPN A HZ   1  
+ATOM   55   N N    . ARG A 1 4 ? 0.255  2.158  0.294  1.00 0.00 ? 8  ARG A N    1  
+ATOM   56   C CA   . ARG A 1 4 ? 1.536  2.559  -0.385 1.00 0.00 ? 8  ARG A CA   1  
+ATOM   57   C C    . ARG A 1 4 ? 2.791  1.626  -0.223 1.00 0.00 ? 8  ARG A C    1  
+ATOM   58   O O    . ARG A 1 4 ? 3.567  1.422  -1.158 1.00 0.00 ? 8  ARG A O    1  
+ATOM   59   C CB   . ARG A 1 4 ? 1.845  4.041  -0.026 1.00 0.00 ? 8  ARG A CB   1  
+ATOM   60   C CG   . ARG A 1 4 ? 2.161  4.346  1.461  1.00 0.00 ? 8  ARG A CG   1  
+ATOM   61   C CD   . ARG A 1 4 ? 2.668  5.780  1.706  1.00 0.00 ? 8  ARG A CD   1  
+ATOM   62   N NE   . ARG A 1 4 ? 2.946  6.018  3.153  1.00 0.00 ? 8  ARG A NE   1  
+ATOM   63   C CZ   . ARG A 1 4 ? 4.062  5.671  3.801  1.00 0.00 ? 8  ARG A CZ   1  
+ATOM   64   N NH1  . ARG A 1 4 ? 5.049  5.013  3.246  1.00 0.00 ? 8  ARG A NH1  1  
+ATOM   65   N NH2  . ARG A 1 4 ? 4.174  6.000  5.056  1.00 0.00 ? 8  ARG A NH2  1  
+ATOM   66   H H    . ARG A 1 4 ? -0.297 2.808  0.862  1.00 0.00 ? 8  ARG A H    1  
+ATOM   67   H HA   . ARG A 1 4 ? 1.329  2.531  -1.464 1.00 0.00 ? 8  ARG A HA   1  
+ATOM   68   H HB2  . ARG A 1 4 ? 2.691  4.375  -0.658 1.00 0.00 ? 8  ARG A HB2  1  
+ATOM   69   H HB3  . ARG A 1 4 ? 0.996  4.670  -0.349 1.00 0.00 ? 8  ARG A HB3  1  
+ATOM   70   H HG2  . ARG A 1 4 ? 1.257  4.160  2.071  1.00 0.00 ? 8  ARG A HG2  1  
+ATOM   71   H HG3  . ARG A 1 4 ? 2.910  3.624  1.835  1.00 0.00 ? 8  ARG A HG3  1  
+ATOM   72   H HD2  . ARG A 1 4 ? 3.555  6.008  1.076  1.00 0.00 ? 8  ARG A HD2  1  
+ATOM   73   H HD3  . ARG A 1 4 ? 1.900  6.502  1.362  1.00 0.00 ? 8  ARG A HD3  1  
+ATOM   74   H HE   . ARG A 1 4 ? 2.265  6.511  3.738  1.00 0.00 ? 8  ARG A HE   1  
+ATOM   75   H HH11 . ARG A 1 4 ? 5.859  4.766  3.818  1.00 0.00 ? 8  ARG A HH11 1  
+ATOM   76   H HH12 . ARG A 1 4 ? 4.888  4.775  2.267  1.00 0.00 ? 8  ARG A HH12 1  
+ATOM   77   H HH21 . ARG A 1 4 ? 3.399  6.522  5.470  1.00 0.00 ? 8  ARG A HH21 1  
+ATOM   78   H HH22 . ARG A 1 4 ? 5.038  5.731  5.530  1.00 0.00 ? 8  ARG A HH22 1  
+ATOM   79   N N    . TRP A 1 5 ? 2.924  1.039  0.970  1.00 0.00 ? 9  TRP A N    1  
+ATOM   80   C CA   . TRP A 1 5 ? 3.868  -0.057 1.320  1.00 0.00 ? 9  TRP A CA   1  
+ATOM   81   C C    . TRP A 1 5 ? 3.931  -1.304 0.369  1.00 0.00 ? 9  TRP A C    1  
+ATOM   82   O O    . TRP A 1 5 ? 4.996  -1.908 0.236  1.00 0.00 ? 9  TRP A O    1  
+ATOM   83   C CB   . TRP A 1 5 ? 3.486  -0.519 2.754  1.00 0.00 ? 9  TRP A CB   1  
+ATOM   84   C CG   . TRP A 1 5 ? 3.564  0.524  3.884  1.00 0.00 ? 9  TRP A CG   1  
+ATOM   85   C CD1  . TRP A 1 5 ? 4.662  0.879  4.688  1.00 0.00 ? 9  TRP A CD1  1  
+ATOM   86   C CD2  . TRP A 1 5 ? 2.536  1.336  4.287  1.00 0.00 ? 9  TRP A CD2  1  
+ATOM   87   N NE1  . TRP A 1 5 ? 4.324  1.903  5.606  1.00 0.00 ? 9  TRP A NE1  1  
+ATOM   88   C CE2  . TRP A 1 5 ? 2.988  2.166  5.334  1.00 0.00 ? 9  TRP A CE2  1  
+ATOM   89   C CE3  . TRP A 1 5 ? 1.226  1.446  3.792  1.00 0.00 ? 9  TRP A CE3  1  
+ATOM   90   C CZ2  . TRP A 1 5 ? 2.104  3.116  5.911  1.00 0.00 ? 9  TRP A CZ2  1  
+ATOM   91   C CZ3  . TRP A 1 5 ? 0.374  2.392  4.351  1.00 0.00 ? 9  TRP A CZ3  1  
+ATOM   92   C CH2  . TRP A 1 5 ? 0.802  3.215  5.403  1.00 0.00 ? 9  TRP A CH2  1  
+ATOM   93   H H    . TRP A 1 5 ? 2.152  1.292  1.592  1.00 0.00 ? 9  TRP A H    1  
+ATOM   94   H HA   . TRP A 1 5 ? 4.883  0.373  1.380  1.00 0.00 ? 9  TRP A HA   1  
+ATOM   95   H HB2  . TRP A 1 5 ? 2.470  -0.957 2.730  1.00 0.00 ? 9  TRP A HB2  1  
+ATOM   96   H HB3  . TRP A 1 5 ? 4.097  -1.370 3.052  1.00 0.00 ? 9  TRP A HB3  1  
+ATOM   97   H HD1  . TRP A 1 5 ? 5.641  0.427  4.594  1.00 0.00 ? 9  TRP A HD1  1  
+ATOM   98   H HE1  . TRP A 1 5 ? 4.890  2.264  6.384  1.00 0.00 ? 9  TRP A HE1  1  
+ATOM   99   H HE3  . TRP A 1 5 ? 0.919  0.803  2.983  1.00 0.00 ? 9  TRP A HE3  1  
+ATOM   100  H HZ2  . TRP A 1 5 ? 2.432  3.752  6.719  1.00 0.00 ? 9  TRP A HZ2  1  
+ATOM   101  H HZ3  . TRP A 1 5 ? -0.622 2.457  3.945  1.00 0.00 ? 9  TRP A HZ3  1  
+ATOM   102  H HH2  . TRP A 1 5 ? 0.114  3.932  5.826  1.00 0.00 ? 9  TRP A HH2  1  
+ATOM   103  N N    . ASP A 1 6 ? 2.811  -1.691 -0.276 1.00 0.00 ? 10 ASP A N    1  
+ATOM   104  C CA   . ASP A 1 6 ? 2.779  -2.797 -1.278 1.00 0.00 ? 10 ASP A CA   1  
+ATOM   105  C C    . ASP A 1 6 ? 3.592  -2.574 -2.598 1.00 0.00 ? 10 ASP A C    1  
+ATOM   106  O O    . ASP A 1 6 ? 4.116  -3.522 -3.177 1.00 0.00 ? 10 ASP A O    1  
+ATOM   107  C CB   . ASP A 1 6 ? 1.294  -3.133 -1.619 1.00 0.00 ? 10 ASP A CB   1  
+ATOM   108  C CG   . ASP A 1 6 ? 0.332  -3.523 -0.484 1.00 0.00 ? 10 ASP A CG   1  
+ATOM   109  O OD1  . ASP A 1 6 ? -0.672 -2.847 -0.275 1.00 0.00 ? 10 ASP A OD1  1  
+ATOM   110  H H    . ASP A 1 6 ? 2.003  -1.073 -0.127 1.00 0.00 ? 10 ASP A H    1  
+ATOM   111  H HA   . ASP A 1 6 ? 3.233  -3.692 -0.810 1.00 0.00 ? 10 ASP A HA   1  
+ATOM   112  H HB2  . ASP A 1 6 ? 0.843  -2.268 -2.144 1.00 0.00 ? 10 ASP A HB2  1  
+ATOM   113  H HB3  . ASP A 1 6 ? 1.261  -3.948 -2.366 1.00 0.00 ? 10 ASP A HB3  1  
+HETATM 114  N N    . NH2 A 1 7 ? 3.728  -1.382 -3.149 1.00 0.00 ? 11 NH2 A N    1  
+HETATM 115  H HN1  . NH2 A 1 7 ? 4.372  -1.391 -3.943 1.00 0.00 ? 11 NH2 A HN1  1  
+HETATM 116  H HN2  . NH2 A 1 7 ? 3.466  -0.583 -2.561 1.00 0.00 ? 11 NH2 A HN2  1  
+HETATM 117  N N    . AC5 A 1 1 ? 0.757  -4.618 0.294  1.00 0.00 ? 5  AC5 A N    2  
+HETATM 118  O O    . AC5 A 1 1 ? -1.747 -4.868 3.155  1.00 0.00 ? 5  AC5 A O    2  
+HETATM 119  C CA   . AC5 A 1 1 ? -0.167 -5.285 1.287  1.00 0.00 ? 5  AC5 A CA   2  
+HETATM 120  C C    . AC5 A 1 1 ? -0.801 -4.440 2.488  1.00 0.00 ? 5  AC5 A C    2  
+HETATM 121  C CB1  . AC5 A 1 1 ? -1.253 -6.051 0.477  1.00 0.00 ? 5  AC5 A CB1  2  
+HETATM 122  C CB2  . AC5 A 1 1 ? 0.671  -6.450 1.890  1.00 0.00 ? 5  AC5 A CB2  2  
+HETATM 123  C CG1  . AC5 A 1 1 ? -1.125 -7.549 0.781  1.00 0.00 ? 5  AC5 A CG1  2  
+HETATM 124  C CG2  . AC5 A 1 1 ? 0.358  -7.720 1.088  1.00 0.00 ? 5  AC5 A CG2  2  
+HETATM 125  H H    . AC5 A 1 1 ? 1.520  -5.156 -0.118 1.00 0.00 ? 5  AC5 A H    2  
+HETATM 126  H HB11 . AC5 A 1 1 ? -1.142 -5.881 -0.610 1.00 0.00 ? 5  AC5 A HB11 2  
+HETATM 127  H HB12 . AC5 A 1 1 ? -2.265 -5.672 0.709  1.00 0.00 ? 5  AC5 A HB12 2  
+HETATM 128  H HB21 . AC5 A 1 1 ? 0.376  -6.638 2.943  1.00 0.00 ? 5  AC5 A HB21 2  
+HETATM 129  H HB22 . AC5 A 1 1 ? 1.756  -6.235 1.952  1.00 0.00 ? 5  AC5 A HB22 2  
+HETATM 130  H HG11 . AC5 A 1 1 ? -1.740 -7.818 1.664  1.00 0.00 ? 5  AC5 A HG11 2  
+HETATM 131  H HG12 . AC5 A 1 1 ? -1.468 -8.189 -0.056 1.00 0.00 ? 5  AC5 A HG12 2  
+HETATM 132  H HG21 . AC5 A 1 1 ? 0.954  -7.763 0.154  1.00 0.00 ? 5  AC5 A HG21 2  
+HETATM 133  H HG22 . AC5 A 1 1 ? 0.572  -8.650 1.652  1.00 0.00 ? 5  AC5 A HG22 2  
+ATOM   134  N N    . HIS A 1 2 ? -0.237 -3.267 2.769  1.00 0.00 ? 6  HIS A N    2  
+ATOM   135  C CA   . HIS A 1 2 ? -0.756 -2.305 3.797  1.00 0.00 ? 6  HIS A CA   2  
+ATOM   136  C C    . HIS A 1 2 ? -1.255 -0.903 3.262  1.00 0.00 ? 6  HIS A C    2  
+ATOM   137  O O    . HIS A 1 2 ? -1.633 -0.034 4.052  1.00 0.00 ? 6  HIS A O    2  
+ATOM   138  C CB   . HIS A 1 2 ? 0.395  -2.201 4.845  1.00 0.00 ? 6  HIS A CB   2  
+ATOM   139  C CG   . HIS A 1 2 ? -0.012 -1.840 6.266  1.00 0.00 ? 6  HIS A CG   2  
+ATOM   140  N ND1  . HIS A 1 2 ? -0.349 -0.577 6.694  1.00 0.00 ? 6  HIS A ND1  2  
+ATOM   141  C CD2  . HIS A 1 2 ? -0.030 -2.733 7.343  1.00 0.00 ? 6  HIS A CD2  2  
+ATOM   142  C CE1  . HIS A 1 2 ? -0.601 -0.831 8.015  1.00 0.00 ? 6  HIS A CE1  2  
+ATOM   143  N NE2  . HIS A 1 2 ? -0.415 -2.095 8.514  1.00 0.00 ? 6  HIS A NE2  2  
+ATOM   144  H H    . HIS A 1 2 ? 0.365  -3.044 1.971  1.00 0.00 ? 6  HIS A H    2  
+ATOM   145  H HA   . HIS A 1 2 ? -1.647 -2.734 4.295  1.00 0.00 ? 6  HIS A HA   2  
+ATOM   146  H HB2  . HIS A 1 2 ? 0.953  -3.158 4.914  1.00 0.00 ? 6  HIS A HB2  2  
+ATOM   147  H HB3  . HIS A 1 2 ? 1.156  -1.484 4.507  1.00 0.00 ? 6  HIS A HB3  2  
+ATOM   148  H HD1  . HIS A 1 2 ? -0.665 0.207  6.112  1.00 0.00 ? 6  HIS A HD1  2  
+ATOM   149  H HD2  . HIS A 1 2 ? 0.224  -3.780 7.253  1.00 0.00 ? 6  HIS A HD2  2  
+ATOM   150  H HE1  . HIS A 1 2 ? -0.992 -0.057 8.662  1.00 0.00 ? 6  HIS A HE1  2  
+HETATM 151  N N    . DPN A 1 3 ? -1.239 -0.649 1.944  1.00 0.00 ? 7  DPN A N    2  
+HETATM 152  C CA   . DPN A 1 3 ? -1.492 0.687  1.339  1.00 0.00 ? 7  DPN A CA   2  
+HETATM 153  C C    . DPN A 1 3 ? -0.322 1.048  0.358  1.00 0.00 ? 7  DPN A C    2  
+HETATM 154  O O    . DPN A 1 3 ? 0.137  0.231  -0.447 1.00 0.00 ? 7  DPN A O    2  
+HETATM 155  C CB   . DPN A 1 3 ? -2.888 0.670  0.667  1.00 0.00 ? 7  DPN A CB   2  
+HETATM 156  C CG   . DPN A 1 3 ? -3.398 2.052  0.226  1.00 0.00 ? 7  DPN A CG   2  
+HETATM 157  C CD1  . DPN A 1 3 ? -3.218 2.485  -1.092 1.00 0.00 ? 7  DPN A CD1  2  
+HETATM 158  C CD2  . DPN A 1 3 ? -4.021 2.900  1.148  1.00 0.00 ? 7  DPN A CD2  2  
+HETATM 159  C CE1  . DPN A 1 3 ? -3.652 3.752  -1.481 1.00 0.00 ? 7  DPN A CE1  2  
+HETATM 160  C CE2  . DPN A 1 3 ? -4.457 4.164  0.757  1.00 0.00 ? 7  DPN A CE2  2  
+HETATM 161  C CZ   . DPN A 1 3 ? -4.270 4.589  -0.556 1.00 0.00 ? 7  DPN A CZ   2  
+HETATM 162  H H    . DPN A 1 3 ? -1.009 -1.480 1.383  1.00 0.00 ? 7  DPN A H    2  
+HETATM 163  H HA   . DPN A 1 3 ? -1.524 1.455  2.142  1.00 0.00 ? 7  DPN A HA   2  
+HETATM 164  H HB2  . DPN A 1 3 ? -2.866 -0.027 -0.189 1.00 0.00 ? 7  DPN A HB2  2  
+HETATM 165  H HB3  . DPN A 1 3 ? -3.633 0.225  1.356  1.00 0.00 ? 7  DPN A HB3  2  
+HETATM 166  H HD1  . DPN A 1 3 ? -2.741 1.842  -1.819 1.00 0.00 ? 7  DPN A HD1  2  
+HETATM 167  H HD2  . DPN A 1 3 ? -4.178 2.576  2.169  1.00 0.00 ? 7  DPN A HD2  2  
+HETATM 168  H HE1  . DPN A 1 3 ? -3.520 4.078  -2.503 1.00 0.00 ? 7  DPN A HE1  2  
+HETATM 169  H HE2  . DPN A 1 3 ? -4.949 4.812  1.469  1.00 0.00 ? 7  DPN A HE2  2  
+HETATM 170  H HZ   . DPN A 1 3 ? -4.620 5.566  -0.862 1.00 0.00 ? 7  DPN A HZ   2  
+ATOM   171  N N    . ARG A 1 4 ? 0.229  2.265  0.491  1.00 0.00 ? 8  ARG A N    2  
+ATOM   172  C CA   . ARG A 1 4 ? 1.505  2.675  -0.196 1.00 0.00 ? 8  ARG A CA   2  
+ATOM   173  C C    . ARG A 1 4 ? 2.800  1.784  -0.046 1.00 0.00 ? 8  ARG A C    2  
+ATOM   174  O O    . ARG A 1 4 ? 3.700  1.801  -0.883 1.00 0.00 ? 8  ARG A O    2  
+ATOM   175  C CB   . ARG A 1 4 ? 1.794  4.151  0.196  1.00 0.00 ? 8  ARG A CB   2  
+ATOM   176  C CG   . ARG A 1 4 ? 2.108  4.421  1.694  1.00 0.00 ? 8  ARG A CG   2  
+ATOM   177  C CD   . ARG A 1 4 ? 2.958  5.683  1.935  1.00 0.00 ? 8  ARG A CD   2  
+ATOM   178  N NE   . ARG A 1 4 ? 3.370  5.792  3.367  1.00 0.00 ? 8  ARG A NE   2  
+ATOM   179  C CZ   . ARG A 1 4 ? 4.370  5.126  3.943  1.00 0.00 ? 8  ARG A CZ   2  
+ATOM   180  N NH1  . ARG A 1 4 ? 5.103  4.244  3.323  1.00 0.00 ? 8  ARG A NH1  2  
+ATOM   181  N NH2  . ARG A 1 4 ? 4.626  5.363  5.188  1.00 0.00 ? 8  ARG A NH2  2  
+ATOM   182  H H    . ARG A 1 4 ? -0.363 2.915  1.016  1.00 0.00 ? 8  ARG A H    2  
+ATOM   183  H HA   . ARG A 1 4 ? 1.300  2.652  -1.277 1.00 0.00 ? 8  ARG A HA   2  
+ATOM   184  H HB2  . ARG A 1 4 ? 2.635  4.495  -0.437 1.00 0.00 ? 8  ARG A HB2  2  
+ATOM   185  H HB3  . ARG A 1 4 ? 0.944  4.783  -0.119 1.00 0.00 ? 8  ARG A HB3  2  
+ATOM   186  H HG2  . ARG A 1 4 ? 1.159  4.477  2.263  1.00 0.00 ? 8  ARG A HG2  2  
+ATOM   187  H HG3  . ARG A 1 4 ? 2.625  3.543  2.121  1.00 0.00 ? 8  ARG A HG3  2  
+ATOM   188  H HD2  . ARG A 1 4 ? 3.840  5.709  1.259  1.00 0.00 ? 8  ARG A HD2  2  
+ATOM   189  H HD3  . ARG A 1 4 ? 2.369  6.579  1.644  1.00 0.00 ? 8  ARG A HD3  2  
+ATOM   190  H HE   . ARG A 1 4 ? 2.886  6.435  4.003  1.00 0.00 ? 8  ARG A HE   2  
+ATOM   191  H HH11 . ARG A 1 4 ? 5.799  3.725  3.862  1.00 0.00 ? 8  ARG A HH11 2  
+ATOM   192  H HH12 . ARG A 1 4 ? 4.828  4.082  2.352  1.00 0.00 ? 8  ARG A HH12 2  
+ATOM   193  H HH21 . ARG A 1 4 ? 5.385  4.823  5.610  1.00 0.00 ? 8  ARG A HH21 2  
+ATOM   194  H HH22 . ARG A 1 4 ? 4.044  6.056  5.658  1.00 0.00 ? 8  ARG A HH22 2  
+ATOM   195  N N    . TRP A 1 5 ? 2.864  1.035  1.051  1.00 0.00 ? 9  TRP A N    2  
+ATOM   196  C CA   . TRP A 1 5 ? 3.876  -0.019 1.340  1.00 0.00 ? 9  TRP A CA   2  
+ATOM   197  C C    . TRP A 1 5 ? 3.984  -1.224 0.336  1.00 0.00 ? 9  TRP A C    2  
+ATOM   198  O O    . TRP A 1 5 ? 5.062  -1.808 0.220  1.00 0.00 ? 9  TRP A O    2  
+ATOM   199  C CB   . TRP A 1 5 ? 3.519  -0.548 2.758  1.00 0.00 ? 9  TRP A CB   2  
+ATOM   200  C CG   . TRP A 1 5 ? 3.649  0.433  3.935  1.00 0.00 ? 9  TRP A CG   2  
+ATOM   201  C CD1  . TRP A 1 5 ? 4.753  0.657  4.778  1.00 0.00 ? 9  TRP A CD1  2  
+ATOM   202  C CD2  . TRP A 1 5 ? 2.655  1.251  4.406  1.00 0.00 ? 9  TRP A CD2  2  
+ATOM   203  N NE1  . TRP A 1 5 ? 4.460  1.615  5.783  1.00 0.00 ? 9  TRP A NE1  2  
+ATOM   204  C CE2  . TRP A 1 5 ? 3.133  1.952  5.532  1.00 0.00 ? 9  TRP A CE2  2  
+ATOM   205  C CE3  . TRP A 1 5 ? 1.345  1.442  3.938  1.00 0.00 ? 9  TRP A CE3  2  
+ATOM   206  C CZ2  . TRP A 1 5 ? 2.274  2.851  6.217  1.00 0.00 ? 9  TRP A CZ2  2  
+ATOM   207  C CZ3  . TRP A 1 5 ? 0.524  2.347  4.594  1.00 0.00 ? 9  TRP A CZ3  2  
+ATOM   208  C CH2  . TRP A 1 5 ? 0.973  3.041  5.726  1.00 0.00 ? 9  TRP A CH2  2  
+ATOM   209  H H    . TRP A 1 5 ? 1.984  1.093  1.566  1.00 0.00 ? 9  TRP A H    2  
+ATOM   210  H HA   . TRP A 1 5 ? 4.875  0.448  1.407  1.00 0.00 ? 9  TRP A HA   2  
+ATOM   211  H HB2  . TRP A 1 5 ? 2.497  -0.978 2.741  1.00 0.00 ? 9  TRP A HB2  2  
+ATOM   212  H HB3  . TRP A 1 5 ? 4.126  -1.425 2.994  1.00 0.00 ? 9  TRP A HB3  2  
+ATOM   213  H HD1  . TRP A 1 5 ? 5.689  0.126  4.674  1.00 0.00 ? 9  TRP A HD1  2  
+ATOM   214  H HE1  . TRP A 1 5 ? 4.946  1.718  6.682  1.00 0.00 ? 9  TRP A HE1  2  
+ATOM   215  H HE3  . TRP A 1 5 ? 1.006  0.870  3.088  1.00 0.00 ? 9  TRP A HE3  2  
+ATOM   216  H HZ2  . TRP A 1 5 ? 2.611  3.373  7.100  1.00 0.00 ? 9  TRP A HZ2  2  
+ATOM   217  H HZ3  . TRP A 1 5 ? -0.476 2.467  4.207  1.00 0.00 ? 9  TRP A HZ3  2  
+ATOM   218  H HH2  . TRP A 1 5 ? 0.296  3.713  6.233  1.00 0.00 ? 9  TRP A HH2  2  
+ATOM   219  N N    . ASP A 1 6 ? 2.893  -1.620 -0.346 1.00 0.00 ? 10 ASP A N    2  
+ATOM   220  C CA   . ASP A 1 6 ? 2.875  -2.800 -1.264 1.00 0.00 ? 10 ASP A CA   2  
+ATOM   221  C C    . ASP A 1 6 ? 3.700  -2.697 -2.594 1.00 0.00 ? 10 ASP A C    2  
+ATOM   222  O O    . ASP A 1 6 ? 4.203  -3.696 -3.100 1.00 0.00 ? 10 ASP A O    2  
+ATOM   223  C CB   . ASP A 1 6 ? 1.392  -3.160 -1.569 1.00 0.00 ? 10 ASP A CB   2  
+ATOM   224  C CG   . ASP A 1 6 ? 0.462  -3.516 -0.402 1.00 0.00 ? 10 ASP A CG   2  
+ATOM   225  O OD1  . ASP A 1 6 ? -0.503 -2.803 -0.145 1.00 0.00 ? 10 ASP A OD1  2  
+ATOM   226  H H    . ASP A 1 6 ? 2.057  -1.045 -0.187 1.00 0.00 ? 10 ASP A H    2  
+ATOM   227  H HA   . ASP A 1 6 ? 3.332  -3.657 -0.729 1.00 0.00 ? 10 ASP A HA   2  
+ATOM   228  H HB2  . ASP A 1 6 ? 0.922  -2.325 -2.123 1.00 0.00 ? 10 ASP A HB2  2  
+ATOM   229  H HB3  . ASP A 1 6 ? 1.354  -4.005 -2.283 1.00 0.00 ? 10 ASP A HB3  2  
+HETATM 230  N N    . NH2 A 1 7 ? 3.866  -1.560 -3.237 1.00 0.00 ? 11 NH2 A N    2  
+HETATM 231  H HN1  . NH2 A 1 7 ? 4.523  -1.654 -4.017 1.00 0.00 ? 11 NH2 A HN1  2  
+HETATM 232  H HN2  . NH2 A 1 7 ? 3.625  -0.713 -2.713 1.00 0.00 ? 11 NH2 A HN2  2  
+HETATM 233  N N    . AC5 A 1 1 ? 0.580  -4.562 0.194  1.00 0.00 ? 5  AC5 A N    3  
+HETATM 234  O O    . AC5 A 1 1 ? -2.323 -4.566 2.552  1.00 0.00 ? 5  AC5 A O    3  
+HETATM 235  C CA   . AC5 A 1 1 ? -0.394 -5.246 1.124  1.00 0.00 ? 5  AC5 A CA   3  
+HETATM 236  C C    . AC5 A 1 1 ? -1.160 -4.349 2.199  1.00 0.00 ? 5  AC5 A C    3  
+HETATM 237  C CB1  . AC5 A 1 1 ? -1.366 -6.079 0.265  1.00 0.00 ? 5  AC5 A CB1  3  
+HETATM 238  C CB2  . AC5 A 1 1 ? 0.373  -6.401 1.821  1.00 0.00 ? 5  AC5 A CB2  3  
+HETATM 239  C CG1  . AC5 A 1 1 ? -1.718 -7.368 1.027  1.00 0.00 ? 5  AC5 A CG1  3  
+HETATM 240  C CG2  . AC5 A 1 1 ? -0.654 -7.505 2.120  1.00 0.00 ? 5  AC5 A CG2  3  
+HETATM 241  H H    . AC5 A 1 1 ? 1.431  -5.035 -0.117 1.00 0.00 ? 5  AC5 A H    3  
+HETATM 242  H HB11 . AC5 A 1 1 ? -0.888 -6.344 -0.693 1.00 0.00 ? 5  AC5 A HB11 3  
+HETATM 243  H HB12 . AC5 A 1 1 ? -2.251 -5.470 0.007  1.00 0.00 ? 5  AC5 A HB12 3  
+HETATM 244  H HB21 . AC5 A 1 1 ? 0.900  -6.069 2.736  1.00 0.00 ? 5  AC5 A HB21 3  
+HETATM 245  H HB22 . AC5 A 1 1 ? 1.155  -6.835 1.166  1.00 0.00 ? 5  AC5 A HB22 3  
+HETATM 246  H HG11 . AC5 A 1 1 ? -2.728 -7.298 1.476  1.00 0.00 ? 5  AC5 A HG11 3  
+HETATM 247  H HG12 . AC5 A 1 1 ? -1.730 -8.245 0.351  1.00 0.00 ? 5  AC5 A HG12 3  
+HETATM 248  H HG21 . AC5 A 1 1 ? -0.195 -8.512 2.144  1.00 0.00 ? 5  AC5 A HG21 3  
+HETATM 249  H HG22 . AC5 A 1 1 ? -1.111 -7.342 3.117  1.00 0.00 ? 5  AC5 A HG22 3  
+ATOM   250  N N    . HIS A 1 2 ? -0.457 -3.336 2.703  1.00 0.00 ? 6  HIS A N    3  
+ATOM   251  C CA   . HIS A 1 2 ? -1.012 -2.308 3.631  1.00 0.00 ? 6  HIS A CA   3  
+ATOM   252  C C    . HIS A 1 2 ? -1.470 -0.941 3.003  1.00 0.00 ? 6  HIS A C    3  
+ATOM   253  O O    . HIS A 1 2 ? -1.968 -0.084 3.737  1.00 0.00 ? 6  HIS A O    3  
+ATOM   254  C CB   . HIS A 1 2 ? 0.079  -2.083 4.716  1.00 0.00 ? 6  HIS A CB   3  
+ATOM   255  C CG   . HIS A 1 2 ? 0.266  -3.211 5.728  1.00 0.00 ? 6  HIS A CG   3  
+ATOM   256  N ND1  . HIS A 1 2 ? -0.623 -3.522 6.737  1.00 0.00 ? 6  HIS A ND1  3  
+ATOM   257  C CD2  . HIS A 1 2 ? 1.361  -4.082 5.767  1.00 0.00 ? 6  HIS A CD2  3  
+ATOM   258  C CE1  . HIS A 1 2 ? 0.026  -4.590 7.301  1.00 0.00 ? 6  HIS A CE1  3  
+ATOM   259  N NE2  . HIS A 1 2 ? 1.232  -5.008 6.795  1.00 0.00 ? 6  HIS A NE2  3  
+ATOM   260  H H    . HIS A 1 2 ? 0.402  -3.247 2.157  1.00 0.00 ? 6  HIS A H    3  
+ATOM   261  H HA   . HIS A 1 2 ? -1.920 -2.696 4.125  1.00 0.00 ? 6  HIS A HA   3  
+ATOM   262  H HB2  . HIS A 1 2 ? 1.047  -1.835 4.243  1.00 0.00 ? 6  HIS A HB2  3  
+ATOM   263  H HB3  . HIS A 1 2 ? -0.154 -1.178 5.288  1.00 0.00 ? 6  HIS A HB3  3  
+ATOM   264  H HD1  . HIS A 1 2 ? -1.524 -3.096 6.972  1.00 0.00 ? 6  HIS A HD1  3  
+ATOM   265  H HD2  . HIS A 1 2 ? 2.191  -4.029 5.083  1.00 0.00 ? 6  HIS A HD2  3  
+ATOM   266  H HE1  . HIS A 1 2 ? -0.408 -5.111 8.145  1.00 0.00 ? 6  HIS A HE1  3  
+HETATM 267  N N    . DPN A 1 3 ? -1.289 -0.707 1.692  1.00 0.00 ? 7  DPN A N    3  
+HETATM 268  C CA   . DPN A 1 3 ? -1.514 0.612  1.040  1.00 0.00 ? 7  DPN A CA   3  
+HETATM 269  C C    . DPN A 1 3 ? -0.286 0.949  0.132  1.00 0.00 ? 7  DPN A C    3  
+HETATM 270  O O    . DPN A 1 3 ? 0.174  0.129  -0.671 1.00 0.00 ? 7  DPN A O    3  
+HETATM 271  C CB   . DPN A 1 3 ? -2.857 0.571  0.268  1.00 0.00 ? 7  DPN A CB   3  
+HETATM 272  C CG   . DPN A 1 3 ? -3.341 1.935  -0.249 1.00 0.00 ? 7  DPN A CG   3  
+HETATM 273  C CD1  . DPN A 1 3 ? -3.076 2.328  -1.566 1.00 0.00 ? 7  DPN A CD1  3  
+HETATM 274  C CD2  . DPN A 1 3 ? -4.029 2.807  0.602  1.00 0.00 ? 7  DPN A CD2  3  
+HETATM 275  C CE1  . DPN A 1 3 ? -3.488 3.578  -2.022 1.00 0.00 ? 7  DPN A CE1  3  
+HETATM 276  C CE2  . DPN A 1 3 ? -4.442 4.056  0.143  1.00 0.00 ? 7  DPN A CE2  3  
+HETATM 277  C CZ   . DPN A 1 3 ? -4.170 4.441  -1.168 1.00 0.00 ? 7  DPN A CZ   3  
+HETATM 278  H H    . DPN A 1 3 ? -1.024 -1.550 1.163  1.00 0.00 ? 7  DPN A H    3  
+HETATM 279  H HA   . DPN A 1 3 ? -1.605 1.396  1.823  1.00 0.00 ? 7  DPN A HA   3  
+HETATM 280  H HB2  . DPN A 1 3 ? -2.764 -0.150 -0.565 1.00 0.00 ? 7  DPN A HB2  3  
+HETATM 281  H HB3  . DPN A 1 3 ? -3.648 0.138  0.913  1.00 0.00 ? 7  DPN A HB3  3  
+HETATM 282  H HD1  . DPN A 1 3 ? -2.541 1.670  -2.236 1.00 0.00 ? 7  DPN A HD1  3  
+HETATM 283  H HD2  . DPN A 1 3 ? -4.243 2.519  1.622  1.00 0.00 ? 7  DPN A HD2  3  
+HETATM 284  H HE1  . DPN A 1 3 ? -3.280 3.878  -3.039 1.00 0.00 ? 7  DPN A HE1  3  
+HETATM 285  H HE2  . DPN A 1 3 ? -4.973 4.727  0.805  1.00 0.00 ? 7  DPN A HE2  3  
+HETATM 286  H HZ   . DPN A 1 3 ? -4.494 5.410  -1.522 1.00 0.00 ? 7  DPN A HZ   3  
+ATOM   287  N N    . ARG A 1 4 ? 0.280  2.156  0.304  1.00 0.00 ? 8  ARG A N    3  
+ATOM   288  C CA   . ARG A 1 4 ? 1.569  2.566  -0.352 1.00 0.00 ? 8  ARG A CA   3  
+ATOM   289  C C    . ARG A 1 4 ? 2.820  1.624  -0.203 1.00 0.00 ? 8  ARG A C    3  
+ATOM   290  O O    . ARG A 1 4 ? 3.605  1.446  -1.136 1.00 0.00 ? 8  ARG A O    3  
+ATOM   291  C CB   . ARG A 1 4 ? 1.877  4.039  0.042  1.00 0.00 ? 8  ARG A CB   3  
+ATOM   292  C CG   . ARG A 1 4 ? 2.204  4.306  1.534  1.00 0.00 ? 8  ARG A CG   3  
+ATOM   293  C CD   . ARG A 1 4 ? 2.663  5.750  1.814  1.00 0.00 ? 8  ARG A CD   3  
+ATOM   294  N NE   . ARG A 1 4 ? 2.962  5.955  3.261  1.00 0.00 ? 8  ARG A NE   3  
+ATOM   295  C CZ   . ARG A 1 4 ? 4.110  5.647  3.872  1.00 0.00 ? 8  ARG A CZ   3  
+ATOM   296  N NH1  . ARG A 1 4 ? 4.240  5.947  5.132  1.00 0.00 ? 8  ARG A NH1  3  
+ATOM   297  N NH2  . ARG A 1 4 ? 5.114  5.055  3.275  1.00 0.00 ? 8  ARG A NH2  3  
+ATOM   298  H H    . ARG A 1 4 ? -0.279 2.796  0.873  1.00 0.00 ? 8  ARG A H    3  
+ATOM   299  H HA   . ARG A 1 4 ? 1.372  2.566  -1.434 1.00 0.00 ? 8  ARG A HA   3  
+ATOM   300  H HB2  . ARG A 1 4 ? 2.718  4.392  -0.587 1.00 0.00 ? 8  ARG A HB2  3  
+ATOM   301  H HB3  . ARG A 1 4 ? 1.024  4.674  -0.259 1.00 0.00 ? 8  ARG A HB3  3  
+ATOM   302  H HG2  . ARG A 1 4 ? 1.317  4.069  2.151  1.00 0.00 ? 8  ARG A HG2  3  
+ATOM   303  H HG3  . ARG A 1 4 ? 2.985  3.599  1.873  1.00 0.00 ? 8  ARG A HG3  3  
+ATOM   304  H HD2  . ARG A 1 4 ? 3.524  6.032  1.173  1.00 0.00 ? 8  ARG A HD2  3  
+ATOM   305  H HD3  . ARG A 1 4 ? 1.859  6.451  1.511  1.00 0.00 ? 8  ARG A HD3  3  
+ATOM   306  H HE   . ARG A 1 4 ? 2.272  6.394  3.877  1.00 0.00 ? 8  ARG A HE   3  
+ATOM   307  H HH11 . ARG A 1 4 ? 5.129  5.710  5.576  1.00 0.00 ? 8  ARG A HH11 3  
+ATOM   308  H HH12 . ARG A 1 4 ? 3.452  6.420  5.579  1.00 0.00 ? 8  ARG A HH12 3  
+ATOM   309  H HH21 . ARG A 1 4 ? 5.951  4.834  3.817  1.00 0.00 ? 8  ARG A HH21 3  
+ATOM   310  H HH22 . ARG A 1 4 ? 4.937  4.833  2.293  1.00 0.00 ? 8  ARG A HH22 3  
+ATOM   311  N N    . TRP A 1 5 ? 2.941  1.005  0.973  1.00 0.00 ? 9  TRP A N    3  
+ATOM   312  C CA   . TRP A 1 5 ? 3.890  -0.094 1.300  1.00 0.00 ? 9  TRP A CA   3  
+ATOM   313  C C    . TRP A 1 5 ? 3.935  -1.331 0.335  1.00 0.00 ? 9  TRP A C    3  
+ATOM   314  O O    . TRP A 1 5 ? 4.992  -1.948 0.195  1.00 0.00 ? 9  TRP A O    3  
+ATOM   315  C CB   . TRP A 1 5 ? 3.532  -0.576 2.734  1.00 0.00 ? 9  TRP A CB   3  
+ATOM   316  C CG   . TRP A 1 5 ? 3.597  0.459  3.871  1.00 0.00 ? 9  TRP A CG   3  
+ATOM   317  C CD1  . TRP A 1 5 ? 4.699  0.856  4.648  1.00 0.00 ? 9  TRP A CD1  3  
+ATOM   318  C CD2  . TRP A 1 5 ? 2.551  1.244  4.283  1.00 0.00 ? 9  TRP A CD2  3  
+ATOM   319  N NE1  . TRP A 1 5 ? 4.348  1.883  5.559  1.00 0.00 ? 9  TRP A NE1  3  
+ATOM   320  C CE2  . TRP A 1 5 ? 3.001  2.106  5.305  1.00 0.00 ? 9  TRP A CE2  3  
+ATOM   321  C CE3  . TRP A 1 5 ? 1.234  1.319  3.798  1.00 0.00 ? 9  TRP A CE3  3  
+ATOM   322  C CZ2  . TRP A 1 5 ? 2.108  3.055  5.867  1.00 0.00 ? 9  TRP A CZ2  3  
+ATOM   323  C CZ3  . TRP A 1 5 ? 0.374  2.263  4.344  1.00 0.00 ? 9  TRP A CZ3  3  
+ATOM   324  C CH2  . TRP A 1 5 ? 0.797  3.120  5.371  1.00 0.00 ? 9  TRP A CH2  3  
+ATOM   325  H H    . TRP A 1 5 ? 2.170  1.247  1.600  1.00 0.00 ? 9  TRP A H    3  
+ATOM   326  H HA   . TRP A 1 5 ? 4.905  0.336  1.348  1.00 0.00 ? 9  TRP A HA   3  
+ATOM   327  H HB2  . TRP A 1 5 ? 2.526  -1.036 2.715  1.00 0.00 ? 9  TRP A HB2  3  
+ATOM   328  H HB3  . TRP A 1 5 ? 4.166  -1.418 3.016  1.00 0.00 ? 9  TRP A HB3  3  
+ATOM   329  H HD1  . TRP A 1 5 ? 5.692  0.442  4.535  1.00 0.00 ? 9  TRP A HD1  3  
+ATOM   330  H HE1  . TRP A 1 5 ? 4.920  2.279  6.313  1.00 0.00 ? 9  TRP A HE1  3  
+ATOM   331  H HE3  . TRP A 1 5 ? 0.934  0.659  2.999  1.00 0.00 ? 9  TRP A HE3  3  
+ATOM   332  H HZ2  . TRP A 1 5 ? 2.434  3.719  6.654  1.00 0.00 ? 9  TRP A HZ2  3  
+ATOM   333  H HZ3  . TRP A 1 5 ? -0.625 2.309  3.939  1.00 0.00 ? 9  TRP A HZ3  3  
+ATOM   334  H HH2  . TRP A 1 5 ? 0.103  3.836  5.781  1.00 0.00 ? 9  TRP A HH2  3  
+ATOM   335  N N    . ASP A 1 6 ? 2.809  -1.696 -0.310 1.00 0.00 ? 10 ASP A N    3  
+ATOM   336  C CA   . ASP A 1 6 ? 2.754  -2.794 -1.317 1.00 0.00 ? 10 ASP A CA   3  
+ATOM   337  C C    . ASP A 1 6 ? 3.576  -2.578 -2.635 1.00 0.00 ? 10 ASP A C    3  
+ATOM   338  O O    . ASP A 1 6 ? 4.096  -3.530 -3.211 1.00 0.00 ? 10 ASP A O    3  
+ATOM   339  C CB   . ASP A 1 6 ? 1.267  -3.098 -1.665 1.00 0.00 ? 10 ASP A CB   3  
+ATOM   340  C CG   . ASP A 1 6 ? 0.284  -3.482 -0.546 1.00 0.00 ? 10 ASP A CG   3  
+ATOM   341  O OD1  . ASP A 1 6 ? -0.740 -2.821 -0.380 1.00 0.00 ? 10 ASP A OD1  3  
+ATOM   342  H H    . ASP A 1 6 ? 2.017  -1.056 -0.158 1.00 0.00 ? 10 ASP A H    3  
+ATOM   343  H HA   . ASP A 1 6 ? 3.192  -3.700 -0.857 1.00 0.00 ? 10 ASP A HA   3  
+ATOM   344  H HB2  . ASP A 1 6 ? 0.835  -2.218 -2.185 1.00 0.00 ? 10 ASP A HB2  3  
+ATOM   345  H HB3  . ASP A 1 6 ? 1.219  -3.903 -2.421 1.00 0.00 ? 10 ASP A HB3  3  
+HETATM 346  N N    . NH2 A 1 7 ? 3.723  -1.387 -3.185 1.00 0.00 ? 11 NH2 A N    3  
+HETATM 347  H HN1  . NH2 A 1 7 ? 4.371  -1.400 -3.975 1.00 0.00 ? 11 NH2 A HN1  3  
+HETATM 348  H HN2  . NH2 A 1 7 ? 3.463  -0.585 -2.599 1.00 0.00 ? 11 NH2 A HN2  3  
+HETATM 349  N N    . AC5 A 1 1 ? 0.635  -4.609 0.260  1.00 0.00 ? 5  AC5 A N    4  
+HETATM 350  O O    . AC5 A 1 1 ? -2.091 -4.728 2.874  1.00 0.00 ? 5  AC5 A O    4  
+HETATM 351  C CA   . AC5 A 1 1 ? -0.323 -5.273 1.221  1.00 0.00 ? 5  AC5 A CA   4  
+HETATM 352  C C    . AC5 A 1 1 ? -1.029 -4.387 2.343  1.00 0.00 ? 5  AC5 A C    4  
+HETATM 353  C CB1  . AC5 A 1 1 ? -1.371 -6.047 0.375  1.00 0.00 ? 5  AC5 A CB1  4  
+HETATM 354  C CB2  . AC5 A 1 1 ? 0.474  -6.428 1.902  1.00 0.00 ? 5  AC5 A CB2  4  
+HETATM 355  C CG1  . AC5 A 1 1 ? -1.398 -7.498 0.866  1.00 0.00 ? 5  AC5 A CG1  4  
+HETATM 356  C CG2  . AC5 A 1 1 ? 0.059  -7.749 1.237  1.00 0.00 ? 5  AC5 A CG2  4  
+HETATM 357  H H    . AC5 A 1 1 ? 1.459  -5.112 -0.075 1.00 0.00 ? 5  AC5 A H    4  
+HETATM 358  H HB11 . AC5 A 1 1 ? -1.105 -6.032 -0.698 1.00 0.00 ? 5  AC5 A HB11 4  
+HETATM 359  H HB12 . AC5 A 1 1 ? -2.361 -5.560 0.425  1.00 0.00 ? 5  AC5 A HB12 4  
+HETATM 360  H HB21 . AC5 A 1 1 ? 0.228  -6.502 2.980  1.00 0.00 ? 5  AC5 A HB21 4  
+HETATM 361  H HB22 . AC5 A 1 1 ? 1.573  -6.289 1.889  1.00 0.00 ? 5  AC5 A HB22 4  
+HETATM 362  H HG11 . AC5 A 1 1 ? -2.053 -7.596 1.755  1.00 0.00 ? 5  AC5 A HG11 4  
+HETATM 363  H HG12 . AC5 A 1 1 ? -1.776 -8.204 0.103  1.00 0.00 ? 5  AC5 A HG12 4  
+HETATM 364  H HG21 . AC5 A 1 1 ? 0.668  -7.939 0.329  1.00 0.00 ? 5  AC5 A HG21 4  
+HETATM 365  H HG22 . AC5 A 1 1 ? 0.186  -8.623 1.903  1.00 0.00 ? 5  AC5 A HG22 4  
+ATOM   366  N N    . HIS A 1 2 ? -0.404 -3.266 2.699  1.00 0.00 ? 6  HIS A N    4  
+ATOM   367  C CA   . HIS A 1 2 ? -0.971 -2.239 3.620  1.00 0.00 ? 6  HIS A CA   4  
+ATOM   368  C C    . HIS A 1 2 ? -1.468 -0.897 2.970  1.00 0.00 ? 6  HIS A C    4  
+ATOM   369  O O    . HIS A 1 2 ? -1.947 -0.023 3.697  1.00 0.00 ? 6  HIS A O    4  
+ATOM   370  C CB   . HIS A 1 2 ? 0.132  -1.968 4.682  1.00 0.00 ? 6  HIS A CB   4  
+ATOM   371  C CG   . HIS A 1 2 ? 0.351  -3.066 5.719  1.00 0.00 ? 6  HIS A CG   4  
+ATOM   372  N ND1  . HIS A 1 2 ? -0.512 -3.358 6.755  1.00 0.00 ? 6  HIS A ND1  4  
+ATOM   373  C CD2  . HIS A 1 2 ? 1.454  -3.929 5.756  1.00 0.00 ? 6  HIS A CD2  4  
+ATOM   374  C CE1  . HIS A 1 2 ? 0.156  -4.407 7.331  1.00 0.00 ? 6  HIS A CE1  4  
+ATOM   375  N NE2  . HIS A 1 2 ? 1.354  -4.829 6.809  1.00 0.00 ? 6  HIS A NE2  4  
+ATOM   376  H H    . HIS A 1 2 ? 0.373  -3.110 2.055  1.00 0.00 ? 6  HIS A H    4  
+ATOM   377  H HA   . HIS A 1 2 ? -1.864 -2.634 4.135  1.00 0.00 ? 6  HIS A HA   4  
+ATOM   378  H HB2  . HIS A 1 2 ? 1.089  -1.720 4.186  1.00 0.00 ? 6  HIS A HB2  4  
+ATOM   379  H HB3  . HIS A 1 2 ? -0.106 -1.051 5.232  1.00 0.00 ? 6  HIS A HB3  4  
+ATOM   380  H HD1  . HIS A 1 2 ? -1.414 -2.936 6.996  1.00 0.00 ? 6  HIS A HD1  4  
+ATOM   381  H HD2  . HIS A 1 2 ? 2.266  -3.892 5.051  1.00 0.00 ? 6  HIS A HD2  4  
+ATOM   382  H HE1  . HIS A 1 2 ? -0.256 -4.910 8.195  1.00 0.00 ? 6  HIS A HE1  4  
+HETATM 383  N N    . DPN A 1 3 ? -1.346 -0.702 1.645  1.00 0.00 ? 7  DPN A N    4  
+HETATM 384  C CA   . DPN A 1 3 ? -1.619 0.594  0.963  1.00 0.00 ? 7  DPN A CA   4  
+HETATM 385  C C    . DPN A 1 3 ? -0.394 0.963  0.068  1.00 0.00 ? 7  DPN A C    4  
+HETATM 386  O O    . DPN A 1 3 ? 0.020  0.201  -0.813 1.00 0.00 ? 7  DPN A O    4  
+HETATM 387  C CB   . DPN A 1 3 ? -2.943 0.480  0.168  1.00 0.00 ? 7  DPN A CB   4  
+HETATM 388  C CG   . DPN A 1 3 ? -3.478 1.818  -0.372 1.00 0.00 ? 7  DPN A CG   4  
+HETATM 389  C CD1  . DPN A 1 3 ? -4.235 2.657  0.453  1.00 0.00 ? 7  DPN A CD1  4  
+HETATM 390  C CD2  . DPN A 1 3 ? -3.189 2.220  -1.681 1.00 0.00 ? 7  DPN A CD2  4  
+HETATM 391  C CE1  . DPN A 1 3 ? -4.693 3.884  -0.025 1.00 0.00 ? 7  DPN A CE1  4  
+HETATM 392  C CE2  . DPN A 1 3 ? -3.645 3.447  -2.156 1.00 0.00 ? 7  DPN A CE2  4  
+HETATM 393  C CZ   . DPN A 1 3 ? -4.397 4.278  -1.327 1.00 0.00 ? 7  DPN A CZ   4  
+HETATM 394  H H    . DPN A 1 3 ? -1.064 -1.551 1.135  1.00 0.00 ? 7  DPN A H    4  
+HETATM 395  H HA   . DPN A 1 3 ? -1.766 1.389  1.723  1.00 0.00 ? 7  DPN A HA   4  
+HETATM 396  H HB2  . DPN A 1 3 ? -2.799 -0.240 -0.656 1.00 0.00 ? 7  DPN A HB2  4  
+HETATM 397  H HB3  . DPN A 1 3 ? -3.727 0.015  0.801  1.00 0.00 ? 7  DPN A HB3  4  
+HETATM 398  H HD1  . DPN A 1 3 ? -4.469 2.364  1.466  1.00 0.00 ? 7  DPN A HD1  4  
+HETATM 399  H HD2  . DPN A 1 3 ? -2.599 1.588  -2.328 1.00 0.00 ? 7  DPN A HD2  4  
+HETATM 400  H HE1  . DPN A 1 3 ? -5.278 4.529  0.615  1.00 0.00 ? 7  DPN A HE1  4  
+HETATM 401  H HE2  . DPN A 1 3 ? -3.417 3.753  -3.166 1.00 0.00 ? 7  DPN A HE2  4  
+HETATM 402  H HZ   . DPN A 1 3 ? -4.754 5.228  -1.698 1.00 0.00 ? 7  DPN A HZ   4  
+ATOM   403  N N    . ARG A 1 4 ? 0.210  2.133  0.332  1.00 0.00 ? 8  ARG A N    4  
+ATOM   404  C CA   . ARG A 1 4 ? 1.483  2.590  -0.327 1.00 0.00 ? 8  ARG A CA   4  
+ATOM   405  C C    . ARG A 1 4 ? 2.685  1.576  -0.310 1.00 0.00 ? 8  ARG A C    4  
+ATOM   406  O O    . ARG A 1 4 ? 3.358  1.324  -1.311 1.00 0.00 ? 8  ARG A O    4  
+ATOM   407  C CB   . ARG A 1 4 ? 1.974  3.945  0.284  1.00 0.00 ? 8  ARG A CB   4  
+ATOM   408  C CG   . ARG A 1 4 ? 0.952  5.027  0.734  1.00 0.00 ? 8  ARG A CG   4  
+ATOM   409  C CD   . ARG A 1 4 ? 1.591  6.329  1.258  1.00 0.00 ? 8  ARG A CD   4  
+ATOM   410  N NE   . ARG A 1 4 ? 2.354  6.091  2.519  1.00 0.00 ? 8  ARG A NE   4  
+ATOM   411  C CZ   . ARG A 1 4 ? 3.160  6.972  3.112  1.00 0.00 ? 8  ARG A CZ   4  
+ATOM   412  N NH1  . ARG A 1 4 ? 3.858  6.574  4.134  1.00 0.00 ? 8  ARG A NH1  4  
+ATOM   413  N NH2  . ARG A 1 4 ? 3.284  8.216  2.722  1.00 0.00 ? 8  ARG A NH2  4  
+ATOM   414  H H    . ARG A 1 4 ? -0.311 2.717  0.989  1.00 0.00 ? 8  ARG A H    4  
+ATOM   415  H HA   . ARG A 1 4 ? 1.251  2.741  -1.394 1.00 0.00 ? 8  ARG A HA   4  
+ATOM   416  H HB2  . ARG A 1 4 ? 2.605  3.726  1.166  1.00 0.00 ? 8  ARG A HB2  4  
+ATOM   417  H HB3  . ARG A 1 4 ? 2.679  4.403  -0.438 1.00 0.00 ? 8  ARG A HB3  4  
+ATOM   418  H HG2  . ARG A 1 4 ? 0.282  5.269  -0.113 1.00 0.00 ? 8  ARG A HG2  4  
+ATOM   419  H HG3  . ARG A 1 4 ? 0.283  4.623  1.520  1.00 0.00 ? 8  ARG A HG3  4  
+ATOM   420  H HD2  . ARG A 1 4 ? 2.242  6.752  0.467  1.00 0.00 ? 8  ARG A HD2  4  
+ATOM   421  H HD3  . ARG A 1 4 ? 0.789  7.073  1.435  1.00 0.00 ? 8  ARG A HD3  4  
+ATOM   422  H HE   . ARG A 1 4 ? 2.345  5.167  2.960  1.00 0.00 ? 8  ARG A HE   4  
+ATOM   423  H HH11 . ARG A 1 4 ? 4.475  7.259  4.572  1.00 0.00 ? 8  ARG A HH11 4  
+ATOM   424  H HH12 . ARG A 1 4 ? 3.772  5.590  4.392  1.00 0.00 ? 8  ARG A HH12 4  
+ATOM   425  H HH21 . ARG A 1 4 ? 3.922  8.829  3.235  1.00 0.00 ? 8  ARG A HH21 4  
+ATOM   426  H HH22 . ARG A 1 4 ? 2.698  8.466  1.923  1.00 0.00 ? 8  ARG A HH22 4  
+ATOM   427  N N    . TRP A 1 5 ? 2.893  1.003  0.878  1.00 0.00 ? 9  TRP A N    4  
+ATOM   428  C CA   . TRP A 1 5 ? 3.914  -0.018 1.225  1.00 0.00 ? 9  TRP A CA   4  
+ATOM   429  C C    . TRP A 1 5 ? 3.961  -1.326 0.363  1.00 0.00 ? 9  TRP A C    4  
+ATOM   430  O O    . TRP A 1 5 ? 5.017  -1.958 0.275  1.00 0.00 ? 9  TRP A O    4  
+ATOM   431  C CB   . TRP A 1 5 ? 3.661  -0.362 2.724  1.00 0.00 ? 9  TRP A CB   4  
+ATOM   432  C CG   . TRP A 1 5 ? 3.679  0.800  3.742  1.00 0.00 ? 9  TRP A CG   4  
+ATOM   433  C CD1  . TRP A 1 5 ? 4.784  1.426  4.349  1.00 0.00 ? 9  TRP A CD1  4  
+ATOM   434  C CD2  . TRP A 1 5 ? 2.588  1.556  4.097  1.00 0.00 ? 9  TRP A CD2  4  
+ATOM   435  N NE1  . TRP A 1 5 ? 4.393  2.568  5.090  1.00 0.00 ? 9  TRP A NE1  4  
+ATOM   436  C CE2  . TRP A 1 5 ? 3.017  2.630  4.908  1.00 0.00 ? 9  TRP A CE2  4  
+ATOM   437  C CE3  . TRP A 1 5 ? 1.249  1.464  3.671  1.00 0.00 ? 9  TRP A CE3  4  
+ATOM   438  C CZ2  . TRP A 1 5 ? 2.086  3.626  5.304  1.00 0.00 ? 9  TRP A CZ2  4  
+ATOM   439  C CZ3  . TRP A 1 5 ? 0.350  2.444  4.072  1.00 0.00 ? 9  TRP A CZ3  4  
+ATOM   440  C CH2  . TRP A 1 5 ? 0.758  3.512  4.882  1.00 0.00 ? 9  TRP A CH2  4  
+ATOM   441  H H    . TRP A 1 5 ? 2.213  1.318  1.574  1.00 0.00 ? 9  TRP A H    4  
+ATOM   442  H HA   . TRP A 1 5 ? 4.906  0.462  1.165  1.00 0.00 ? 9  TRP A HA   4  
+ATOM   443  H HB2  . TRP A 1 5 ? 2.699  -0.902 2.808  1.00 0.00 ? 9  TRP A HB2  4  
+ATOM   444  H HB3  . TRP A 1 5 ? 4.377  -1.114 3.054  1.00 0.00 ? 9  TRP A HB3  4  
+ATOM   445  H HD1  . TRP A 1 5 ? 5.807  1.107  4.204  1.00 0.00 ? 9  TRP A HD1  4  
+ATOM   446  H HE1  . TRP A 1 5 ? 4.983  3.156  5.692  1.00 0.00 ? 9  TRP A HE1  4  
+ATOM   447  H HE3  . TRP A 1 5 ? 0.968  0.670  2.996  1.00 0.00 ? 9  TRP A HE3  4  
+ATOM   448  H HZ2  . TRP A 1 5 ? 2.393  4.467  5.905  1.00 0.00 ? 9  TRP A HZ2  4  
+ATOM   449  H HZ3  . TRP A 1 5 ? -0.668 2.355  3.725  1.00 0.00 ? 9  TRP A HZ3  4  
+ATOM   450  H HH2  . TRP A 1 5 ? 0.035  4.259  5.179  1.00 0.00 ? 9  TRP A HH2  4  
+ATOM   451  N N    . ASP A 1 6 ? 2.841  -1.725 -0.269 1.00 0.00 ? 10 ASP A N    4  
+ATOM   452  C CA   . ASP A 1 6 ? 2.801  -2.839 -1.260 1.00 0.00 ? 10 ASP A CA   4  
+ATOM   453  C C    . ASP A 1 6 ? 3.625  -2.630 -2.578 1.00 0.00 ? 10 ASP A C    4  
+ATOM   454  O O    . ASP A 1 6 ? 4.176  -3.578 -3.128 1.00 0.00 ? 10 ASP A O    4  
+ATOM   455  C CB   . ASP A 1 6 ? 1.317  -3.158 -1.608 1.00 0.00 ? 10 ASP A CB   4  
+ATOM   456  C CG   . ASP A 1 6 ? 0.340  -3.529 -0.482 1.00 0.00 ? 10 ASP A CG   4  
+ATOM   457  O OD1  . ASP A 1 6 ? -0.674 -2.855 -0.305 1.00 0.00 ? 10 ASP A OD1  4  
+ATOM   458  H H    . ASP A 1 6 ? 2.066  -1.056 -0.165 1.00 0.00 ? 10 ASP A H    4  
+ATOM   459  H HA   . ASP A 1 6 ? 3.245  -3.734 -0.784 1.00 0.00 ? 10 ASP A HA   4  
+ATOM   460  H HB2  . ASP A 1 6 ? 0.880  -2.292 -2.143 1.00 0.00 ? 10 ASP A HB2  4  
+ATOM   461  H HB3  . ASP A 1 6 ? 1.279  -3.978 -2.350 1.00 0.00 ? 10 ASP A HB3  4  
+HETATM 462  N N    . NH2 A 1 7 ? 3.738  -1.447 -3.156 1.00 0.00 ? 11 NH2 A N    4  
+HETATM 463  H HN1  . NH2 A 1 7 ? 4.388  -1.459 -3.944 1.00 0.00 ? 11 NH2 A HN1  4  
+HETATM 464  H HN2  . NH2 A 1 7 ? 3.444  -0.637 -2.595 1.00 0.00 ? 11 NH2 A HN2  4  
+HETATM 465  N N    . AC5 A 1 1 ? 0.666  -4.651 0.260  1.00 0.00 ? 5  AC5 A N    5  
+HETATM 466  O O    . AC5 A 1 1 ? -1.926 -4.847 3.017  1.00 0.00 ? 5  AC5 A O    5  
+HETATM 467  C CA   . AC5 A 1 1 ? -0.253 -5.327 1.254  1.00 0.00 ? 5  AC5 A CA   5  
+HETATM 468  C C    . AC5 A 1 1 ? -0.921 -4.461 2.411  1.00 0.00 ? 5  AC5 A C    5  
+HETATM 469  C CB1  . AC5 A 1 1 ? -1.314 -6.124 0.443  1.00 0.00 ? 5  AC5 A CB1  5  
+HETATM 470  C CB2  . AC5 A 1 1 ? 0.589  -6.462 1.910  1.00 0.00 ? 5  AC5 A CB2  5  
+HETATM 471  C CG1  . AC5 A 1 1 ? -1.213 -7.601 0.841  1.00 0.00 ? 5  AC5 A CG1  5  
+HETATM 472  C CG2  . AC5 A 1 1 ? 0.266  -7.768 1.172  1.00 0.00 ? 5  AC5 A CG2  5  
+HETATM 473  H H    . AC5 A 1 1 ? 1.476  -5.153 -0.107 1.00 0.00 ? 5  AC5 A H    5  
+HETATM 474  H HB11 . AC5 A 1 1 ? -1.144 -6.026 -0.645 1.00 0.00 ? 5  AC5 A HB11 5  
+HETATM 475  H HB12 . AC5 A 1 1 ? -2.328 -5.717 0.602  1.00 0.00 ? 5  AC5 A HB12 5  
+HETATM 476  H HB21 . AC5 A 1 1 ? 0.308  -6.600 2.975  1.00 0.00 ? 5  AC5 A HB21 5  
+HETATM 477  H HB22 . AC5 A 1 1 ? 1.675  -6.249 1.946  1.00 0.00 ? 5  AC5 A HB22 5  
+HETATM 478  H HG11 . AC5 A 1 1 ? -1.839 -7.805 1.732  1.00 0.00 ? 5  AC5 A HG11 5  
+HETATM 479  H HG12 . AC5 A 1 1 ? -1.554 -8.286 0.042  1.00 0.00 ? 5  AC5 A HG12 5  
+HETATM 480  H HG21 . AC5 A 1 1 ? 0.870  -7.860 0.247  1.00 0.00 ? 5  AC5 A HG21 5  
+HETATM 481  H HG22 . AC5 A 1 1 ? 0.468  -8.668 1.785  1.00 0.00 ? 5  AC5 A HG22 5  
+ATOM   482  N N    . HIS A 1 2 ? -0.315 -3.314 2.723  1.00 0.00 ? 6  HIS A N    5  
+ATOM   483  C CA   . HIS A 1 2 ? -0.845 -2.320 3.707  1.00 0.00 ? 6  HIS A CA   5  
+ATOM   484  C C    . HIS A 1 2 ? -1.333 -0.941 3.120  1.00 0.00 ? 6  HIS A C    5  
+ATOM   485  O O    . HIS A 1 2 ? -1.777 -0.077 3.880  1.00 0.00 ? 6  HIS A O    5  
+ATOM   486  C CB   . HIS A 1 2 ? 0.283  -2.173 4.772  1.00 0.00 ? 6  HIS A CB   5  
+ATOM   487  C CG   . HIS A 1 2 ? -0.166 -1.719 6.152  1.00 0.00 ? 6  HIS A CG   5  
+ATOM   488  N ND1  . HIS A 1 2 ? -0.199 -0.416 6.595  1.00 0.00 ? 6  HIS A ND1  5  
+ATOM   489  C CD2  . HIS A 1 2 ? -0.539 -2.587 7.183  1.00 0.00 ? 6  HIS A CD2  5  
+ATOM   490  C CE1  . HIS A 1 2 ? -0.636 -0.613 7.879  1.00 0.00 ? 6  HIS A CE1  5  
+ATOM   491  N NE2  . HIS A 1 2 ? -0.861 -1.888 8.338  1.00 0.00 ? 6  HIS A NE2  5  
+ATOM   492  H H    . HIS A 1 2 ? 0.364  -3.132 1.977  1.00 0.00 ? 6  HIS A H    5  
+ATOM   493  H HA   . HIS A 1 2 ? -1.743 -2.734 4.202  1.00 0.00 ? 6  HIS A HA   5  
+ATOM   494  H HB2  . HIS A 1 2 ? 0.820  -3.131 4.916  1.00 0.00 ? 6  HIS A HB2  5  
+ATOM   495  H HB3  . HIS A 1 2 ? 1.066  -1.490 4.412  1.00 0.00 ? 6  HIS A HB3  5  
+ATOM   496  H HD1  . HIS A 1 2 ? -0.081 0.451  6.059  1.00 0.00 ? 6  HIS A HD1  5  
+ATOM   497  H HD2  . HIS A 1 2 ? -0.551 -3.661 7.071  1.00 0.00 ? 6  HIS A HD2  5  
+ATOM   498  H HE1  . HIS A 1 2 ? -0.820 0.231  8.530  1.00 0.00 ? 6  HIS A HE1  5  
+HETATM 499  N N    . DPN A 1 3 ? -1.246 -0.709 1.798  1.00 0.00 ? 7  DPN A N    5  
+HETATM 500  C CA   . DPN A 1 3 ? -1.493 0.612  1.158  1.00 0.00 ? 7  DPN A CA   5  
+HETATM 501  C C    . DPN A 1 3 ? -0.309 0.940  0.191  1.00 0.00 ? 7  DPN A C    5  
+HETATM 502  O O    . DPN A 1 3 ? 0.127  0.107  -0.612 1.00 0.00 ? 7  DPN A O    5  
+HETATM 503  C CB   . DPN A 1 3 ? -2.874 0.584  0.458  1.00 0.00 ? 7  DPN A CB   5  
+HETATM 504  C CG   . DPN A 1 3 ? -3.375 1.957  -0.022 1.00 0.00 ? 7  DPN A CG   5  
+HETATM 505  C CD1  . DPN A 1 3 ? -3.178 2.359  -1.348 1.00 0.00 ? 7  DPN A CD1  5  
+HETATM 506  C CD2  . DPN A 1 3 ? -4.008 2.827  0.873  1.00 0.00 ? 7  DPN A CD2  5  
+HETATM 507  C CE1  . DPN A 1 3 ? -3.604 3.617  -1.771 1.00 0.00 ? 7  DPN A CE1  5  
+HETATM 508  C CE2  . DPN A 1 3 ? -4.434 4.084  0.448  1.00 0.00 ? 7  DPN A CE2  5  
+HETATM 509  C CZ   . DPN A 1 3 ? -4.231 4.478  -0.873 1.00 0.00 ? 7  DPN A CZ   5  
+HETATM 510  H H    . DPN A 1 3 ? -0.986 -1.547 1.258  1.00 0.00 ? 7  DPN A H    5  
+HETATM 511  H HA   . DPN A 1 3 ? -1.537 1.395  1.946  1.00 0.00 ? 7  DPN A HA   5  
+HETATM 512  H HB2  . DPN A 1 3 ? -2.833 -0.130 -0.384 1.00 0.00 ? 7  DPN A HB2  5  
+HETATM 513  H HB3  . DPN A 1 3 ? -3.633 0.152  1.141  1.00 0.00 ? 7  DPN A HB3  5  
+HETATM 514  H HD1  . DPN A 1 3 ? -2.685 1.703  -2.051 1.00 0.00 ? 7  DPN A HD1  5  
+HETATM 515  H HD2  . DPN A 1 3 ? -4.170 2.532  1.901  1.00 0.00 ? 7  DPN A HD2  5  
+HETATM 516  H HE1  . DPN A 1 3 ? -3.447 3.923  -2.794 1.00 0.00 ? 7  DPN A HE1  5  
+HETATM 517  H HE2  . DPN A 1 3 ? -4.924 4.753  1.141  1.00 0.00 ? 7  DPN A HE2  5  
+HETATM 518  H HZ   . DPN A 1 3 ? -4.563 5.452  -1.204 1.00 0.00 ? 7  DPN A HZ   5  
+ATOM   519  N N    . ARG A 1 4 ? 0.257  2.153  0.316  1.00 0.00 ? 8  ARG A N    5  
+ATOM   520  C CA   . ARG A 1 4 ? 1.532  2.548  -0.374 1.00 0.00 ? 8  ARG A CA   5  
+ATOM   521  C C    . ARG A 1 4 ? 2.787  1.612  -0.225 1.00 0.00 ? 8  ARG A C    5  
+ATOM   522  O O    . ARG A 1 4 ? 3.554  1.407  -1.167 1.00 0.00 ? 8  ARG A O    5  
+ATOM   523  C CB   . ARG A 1 4 ? 1.850  4.029  -0.019 1.00 0.00 ? 8  ARG A CB   5  
+ATOM   524  C CG   . ARG A 1 4 ? 2.182  4.332  1.466  1.00 0.00 ? 8  ARG A CG   5  
+ATOM   525  C CD   . ARG A 1 4 ? 2.693  5.765  1.707  1.00 0.00 ? 8  ARG A CD   5  
+ATOM   526  N NE   . ARG A 1 4 ? 2.986  6.002  3.151  1.00 0.00 ? 8  ARG A NE   5  
+ATOM   527  C CZ   . ARG A 1 4 ? 4.107  5.653  3.788  1.00 0.00 ? 8  ARG A CZ   5  
+ATOM   528  N NH1  . ARG A 1 4 ? 5.089  4.996  3.223  1.00 0.00 ? 8  ARG A NH1  5  
+ATOM   529  N NH2  . ARG A 1 4 ? 4.233  5.980  5.042  1.00 0.00 ? 8  ARG A NH2  5  
+ATOM   530  H H    . ARG A 1 4 ? -0.288 2.805  0.887  1.00 0.00 ? 8  ARG A H    5  
+ATOM   531  H HA   . ARG A 1 4 ? 1.316  2.521  -1.452 1.00 0.00 ? 8  ARG A HA   5  
+ATOM   532  H HB2  . ARG A 1 4 ? 2.691  4.361  -0.659 1.00 0.00 ? 8  ARG A HB2  5  
+ATOM   533  H HB3  . ARG A 1 4 ? 0.999  4.662  -0.332 1.00 0.00 ? 8  ARG A HB3  5  
+ATOM   534  H HG2  . ARG A 1 4 ? 1.283  4.145  2.085  1.00 0.00 ? 8  ARG A HG2  5  
+ATOM   535  H HG3  . ARG A 1 4 ? 2.934  3.609  1.831  1.00 0.00 ? 8  ARG A HG3  5  
+ATOM   536  H HD2  . ARG A 1 4 ? 3.572  5.994  1.068  1.00 0.00 ? 8  ARG A HD2  5  
+ATOM   537  H HD3  . ARG A 1 4 ? 1.921  6.488  1.373  1.00 0.00 ? 8  ARG A HD3  5  
+ATOM   538  H HE   . ARG A 1 4 ? 2.310  6.495  3.744  1.00 0.00 ? 8  ARG A HE   5  
+ATOM   539  H HH11 . ARG A 1 4 ? 4.917  4.759  2.244  1.00 0.00 ? 8  ARG A HH11 5  
+ATOM   540  H HH12 . ARG A 1 4 ? 5.904  4.747  3.784  1.00 0.00 ? 8  ARG A HH12 5  
+ATOM   541  H HH21 . ARG A 1 4 ? 3.463  6.502  5.464  1.00 0.00 ? 8  ARG A HH21 5  
+ATOM   542  H HH22 . ARG A 1 4 ? 5.101  5.710  5.506  1.00 0.00 ? 8  ARG A HH22 5  
+ATOM   543  N N    . TRP A 1 5 ? 2.929  1.024  0.965  1.00 0.00 ? 9  TRP A N    5  
+ATOM   544  C CA   . TRP A 1 5 ? 3.881  -0.069 1.308  1.00 0.00 ? 9  TRP A CA   5  
+ATOM   545  C C    . TRP A 1 5 ? 3.937  -1.315 0.358  1.00 0.00 ? 9  TRP A C    5  
+ATOM   546  O O    . TRP A 1 5 ? 5.004  -1.918 0.217  1.00 0.00 ? 9  TRP A O    5  
+ATOM   547  C CB   . TRP A 1 5 ? 3.511  -0.530 2.747  1.00 0.00 ? 9  TRP A CB   5  
+ATOM   548  C CG   . TRP A 1 5 ? 3.602  0.514  3.875  1.00 0.00 ? 9  TRP A CG   5  
+ATOM   549  C CD1  . TRP A 1 5 ? 4.708  0.869  4.667  1.00 0.00 ? 9  TRP A CD1  5  
+ATOM   550  C CD2  . TRP A 1 5 ? 2.576  1.325  4.289  1.00 0.00 ? 9  TRP A CD2  5  
+ATOM   551  N NE1  . TRP A 1 5 ? 4.379  1.891  5.590  1.00 0.00 ? 9  TRP A NE1  5  
+ATOM   552  C CE2  . TRP A 1 5 ? 3.041  2.154  5.331  1.00 0.00 ? 9  TRP A CE2  5  
+ATOM   553  C CE3  . TRP A 1 5 ? 1.261  1.435  3.807  1.00 0.00 ? 9  TRP A CE3  5  
+ATOM   554  C CZ2  . TRP A 1 5 ? 2.162  3.103  5.916  1.00 0.00 ? 9  TRP A CZ2  5  
+ATOM   555  C CZ3  . TRP A 1 5 ? 0.417  2.380  4.375  1.00 0.00 ? 9  TRP A CZ3  5  
+ATOM   556  C CH2  . TRP A 1 5 ? 0.855  3.203  5.422  1.00 0.00 ? 9  TRP A CH2  5  
+ATOM   557  H H    . TRP A 1 5 ? 2.166  1.279  1.596  1.00 0.00 ? 9  TRP A H    5  
+ATOM   558  H HA   . TRP A 1 5 ? 4.895  0.365  1.358  1.00 0.00 ? 9  TRP A HA   5  
+ATOM   559  H HB2  . TRP A 1 5 ? 2.496  -0.970 2.732  1.00 0.00 ? 9  TRP A HB2  5  
+ATOM   560  H HB3  . TRP A 1 5 ? 4.128  -1.382 3.038  1.00 0.00 ? 9  TRP A HB3  5  
+ATOM   561  H HD1  . TRP A 1 5 ? 5.685  0.417  4.563  1.00 0.00 ? 9  TRP A HD1  5  
+ATOM   562  H HE1  . TRP A 1 5 ? 4.952  2.251  6.362  1.00 0.00 ? 9  TRP A HE1  5  
+ATOM   563  H HE3  . TRP A 1 5 ? 0.947  0.791  3.000  1.00 0.00 ? 9  TRP A HE3  5  
+ATOM   564  H HZ2  . TRP A 1 5 ? 2.500  3.739  6.722  1.00 0.00 ? 9  TRP A HZ2  5  
+ATOM   565  H HZ3  . TRP A 1 5 ? -0.583 2.447  3.978  1.00 0.00 ? 9  TRP A HZ3  5  
+ATOM   566  H HH2  . TRP A 1 5 ? 0.172  3.920  5.852  1.00 0.00 ? 9  TRP A HH2  5  
+ATOM   567  N N    . ASP A 1 6 ? 2.814  -1.707 -0.277 1.00 0.00 ? 10 ASP A N    5  
+ATOM   568  C CA   . ASP A 1 6 ? 2.775  -2.814 -1.276 1.00 0.00 ? 10 ASP A CA   5  
+ATOM   569  C C    . ASP A 1 6 ? 3.571  -2.588 -2.607 1.00 0.00 ? 10 ASP A C    5  
+ATOM   570  O O    . ASP A 1 6 ? 4.092  -3.532 -3.194 1.00 0.00 ? 10 ASP A O    5  
+ATOM   571  C CB   . ASP A 1 6 ? 1.291  -3.163 -1.598 1.00 0.00 ? 10 ASP A CB   5  
+ATOM   572  C CG   . ASP A 1 6 ? 0.346  -3.560 -0.452 1.00 0.00 ? 10 ASP A CG   5  
+ATOM   573  O OD1  . ASP A 1 6 ? -0.660 -2.890 -0.230 1.00 0.00 ? 10 ASP A OD1  5  
+ATOM   574  H H    . ASP A 1 6 ? 2.009  -1.086 -0.125 1.00 0.00 ? 10 ASP A H    5  
+ATOM   575  H HA   . ASP A 1 6 ? 3.244  -3.706 -0.815 1.00 0.00 ? 10 ASP A HA   5  
+ATOM   576  H HB2  . ASP A 1 6 ? 0.827  -2.302 -2.120 1.00 0.00 ? 10 ASP A HB2  5  
+ATOM   577  H HB3  . ASP A 1 6 ? 1.255  -3.979 -2.346 1.00 0.00 ? 10 ASP A HB3  5  
+HETATM 578  N N    . NH2 A 1 7 ? 3.695  -1.393 -3.159 1.00 0.00 ? 11 NH2 A N    5  
+HETATM 579  H HN1  . NH2 A 1 7 ? 4.330  -1.399 -3.960 1.00 0.00 ? 11 NH2 A HN1  5  
+HETATM 580  H HN2  . NH2 A 1 7 ? 3.439  -0.596 -2.567 1.00 0.00 ? 11 NH2 A HN2  5  
+HETATM 581  N N    . AC5 A 1 1 ? 0.655  -4.605 0.246  1.00 0.00 ? 5  AC5 A N    6  
+HETATM 582  O O    . AC5 A 1 1 ? -2.068 -4.789 2.863  1.00 0.00 ? 5  AC5 A O    6  
+HETATM 583  C CA   . AC5 A 1 1 ? -0.299 -5.289 1.198  1.00 0.00 ? 5  AC5 A CA   6  
+HETATM 584  C C    . AC5 A 1 1 ? -1.010 -4.429 2.335  1.00 0.00 ? 5  AC5 A C    6  
+HETATM 585  C CB1  . AC5 A 1 1 ? -1.340 -6.058 0.340  1.00 0.00 ? 5  AC5 A CB1  6  
+HETATM 586  C CB2  . AC5 A 1 1 ? 0.509  -6.450 1.859  1.00 0.00 ? 5  AC5 A CB2  6  
+HETATM 587  C CG1  . AC5 A 1 1 ? -1.353 -7.517 0.805  1.00 0.00 ? 5  AC5 A CG1  6  
+HETATM 588  C CG2  . AC5 A 1 1 ? 0.107  -7.761 1.169  1.00 0.00 ? 5  AC5 A CG2  6  
+HETATM 589  H H    . AC5 A 1 1 ? 1.472  -5.107 -0.107 1.00 0.00 ? 5  AC5 A H    6  
+HETATM 590  H HB11 . AC5 A 1 1 ? -1.078 -6.018 -0.733 1.00 0.00 ? 5  AC5 A HB11 6  
+HETATM 591  H HB12 . AC5 A 1 1 ? -2.335 -5.583 0.402  1.00 0.00 ? 5  AC5 A HB12 6  
+HETATM 592  H HB21 . AC5 A 1 1 ? 0.259  -6.545 2.936  1.00 0.00 ? 5  AC5 A HB21 6  
+HETATM 593  H HB22 . AC5 A 1 1 ? 1.606  -6.300 1.851  1.00 0.00 ? 5  AC5 A HB22 6  
+HETATM 594  H HG11 . AC5 A 1 1 ? -2.005 -7.639 1.691  1.00 0.00 ? 5  AC5 A HG11 6  
+HETATM 595  H HG12 . AC5 A 1 1 ? -1.723 -8.213 0.026  1.00 0.00 ? 5  AC5 A HG12 6  
+HETATM 596  H HG21 . AC5 A 1 1 ? 0.717  -7.928 0.259  1.00 0.00 ? 5  AC5 A HG21 6  
+HETATM 597  H HG22 . AC5 A 1 1 ? 0.242  -8.647 1.819  1.00 0.00 ? 5  AC5 A HG22 6  
+ATOM   598  N N    . HIS A 1 2 ? -0.395 -3.308 2.708  1.00 0.00 ? 6  HIS A N    6  
+ATOM   599  C CA   . HIS A 1 2 ? -0.969 -2.304 3.653  1.00 0.00 ? 6  HIS A CA   6  
+ATOM   600  C C    . HIS A 1 2 ? -1.452 -0.941 3.034  1.00 0.00 ? 6  HIS A C    6  
+ATOM   601  O O    . HIS A 1 2 ? -1.938 -0.086 3.779  1.00 0.00 ? 6  HIS A O    6  
+ATOM   602  C CB   . HIS A 1 2 ? 0.122  -2.069 4.735  1.00 0.00 ? 6  HIS A CB   6  
+ATOM   603  C CG   . HIS A 1 2 ? 0.325  -3.199 5.740  1.00 0.00 ? 6  HIS A CG   6  
+ATOM   604  N ND1  . HIS A 1 2 ? -0.552 -3.519 6.756  1.00 0.00 ? 6  HIS A ND1  6  
+ATOM   605  C CD2  . HIS A 1 2 ? 1.424  -4.065 5.766  1.00 0.00 ? 6  HIS A CD2  6  
+ATOM   606  C CE1  . HIS A 1 2 ? 0.105  -4.589 7.308  1.00 0.00 ? 6  HIS A CE1  6  
+ATOM   607  N NE2  . HIS A 1 2 ? 1.309  -4.998 6.789  1.00 0.00 ? 6  HIS A NE2  6  
+ATOM   608  H H    . HIS A 1 2 ? 0.379  -3.132 2.068  1.00 0.00 ? 6  HIS A H    6  
+ATOM   609  H HA   . HIS A 1 2 ? -1.871 -2.708 4.146  1.00 0.00 ? 6  HIS A HA   6  
+ATOM   610  H HB2  . HIS A 1 2 ? 1.086  -1.808 4.259  1.00 0.00 ? 6  HIS A HB2  6  
+ATOM   611  H HB3  . HIS A 1 2 ? -0.121 -1.168 5.309  1.00 0.00 ? 6  HIS A HB3  6  
+ATOM   612  H HD1  . HIS A 1 2 ? -1.455 -3.102 6.999  1.00 0.00 ? 6  HIS A HD1  6  
+ATOM   613  H HD2  . HIS A 1 2 ? 2.246  -4.007 5.071  1.00 0.00 ? 6  HIS A HD2  6  
+ATOM   614  H HE1  . HIS A 1 2 ? -0.319 -5.117 8.151  1.00 0.00 ? 6  HIS A HE1  6  
+HETATM 615  N N    . DPN A 1 3 ? -1.307 -0.708 1.718  1.00 0.00 ? 7  DPN A N    6  
+HETATM 616  C CA   . DPN A 1 3 ? -1.540 0.613  1.073  1.00 0.00 ? 7  DPN A CA   6  
+HETATM 617  C C    . DPN A 1 3 ? -0.317 0.955  0.159  1.00 0.00 ? 7  DPN A C    6  
+HETATM 618  O O    . DPN A 1 3 ? 0.132  0.142  -0.657 1.00 0.00 ? 7  DPN A O    6  
+HETATM 619  C CB   . DPN A 1 3 ? -2.886 0.569  0.307  1.00 0.00 ? 7  DPN A CB   6  
+HETATM 620  C CG   . DPN A 1 3 ? -3.377 1.935  -0.202 1.00 0.00 ? 7  DPN A CG   6  
+HETATM 621  C CD1  . DPN A 1 3 ? -3.120 2.333  -1.519 1.00 0.00 ? 7  DPN A CD1  6  
+HETATM 622  C CD2  . DPN A 1 3 ? -4.063 2.801  0.656  1.00 0.00 ? 7  DPN A CD2  6  
+HETATM 623  C CE1  . DPN A 1 3 ? -3.541 3.583  -1.968 1.00 0.00 ? 7  DPN A CE1  6  
+HETATM 624  C CE2  . DPN A 1 3 ? -4.484 4.051  0.204  1.00 0.00 ? 7  DPN A CE2  6  
+HETATM 625  C CZ   . DPN A 1 3 ? -4.221 4.441  -1.107 1.00 0.00 ? 7  DPN A CZ   6  
+HETATM 626  H H    . DPN A 1 3 ? -1.028 -1.545 1.186  1.00 0.00 ? 7  DPN A H    6  
+HETATM 627  H HA   . DPN A 1 3 ? -1.630 1.394  1.856  1.00 0.00 ? 7  DPN A HA   6  
+HETATM 628  H HB2  . DPN A 1 3 ? -2.796 -0.147 -0.528 1.00 0.00 ? 7  DPN A HB2  6  
+HETATM 629  H HB3  . DPN A 1 3 ? -3.673 0.132  0.954  1.00 0.00 ? 7  DPN A HB3  6  
+HETATM 630  H HD1  . DPN A 1 3 ? -2.587 1.679  -2.194 1.00 0.00 ? 7  DPN A HD1  6  
+HETATM 631  H HD2  . DPN A 1 3 ? -4.271 2.510  1.676  1.00 0.00 ? 7  DPN A HD2  6  
+HETATM 632  H HE1  . DPN A 1 3 ? -3.339 3.887  -2.985 1.00 0.00 ? 7  DPN A HE1  6  
+HETATM 633  H HE2  . DPN A 1 3 ? -5.014 4.717  0.869  1.00 0.00 ? 7  DPN A HE2  6  
+HETATM 634  H HZ   . DPN A 1 3 ? -4.549 5.409  -1.458 1.00 0.00 ? 7  DPN A HZ   6  
+ATOM   635  N N    . ARG A 1 4 ? 0.253  2.159  0.335  1.00 0.00 ? 8  ARG A N    6  
+ATOM   636  C CA   . ARG A 1 4 ? 1.529  2.575  -0.342 1.00 0.00 ? 8  ARG A CA   6  
+ATOM   637  C C    . ARG A 1 4 ? 2.792  1.652  -0.202 1.00 0.00 ? 8  ARG A C    6  
+ATOM   638  O O    . ARG A 1 4 ? 3.588  1.506  -1.131 1.00 0.00 ? 8  ARG A O    6  
+ATOM   639  C CB   . ARG A 1 4 ? 1.828  4.054  0.027  1.00 0.00 ? 8  ARG A CB   6  
+ATOM   640  C CG   . ARG A 1 4 ? 2.199  4.352  1.507  1.00 0.00 ? 8  ARG A CG   6  
+ATOM   641  C CD   . ARG A 1 4 ? 2.579  5.815  1.807  1.00 0.00 ? 8  ARG A CD   6  
+ATOM   642  N NE   . ARG A 1 4 ? 3.938  6.124  1.277  1.00 0.00 ? 8  ARG A NE   6  
+ATOM   643  C CZ   . ARG A 1 4 ? 4.556  7.300  1.377  1.00 0.00 ? 8  ARG A CZ   6  
+ATOM   644  N NH1  . ARG A 1 4 ? 5.748  7.415  0.866  1.00 0.00 ? 8  ARG A NH1  6  
+ATOM   645  N NH2  . ARG A 1 4 ? 4.031  8.349  1.963  1.00 0.00 ? 8  ARG A NH2  6  
+ATOM   646  H H    . ARG A 1 4 ? -0.293 2.793  0.923  1.00 0.00 ? 8  ARG A H    6  
+ATOM   647  H HA   . ARG A 1 4 ? 1.318  2.556  -1.420 1.00 0.00 ? 8  ARG A HA   6  
+ATOM   648  H HB2  . ARG A 1 4 ? 2.644  4.410  -0.631 1.00 0.00 ? 8  ARG A HB2  6  
+ATOM   649  H HB3  . ARG A 1 4 ? 0.958  4.675  -0.258 1.00 0.00 ? 8  ARG A HB3  6  
+ATOM   650  H HG2  . ARG A 1 4 ? 1.331  4.082  2.139  1.00 0.00 ? 8  ARG A HG2  6  
+ATOM   651  H HG3  . ARG A 1 4 ? 3.007  3.676  1.851  1.00 0.00 ? 8  ARG A HG3  6  
+ATOM   652  H HD2  . ARG A 1 4 ? 1.813  6.498  1.386  1.00 0.00 ? 8  ARG A HD2  6  
+ATOM   653  H HD3  . ARG A 1 4 ? 2.557  5.966  2.907  1.00 0.00 ? 8  ARG A HD3  6  
+ATOM   654  H HE   . ARG A 1 4 ? 4.478  5.400  0.795  1.00 0.00 ? 8  ARG A HE   6  
+ATOM   655  H HH11 . ARG A 1 4 ? 6.209  8.323  0.951  1.00 0.00 ? 8  ARG A HH11 6  
+ATOM   656  H HH12 . ARG A 1 4 ? 6.141  6.585  0.414  1.00 0.00 ? 8  ARG A HH12 6  
+ATOM   657  H HH21 . ARG A 1 4 ? 4.574  9.213  1.996  1.00 0.00 ? 8  ARG A HH21 6  
+ATOM   658  H HH22 . ARG A 1 4 ? 3.098  8.191  2.342  1.00 0.00 ? 8  ARG A HH22 6  
+ATOM   659  N N    . TRP A 1 5 ? 2.916  1.014  0.962  1.00 0.00 ? 9  TRP A N    6  
+ATOM   660  C CA   . TRP A 1 5 ? 3.909  -0.049 1.285  1.00 0.00 ? 9  TRP A CA   6  
+ATOM   661  C C    . TRP A 1 5 ? 3.970  -1.295 0.336  1.00 0.00 ? 9  TRP A C    6  
+ATOM   662  O O    . TRP A 1 5 ? 5.038  -1.894 0.193  1.00 0.00 ? 9  TRP A O    6  
+ATOM   663  C CB   . TRP A 1 5 ? 3.607  -0.515 2.738  1.00 0.00 ? 9  TRP A CB   6  
+ATOM   664  C CG   . TRP A 1 5 ? 3.668  0.550  3.846  1.00 0.00 ? 9  TRP A CG   6  
+ATOM   665  C CD1  . TRP A 1 5 ? 4.792  1.055  4.528  1.00 0.00 ? 9  TRP A CD1  6  
+ATOM   666  C CD2  . TRP A 1 5 ? 2.609  1.318  4.262  1.00 0.00 ? 9  TRP A CD2  6  
+ATOM   667  N NE1  . TRP A 1 5 ? 4.442  2.131  5.376  1.00 0.00 ? 9  TRP A NE1  6  
+ATOM   668  C CE2  . TRP A 1 5 ? 3.074  2.281  5.182  1.00 0.00 ? 9  TRP A CE2  6  
+ATOM   669  C CE3  . TRP A 1 5 ? 1.273  1.327  3.819  1.00 0.00 ? 9  TRP A CE3  6  
+ATOM   670  C CZ2  . TRP A 1 5 ? 2.186  3.270  5.676  1.00 0.00 ? 9  TRP A CZ2  6  
+ATOM   671  C CZ3  . TRP A 1 5 ? 0.413  2.301  4.311  1.00 0.00 ? 9  TRP A CZ3  6  
+ATOM   672  C CH2  . TRP A 1 5 ? 0.857  3.259  5.233  1.00 0.00 ? 9  TRP A CH2  6  
+ATOM   673  H H    . TRP A 1 5 ? 2.154  1.248  1.603  1.00 0.00 ? 9  TRP A H    6  
+ATOM   674  H HA   . TRP A 1 5 ? 4.911  0.415  1.294  1.00 0.00 ? 9  TRP A HA   6  
+ATOM   675  H HB2  . TRP A 1 5 ? 2.616  -1.011 2.757  1.00 0.00 ? 9  TRP A HB2  6  
+ATOM   676  H HB3  . TRP A 1 5 ? 4.278  -1.326 3.019  1.00 0.00 ? 9  TRP A HB3  6  
+ATOM   677  H HD1  . TRP A 1 5 ? 5.802  0.706  4.361  1.00 0.00 ? 9  TRP A HD1  6  
+ATOM   678  H HE1  . TRP A 1 5 ? 5.057  2.699  5.972  1.00 0.00 ? 9  TRP A HE1  6  
+ATOM   679  H HE3  . TRP A 1 5 ? 0.968  0.612  3.072  1.00 0.00 ? 9  TRP A HE3  6  
+ATOM   680  H HZ2  . TRP A 1 5 ? 2.532  4.025  6.367  1.00 0.00 ? 9  TRP A HZ2  6  
+ATOM   681  H HZ3  . TRP A 1 5 ? -0.599 2.296  3.938  1.00 0.00 ? 9  TRP A HZ3  6  
+ATOM   682  H HH2  . TRP A 1 5 ? 0.166  4.007  5.596  1.00 0.00 ? 9  TRP A HH2  6  
+ATOM   683  N N    . ASP A 1 6 ? 2.846  -1.689 -0.296 1.00 0.00 ? 10 ASP A N    6  
+ATOM   684  C CA   . ASP A 1 6 ? 2.802  -2.807 -1.285 1.00 0.00 ? 10 ASP A CA   6  
+ATOM   685  C C    . ASP A 1 6 ? 3.614  -2.606 -2.610 1.00 0.00 ? 10 ASP A C    6  
+ATOM   686  O O    . ASP A 1 6 ? 4.149  -3.560 -3.166 1.00 0.00 ? 10 ASP A O    6  
+ATOM   687  C CB   . ASP A 1 6 ? 1.316  -3.134 -1.615 1.00 0.00 ? 10 ASP A CB   6  
+ATOM   688  C CG   . ASP A 1 6 ? 0.354  -3.515 -0.478 1.00 0.00 ? 10 ASP A CG   6  
+ATOM   689  O OD1  . ASP A 1 6 ? -0.657 -2.844 -0.280 1.00 0.00 ? 10 ASP A OD1  6  
+ATOM   690  H H    . ASP A 1 6 ? 2.042  -1.071 -0.134 1.00 0.00 ? 10 ASP A H    6  
+ATOM   691  H HA   . ASP A 1 6 ? 3.252  -3.700 -0.809 1.00 0.00 ? 10 ASP A HA   6  
+ATOM   692  H HB2  . ASP A 1 6 ? 0.867  -2.269 -2.142 1.00 0.00 ? 10 ASP A HB2  6  
+ATOM   693  H HB3  . ASP A 1 6 ? 1.273  -3.951 -2.359 1.00 0.00 ? 10 ASP A HB3  6  
+HETATM 694  N N    . NH2 A 1 7 ? 3.733  -1.425 -3.188 1.00 0.00 ? 11 NH2 A N    6  
+HETATM 695  H HN1  . NH2 A 1 7 ? 4.380  -1.443 -3.981 1.00 0.00 ? 11 NH2 A HN1  6  
+HETATM 696  H HN2  . NH2 A 1 7 ? 3.455  -0.617 -2.620 1.00 0.00 ? 11 NH2 A HN2  6  
+HETATM 697  N N    . AC5 A 1 1 ? 0.802  -4.615 0.103  1.00 0.00 ? 5  AC5 A N    7  
+HETATM 698  O O    . AC5 A 1 1 ? -2.317 -4.836 2.008  1.00 0.00 ? 5  AC5 A O    7  
+HETATM 699  C CA   . AC5 A 1 1 ? -0.023 -5.317 1.148  1.00 0.00 ? 5  AC5 A CA   7  
+HETATM 700  C C    . AC5 A 1 1 ? -1.143 -4.475 1.898  1.00 0.00 ? 5  AC5 A C    7  
+HETATM 701  C CB1  . AC5 A 1 1 ? -0.572 -6.613 0.534  1.00 0.00 ? 5  AC5 A CB1  7  
+HETATM 702  C CB2  . AC5 A 1 1 ? 0.991  -5.934 2.156  1.00 0.00 ? 5  AC5 A CB2  7  
+HETATM 703  C CG1  . AC5 A 1 1 ? 0.548  -7.664 0.476  1.00 0.00 ? 5  AC5 A CG1  7  
+HETATM 704  C CG2  . AC5 A 1 1 ? 1.483  -7.298 1.631  1.00 0.00 ? 5  AC5 A CG2  7  
+HETATM 705  H H    . AC5 A 1 1 ? 1.722  -4.995 -0.117 1.00 0.00 ? 5  AC5 A H    7  
+HETATM 706  H HB11 . AC5 A 1 1 ? -1.027 -6.393 -0.445 1.00 0.00 ? 5  AC5 A HB11 7  
+HETATM 707  H HB12 . AC5 A 1 1 ? -1.376 -6.989 1.185  1.00 0.00 ? 5  AC5 A HB12 7  
+HETATM 708  H HB21 . AC5 A 1 1 ? 0.494  -6.104 3.131  1.00 0.00 ? 5  AC5 A HB21 7  
+HETATM 709  H HB22 . AC5 A 1 1 ? 1.831  -5.250 2.394  1.00 0.00 ? 5  AC5 A HB22 7  
+HETATM 710  H HG11 . AC5 A 1 1 ? 0.156  -8.698 0.555  1.00 0.00 ? 5  AC5 A HG11 7  
+HETATM 711  H HG12 . AC5 A 1 1 ? 1.084  -7.602 -0.490 1.00 0.00 ? 5  AC5 A HG12 7  
+HETATM 712  H HG21 . AC5 A 1 1 ? 2.532  -7.241 1.282  1.00 0.00 ? 5  AC5 A HG21 7  
+HETATM 713  H HG22 . AC5 A 1 1 ? 1.461  -8.066 2.429  1.00 0.00 ? 5  AC5 A HG22 7  
+ATOM   714  N N    . HIS A 1 2 ? -0.694 -3.348 2.442  1.00 0.00 ? 6  HIS A N    7  
+ATOM   715  C CA   . HIS A 1 2 ? -1.470 -2.488 3.375  1.00 0.00 ? 6  HIS A CA   7  
+ATOM   716  C C    . HIS A 1 2 ? -1.463 -0.957 3.042  1.00 0.00 ? 6  HIS A C    7  
+ATOM   717  O O    . HIS A 1 2 ? -1.448 -0.109 3.939  1.00 0.00 ? 6  HIS A O    7  
+ATOM   718  C CB   . HIS A 1 2 ? -1.007 -2.856 4.811  1.00 0.00 ? 6  HIS A CB   7  
+ATOM   719  C CG   . HIS A 1 2 ? 0.477  -2.794 5.185  1.00 0.00 ? 6  HIS A CG   7  
+ATOM   720  N ND1  . HIS A 1 2 ? 1.327  -3.881 5.233  1.00 0.00 ? 6  HIS A ND1  7  
+ATOM   721  C CD2  . HIS A 1 2 ? 1.148  -1.648 5.597  1.00 0.00 ? 6  HIS A CD2  7  
+ATOM   722  C CE1  . HIS A 1 2 ? 2.466  -3.269 5.689  1.00 0.00 ? 6  HIS A CE1  7  
+ATOM   723  N NE2  . HIS A 1 2 ? 2.466  -1.920 5.934  1.00 0.00 ? 6  HIS A NE2  7  
+ATOM   724  H H    . HIS A 1 2 ? 0.319  -3.340 2.348  1.00 0.00 ? 6  HIS A H    7  
+ATOM   725  H HA   . HIS A 1 2 ? -2.545 -2.753 3.322  1.00 0.00 ? 6  HIS A HA   7  
+ATOM   726  H HB2  . HIS A 1 2 ? -1.564 -2.205 5.495  1.00 0.00 ? 6  HIS A HB2  7  
+ATOM   727  H HB3  . HIS A 1 2 ? -1.367 -3.869 5.026  1.00 0.00 ? 6  HIS A HB3  7  
+ATOM   728  H HD1  . HIS A 1 2 ? 1.117  -4.878 5.126  1.00 0.00 ? 6  HIS A HD1  7  
+ATOM   729  H HD2  . HIS A 1 2 ? 0.666  -0.689 5.646  1.00 0.00 ? 6  HIS A HD2  7  
+ATOM   730  H HE1  . HIS A 1 2 ? 3.359  -3.849 5.886  1.00 0.00 ? 6  HIS A HE1  7  
+HETATM 731  N N    . DPN A 1 3 ? -1.542 -0.611 1.748  1.00 0.00 ? 7  DPN A N    7  
+HETATM 732  C CA   . DPN A 1 3 ? -1.543 0.791  1.249  1.00 0.00 ? 7  DPN A CA   7  
+HETATM 733  C C    . DPN A 1 3 ? -0.362 1.014  0.247  1.00 0.00 ? 7  DPN A C    7  
+HETATM 734  O O    . DPN A 1 3 ? -0.025 0.153  -0.573 1.00 0.00 ? 7  DPN A O    7  
+HETATM 735  C CB   . DPN A 1 3 ? -2.940 1.089  0.639  1.00 0.00 ? 7  DPN A CB   7  
+HETATM 736  C CG   . DPN A 1 3 ? -3.199 2.574  0.329  1.00 0.00 ? 7  DPN A CG   7  
+HETATM 737  C CD1  . DPN A 1 3 ? -3.576 3.450  1.351  1.00 0.00 ? 7  DPN A CD1  7  
+HETATM 738  C CD2  . DPN A 1 3 ? -3.024 3.066  -0.969 1.00 0.00 ? 7  DPN A CD2  7  
+HETATM 739  C CE1  . DPN A 1 3 ? -3.771 4.803  1.080  1.00 0.00 ? 7  DPN A CE1  7  
+HETATM 740  C CE2  . DPN A 1 3 ? -3.220 4.419  -1.238 1.00 0.00 ? 7  DPN A CE2  7  
+HETATM 741  C CZ   . DPN A 1 3 ? -3.593 5.287  -0.215 1.00 0.00 ? 7  DPN A CZ   7  
+HETATM 742  H H    . DPN A 1 3 ? -1.401 -1.425 1.141  1.00 0.00 ? 7  DPN A H    7  
+HETATM 743  H HA   . DPN A 1 3 ? -1.409 1.483  2.105  1.00 0.00 ? 7  DPN A HA   7  
+HETATM 744  H HB2  . DPN A 1 3 ? -3.081 0.470  -0.267 1.00 0.00 ? 7  DPN A HB2  7  
+HETATM 745  H HB3  . DPN A 1 3 ? -3.732 0.736  1.328  1.00 0.00 ? 7  DPN A HB3  7  
+HETATM 746  H HD1  . DPN A 1 3 ? -3.714 3.089  2.361  1.00 0.00 ? 7  DPN A HD1  7  
+HETATM 747  H HD2  . DPN A 1 3 ? -2.726 2.405  -1.771 1.00 0.00 ? 7  DPN A HD2  7  
+HETATM 748  H HE1  . DPN A 1 3 ? -4.065 5.478  1.872  1.00 0.00 ? 7  DPN A HE1  7  
+HETATM 749  H HE2  . DPN A 1 3 ? -3.083 4.795  -2.242 1.00 0.00 ? 7  DPN A HE2  7  
+HETATM 750  H HZ   . DPN A 1 3 ? -3.748 6.335  -0.424 1.00 0.00 ? 7  DPN A HZ   7  
+ATOM   751  N N    . ARG A 1 4 ? 0.300  2.180  0.357  1.00 0.00 ? 8  ARG A N    7  
+ATOM   752  C CA   . ARG A 1 4 ? 1.551  2.500  -0.411 1.00 0.00 ? 8  ARG A CA   7  
+ATOM   753  C C    . ARG A 1 4 ? 2.753  1.490  -0.337 1.00 0.00 ? 8  ARG A C    7  
+ATOM   754  O O    . ARG A 1 4 ? 3.474  1.270  -1.312 1.00 0.00 ? 8  ARG A O    7  
+ATOM   755  C CB   . ARG A 1 4 ? 1.968  3.957  -0.058 1.00 0.00 ? 8  ARG A CB   7  
+ATOM   756  C CG   . ARG A 1 4 ? 2.530  4.186  1.369  1.00 0.00 ? 8  ARG A CG   7  
+ATOM   757  C CD   . ARG A 1 4 ? 2.894  5.644  1.675  1.00 0.00 ? 8  ARG A CD   7  
+ATOM   758  N NE   . ARG A 1 4 ? 3.471  5.697  3.047  1.00 0.00 ? 8  ARG A NE   7  
+ATOM   759  C CZ   . ARG A 1 4 ? 3.892  6.798  3.668  1.00 0.00 ? 8  ARG A CZ   7  
+ATOM   760  N NH1  . ARG A 1 4 ? 4.401  6.676  4.859  1.00 0.00 ? 8  ARG A NH1  7  
+ATOM   761  N NH2  . ARG A 1 4 ? 3.825  7.998  3.144  1.00 0.00 ? 8  ARG A NH2  7  
+ATOM   762  H H    . ARG A 1 4 ? -0.155 2.859  0.972  1.00 0.00 ? 8  ARG A H    7  
+ATOM   763  H HA   . ARG A 1 4 ? 1.269  2.495  -1.474 1.00 0.00 ? 8  ARG A HA   7  
+ATOM   764  H HB2  . ARG A 1 4 ? 2.725  4.286  -0.794 1.00 0.00 ? 8  ARG A HB2  7  
+ATOM   765  H HB3  . ARG A 1 4 ? 1.104  4.630  -0.227 1.00 0.00 ? 8  ARG A HB3  7  
+ATOM   766  H HG2  . ARG A 1 4 ? 1.789  3.825  2.108  1.00 0.00 ? 8  ARG A HG2  7  
+ATOM   767  H HG3  . ARG A 1 4 ? 3.423  3.544  1.505  1.00 0.00 ? 8  ARG A HG3  7  
+ATOM   768  H HD2  . ARG A 1 4 ? 3.623  6.018  0.925  1.00 0.00 ? 8  ARG A HD2  7  
+ATOM   769  H HD3  . ARG A 1 4 ? 1.990  6.284  1.595  1.00 0.00 ? 8  ARG A HD3  7  
+ATOM   770  H HE   . ARG A 1 4 ? 3.588  4.837  3.591  1.00 0.00 ? 8  ARG A HE   7  
+ATOM   771  H HH11 . ARG A 1 4 ? 4.722  7.529  5.320  1.00 0.00 ? 8  ARG A HH11 7  
+ATOM   772  H HH12 . ARG A 1 4 ? 4.461  5.729  5.238  1.00 0.00 ? 8  ARG A HH12 7  
+ATOM   773  H HH21 . ARG A 1 4 ? 4.171  8.790  3.687  1.00 0.00 ? 8  ARG A HH21 7  
+ATOM   774  H HH22 . ARG A 1 4 ? 3.418  8.020  2.207  1.00 0.00 ? 8  ARG A HH22 7  
+ATOM   775  N N    . TRP A 1 5 ? 2.908  0.874  0.836  1.00 0.00 ? 9  TRP A N    7  
+ATOM   776  C CA   . TRP A 1 5 ? 3.893  -0.195 1.157  1.00 0.00 ? 9  TRP A CA   7  
+ATOM   777  C C    . TRP A 1 5 ? 3.933  -1.460 0.231  1.00 0.00 ? 9  TRP A C    7  
+ATOM   778  O O    . TRP A 1 5 ? 4.981  -2.098 0.124  1.00 0.00 ? 9  TRP A O    7  
+ATOM   779  C CB   . TRP A 1 5 ? 3.611  -0.606 2.629  1.00 0.00 ? 9  TRP A CB   7  
+ATOM   780  C CG   . TRP A 1 5 ? 3.785  0.495  3.693  1.00 0.00 ? 9  TRP A CG   7  
+ATOM   781  C CD1  . TRP A 1 5 ? 4.960  0.925  4.337  1.00 0.00 ? 9  TRP A CD1  7  
+ATOM   782  C CD2  . TRP A 1 5 ? 2.792  1.327  4.141  1.00 0.00 ? 9  TRP A CD2  7  
+ATOM   783  N NE1  . TRP A 1 5 ? 4.710  2.024  5.194  1.00 0.00 ? 9  TRP A NE1  7  
+ATOM   784  C CE2  . TRP A 1 5 ? 3.347  2.252  5.052  1.00 0.00 ? 9  TRP A CE2  7  
+ATOM   785  C CE3  . TRP A 1 5 ? 1.429  1.387  3.789  1.00 0.00 ? 9  TRP A CE3  7  
+ATOM   786  C CZ2  . TRP A 1 5 ? 2.525  3.250  5.634  1.00 0.00 ? 9  TRP A CZ2  7  
+ATOM   787  C CZ3  . TRP A 1 5 ? 0.640  2.380  4.355  1.00 0.00 ? 9  TRP A CZ3  7  
+ATOM   788  C CH2  . TRP A 1 5 ? 1.174  3.299  5.269  1.00 0.00 ? 9  TRP A CH2  7  
+ATOM   789  H H    . TRP A 1 5 ? 2.194  1.162  1.510  1.00 0.00 ? 9  TRP A H    7  
+ATOM   790  H HA   . TRP A 1 5 ? 4.900  0.258  1.135  1.00 0.00 ? 9  TRP A HA   7  
+ATOM   791  H HB2  . TRP A 1 5 ? 2.595  -1.041 2.709  1.00 0.00 ? 9  TRP A HB2  7  
+ATOM   792  H HB3  . TRP A 1 5 ? 4.244  -1.447 2.915  1.00 0.00 ? 9  TRP A HB3  7  
+ATOM   793  H HD1  . TRP A 1 5 ? 5.933  0.484  4.168  1.00 0.00 ? 9  TRP A HD1  7  
+ATOM   794  H HE1  . TRP A 1 5 ? 5.363  2.462  5.855  1.00 0.00 ? 9  TRP A HE1  7  
+ATOM   795  H HE3  . TRP A 1 5 ? 1.032  0.655  3.094  1.00 0.00 ? 9  TRP A HE3  7  
+ATOM   796  H HZ2  . TRP A 1 5 ? 2.930  3.950  6.348  1.00 0.00 ? 9  TRP A HZ2  7  
+ATOM   797  H HZ3  . TRP A 1 5 ? -0.398 2.414  4.066  1.00 0.00 ? 9  TRP A HZ3  7  
+ATOM   798  H HH2  . TRP A 1 5 ? 0.531  4.051  5.704  1.00 0.00 ? 9  TRP A HH2  7  
+ATOM   799  N N    . ASP A 1 6 ? 2.818  -1.808 -0.440 1.00 0.00 ? 10 ASP A N    7  
+ATOM   800  C CA   . ASP A 1 6 ? 2.797  -2.853 -1.505 1.00 0.00 ? 10 ASP A CA   7  
+ATOM   801  C C    . ASP A 1 6 ? 3.592  -2.530 -2.816 1.00 0.00 ? 10 ASP A C    7  
+ATOM   802  O O    . ASP A 1 6 ? 4.117  -3.431 -3.465 1.00 0.00 ? 10 ASP A O    7  
+ATOM   803  C CB   . ASP A 1 6 ? 1.318  -3.205 -1.851 1.00 0.00 ? 10 ASP A CB   7  
+ATOM   804  C CG   . ASP A 1 6 ? 0.353  -3.687 -0.758 1.00 0.00 ? 10 ASP A CG   7  
+ATOM   805  O OD1  . ASP A 1 6 ? -0.788 -3.228 -0.724 1.00 0.00 ? 10 ASP A OD1  7  
+ATOM   806  H H    . ASP A 1 6 ? 2.041  -1.148 -0.294 1.00 0.00 ? 10 ASP A H    7  
+ATOM   807  H HA   . ASP A 1 6 ? 3.281  -3.763 -1.101 1.00 0.00 ? 10 ASP A HA   7  
+ATOM   808  H HB2  . ASP A 1 6 ? 0.846  -2.321 -2.322 1.00 0.00 ? 10 ASP A HB2  7  
+ATOM   809  H HB3  . ASP A 1 6 ? 1.300  -3.981 -2.637 1.00 0.00 ? 10 ASP A HB3  7  
+HETATM 810  N N    . NH2 A 1 7 ? 3.714  -1.302 -3.286 1.00 0.00 ? 11 NH2 A N    7  
+HETATM 811  H HN1  . NH2 A 1 7 ? 4.345  -1.253 -4.088 1.00 0.00 ? 11 NH2 A HN1  7  
+HETATM 812  H HN2  . NH2 A 1 7 ? 3.461  -0.543 -2.642 1.00 0.00 ? 11 NH2 A HN2  7  
+HETATM 813  N N    . AC5 A 1 1 ? 0.626  -4.579 0.214  1.00 0.00 ? 5  AC5 A N    8  
+HETATM 814  O O    . AC5 A 1 1 ? -2.224 -4.658 2.645  1.00 0.00 ? 5  AC5 A O    8  
+HETATM 815  C CA   . AC5 A 1 1 ? -0.314 -5.269 1.172  1.00 0.00 ? 5  AC5 A CA   8  
+HETATM 816  C C    . AC5 A 1 1 ? -1.088 -4.382 2.245  1.00 0.00 ? 5  AC5 A C    8  
+HETATM 817  C CB1  . AC5 A 1 1 ? -1.266 -6.147 0.337  1.00 0.00 ? 5  AC5 A CB1  8  
+HETATM 818  C CB2  . AC5 A 1 1 ? 0.506  -6.383 1.876  1.00 0.00 ? 5  AC5 A CB2  8  
+HETATM 819  C CG1  . AC5 A 1 1 ? -0.542 -7.439 -0.076 1.00 0.00 ? 5  AC5 A CG1  8  
+HETATM 820  C CG2  . AC5 A 1 1 ? 0.558  -7.632 0.973  1.00 0.00 ? 5  AC5 A CG2  8  
+HETATM 821  H H    . AC5 A 1 1 ? 1.420  -5.105 -0.149 1.00 0.00 ? 5  AC5 A H    8  
+HETATM 822  H HB11 . AC5 A 1 1 ? -1.664 -5.575 -0.519 1.00 0.00 ? 5  AC5 A HB11 8  
+HETATM 823  H HB12 . AC5 A 1 1 ? -2.135 -6.411 0.959  1.00 0.00 ? 5  AC5 A HB12 8  
+HETATM 824  H HB21 . AC5 A 1 1 ? 0.012  -6.675 2.824  1.00 0.00 ? 5  AC5 A HB21 8  
+HETATM 825  H HB22 . AC5 A 1 1 ? 1.518  -6.046 2.176  1.00 0.00 ? 5  AC5 A HB22 8  
+HETATM 826  H HG11 . AC5 A 1 1 ? -1.232 -8.303 -0.128 1.00 0.00 ? 5  AC5 A HG11 8  
+HETATM 827  H HG12 . AC5 A 1 1 ? -0.097 -7.326 -1.084 1.00 0.00 ? 5  AC5 A HG12 8  
+HETATM 828  H HG21 . AC5 A 1 1 ? 1.546  -7.729 0.485  1.00 0.00 ? 5  AC5 A HG21 8  
+HETATM 829  H HG22 . AC5 A 1 1 ? 0.407  -8.558 1.559  1.00 0.00 ? 5  AC5 A HG22 8  
+ATOM   830  N N    . HIS A 1 2 ? -0.431 -3.323 2.716  1.00 0.00 ? 6  HIS A N    8  
+ATOM   831  C CA   . HIS A 1 2 ? -1.016 -2.307 3.640  1.00 0.00 ? 6  HIS A CA   8  
+ATOM   832  C C    . HIS A 1 2 ? -1.494 -0.950 3.008  1.00 0.00 ? 6  HIS A C    8  
+ATOM   833  O O    . HIS A 1 2 ? -1.991 -0.092 3.742  1.00 0.00 ? 6  HIS A O    8  
+ATOM   834  C CB   . HIS A 1 2 ? 0.064  -2.060 4.731  1.00 0.00 ? 6  HIS A CB   8  
+ATOM   835  C CG   . HIS A 1 2 ? 0.269  -3.182 5.746  1.00 0.00 ? 6  HIS A CG   8  
+ATOM   836  N ND1  . HIS A 1 2 ? -0.617 -3.506 6.753  1.00 0.00 ? 6  HIS A ND1  8  
+ATOM   837  C CD2  . HIS A 1 2 ? 1.381  -4.030 5.795  1.00 0.00 ? 6  HIS A CD2  8  
+ATOM   838  C CE1  . HIS A 1 2 ? 0.052  -4.558 7.325  1.00 0.00 ? 6  HIS A CE1  8  
+ATOM   839  N NE2  . HIS A 1 2 ? 1.267  -4.954 6.824  1.00 0.00 ? 6  HIS A NE2  8  
+ATOM   840  H H    . HIS A 1 2 ? 0.417  -3.195 2.164  1.00 0.00 ? 6  HIS A H    8  
+ATOM   841  H HA   . HIS A 1 2 ? -1.919 -2.713 4.130  1.00 0.00 ? 6  HIS A HA   8  
+ATOM   842  H HB2  . HIS A 1 2 ? 1.030  -1.795 4.262  1.00 0.00 ? 6  HIS A HB2  8  
+ATOM   843  H HB3  . HIS A 1 2 ? -0.189 -1.158 5.300  1.00 0.00 ? 6  HIS A HB3  8  
+ATOM   844  H HD1  . HIS A 1 2 ? -1.527 -3.097 6.985  1.00 0.00 ? 6  HIS A HD1  8  
+ATOM   845  H HD2  . HIS A 1 2 ? 2.214  -3.963 5.112  1.00 0.00 ? 6  HIS A HD2  8  
+ATOM   846  H HE1  . HIS A 1 2 ? -0.374 -5.083 8.169  1.00 0.00 ? 6  HIS A HE1  8  
+HETATM 847  N N    . DPN A 1 3 ? -1.330 -0.722 1.693  1.00 0.00 ? 7  DPN A N    8  
+HETATM 848  C CA   . DPN A 1 3 ? -1.542 0.601  1.045  1.00 0.00 ? 7  DPN A CA   8  
+HETATM 849  C C    . DPN A 1 3 ? -0.319 0.924  0.125  1.00 0.00 ? 7  DPN A C    8  
+HETATM 850  O O    . DPN A 1 3 ? 0.124  0.100  -0.683 1.00 0.00 ? 7  DPN A O    8  
+HETATM 851  C CB   . DPN A 1 3 ? -2.894 0.589  0.287  1.00 0.00 ? 7  DPN A CB   8  
+HETATM 852  C CG   . DPN A 1 3 ? -3.367 1.973  -0.189 1.00 0.00 ? 7  DPN A CG   8  
+HETATM 853  C CD1  . DPN A 1 3 ? -3.100 2.402  -1.494 1.00 0.00 ? 7  DPN A CD1  8  
+HETATM 854  C CD2  . DPN A 1 3 ? -4.040 2.828  0.691  1.00 0.00 ? 7  DPN A CD2  8  
+HETATM 855  C CE1  . DPN A 1 3 ? -3.499 3.671  -1.912 1.00 0.00 ? 7  DPN A CE1  8  
+HETATM 856  C CE2  . DPN A 1 3 ? -4.440 4.096  0.270  1.00 0.00 ? 7  DPN A CE2  8  
+HETATM 857  C CZ   . DPN A 1 3 ? -4.169 4.515  -1.029 1.00 0.00 ? 7  DPN A CZ   8  
+HETATM 858  H H    . DPN A 1 3 ? -1.050 -1.563 1.166  1.00 0.00 ? 7  DPN A H    8  
+HETATM 859  H HA   . DPN A 1 3 ? -1.611 1.383  1.830  1.00 0.00 ? 7  DPN A HA   8  
+HETATM 860  H HB2  . DPN A 1 3 ? -2.820 -0.112 -0.563 1.00 0.00 ? 7  DPN A HB2  8  
+HETATM 861  H HB3  . DPN A 1 3 ? -3.682 0.150  0.932  1.00 0.00 ? 7  DPN A HB3  8  
+HETATM 862  H HD1  . DPN A 1 3 ? -2.575 1.757  -2.186 1.00 0.00 ? 7  DPN A HD1  8  
+HETATM 863  H HD2  . DPN A 1 3 ? -4.255 2.512  1.702  1.00 0.00 ? 7  DPN A HD2  8  
+HETATM 864  H HE1  . DPN A 1 3 ? -3.293 3.996  -2.921 1.00 0.00 ? 7  DPN A HE1  8  
+HETATM 865  H HE2  . DPN A 1 3 ? -4.965 4.750  0.952  1.00 0.00 ? 7  DPN A HE2  8  
+HETATM 866  H HZ   . DPN A 1 3 ? -4.483 5.495  -1.357 1.00 0.00 ? 7  DPN A HZ   8  
+ATOM   867  N N    . ARG A 1 4 ? 0.257  2.128  0.286  1.00 0.00 ? 8  ARG A N    8  
+ATOM   868  C CA   . ARG A 1 4 ? 1.527  2.534  -0.408 1.00 0.00 ? 8  ARG A CA   8  
+ATOM   869  C C    . ARG A 1 4 ? 2.788  1.608  -0.254 1.00 0.00 ? 8  ARG A C    8  
+ATOM   870  O O    . ARG A 1 4 ? 3.545  1.394  -1.202 1.00 0.00 ? 8  ARG A O    8  
+ATOM   871  C CB   . ARG A 1 4 ? 1.807  4.025  -0.074 1.00 0.00 ? 8  ARG A CB   8  
+ATOM   872  C CG   . ARG A 1 4 ? 2.249  4.348  1.380  1.00 0.00 ? 8  ARG A CG   8  
+ATOM   873  C CD   . ARG A 1 4 ? 2.444  5.845  1.688  1.00 0.00 ? 8  ARG A CD   8  
+ATOM   874  N NE   . ARG A 1 4 ? 1.132  6.541  1.820  1.00 0.00 ? 8  ARG A NE   8  
+ATOM   875  C CZ   . ARG A 1 4 ? 0.520  6.858  2.963  1.00 0.00 ? 8  ARG A CZ   8  
+ATOM   876  N NH1  . ARG A 1 4 ? -0.625 7.475  2.897  1.00 0.00 ? 8  ARG A NH1  8  
+ATOM   877  N NH2  . ARG A 1 4 ? 1.001  6.581  4.150  1.00 0.00 ? 8  ARG A NH2  8  
+ATOM   878  H H    . ARG A 1 4 ? -0.279 2.768  0.876  1.00 0.00 ? 8  ARG A H    8  
+ATOM   879  H HA   . ARG A 1 4 ? 1.309  2.493  -1.485 1.00 0.00 ? 8  ARG A HA   8  
+ATOM   880  H HB2  . ARG A 1 4 ? 2.585  4.395  -0.769 1.00 0.00 ? 8  ARG A HB2  8  
+ATOM   881  H HB3  . ARG A 1 4 ? 0.907  4.616  -0.327 1.00 0.00 ? 8  ARG A HB3  8  
+ATOM   882  H HG2  . ARG A 1 4 ? 1.532  3.911  2.100  1.00 0.00 ? 8  ARG A HG2  8  
+ATOM   883  H HG3  . ARG A 1 4 ? 3.206  3.828  1.577  1.00 0.00 ? 8  ARG A HG3  8  
+ATOM   884  H HD2  . ARG A 1 4 ? 3.088  5.970  2.582  1.00 0.00 ? 8  ARG A HD2  8  
+ATOM   885  H HD3  . ARG A 1 4 ? 3.036  6.319  0.878  1.00 0.00 ? 8  ARG A HD3  8  
+ATOM   886  H HE   . ARG A 1 4 ? 0.604  6.783  0.980  1.00 0.00 ? 8  ARG A HE   8  
+ATOM   887  H HH11 . ARG A 1 4 ? -1.078 7.715  3.781  1.00 0.00 ? 8  ARG A HH11 8  
+ATOM   888  H HH12 . ARG A 1 4 ? -0.979 7.696  1.964  1.00 0.00 ? 8  ARG A HH12 8  
+ATOM   889  H HH21 . ARG A 1 4 ? 0.470  6.870  4.972  1.00 0.00 ? 8  ARG A HH21 8  
+ATOM   890  H HH22 . ARG A 1 4 ? 1.889  6.076  4.134  1.00 0.00 ? 8  ARG A HH22 8  
+ATOM   891  N N    . TRP A 1 5 ? 2.940  1.032  0.942  1.00 0.00 ? 9  TRP A N    8  
+ATOM   892  C CA   . TRP A 1 5 ? 3.883  -0.071 1.278  1.00 0.00 ? 9  TRP A CA   8  
+ATOM   893  C C    . TRP A 1 5 ? 3.936  -1.313 0.321  1.00 0.00 ? 9  TRP A C    8  
+ATOM   894  O O    . TRP A 1 5 ? 5.001  -1.917 0.172  1.00 0.00 ? 9  TRP A O    8  
+ATOM   895  C CB   . TRP A 1 5 ? 3.517  -0.549 2.714  1.00 0.00 ? 9  TRP A CB   8  
+ATOM   896  C CG   . TRP A 1 5 ? 3.573  0.492  3.845  1.00 0.00 ? 9  TRP A CG   8  
+ATOM   897  C CD1  . TRP A 1 5 ? 4.679  0.922  4.601  1.00 0.00 ? 9  TRP A CD1  8  
+ATOM   898  C CD2  . TRP A 1 5 ? 2.521  1.274  4.253  1.00 0.00 ? 9  TRP A CD2  8  
+ATOM   899  N NE1  . TRP A 1 5 ? 4.323  1.960  5.494  1.00 0.00 ? 9  TRP A NE1  8  
+ATOM   900  C CE2  . TRP A 1 5 ? 2.973  2.164  5.249  1.00 0.00 ? 9  TRP A CE2  8  
+ATOM   901  C CE3  . TRP A 1 5 ? 1.203  1.336  3.769  1.00 0.00 ? 9  TRP A CE3  8  
+ATOM   902  C CZ2  . TRP A 1 5 ? 2.081  3.128  5.786  1.00 0.00 ? 9  TRP A CZ2  8  
+ATOM   903  C CZ3  . TRP A 1 5 ? 0.341  2.288  4.298  1.00 0.00 ? 9  TRP A CZ3  8  
+ATOM   904  C CH2  . TRP A 1 5 ? 0.766  3.169  5.303  1.00 0.00 ? 9  TRP A CH2  8  
+ATOM   905  H H    . TRP A 1 5 ? 2.196  1.307  1.587  1.00 0.00 ? 9  TRP A H    8  
+ATOM   906  H HA   . TRP A 1 5 ? 4.898  0.359  1.330  1.00 0.00 ? 9  TRP A HA   8  
+ATOM   907  H HB2  . TRP A 1 5 ? 2.511  -1.011 2.691  1.00 0.00 ? 9  TRP A HB2  8  
+ATOM   908  H HB3  . TRP A 1 5 ? 4.152  -1.386 3.006  1.00 0.00 ? 9  TRP A HB3  8  
+ATOM   909  H HD1  . TRP A 1 5 ? 5.681  0.537  4.471  1.00 0.00 ? 9  TRP A HD1  8  
+ATOM   910  H HE1  . TRP A 1 5 ? 4.928  2.463  6.156  1.00 0.00 ? 9  TRP A HE1  8  
+ATOM   911  H HE3  . TRP A 1 5 ? 0.908  0.666  2.977  1.00 0.00 ? 9  TRP A HE3  8  
+ATOM   912  H HZ2  . TRP A 1 5 ? 2.412  3.815  6.552  1.00 0.00 ? 9  TRP A HZ2  8  
+ATOM   913  H HZ3  . TRP A 1 5 ? -0.660 2.321  3.899  1.00 0.00 ? 9  TRP A HZ3  8  
+ATOM   914  H HH2  . TRP A 1 5 ? 0.069  3.888  5.706  1.00 0.00 ? 9  TRP A HH2  8  
+ATOM   915  N N    . ASP A 1 6 ? 2.810  -1.696 -0.311 1.00 0.00 ? 10 ASP A N    8  
+ATOM   916  C CA   . ASP A 1 6 ? 2.761  -2.791 -1.324 1.00 0.00 ? 10 ASP A CA   8  
+ATOM   917  C C    . ASP A 1 6 ? 3.565  -2.560 -2.649 1.00 0.00 ? 10 ASP A C    8  
+ATOM   918  O O    . ASP A 1 6 ? 4.071  -3.504 -3.246 1.00 0.00 ? 10 ASP A O    8  
+ATOM   919  C CB   . ASP A 1 6 ? 1.273  -3.112 -1.656 1.00 0.00 ? 10 ASP A CB   8  
+ATOM   920  C CG   . ASP A 1 6 ? 0.311  -3.501 -0.520 1.00 0.00 ? 10 ASP A CG   8  
+ATOM   921  O OD1  . ASP A 1 6 ? -0.710 -2.843 -0.334 1.00 0.00 ? 10 ASP A OD1  8  
+ATOM   922  H H    . ASP A 1 6 ? 2.007  -1.075 -0.147 1.00 0.00 ? 10 ASP A H    8  
+ATOM   923  H HA   . ASP A 1 6 ? 3.216  -3.694 -0.870 1.00 0.00 ? 10 ASP A HA   8  
+ATOM   924  H HB2  . ASP A 1 6 ? 0.827  -2.242 -2.175 1.00 0.00 ? 10 ASP A HB2  8  
+ATOM   925  H HB3  . ASP A 1 6 ? 1.230  -3.924 -2.406 1.00 0.00 ? 10 ASP A HB3  8  
+HETATM 926  N N    . NH2 A 1 7 ? 3.711  -1.361 -3.184 1.00 0.00 ? 11 NH2 A N    8  
+HETATM 927  H HN1  . NH2 A 1 7 ? 4.351  -1.365 -3.982 1.00 0.00 ? 11 NH2 A HN1  8  
+HETATM 928  H HN2  . NH2 A 1 7 ? 3.470  -0.566 -2.579 1.00 0.00 ? 11 NH2 A HN2  8  
+HETATM 929  N N    . AC5 A 1 1 ? 0.587  -4.575 0.204  1.00 0.00 ? 5  AC5 A N    9  
+HETATM 930  O O    . AC5 A 1 1 ? -2.277 -4.630 2.626  1.00 0.00 ? 5  AC5 A O    9  
+HETATM 931  C CA   . AC5 A 1 1 ? -0.370 -5.264 1.147  1.00 0.00 ? 5  AC5 A CA   9  
+HETATM 932  C C    . AC5 A 1 1 ? -1.134 -4.374 2.228  1.00 0.00 ? 5  AC5 A C    9  
+HETATM 933  C CB1  . AC5 A 1 1 ? -1.342 -6.112 0.303  1.00 0.00 ? 5  AC5 A CB1  9  
+HETATM 934  C CB2  . AC5 A 1 1 ? 0.417  -6.407 1.841  1.00 0.00 ? 5  AC5 A CB2  9  
+HETATM 935  C CG1  . AC5 A 1 1 ? -1.663 -7.407 1.069  1.00 0.00 ? 5  AC5 A CG1  9  
+HETATM 936  C CG2  . AC5 A 1 1 ? -0.590 -7.523 2.155  1.00 0.00 ? 5  AC5 A CG2  9  
+HETATM 937  H H    . AC5 A 1 1 ? 1.442  -5.040 -0.109 1.00 0.00 ? 5  AC5 A H    9  
+HETATM 938  H HB11 . AC5 A 1 1 ? -0.876 -6.368 -0.663 1.00 0.00 ? 5  AC5 A HB11 9  
+HETATM 939  H HB12 . AC5 A 1 1 ? -2.241 -5.517 0.058  1.00 0.00 ? 5  AC5 A HB12 9  
+HETATM 940  H HB21 . AC5 A 1 1 ? 0.951  -6.062 2.749  1.00 0.00 ? 5  AC5 A HB21 9  
+HETATM 941  H HB22 . AC5 A 1 1 ? 1.200  -6.831 1.181  1.00 0.00 ? 5  AC5 A HB22 9  
+HETATM 942  H HG11 . AC5 A 1 1 ? -2.672 -7.357 1.524  1.00 0.00 ? 5  AC5 A HG11 9  
+HETATM 943  H HG12 . AC5 A 1 1 ? -1.663 -8.285 0.394  1.00 0.00 ? 5  AC5 A HG12 9  
+HETATM 944  H HG21 . AC5 A 1 1 ? -0.117 -8.523 2.184  1.00 0.00 ? 5  AC5 A HG21 9  
+HETATM 945  H HG22 . AC5 A 1 1 ? -1.043 -7.359 3.154  1.00 0.00 ? 5  AC5 A HG22 9  
+ATOM   946  N N    . HIS A 1 2 ? -0.454 -3.331 2.698  1.00 0.00 ? 6  HIS A N    9  
+ATOM   947  C CA   . HIS A 1 2 ? -1.018 -2.307 3.625  1.00 0.00 ? 6  HIS A CA   9  
+ATOM   948  C C    . HIS A 1 2 ? -1.481 -0.943 2.994  1.00 0.00 ? 6  HIS A C    9  
+ATOM   949  O O    . HIS A 1 2 ? -1.982 -0.086 3.726  1.00 0.00 ? 6  HIS A O    9  
+ATOM   950  C CB   . HIS A 1 2 ? 0.071  -2.074 4.713  1.00 0.00 ? 6  HIS A CB   9  
+ATOM   951  C CG   . HIS A 1 2 ? 0.415  -3.183 5.710  1.00 0.00 ? 6  HIS A CG   9  
+ATOM   952  N ND1  . HIS A 1 2 ? 1.519  -3.130 6.535  1.00 0.00 ? 6  HIS A ND1  9  
+ATOM   953  C CD2  . HIS A 1 2 ? -0.290 -4.374 5.945  1.00 0.00 ? 6  HIS A CD2  9  
+ATOM   954  C CE1  . HIS A 1 2 ? 1.381  -4.319 7.203  1.00 0.00 ? 6  HIS A CE1  9  
+ATOM   955  N NE2  . HIS A 1 2 ? 0.324  -5.146 6.920  1.00 0.00 ? 6  HIS A NE2  9  
+ATOM   956  H H    . HIS A 1 2 ? 0.398  -3.230 2.145  1.00 0.00 ? 6  HIS A H    9  
+ATOM   957  H HA   . HIS A 1 2 ? -1.927 -2.695 4.118  1.00 0.00 ? 6  HIS A HA   9  
+ATOM   958  H HB2  . HIS A 1 2 ? 1.008  -1.763 4.227  1.00 0.00 ? 6  HIS A HB2  9  
+ATOM   959  H HB3  . HIS A 1 2 ? -0.226 -1.204 5.312  1.00 0.00 ? 6  HIS A HB3  9  
+ATOM   960  H HD1  . HIS A 1 2 ? 2.229  -2.398 6.634  1.00 0.00 ? 6  HIS A HD1  9  
+ATOM   961  H HD2  . HIS A 1 2 ? -1.184 -4.644 5.407  1.00 0.00 ? 6  HIS A HD2  9  
+ATOM   962  H HE1  . HIS A 1 2 ? 2.100  -4.611 7.958  1.00 0.00 ? 6  HIS A HE1  9  
+HETATM 963  N N    . DPN A 1 3 ? -1.300 -0.711 1.683  1.00 0.00 ? 7  DPN A N    9  
+HETATM 964  C CA   . DPN A 1 3 ? -1.524 0.609  1.032  1.00 0.00 ? 7  DPN A CA   9  
+HETATM 965  C C    . DPN A 1 3 ? -0.297 0.945  0.121  1.00 0.00 ? 7  DPN A C    9  
+HETATM 966  O O    . DPN A 1 3 ? 0.155  0.127  -0.688 1.00 0.00 ? 7  DPN A O    9  
+HETATM 967  C CB   . DPN A 1 3 ? -2.867 0.570  0.259  1.00 0.00 ? 7  DPN A CB   9  
+HETATM 968  C CG   . DPN A 1 3 ? -3.351 1.936  -0.257 1.00 0.00 ? 7  DPN A CG   9  
+HETATM 969  C CD1  . DPN A 1 3 ? -4.039 2.805  0.595  1.00 0.00 ? 7  DPN A CD1  9  
+HETATM 970  C CD2  . DPN A 1 3 ? -3.084 2.329  -1.573 1.00 0.00 ? 7  DPN A CD2  9  
+HETATM 971  C CE1  . DPN A 1 3 ? -4.452 4.055  0.137  1.00 0.00 ? 7  DPN A CE1  9  
+HETATM 972  C CE2  . DPN A 1 3 ? -3.496 3.580  -2.028 1.00 0.00 ? 7  DPN A CE2  9  
+HETATM 973  C CZ   . DPN A 1 3 ? -4.179 4.441  -1.173 1.00 0.00 ? 7  DPN A CZ   9  
+HETATM 974  H H    . DPN A 1 3 ? -1.034 -1.553 1.154  1.00 0.00 ? 7  DPN A H    9  
+HETATM 975  H HA   . DPN A 1 3 ? -1.614 1.392  1.813  1.00 0.00 ? 7  DPN A HA   9  
+HETATM 976  H HB2  . DPN A 1 3 ? -2.776 -0.151 -0.574 1.00 0.00 ? 7  DPN A HB2  9  
+HETATM 977  H HB3  . DPN A 1 3 ? -3.658 0.136  0.904  1.00 0.00 ? 7  DPN A HB3  9  
+HETATM 978  H HD1  . DPN A 1 3 ? -4.254 2.517  1.614  1.00 0.00 ? 7  DPN A HD1  9  
+HETATM 979  H HD2  . DPN A 1 3 ? -2.548 1.671  -2.243 1.00 0.00 ? 7  DPN A HD2  9  
+HETATM 980  H HE1  . DPN A 1 3 ? -4.985 4.724  0.797  1.00 0.00 ? 7  DPN A HE1  9  
+HETATM 981  H HE2  . DPN A 1 3 ? -3.287 3.880  -3.046 1.00 0.00 ? 7  DPN A HE2  9  
+HETATM 982  H HZ   . DPN A 1 3 ? -4.502 5.409  -1.529 1.00 0.00 ? 7  DPN A HZ   9  
+ATOM   983  N N    . ARG A 1 4 ? 0.279  2.146  0.300  1.00 0.00 ? 8  ARG A N    9  
+ATOM   984  C CA   . ARG A 1 4 ? 1.564  2.555  -0.362 1.00 0.00 ? 8  ARG A CA   9  
+ATOM   985  C C    . ARG A 1 4 ? 2.808  1.601  -0.228 1.00 0.00 ? 8  ARG A C    9  
+ATOM   986  O O    . ARG A 1 4 ? 3.571  1.401  -1.175 1.00 0.00 ? 8  ARG A O    9  
+ATOM   987  C CB   . ARG A 1 4 ? 1.876  4.025  0.050  1.00 0.00 ? 8  ARG A CB   9  
+ATOM   988  C CG   . ARG A 1 4 ? 2.306  4.249  1.521  1.00 0.00 ? 8  ARG A CG   9  
+ATOM   989  C CD   . ARG A 1 4 ? 2.546  5.723  1.885  1.00 0.00 ? 8  ARG A CD   9  
+ATOM   990  N NE   . ARG A 1 4 ? 2.980  5.786  3.306  1.00 0.00 ? 8  ARG A NE   9  
+ATOM   991  C CZ   . ARG A 1 4 ? 3.264  6.900  3.981  1.00 0.00 ? 8  ARG A CZ   9  
+ATOM   992  N NH1  . ARG A 1 4 ? 3.176  8.101  3.465  1.00 0.00 ? 8  ARG A NH1  9  
+ATOM   993  N NH2  . ARG A 1 4 ? 3.652  6.789  5.217  1.00 0.00 ? 8  ARG A NH2  9  
+ATOM   994  H H    . ARG A 1 4 ? -0.274 2.785  0.877  1.00 0.00 ? 8  ARG A H    9  
+ATOM   995  H HA   . ARG A 1 4 ? 1.361  2.567  -1.443 1.00 0.00 ? 8  ARG A HA   9  
+ATOM   996  H HB2  . ARG A 1 4 ? 2.671  4.411  -0.619 1.00 0.00 ? 8  ARG A HB2  9  
+ATOM   997  H HB3  . ARG A 1 4 ? 0.995  4.654  -0.178 1.00 0.00 ? 8  ARG A HB3  9  
+ATOM   998  H HG2  . ARG A 1 4 ? 1.535  3.823  2.189  1.00 0.00 ? 8  ARG A HG2  9  
+ATOM   999  H HG3  . ARG A 1 4 ? 3.228  3.666  1.717  1.00 0.00 ? 8  ARG A HG3  9  
+ATOM   1000 H HD2  . ARG A 1 4 ? 3.318  6.156  1.215  1.00 0.00 ? 8  ARG A HD2  9  
+ATOM   1001 H HD3  . ARG A 1 4 ? 1.614  6.306  1.724  1.00 0.00 ? 8  ARG A HD3  9  
+ATOM   1002 H HE   . ARG A 1 4 ? 3.095  4.924  3.851  1.00 0.00 ? 8  ARG A HE   9  
+ATOM   1003 H HH11 . ARG A 1 4 ? 3.412  8.905  4.050  1.00 0.00 ? 8  ARG A HH11 9  
+ATOM   1004 H HH12 . ARG A 1 4 ? 2.868  8.116  2.491  1.00 0.00 ? 8  ARG A HH12 9  
+ATOM   1005 H HH21 . ARG A 1 4 ? 3.731  5.843  5.593  1.00 0.00 ? 8  ARG A HH21 9  
+ATOM   1006 H HH22 . ARG A 1 4 ? 3.870  7.653  5.717  1.00 0.00 ? 8  ARG A HH22 9  
+ATOM   1007 N N    . TRP A 1 5 ? 2.939  0.992  0.953  1.00 0.00 ? 9  TRP A N    9  
+ATOM   1008 C CA   . TRP A 1 5 ? 3.892  -0.104 1.282  1.00 0.00 ? 9  TRP A CA   9  
+ATOM   1009 C C    . TRP A 1 5 ? 3.928  -1.349 0.328  1.00 0.00 ? 9  TRP A C    9  
+ATOM   1010 O O    . TRP A 1 5 ? 4.981  -1.973 0.186  1.00 0.00 ? 9  TRP A O    9  
+ATOM   1011 C CB   . TRP A 1 5 ? 3.551  -0.571 2.725  1.00 0.00 ? 9  TRP A CB   9  
+ATOM   1012 C CG   . TRP A 1 5 ? 3.615  0.480  3.849  1.00 0.00 ? 9  TRP A CG   9  
+ATOM   1013 C CD1  . TRP A 1 5 ? 4.726  0.920  4.593  1.00 0.00 ? 9  TRP A CD1  9  
+ATOM   1014 C CD2  . TRP A 1 5 ? 2.562  1.253  4.268  1.00 0.00 ? 9  TRP A CD2  9  
+ATOM   1015 N NE1  . TRP A 1 5 ? 4.372  1.958  5.487  1.00 0.00 ? 9  TRP A NE1  9  
+ATOM   1016 C CE2  . TRP A 1 5 ? 3.015  2.148  5.260  1.00 0.00 ? 9  TRP A CE2  9  
+ATOM   1017 C CE3  . TRP A 1 5 ? 1.237  1.301  3.801  1.00 0.00 ? 9  TRP A CE3  9  
+ATOM   1018 C CZ2  . TRP A 1 5 ? 2.120  3.102  5.810  1.00 0.00 ? 9  TRP A CZ2  9  
+ATOM   1019 C CZ3  . TRP A 1 5 ? 0.372  2.244  4.340  1.00 0.00 ? 9  TRP A CZ3  9  
+ATOM   1020 C CH2  . TRP A 1 5 ? 0.801  3.133  5.336  1.00 0.00 ? 9  TRP A CH2  9  
+ATOM   1021 H H    . TRP A 1 5 ? 2.187  1.250  1.595  1.00 0.00 ? 9  TRP A H    9  
+ATOM   1022 H HA   . TRP A 1 5 ? 4.908  0.328  1.313  1.00 0.00 ? 9  TRP A HA   9  
+ATOM   1023 H HB2  . TRP A 1 5 ? 2.550  -1.041 2.721  1.00 0.00 ? 9  TRP A HB2  9  
+ATOM   1024 H HB3  . TRP A 1 5 ? 4.196  -1.401 3.013  1.00 0.00 ? 9  TRP A HB3  9  
+ATOM   1025 H HD1  . TRP A 1 5 ? 5.728  0.534  4.456  1.00 0.00 ? 9  TRP A HD1  9  
+ATOM   1026 H HE1  . TRP A 1 5 ? 4.972  2.423  6.180  1.00 0.00 ? 9  TRP A HE1  9  
+ATOM   1027 H HE3  . TRP A 1 5 ? 0.937  0.626  3.013  1.00 0.00 ? 9  TRP A HE3  9  
+ATOM   1028 H HZ2  . TRP A 1 5 ? 2.446  3.785  6.580  1.00 0.00 ? 9  TRP A HZ2  9  
+ATOM   1029 H HZ3  . TRP A 1 5 ? -0.634 2.267  3.952  1.00 0.00 ? 9  TRP A HZ3  9  
+ATOM   1030 H HH2  . TRP A 1 5 ? 0.101  3.849  5.742  1.00 0.00 ? 9  TRP A HH2  9  
+ATOM   1031 N N    . ASP A 1 6 ? 2.797  -1.714 -0.310 1.00 0.00 ? 10 ASP A N    9  
+ATOM   1032 C CA   . ASP A 1 6 ? 2.737  -2.803 -1.326 1.00 0.00 ? 10 ASP A CA   9  
+ATOM   1033 C C    . ASP A 1 6 ? 3.546  -2.574 -2.649 1.00 0.00 ? 10 ASP A C    9  
+ATOM   1034 O O    . ASP A 1 6 ? 4.053  -3.519 -3.245 1.00 0.00 ? 10 ASP A O    9  
+ATOM   1035 C CB   . ASP A 1 6 ? 1.246  -3.107 -1.662 1.00 0.00 ? 10 ASP A CB   9  
+ATOM   1036 C CG   . ASP A 1 6 ? 0.273  -3.501 -0.538 1.00 0.00 ? 10 ASP A CG   9  
+ATOM   1037 O OD1  . ASP A 1 6 ? -0.758 -2.853 -0.370 1.00 0.00 ? 10 ASP A OD1  9  
+ATOM   1038 H H    . ASP A 1 6 ? 2.013  -1.063 -0.160 1.00 0.00 ? 10 ASP A H    9  
+ATOM   1039 H HA   . ASP A 1 6 ? 3.180  -3.712 -0.877 1.00 0.00 ? 10 ASP A HA   9  
+ATOM   1040 H HB2  . ASP A 1 6 ? 0.810  -2.226 -2.174 1.00 0.00 ? 10 ASP A HB2  9  
+ATOM   1041 H HB3  . ASP A 1 6 ? 1.196  -3.908 -2.423 1.00 0.00 ? 10 ASP A HB3  9  
+HETATM 1042 N N    . NH2 A 1 7 ? 3.694  -1.374 -3.185 1.00 0.00 ? 11 NH2 A N    9  
+HETATM 1043 H HN1  . NH2 A 1 7 ? 4.333  -1.380 -3.982 1.00 0.00 ? 11 NH2 A HN1  9  
+HETATM 1044 H HN2  . NH2 A 1 7 ? 3.447  -0.579 -2.584 1.00 0.00 ? 11 NH2 A HN2  9  
+HETATM 1045 N N    . AC5 A 1 1 ? 0.659  -4.655 0.259  1.00 0.00 ? 5  AC5 A N    10 
+HETATM 1046 O O    . AC5 A 1 1 ? -1.932 -4.844 3.015  1.00 0.00 ? 5  AC5 A O    10 
+HETATM 1047 C CA   . AC5 A 1 1 ? -0.260 -5.328 1.251  1.00 0.00 ? 5  AC5 A CA   10 
+HETATM 1048 C C    . AC5 A 1 1 ? -0.926 -4.461 2.410  1.00 0.00 ? 5  AC5 A C    10 
+HETATM 1049 C CB1  . AC5 A 1 1 ? -1.324 -6.123 0.440  1.00 0.00 ? 5  AC5 A CB1  10 
+HETATM 1050 C CB2  . AC5 A 1 1 ? 0.577  -6.467 1.908  1.00 0.00 ? 5  AC5 A CB2  10 
+HETATM 1051 C CG1  . AC5 A 1 1 ? -1.228 -7.599 0.840  1.00 0.00 ? 5  AC5 A CG1  10 
+HETATM 1052 C CG2  . AC5 A 1 1 ? 0.251  -7.772 1.171  1.00 0.00 ? 5  AC5 A CG2  10 
+HETATM 1053 H H    . AC5 A 1 1 ? 1.470  -5.156 -0.109 1.00 0.00 ? 5  AC5 A H    10 
+HETATM 1054 H HB11 . AC5 A 1 1 ? -1.152 -6.026 -0.647 1.00 0.00 ? 5  AC5 A HB11 10 
+HETATM 1055 H HB12 . AC5 A 1 1 ? -2.337 -5.712 0.598  1.00 0.00 ? 5  AC5 A HB12 10 
+HETATM 1056 H HB21 . AC5 A 1 1 ? 0.299  -6.603 2.972  1.00 0.00 ? 5  AC5 A HB21 10 
+HETATM 1057 H HB22 . AC5 A 1 1 ? 1.666  -6.257 1.941  1.00 0.00 ? 5  AC5 A HB22 10 
+HETATM 1058 H HG11 . AC5 A 1 1 ? -1.855 -7.801 1.733  1.00 0.00 ? 5  AC5 A HG11 10 
+HETATM 1059 H HG12 . AC5 A 1 1 ? -1.572 -8.284 0.042  1.00 0.00 ? 5  AC5 A HG12 10 
+HETATM 1060 H HG21 . AC5 A 1 1 ? 0.853  -7.866 0.245  1.00 0.00 ? 5  AC5 A HG21 10 
+HETATM 1061 H HG22 . AC5 A 1 1 ? 0.450  -8.672 1.784  1.00 0.00 ? 5  AC5 A HG22 10 
+ATOM   1062 N N    . HIS A 1 2 ? -0.316 -3.318 2.721  1.00 0.00 ? 6  HIS A N    10 
+ATOM   1063 C CA   . HIS A 1 2 ? -0.844 -2.321 3.705  1.00 0.00 ? 6  HIS A CA   10 
+ATOM   1064 C C    . HIS A 1 2 ? -1.336 -0.944 3.118  1.00 0.00 ? 6  HIS A C    10 
+ATOM   1065 O O    . HIS A 1 2 ? -1.784 -0.082 3.879  1.00 0.00 ? 6  HIS A O    10 
+ATOM   1066 C CB   . HIS A 1 2 ? 0.290  -2.169 4.764  1.00 0.00 ? 6  HIS A CB   10 
+ATOM   1067 C CG   . HIS A 1 2 ? -0.155 -1.716 6.146  1.00 0.00 ? 6  HIS A CG   10 
+ATOM   1068 N ND1  . HIS A 1 2 ? -0.194 -0.411 6.587  1.00 0.00 ? 6  HIS A ND1  10 
+ATOM   1069 C CD2  . HIS A 1 2 ? -0.522 -2.584 7.179  1.00 0.00 ? 6  HIS A CD2  10 
+ATOM   1070 C CE1  . HIS A 1 2 ? -0.624 -0.609 7.871  1.00 0.00 ? 6  HIS A CE1  10 
+ATOM   1071 N NE2  . HIS A 1 2 ? -0.844 -1.883 8.335  1.00 0.00 ? 6  HIS A NE2  10 
+ATOM   1072 H H    . HIS A 1 2 ? 0.365  -3.138 1.977  1.00 0.00 ? 6  HIS A H    10 
+ATOM   1073 H HA   . HIS A 1 2 ? -1.737 -2.736 4.206  1.00 0.00 ? 6  HIS A HA   10 
+ATOM   1074 H HB2  . HIS A 1 2 ? 0.829  -3.127 4.907  1.00 0.00 ? 6  HIS A HB2  10 
+ATOM   1075 H HB3  . HIS A 1 2 ? 1.070  -1.486 4.399  1.00 0.00 ? 6  HIS A HB3  10 
+ATOM   1076 H HD1  . HIS A 1 2 ? -0.081 0.455  6.049  1.00 0.00 ? 6  HIS A HD1  10 
+ATOM   1077 H HD2  . HIS A 1 2 ? -0.530 -3.658 7.069  1.00 0.00 ? 6  HIS A HD2  10 
+ATOM   1078 H HE1  . HIS A 1 2 ? -0.811 0.235  8.522  1.00 0.00 ? 6  HIS A HE1  10 
+HETATM 1079 N N    . DPN A 1 3 ? -1.248 -0.711 1.796  1.00 0.00 ? 7  DPN A N    10 
+HETATM 1080 C CA   . DPN A 1 3 ? -1.505 0.609  1.157  1.00 0.00 ? 7  DPN A CA   10 
+HETATM 1081 C C    . DPN A 1 3 ? -0.329 0.940  0.181  1.00 0.00 ? 7  DPN A C    10 
+HETATM 1082 O O    . DPN A 1 3 ? 0.093  0.112  -0.635 1.00 0.00 ? 7  DPN A O    10 
+HETATM 1083 C CB   . DPN A 1 3 ? -2.891 0.575  0.464  1.00 0.00 ? 7  DPN A CB   10 
+HETATM 1084 C CG   . DPN A 1 3 ? -3.402 1.944  -0.011 1.00 0.00 ? 7  DPN A CG   10 
+HETATM 1085 C CD1  . DPN A 1 3 ? -3.212 2.349  -1.337 1.00 0.00 ? 7  DPN A CD1  10 
+HETATM 1086 C CD2  . DPN A 1 3 ? -4.036 2.811  0.887  1.00 0.00 ? 7  DPN A CD2  10 
+HETATM 1087 C CE1  . DPN A 1 3 ? -3.647 3.605  -1.757 1.00 0.00 ? 7  DPN A CE1  10 
+HETATM 1088 C CE2  . DPN A 1 3 ? -4.471 4.064  0.465  1.00 0.00 ? 7  DPN A CE2  10 
+HETATM 1089 C CZ   . DPN A 1 3 ? -4.276 4.461  -0.856 1.00 0.00 ? 7  DPN A CZ   10 
+HETATM 1090 H H    . DPN A 1 3 ? -0.987 -1.548 1.255  1.00 0.00 ? 7  DPN A H    10 
+HETATM 1091 H HA   . DPN A 1 3 ? -1.548 1.392  1.943  1.00 0.00 ? 7  DPN A HA   10 
+HETATM 1092 H HB2  . DPN A 1 3 ? -2.852 -0.139 -0.377 1.00 0.00 ? 7  DPN A HB2  10 
+HETATM 1093 H HB3  . DPN A 1 3 ? -3.643 0.138  1.151  1.00 0.00 ? 7  DPN A HB3  10 
+HETATM 1094 H HD1  . DPN A 1 3 ? -2.718 1.697  -2.043 1.00 0.00 ? 7  DPN A HD1  10 
+HETATM 1095 H HD2  . DPN A 1 3 ? -4.191 2.513  1.916  1.00 0.00 ? 7  DPN A HD2  10 
+HETATM 1096 H HE1  . DPN A 1 3 ? -3.498 3.914  -2.782 1.00 0.00 ? 7  DPN A HE1  10 
+HETATM 1097 H HE2  . DPN A 1 3 ? -4.962 4.730  1.162  1.00 0.00 ? 7  DPN A HE2  10 
+HETATM 1098 H HZ   . DPN A 1 3 ? -4.616 5.433  -1.183 1.00 0.00 ? 7  DPN A HZ   10 
+ATOM   1099 N N    . ARG A 1 4 ? 0.243  2.149  0.310  1.00 0.00 ? 8  ARG A N    10 
+ATOM   1100 C CA   . ARG A 1 4 ? 1.510  2.547  -0.395 1.00 0.00 ? 8  ARG A CA   10 
+ATOM   1101 C C    . ARG A 1 4 ? 2.761  1.603  -0.259 1.00 0.00 ? 8  ARG A C    10 
+ATOM   1102 O O    . ARG A 1 4 ? 3.508  1.382  -1.212 1.00 0.00 ? 8  ARG A O    10 
+ATOM   1103 C CB   . ARG A 1 4 ? 1.823  4.030  -0.031 1.00 0.00 ? 8  ARG A CB   10 
+ATOM   1104 C CG   . ARG A 1 4 ? 2.286  4.294  1.424  1.00 0.00 ? 8  ARG A CG   10 
+ATOM   1105 C CD   . ARG A 1 4 ? 2.524  5.776  1.750  1.00 0.00 ? 8  ARG A CD   10 
+ATOM   1106 N NE   . ARG A 1 4 ? 2.987  5.871  3.161  1.00 0.00 ? 8  ARG A NE   10 
+ATOM   1107 C CZ   . ARG A 1 4 ? 3.278  7.000  3.806  1.00 0.00 ? 8  ARG A CZ   10 
+ATOM   1108 N NH1  . ARG A 1 4 ? 3.694  6.917  5.035  1.00 0.00 ? 8  ARG A NH1  10 
+ATOM   1109 N NH2  . ARG A 1 4 ? 3.169  8.191  3.268  1.00 0.00 ? 8  ARG A NH2  10 
+ATOM   1110 H H    . ARG A 1 4 ? -0.291 2.799  0.895  1.00 0.00 ? 8  ARG A H    10 
+ATOM   1111 H HA   . ARG A 1 4 ? 1.283  2.524  -1.470 1.00 0.00 ? 8  ARG A HA   10 
+ATOM   1112 H HB2  . ARG A 1 4 ? 2.599  4.402  -0.727 1.00 0.00 ? 8  ARG A HB2  10 
+ATOM   1113 H HB3  . ARG A 1 4 ? 0.932  4.647  -0.254 1.00 0.00 ? 8  ARG A HB3  10 
+ATOM   1114 H HG2  . ARG A 1 4 ? 1.533  3.878  2.120  1.00 0.00 ? 8  ARG A HG2  10 
+ATOM   1115 H HG3  . ARG A 1 4 ? 3.216  3.721  1.612  1.00 0.00 ? 8  ARG A HG3  10 
+ATOM   1116 H HD2  . ARG A 1 4 ? 3.278  6.197  1.054  1.00 0.00 ? 8  ARG A HD2  10 
+ATOM   1117 H HD3  . ARG A 1 4 ? 1.585  6.350  1.596  1.00 0.00 ? 8  ARG A HD3  10 
+ATOM   1118 H HE   . ARG A 1 4 ? 3.121  5.022  3.721  1.00 0.00 ? 8  ARG A HE   10 
+ATOM   1119 H HH11 . ARG A 1 4 ? 3.917  7.792  5.514  1.00 0.00 ? 8  ARG A HH11 10 
+ATOM   1120 H HH12 . ARG A 1 4 ? 3.786  5.979  5.429  1.00 0.00 ? 8  ARG A HH12 10 
+ATOM   1121 H HH21 . ARG A 1 4 ? 2.841  8.184  2.301  1.00 0.00 ? 8  ARG A HH21 10 
+ATOM   1122 H HH22 . ARG A 1 4 ? 3.414  9.007  3.831  1.00 0.00 ? 8  ARG A HH22 10 
+ATOM   1123 N N    . TRP A 1 5 ? 2.917  1.027  0.937  1.00 0.00 ? 9  TRP A N    10 
+ATOM   1124 C CA   . TRP A 1 5 ? 3.886  -0.050 1.283  1.00 0.00 ? 9  TRP A CA   10 
+ATOM   1125 C C    . TRP A 1 5 ? 3.937  -1.315 0.355  1.00 0.00 ? 9  TRP A C    10 
+ATOM   1126 O O    . TRP A 1 5 ? 5.003  -1.920 0.221  1.00 0.00 ? 9  TRP A O    10 
+ATOM   1127 C CB   . TRP A 1 5 ? 3.550  -0.484 2.738  1.00 0.00 ? 9  TRP A CB   10 
+ATOM   1128 C CG   . TRP A 1 5 ? 3.636  0.589  3.839  1.00 0.00 ? 9  TRP A CG   10 
+ATOM   1129 C CD1  . TRP A 1 5 ? 4.757  1.019  4.573  1.00 0.00 ? 9  TRP A CD1  10 
+ATOM   1130 C CD2  . TRP A 1 5 ? 2.597  1.381  4.258  1.00 0.00 ? 9  TRP A CD2  10 
+ATOM   1131 N NE1  . TRP A 1 5 ? 4.425  2.069  5.462  1.00 0.00 ? 9  TRP A NE1  10 
+ATOM   1132 C CE2  . TRP A 1 5 ? 3.070  2.275  5.243  1.00 0.00 ? 9  TRP A CE2  10 
+ATOM   1133 C CE3  . TRP A 1 5 ? 1.268  1.437  3.811  1.00 0.00 ? 9  TRP A CE3  10 
+ATOM   1134 C CZ2  . TRP A 1 5 ? 2.187  3.234  5.804  1.00 0.00 ? 9  TRP A CZ2  10 
+ATOM   1135 C CZ3  . TRP A 1 5 ? 0.415  2.387  4.359  1.00 0.00 ? 9  TRP A CZ3  10 
+ATOM   1136 C CH2  . TRP A 1 5 ? 0.863  3.273  5.349  1.00 0.00 ? 9  TRP A CH2  10 
+ATOM   1137 H H    . TRP A 1 5 ? 2.172  1.297  1.582  1.00 0.00 ? 9  TRP A H    10 
+ATOM   1138 H HA   . TRP A 1 5 ? 4.895  0.395  1.302  1.00 0.00 ? 9  TRP A HA   10 
+ATOM   1139 H HB2  . TRP A 1 5 ? 2.544  -0.947 2.751  1.00 0.00 ? 9  TRP A HB2  10 
+ATOM   1140 H HB3  . TRP A 1 5 ? 4.189  -1.315 3.038  1.00 0.00 ? 9  TRP A HB3  10 
+ATOM   1141 H HD1  . TRP A 1 5 ? 5.750  0.613  4.440  1.00 0.00 ? 9  TRP A HD1  10 
+ATOM   1142 H HE1  . TRP A 1 5 ? 5.033  2.524  6.155  1.00 0.00 ? 9  TRP A HE1  10 
+ATOM   1143 H HE3  . TRP A 1 5 ? 0.951  0.756  3.035  1.00 0.00 ? 9  TRP A HE3  10 
+ATOM   1144 H HZ2  . TRP A 1 5 ? 2.528  3.915  6.571  1.00 0.00 ? 9  TRP A HZ2  10 
+ATOM   1145 H HZ3  . TRP A 1 5 ? -0.596 2.412  3.988  1.00 0.00 ? 9  TRP A HZ3  10 
+ATOM   1146 H HH2  . TRP A 1 5 ? 0.173  3.995  5.762  1.00 0.00 ? 9  TRP A HH2  10 
+ATOM   1147 N N    . ASP A 1 6 ? 2.812  -1.713 -0.272 1.00 0.00 ? 10 ASP A N    10 
+ATOM   1148 C CA   . ASP A 1 6 ? 2.774  -2.819 -1.273 1.00 0.00 ? 10 ASP A CA   10 
+ATOM   1149 C C    . ASP A 1 6 ? 3.571  -2.590 -2.603 1.00 0.00 ? 10 ASP A C    10 
+ATOM   1150 O O    . ASP A 1 6 ? 4.090  -3.534 -3.189 1.00 0.00 ? 10 ASP A O    10 
+ATOM   1151 C CB   . ASP A 1 6 ? 1.289  -3.166 -1.598 1.00 0.00 ? 10 ASP A CB   10 
+ATOM   1152 C CG   . ASP A 1 6 ? 0.341  -3.562 -0.454 1.00 0.00 ? 10 ASP A CG   10 
+ATOM   1153 O OD1  . ASP A 1 6 ? -0.664 -2.891 -0.233 1.00 0.00 ? 10 ASP A OD1  10 
+ATOM   1154 H H    . ASP A 1 6 ? 2.010  -1.087 -0.124 1.00 0.00 ? 10 ASP A H    10 
+ATOM   1155 H HA   . ASP A 1 6 ? 3.241  -3.711 -0.812 1.00 0.00 ? 10 ASP A HA   10 
+ATOM   1156 H HB2  . ASP A 1 6 ? 0.827  -2.302 -2.117 1.00 0.00 ? 10 ASP A HB2  10 
+ATOM   1157 H HB3  . ASP A 1 6 ? 1.253  -3.979 -2.345 1.00 0.00 ? 10 ASP A HB3  10 
+HETATM 1158 N N    . NH2 A 1 7 ? 3.696  -1.397 -3.153 1.00 0.00 ? 11 NH2 A N    10 
+HETATM 1159 H HN1  . NH2 A 1 7 ? 4.331  -1.401 -3.953 1.00 0.00 ? 11 NH2 A HN1  10 
+HETATM 1160 H HN2  . NH2 A 1 7 ? 3.441  -0.598 -2.559 1.00 0.00 ? 11 NH2 A HN2  10 
+# 
+loop_
+_pdbx_poly_seq_scheme.asym_id 
+_pdbx_poly_seq_scheme.entity_id 
+_pdbx_poly_seq_scheme.seq_id 
+_pdbx_poly_seq_scheme.mon_id 
+_pdbx_poly_seq_scheme.ndb_seq_num 
+_pdbx_poly_seq_scheme.pdb_seq_num 
+_pdbx_poly_seq_scheme.auth_seq_num 
+_pdbx_poly_seq_scheme.pdb_mon_id 
+_pdbx_poly_seq_scheme.auth_mon_id 
+_pdbx_poly_seq_scheme.pdb_strand_id 
+_pdbx_poly_seq_scheme.pdb_ins_code 
+_pdbx_poly_seq_scheme.hetero 
+A 1 1 AC5 1 5  5  AC5 ACP A . n 
+A 1 2 HIS 2 6  6  HIS HIS A . n 
+A 1 3 DPN 3 7  7  DPN DPN A . n 
+A 1 4 ARG 4 8  8  ARG ARG A . n 
+A 1 5 TRP 5 9  9  TRP TRP A . n 
+A 1 6 ASP 6 10 10 ASP ASP A . n 
+A 1 7 NH2 7 11 11 NH2 NH2 A . n 
+# 
+_pdbx_struct_assembly.id                   1 
+_pdbx_struct_assembly.details              author_and_software_defined_assembly 
+_pdbx_struct_assembly.method_details       PISA 
+_pdbx_struct_assembly.oligomeric_details   monomeric 
+_pdbx_struct_assembly.oligomeric_count     1 
+# 
+_pdbx_struct_assembly_gen.assembly_id       1 
+_pdbx_struct_assembly_gen.oper_expression   1 
+_pdbx_struct_assembly_gen.asym_id_list      A 
+# 
+loop_
+_pdbx_struct_assembly_prop.biol_id 
+_pdbx_struct_assembly_prop.type 
+_pdbx_struct_assembly_prop.value 
+_pdbx_struct_assembly_prop.details 
+1 'ABSA (A^2)' 110 ? 
+1 MORE         0   ? 
+1 'SSA (A^2)'  970 ? 
+# 
+_pdbx_struct_oper_list.id                   1 
+_pdbx_struct_oper_list.type                 'identity operation' 
+_pdbx_struct_oper_list.name                 1_555 
+_pdbx_struct_oper_list.symmetry_operation   ? 
+_pdbx_struct_oper_list.matrix[1][1]         1.0000000000 
+_pdbx_struct_oper_list.matrix[1][2]         0.0000000000 
+_pdbx_struct_oper_list.matrix[1][3]         0.0000000000 
+_pdbx_struct_oper_list.vector[1]            0.0000000000 
+_pdbx_struct_oper_list.matrix[2][1]         0.0000000000 
+_pdbx_struct_oper_list.matrix[2][2]         1.0000000000 
+_pdbx_struct_oper_list.matrix[2][3]         0.0000000000 
+_pdbx_struct_oper_list.vector[2]            0.0000000000 
+_pdbx_struct_oper_list.matrix[3][1]         0.0000000000 
+_pdbx_struct_oper_list.matrix[3][2]         0.0000000000 
+_pdbx_struct_oper_list.matrix[3][3]         1.0000000000 
+_pdbx_struct_oper_list.vector[3]            0.0000000000 
+# 
+loop_
+_pdbx_audit_revision_history.ordinal 
+_pdbx_audit_revision_history.data_content_type 
+_pdbx_audit_revision_history.major_revision 
+_pdbx_audit_revision_history.minor_revision 
+_pdbx_audit_revision_history.revision_date 
+1 'Structure model' 1 0 2018-04-25 
+2 'Structure model' 2 0 2018-05-23 
+# 
+_pdbx_audit_revision_details.ordinal             1 
+_pdbx_audit_revision_details.revision_ordinal    1 
+_pdbx_audit_revision_details.data_content_type   'Structure model' 
+_pdbx_audit_revision_details.provider            repository 
+_pdbx_audit_revision_details.type                'Initial release' 
+_pdbx_audit_revision_details.description         ? 
+# 
+loop_
+_pdbx_audit_revision_group.ordinal 
+_pdbx_audit_revision_group.revision_ordinal 
+_pdbx_audit_revision_group.data_content_type 
+_pdbx_audit_revision_group.group 
+1 2 'Structure model' 'Atomic model'        
+2 2 'Structure model' 'Data collection'     
+3 2 'Structure model' 'Database references' 
+4 2 'Structure model' 'Source and taxonomy' 
+# 
+loop_
+_pdbx_audit_revision_category.ordinal 
+_pdbx_audit_revision_category.revision_ordinal 
+_pdbx_audit_revision_category.data_content_type 
+_pdbx_audit_revision_category.category 
+1 2 'Structure model' atom_site           
+2 2 'Structure model' citation            
+3 2 'Structure model' pdbx_entity_src_syn 
+# 
+loop_
+_pdbx_audit_revision_item.ordinal 
+_pdbx_audit_revision_item.revision_ordinal 
+_pdbx_audit_revision_item.data_content_type 
+_pdbx_audit_revision_item.item 
+1 2 'Structure model' '_atom_site.auth_atom_id'               
+2 2 'Structure model' '_atom_site.label_atom_id'              
+3 2 'Structure model' '_citation.journal_volume'              
+4 2 'Structure model' '_citation.page_first'                  
+5 2 'Structure model' '_citation.page_last'                   
+6 2 'Structure model' '_pdbx_entity_src_syn.ncbi_taxonomy_id' 
+# 
+loop_
+_pdbx_nmr_exptl_sample.solution_id 
+_pdbx_nmr_exptl_sample.component 
+_pdbx_nmr_exptl_sample.concentration 
+_pdbx_nmr_exptl_sample.concentration_range 
+_pdbx_nmr_exptl_sample.concentration_units 
+_pdbx_nmr_exptl_sample.isotopic_labeling 
+1 Peptide 2.0 ? mM      'natural abundance' 
+1 D2O     10  ? '% v/v' '[U-99% 2H]'        
+1 TSP     0.1 ? mM      'natural abundance' 
+1 DPC     200 ? mM      '[U-100% 2H]'       
+# 
+loop_
+_pdbx_validate_rmsd_angle.id 
+_pdbx_validate_rmsd_angle.PDB_model_num 
+_pdbx_validate_rmsd_angle.auth_atom_id_1 
+_pdbx_validate_rmsd_angle.auth_asym_id_1 
+_pdbx_validate_rmsd_angle.auth_comp_id_1 
+_pdbx_validate_rmsd_angle.auth_seq_id_1 
+_pdbx_validate_rmsd_angle.PDB_ins_code_1 
+_pdbx_validate_rmsd_angle.label_alt_id_1 
+_pdbx_validate_rmsd_angle.auth_atom_id_2 
+_pdbx_validate_rmsd_angle.auth_asym_id_2 
+_pdbx_validate_rmsd_angle.auth_comp_id_2 
+_pdbx_validate_rmsd_angle.auth_seq_id_2 
+_pdbx_validate_rmsd_angle.PDB_ins_code_2 
+_pdbx_validate_rmsd_angle.label_alt_id_2 
+_pdbx_validate_rmsd_angle.auth_atom_id_3 
+_pdbx_validate_rmsd_angle.auth_asym_id_3 
+_pdbx_validate_rmsd_angle.auth_comp_id_3 
+_pdbx_validate_rmsd_angle.auth_seq_id_3 
+_pdbx_validate_rmsd_angle.PDB_ins_code_3 
+_pdbx_validate_rmsd_angle.label_alt_id_3 
+_pdbx_validate_rmsd_angle.angle_value 
+_pdbx_validate_rmsd_angle.angle_target_value 
+_pdbx_validate_rmsd_angle.angle_deviation 
+_pdbx_validate_rmsd_angle.angle_standard_deviation 
+_pdbx_validate_rmsd_angle.linker_flag 
+1  1  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 119.98 111.50 8.48  1.30 N 
+2  1  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH1 A ARG 8 ? ? 123.67 120.30 3.37  0.50 N 
+3  2  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 119.82 111.50 8.32  1.30 N 
+4  2  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH1 A ARG 8 ? ? 123.68 120.30 3.38  0.50 N 
+5  2  CD1 A TRP 9 ? ? NE1 A TRP 9 ? ? CE2 A TRP 9 ? ? 103.45 109.00 -5.55 0.90 N 
+6  3  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 120.09 111.50 8.59  1.30 N 
+7  3  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH2 A ARG 8 ? ? 123.67 120.30 3.37  0.50 N 
+8  4  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 120.04 111.50 8.54  1.30 N 
+9  4  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH2 A ARG 8 ? ? 123.54 120.30 3.24  0.50 N 
+10 5  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 119.91 111.50 8.41  1.30 N 
+11 5  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH1 A ARG 8 ? ? 123.68 120.30 3.38  0.50 N 
+12 6  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 120.01 111.50 8.51  1.30 N 
+13 6  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH2 A ARG 8 ? ? 123.64 120.30 3.34  0.50 N 
+14 7  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 119.91 111.50 8.41  1.30 N 
+15 7  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH2 A ARG 8 ? ? 123.64 120.30 3.34  0.50 N 
+16 8  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 120.05 111.50 8.55  1.30 N 
+17 8  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH2 A ARG 8 ? ? 123.86 120.30 3.56  0.50 N 
+18 9  ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 120.00 111.50 8.50  1.30 N 
+19 9  NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH1 A ARG 8 ? ? 123.52 120.30 3.22  0.50 N 
+20 10 ND1 A HIS 6 ? ? CE1 A HIS 6 ? ? NE2 A HIS 6 ? ? 120.10 111.50 8.60  1.30 N 
+21 10 NE  A ARG 8 ? ? CZ  A ARG 8 ? ? NH2 A ARG 8 ? ? 123.56 120.30 3.26  0.50 N 
+# 
+_pdbx_struct_assembly_auth_evidence.id                     1 
+_pdbx_struct_assembly_auth_evidence.assembly_id            1 
+_pdbx_struct_assembly_auth_evidence.experimental_support   none 
+_pdbx_struct_assembly_auth_evidence.details                ? 
+# 

@@ -10,6 +10,7 @@ import org.rcsb.cif.model.StrColumnBuilder;
 import org.rcsb.cif.model.ValueKind;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.AtomSite;
+import org.rcsb.cif.schema.mm.MaQaMetricLocal;
 import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifBlockBuilder;
 import org.rcsb.cif.schema.mm.MmCifCategoryBuilder;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -94,7 +96,7 @@ public class StructureWriterImpl implements StructureWriter {
         }
 
         // ensure that all needed atoms are present to make this residue useful during indexing
-        List<LabelSelection> validResidues = determineValidResidues(atomSite);
+        List<LabelSelection> validResidues = determineValidResidues(block);
 
         MmCifCategoryBuilder.AtomSiteBuilder atomSiteBuilder = outputBuilder.enterAtomSite();
         StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelAtomId = atomSiteBuilder.enterLabelAtomId();
@@ -126,13 +128,6 @@ public class StructureWriterImpl implements StructureWriter {
             // skip non-polymer
             if (atomSite.getLabelSeqId().getValueKind(row) != ValueKind.PRESENT) {
                 continue;
-            }
-
-            // filter away residues with low confidence, if requested
-            if (atomSite.getBIsoOrEquiv().isDefined() && residueQualityStrategy != ResidueQualityStrategy.NONE) {
-                if (!residueQualityStrategy.test(atomSite.getBIsoOrEquiv().get(row), this.residueQualityCutoff)) {
-                    continue;
-                }
             }
 
             String currentLabelAsymId = atomSite.getLabelAsymId().get(row);
@@ -200,7 +195,8 @@ public class StructureWriterImpl implements StructureWriter {
         }
     }
 
-    private List<LabelSelection> determineValidResidues(AtomSite atomSite) {
+    private List<LabelSelection> determineValidResidues(MmCifBlock block) {
+        AtomSite atomSite = block.getAtomSite();
         Map<LabelSelection, ResidueType> residueTypes = new HashMap<>();
         Map<LabelSelection, Set<String>> presentAtoms = new HashMap<>();
         for (int row = 0; row < atomSite.getRowCount(); row++) {
@@ -208,7 +204,32 @@ public class StructureWriterImpl implements StructureWriter {
                 continue;
             }
 
-            LabelSelection labelSelection = new LabelSelection(atomSite.getLabelAsymId().get(row), "1", atomSite.getLabelSeqId().get(row));
+            String labelAsymId = atomSite.getLabelAsymId().get(row);
+            int labelSeqId = atomSite.getLabelSeqId().get(row);
+
+            // filter away residues with low confidence, if requested
+            if (residueQualityStrategy != ResidueQualityStrategy.NONE) {
+                switch (residueQualityStrategy) {
+                    // filter by B-factor
+                    case BFACTOR_ABOVE_CUTOFF: case BFACTOR_BELOW_CUTOFF:
+                        if (atomSite.getBIsoOrEquiv().isDefined() && atomSite.getBIsoOrEquiv().getValueKind(row) == ValueKind.PRESENT) {
+                            if (!residueQualityStrategy.test(atomSite.getBIsoOrEquiv().get(row), residueQualityCutoff)) {
+                                continue;
+                            }
+                        }
+                        // filter by qa-metric
+                    case QA_METRIC_LOCAL_ABOVE_CUTOFF: case QA_METRIC_LOCAL_BELOW_CUTOFF:
+                        MaQaMetricLocal category = block.getMaQaMetricLocal();
+                        if (category.isDefined()) {
+                            double metricValue = findMetricValue(category,labelAsymId, labelSeqId);
+                            if (!residueQualityStrategy.test(metricValue, residueQualityCutoff)) {
+                                continue;
+                            }
+                        }
+                }
+            }
+
+            LabelSelection labelSelection = new LabelSelection(labelAsymId, "1", labelSeqId);
             residueTypes.put(labelSelection, ResidueType.ofThreeLetterCode(atomSite.getLabelCompId().get(row)));
             Set<String> atoms = presentAtoms.computeIfAbsent(labelSelection, e -> new HashSet<>());
             atoms.add(atomSite.getLabelAtomId().get(row));
@@ -275,5 +296,15 @@ public class StructureWriterImpl implements StructureWriter {
             default:
                 return false;
         }
+    }
+
+    private double findMetricValue(MaQaMetricLocal category, String labelAsymId, int labelSeqId) {
+        for (int i = 0; i < category.getRowCount(); i++) {
+            if (category.getLabelAsymId().get(i).equals(labelAsymId) && category.getLabelSeqId().get(i) == labelSeqId) {
+                return category.getMetricValue().get(i);
+            }
+        }
+
+        throw new NoSuchElementException("No in '" + category.getCategoryName() + "' for '" + labelAsymId + "-" + labelSeqId + "'");
     }
 }

@@ -8,17 +8,20 @@ import java.util.Set;
  */
 public class StructureInformation {
     private final String structureIdentifier;
+    private final int structureIndex;
     private final Revision revision;
     private final Map<String, Set<String>> assemblyInformation;
 
     /**
      * Wraps info on a structure.
      * @param structureIdentifier entry id
+     * @param structureIndex globally unique identifier of this entry
      * @param revision version
      * @param assemblyInformation present assemblies
      */
-    public StructureInformation(String structureIdentifier, Revision revision, Map<String, Set<String>> assemblyInformation) {
+    public StructureInformation(String structureIdentifier, int structureIndex, Revision revision, Map<String, Set<String>> assemblyInformation) {
         this.structureIdentifier = structureIdentifier;
+        this.structureIndex = structureIndex;
         this.revision = revision;
         this.assemblyInformation = assemblyInformation;
     }
@@ -29,6 +32,15 @@ public class StructureInformation {
      */
     public String getStructureIdentifier() {
         return structureIdentifier;
+    }
+
+    /**
+     * An integer that is guaranteed to be a unique identifier for this structure. Used to map between the int
+     * representation and a readable String representation (such as a PDB-ID).
+     * @return an int
+     */
+    public int getStructureIndex() {
+        return structureIndex;
     }
 
     /**

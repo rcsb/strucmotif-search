@@ -13,6 +13,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.zip.GZIPInputStream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -26,11 +27,11 @@ public class InvertedIndexImplTest {
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("index/" + residuePairDescriptor.toString() + ".msg");
+                        .getResourceAsStream("index/" + residuePairDescriptor + ".msg.gz");
                 if (inputStream == null) {
                     throw new IOException();
                 }
-                return inputStream;
+                return new GZIPInputStream(inputStream);
             }
         };
     }

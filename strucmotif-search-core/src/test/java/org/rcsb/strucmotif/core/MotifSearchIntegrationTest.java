@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.zip.GZIPInputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,11 +67,11 @@ public class MotifSearchIntegrationTest {
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("index/" + residuePairDescriptor.toString() + ".msg");
+                        .getResourceAsStream("index/" + residuePairDescriptor + ".msg.gz");
                 if (inputStream == null) {
                     throw new IOException();
                 }
-                return inputStream;
+                return new GZIPInputStream(inputStream);
             }
         };
 
@@ -159,7 +160,7 @@ public class MotifSearchIntegrationTest {
 
         MotifSearchResult response = buildParameters.buildQuery().run();
 
-        assertEquals(420, response.getHits().size());
+        assertEquals(422, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()

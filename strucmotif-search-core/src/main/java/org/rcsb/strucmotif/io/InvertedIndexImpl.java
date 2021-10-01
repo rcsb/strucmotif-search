@@ -67,7 +67,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
 
         try {
-            Map<String, Object> data = residuePairOccurrences.entrySet()
+            Map<Object, Object> data = residuePairOccurrences.entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey,
                             entry -> entry.getValue()
@@ -75,7 +75,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                                     .map(this::createObjectArray)
                                     .toArray()));
 
-            Map<String, Object> map = getMap(residuePairDescriptor);
+            Map<Object, Object> map = getMap(residuePairDescriptor);
 
             // read already present target identifiers and add to list to write
             data.putAll(map);
@@ -112,7 +112,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     private Stream<Pair<String, InvertedIndexResiduePairIdentifier[]>> getPairs(InputStream inputStream, ResiduePairDescriptor residuePairDescriptor) throws IOException {
         return getData(inputStream)
                 .map(entry -> {
-                    String id = entry.getKey();
+                    String id = (String) entry.getKey();
                     Object[] array = (Object[]) entry.getValue();
                     InvertedIndexResiduePairIdentifier[] value = new InvertedIndexResiduePairIdentifier[array.length];
                     for (int i = 0; i < array.length; i++) {
@@ -127,7 +127,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         return new InvertedIndexResiduePairIdentifier(data, residuePairDescriptor.isFlipped());
     }
 
-    private Stream<Map.Entry<String, Object>> getData(InputStream inputStream) throws IOException {
+    private Stream<Map.Entry<Object, Object>> getData(InputStream inputStream) throws IOException {
         return MessagePack.decode(inputStream).entrySet().stream();
     }
 
@@ -149,7 +149,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         return basePath.resolve(uberbin).resolve(bin + extension);
     }
 
-    private Map<String, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
+    private Map<Object, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
         try {
             return MessagePack.decode(getInputStream(residuePairDescriptor));
         } catch (IOException e) {
@@ -198,7 +198,7 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     private void delete(ResiduePairDescriptor residuePairDescriptor, Collection<String> removals) {
         try {
-            Map<String, Object> map = getMap(residuePairDescriptor);
+            Map<Object, Object> map = getMap(residuePairDescriptor);
 
             // if no entry would be removed: don't bother and return
             if (removals.stream().noneMatch(map::containsKey)) {
@@ -206,10 +206,10 @@ public class InvertedIndexImpl implements InvertedIndex {
             }
 
             // remove all occurrences of structure identifiers
-            Map<String, Object> filteredMap = map.entrySet()
+            Map<Object, Object> filteredMap = map.entrySet()
                     .stream()
                     // let only entries pass if their key is not in removal set
-                    .filter(entry -> !removals.contains(entry.getKey()))
+                    .filter(entry -> !removals.contains((String) entry.getKey()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             // serialize message

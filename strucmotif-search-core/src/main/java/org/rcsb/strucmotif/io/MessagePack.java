@@ -17,7 +17,7 @@ import java.util.Map;
  * considered.
  */
 class MessagePack {
-    public static ByteArrayOutputStream encode(Map<String, Object> input) {
+    public static ByteArrayOutputStream encode(Map<Object, Object> input) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -179,9 +179,9 @@ class MessagePack {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> decode(InputStream inputStream) throws IOException {
+    public static Map<Object, Object> decode(InputStream inputStream) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(inputStream);
-        Map<String, Object> map = (Map<String, Object>) decodeInternal(dataInputStream);
+        Map<Object, Object> map = (Map<Object, Object>) decodeInternal(dataInputStream);
         dataInputStream.close();
         return map;
     }
@@ -288,10 +288,10 @@ class MessagePack {
         return (int) (inputStream.readInt() & 0xFFFFFFFFL);
     }
 
-    private static Map<String, Object> map(DataInputStream inputStream, int length) throws IOException {
-        Map<String, Object> value = new LinkedHashMap<>();
+    private static Map<Object, Object> map(DataInputStream inputStream, int length) throws IOException {
+        Map<Object, Object> value = new LinkedHashMap<>();
         for (int i = 0; i < length; i++) {
-            value.put((String) decodeInternal(inputStream), decodeInternal(inputStream));
+            value.put(decodeInternal(inputStream), decodeInternal(inputStream));
         }
         return value;
     }

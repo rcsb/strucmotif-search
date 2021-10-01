@@ -10,6 +10,7 @@ import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final MotifSearchConfig motifSearchConfig;
     private final AlignmentService alignmentService;
     private final StructureDataProvider structureDataProvider;
+    private final StructureIndexProvider structureIndexProvider;
     private final AssemblyInformationProvider assemblyInformationProvider;
 
     /**
@@ -44,15 +46,17 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
      * @param motifSearchConfig app config
      * @param alignmentService alignment service
      * @param structureDataProvider structure data provider
+     * @param structureIndexProvider maps from index to identifier
      * @param assemblyInformationProvider all known assemblies
      */
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, AssemblyInformationProvider assemblyInformationProvider) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StructureIndexProvider structureIndexProvider, AssemblyInformationProvider assemblyInformationProvider) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
         this.alignmentService = alignmentService;
         this.structureDataProvider = structureDataProvider;
+        this.structureIndexProvider = structureIndexProvider;
         this.assemblyInformationProvider = assemblyInformationProvider;
 
         // initialize structure cache (if active)
@@ -158,8 +162,9 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 .values()
                 .parallelStream()
                 .flatMap(targetStructure -> {
-                    Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
-                    return targetStructure.paths(residueIndexSwaps, structure, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
+                    String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
+                    Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
+                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
                 })
                 .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                 .limit(limit)
@@ -181,8 +186,9 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                     .values()
                     .parallelStream()
                     .flatMap(targetStructure -> {
-                        Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
-                        return targetStructure.paths(residueIndexSwaps, structure, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
+                        String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
+                        Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
+                        return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
                     })
                     .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                     .forEach(hit -> {

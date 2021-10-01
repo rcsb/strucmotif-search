@@ -18,7 +18,7 @@ class Context {
     final Set<String> known;
     final Set<StructureInformation> processed;
     String partitionContext;
-    Map<ResiduePairDescriptor, Map<String, Collection<ResiduePairIdentifier>>> buffer;
+    Map<ResiduePairDescriptor, Map<Integer, Collection<ResiduePairIdentifier>>> buffer;
     AtomicInteger structureCounter;
 
     /**

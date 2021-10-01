@@ -38,17 +38,17 @@ import java.util.stream.Stream;
  * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
-    private final String structureIdentifier;
+    private final int structureIndex;
     // non-final fields to achieve the lazy behavior - tread lightly
     private List<InvertedIndexResiduePairIdentifier[]> paths;
 
     /**
      * Construct a target structure instance.
-     * @param structureIdentifier its identifier
+     * @param structureIndex its identifier
      * @param residuePairIdentifiers all first-generation residue pairs
      */
-    public TargetStructure(String structureIdentifier, InvertedIndexResiduePairIdentifier[] residuePairIdentifiers) {
-        this.structureIdentifier = structureIdentifier;
+    public TargetStructure(int structureIndex, InvertedIndexResiduePairIdentifier[] residuePairIdentifiers) {
+        this.structureIndex = structureIndex;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
         this.paths = new ArrayList<>(residuePairIdentifiers.length);
@@ -66,11 +66,11 @@ public class TargetStructure {
     }
 
     /**
-     * The identifier of this structure
-     * @return a String
+     * The index of this structure
+     * @return an int
      */
-    public String getStructureIdentifier() {
-        return structureIdentifier;
+    public int getStructureIndex() {
+        return structureIndex;
     }
 
     /**
@@ -117,17 +117,18 @@ public class TargetStructure {
      * this causes the structure to be parsed. Also, this method is supposed to be called once and results to be
      * consumed directly.
      * @param residueIndexSwaps how residues were rearranged
-     * @param structure provides assembly information
+     * @param structure the structure data
+     * @param structureIdentifier the structureIdentifier
      * @param hitScorer the hit scorer
      * @param assemblyInformationProvider provides prepared assembly information
      * @param undefinedAssemblies allow hits without assembly?
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
-        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, hitScorer, assemblyInformationProvider, undefinedAssemblies));
+    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, undefinedAssemblies));
     }
 
-    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
         List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = indexSelections.stream()
                 .map(indexSelection -> {

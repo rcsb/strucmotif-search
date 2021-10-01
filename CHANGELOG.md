@@ -3,6 +3,9 @@ Strucmotif-search Changelog
 
 Unreleased
 -------------
+### Breaking changes
+- change index keys from `String` to `int` - this allows more efficient storage of non-PDB identifiers
+
 ### Added
 - support hits without assembly information (`strucmotif.undefined-assemblies` must be true)
 - optionally, index only residues with 'good quality' (e.g., based on B-factor values)

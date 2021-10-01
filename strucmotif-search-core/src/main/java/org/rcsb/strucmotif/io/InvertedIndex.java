@@ -19,18 +19,18 @@ public interface InvertedIndex {
      * @param residuePairDescriptor the bin for which new data should be written
      * @param residuePairOccurrences the data to append to this bin - keys are pdbIds, values are all words of this descriptor
      */
-    void insert(ResiduePairDescriptor residuePairDescriptor, Map<String, Collection<ResiduePairIdentifier>> residuePairOccurrences);
+    void insert(ResiduePairDescriptor residuePairDescriptor, Map<Integer, Collection<ResiduePairIdentifier>> residuePairOccurrences);
 
     /**
      * Perform lookup for a particular bin.
      * @param residuePairDescriptor the bin for which occurrences should the lookup be performed
      * @return a {@link Stream} of all occurrences, grouped by their structure identifier
      */
-    Stream<Pair<String, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor);
+    Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor);
 
     /**
      * Removes all information on a set of structures from the index.
      * @param structureIdentifiers what to remove
      */
-    void delete(Collection<String> structureIdentifiers);
+    void delete(Collection<Integer> structureIdentifiers);
 }

@@ -248,6 +248,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
     private void handleUpdateItemInternal(UpdateItem item, Context context) {
         String structureIdentifier = item.getStructureIdentifier();
+        int structureIndex = structureIndexProvider.nextStructureIndex();
         try {
             InputStream inputStream = handleInputStream(item, context);
 
@@ -261,7 +262,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
             // write renumbered structure
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
-            context.processed.add(new StructureInformation(structureIdentifier, structureIndexProvider.nextStructureIndex(), revision, assemblyInformation));
+            context.processed.add(new StructureInformation(structureIdentifier, structureIndex, revision, assemblyInformation));
         } catch (IOException e) {
             throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
         } catch (ParsingException e) {
@@ -301,8 +302,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
                             ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
                             ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
 
-                            Map<String, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
-                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIdentifier, k -> Collections.synchronizedSet(new HashSet<>()));
+                            Map<Integer, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
+                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIndex, k -> Collections.synchronizedSet(new HashSet<>()));
                             targetIdentifiers.add(targetIdentifier);
                             structureMotifCounter.incrementAndGet();
                         });
@@ -348,7 +349,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         threadPool.submit(() -> {
             context.buffer.entrySet().parallelStream().forEach(entry -> {
                 ResiduePairDescriptor full = entry.getKey();
-                Map<String, Collection<ResiduePairIdentifier>> output = entry.getValue();
+                Map<Integer, Collection<ResiduePairIdentifier>> output = entry.getValue();
 
                 if (bufferCount.incrementAndGet() % 100000 == 0) {
                     logger.info("[{}] {} / {}",
@@ -388,7 +389,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
         // inverted index is expensive and should be done as batch
         if (identifiers.size() > 0) {
-            invertedIndex.delete(identifiers);
+            Set<Integer> mapped = identifiers.stream()
+                    .map(structureIndexProvider::selectStructureIndex)
+                    .collect(Collectors.toSet());
+            invertedIndex.delete(mapped);
             stateRepository.deleteKnown(identifiers);
             stateRepository.deleteDirty(identifiers);
         }

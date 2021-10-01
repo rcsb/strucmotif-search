@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * A file-system-based state repository.
@@ -42,9 +43,8 @@ public class StateRepositoryImpl implements StateRepository {
 
     @Override
     public Collection<StructureInformation> selectKnown() {
-        try {
-            return Files.lines(knownPath)
-                    .filter(line -> !line.isBlank())
+        try (Stream<String> lines = Files.lines(knownPath)) {
+            return lines.filter(line -> !line.isBlank())
                     .map(line -> line.split(TOP_LEVEL_DELIMITER))
                     .map(this::handleKnownSplit)
                     .collect(Collectors.toSet());
@@ -85,9 +85,8 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     private Set<String> select(Path source) {
-        try {
-            return Files.lines(source)
-                    .filter(line -> !line.isBlank())
+        try (Stream<String> lines = Files.lines(source)) {
+            return lines.filter(line -> !line.isBlank())
                     .collect(Collectors.toSet());
         } catch (IOException e) {
             return Collections.emptySet();
@@ -96,11 +95,11 @@ public class StateRepositoryImpl implements StateRepository {
 
     @Override
     public void insertKnown(Collection<StructureInformation> additions) {
-        try {
-            FileWriter writer = new FileWriter(knownPath.toFile(), true);
+        try (FileWriter writer = new FileWriter(knownPath.toFile(), true)) {
             for (StructureInformation addition : additions) {
                 // let's concat externally in case 'append' invocation from multiple threads race
                 String update = addition.getStructureIdentifier() + TOP_LEVEL_DELIMITER +
+                        addition.getStructureIndex() + TOP_LEVEL_DELIMITER +
                         addition.getRevision().getMajor() + TOP_LEVEL_DELIMITER +
                         addition.getRevision().getMinor() + TOP_LEVEL_DELIMITER +
                         addition.getAssemblyInformation().entrySet().stream()
@@ -109,7 +108,6 @@ public class StateRepositoryImpl implements StateRepository {
                                 .collect(Collectors.joining(TOP_LEVEL_DELIMITER)) + "\n";
                 writer.append(update);
             }
-            writer.close();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -121,14 +119,12 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     private void insert(Collection<String> additions, Path destination) {
-        try {
-            FileWriter writer = new FileWriter(destination.toFile(), true);
+        try (FileWriter writer = new FileWriter(destination.toFile(), true)) {
             for (String structureIdentifier : additions) {
                 // let's concat externally in case 'append' invocation from multiple threads race
                 String update = structureIdentifier + "\n";
                 writer.append(update);
             }
-            writer.close();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -153,9 +149,8 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     private void delete(Collection<String> removals, Path destination) {
-        try {
-            String output = Files.lines(destination)
-                    .filter(line -> removals.stream().noneMatch(line::startsWith))
+        try (Stream<String> lines = Files.lines(destination)) {
+            String output = lines.filter(line -> removals.stream().noneMatch(line::startsWith))
                     .collect(Collectors.joining("\n", "", "\n"));
             Files.write(destination, output.getBytes());
         } catch (IOException e) {

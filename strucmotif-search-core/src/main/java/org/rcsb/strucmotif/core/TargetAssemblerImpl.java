@@ -15,6 +15,7 @@ import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,16 +35,19 @@ public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
     private final InvertedIndex invertedIndex;
     private final ThreadPool threadPool;
+    private final StructureIndexProvider structureIndexProvider;
 
     /**
      * Injectable constructor.
      * @param invertedIndex inverted index
      * @param threadPool thread pool
+     * @param structureIndexProvider maps from structureIdentifiers to indices
      */
     @Autowired
-    public TargetAssemblerImpl(InvertedIndex invertedIndex, ThreadPool threadPool) {
+    public TargetAssemblerImpl(InvertedIndex invertedIndex, ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
         this.invertedIndex = invertedIndex;
         this.threadPool = threadPool;
+        this.structureIndexProvider = structureIndexProvider;
     }
 
     @Override
@@ -63,7 +67,15 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
         boolean whitelist = !query.getWhitelist().isEmpty();
+        Set<Integer> allowed = query.getWhitelist()
+                .stream()
+                .map(structureIndexProvider::selectStructureIndex)
+                .collect(Collectors.toSet());
         boolean blacklist = !query.getBlacklist().isEmpty();
+        Set<Integer> ignored = query.getBlacklist()
+                .stream()
+                .map(structureIndexProvider::selectStructureIndex)
+                .collect(Collectors.toSet());
 
         response.getTimings().pathsStart();
         // retrieve target identifiers per query motif descriptor
@@ -72,15 +84,15 @@ public class TargetAssemblerImpl implements TargetAssembler {
             ResiduePairDescriptor residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
-            Map<String, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers;
+            Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers;
             // asked to honor entry-level white- or blacklist
             if (whitelist || blacklist) {
                 residuePairIdentifiers = residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                         .flatMap(invertedIndex::select)
                         // if there is a whitelist, this entry has to occur therein
-                        .filter(pair -> !whitelist || query.getWhitelist().contains(pair.getFirst()))
+                        .filter(pair -> !whitelist || allowed.contains(pair.getFirst()))
                         // cannot occur in blacklist
-                        .filter(pair -> !query.getBlacklist().contains(pair.getFirst()))
+                        .filter(pair -> !ignored.contains(pair.getFirst()))
                         .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat));
             } else {
                 // standard mode: accepted everybody
@@ -117,8 +129,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return result;
     }
 
-    private void consume(MotifSearchResult response, Map<String, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
-        Map<String, TargetStructure> targetStructures = response.getTargetStructures();
+    private void consume(MotifSearchResult response, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
+        Map<Integer, TargetStructure> targetStructures = response.getTargetStructures();
         QueryStructure queryStructure = response.getQuery().getQueryStructure();
 
         if (targetStructures == null) {

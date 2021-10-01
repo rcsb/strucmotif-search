@@ -17,7 +17,7 @@ public class MotifSearchResult {
      * Keep track of the generation we are currently in, i.e. how many words of the query have been consumed.
      */
     private int pathGeneration;
-    private Map<String, TargetStructure> targetStructures;
+    private Map<Integer, TargetStructure> targetStructures;
 
     private List<Hit> hits;
     private int numberOfPaths;
@@ -54,15 +54,15 @@ public class MotifSearchResult {
      * Access to all currently referenced target structures.
      * @return a map with structure identifiers as keys and target structure instances as values
      */
-    public Map<String, TargetStructure> getTargetStructures() {
+    public Map<Integer, TargetStructure> getTargetStructures() {
         return targetStructures;
     }
 
     /**
      * Update the currently referenced target structures.
-     * @param targetStructures a map with structure identifiers as keys and target structure instances as values
+     * @param targetStructures a map with structure indices as keys and target structure instances as values
      */
-    public void setTargetStructures(Map<String, TargetStructure> targetStructures) {
+    public void setTargetStructures(Map<Integer, TargetStructure> targetStructures) {
         this.targetStructures = targetStructures;
     }
 

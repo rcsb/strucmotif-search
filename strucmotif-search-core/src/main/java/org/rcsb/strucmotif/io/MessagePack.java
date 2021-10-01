@@ -11,13 +11,10 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Decodes and encodes MessagePack data. Exists isolated from other codec implementations for simplicity and due to
- * subtle differences such as byte order in MessagePack being big-endian as opposed to binary CIF codecs which require
- * little-endian order. Regarding primitive number data types, only <code>int</code> and <code>double</code> are
- * considered.
+ * Decodes and encodes MessagePack data.
  */
 class MessagePack {
-    public static ByteArrayOutputStream encode(Map<Object, Object> input) {
+    public static ByteArrayOutputStream encode(Map<?, ?> input) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
@@ -178,10 +175,9 @@ class MessagePack {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    public static Map<Object, Object> decode(InputStream inputStream) throws IOException {
+    public static Map<?, ?> decode(InputStream inputStream) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(inputStream);
-        Map<Object, Object> map = (Map<Object, Object>) decodeInternal(dataInputStream);
+        Map<?, ?> map = (Map<?, ?>) decodeInternal(dataInputStream);
         dataInputStream.close();
         return map;
     }
@@ -288,7 +284,7 @@ class MessagePack {
         return (int) (inputStream.readInt() & 0xFFFFFFFFL);
     }
 
-    private static Map<Object, Object> map(DataInputStream inputStream, int length) throws IOException {
+    private static Map<?, ?> map(DataInputStream inputStream, int length) throws IOException {
         Map<Object, Object> value = new LinkedHashMap<>();
         for (int i = 0; i < length; i++) {
             value.put(decodeInternal(inputStream), decodeInternal(inputStream));

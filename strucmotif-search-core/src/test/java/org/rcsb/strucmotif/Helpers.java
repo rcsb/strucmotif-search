@@ -30,7 +30,7 @@ public class Helpers {
     }
 
     public static InputStream getRenumberedBcif(String pdbId) {
-        return getResource("bcif/" + pdbId + ".bcif");
+        return getResource("renum/" + pdbId + ".bcif");
     }
 
     public static InputStream getResource(String location) {

@@ -7,26 +7,28 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
 
 @Service
 public class StructureIndexProviderImpl implements StructureIndexProvider {
     private final Deque<Integer> reuse;
     private int next;
     private final Map<Integer, String> forward;
+    private final Map<String, Integer> backward;
 
     public StructureIndexProviderImpl(StateRepository stateRepository) {
         this.reuse = new ArrayDeque<>();
         this.forward = new HashMap<>();
+        this.backward = new HashMap<>();
 
         // determine the largest known id
-        int max = Integer.MIN_VALUE;
+        int max = -1; // let's start at 0, negative values are perfectly fine too (and will happen when counter overflows)
         for (StructureInformation structureInformation : stateRepository.selectKnown()) {
-            int index = structureInformation.getStructureIndex();
-            forward.put(index, structureInformation.getStructureIdentifier());
-            if (index > max) {
-                max = index;
+            int structureIndex = structureInformation.getStructureIndex();
+            String structureIdentifier = structureInformation.getStructureIdentifier();
+            forward.put(structureIndex, structureIdentifier);
+            backward.put(structureIdentifier, structureIndex);
+            if (structureIndex > max) {
+                max = structureIndex;
             }
         }
 
@@ -48,18 +50,18 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
         return forward.get(structureIndex);
     }
 
-    /**
-     * Maps between structure identifier and index. Note that this is here for convenience and not necessarily fast.
-     * @param structureIdentifier the String
-     * @return the int
-     */
+    @Override
     public int selectStructureIndex(String structureIdentifier) {
-        for (Map.Entry<Integer, String> entry : forward.entrySet()) {
-            if (Objects.equals(structureIdentifier, entry.getValue())) {
-                return entry.getKey();
-            }
+        return backward.get(structureIdentifier);
+    }
+
+    @Override
+    public int selectOrMintStructureIndex(String structureIdentifier) {
+        if (backward.containsKey(structureIdentifier)) {
+            return backward.get(structureIdentifier);
         }
-        throw new NoSuchElementException("Didn't find index for identifier '" + structureIdentifier + "'");
+
+        return nextStructureIndex();
     }
 
     @Override

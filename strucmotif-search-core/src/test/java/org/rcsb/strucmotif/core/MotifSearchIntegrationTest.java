@@ -18,7 +18,10 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
+import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
 import org.rcsb.strucmotif.io.StateRepositoryImpl;
@@ -78,7 +81,7 @@ public class MotifSearchIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepositoryImpl stateRepository = new StateRepositoryImpl(motifSearchConfig) {
+        StateRepository stateRepository = new StateRepositoryImpl(motifSearchConfig) {
             @Override
             public Collection<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -90,9 +93,11 @@ public class MotifSearchIntegrationTest {
             }
         };
 
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
+        StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
+
+        TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
-        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, assemblyInformationProvider);
+        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 

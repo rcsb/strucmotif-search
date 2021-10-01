@@ -16,6 +16,7 @@ import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.rcsb.strucmotif.math.Partition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +73,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
     private final InvertedIndex invertedIndex;
     private final MotifSearchConfig motifSearchConfig;
     private final ThreadPool threadPool;
+    private final StructureIndexProvider structureIndexProvider;
 
     /**
      * Injectable constructor.
@@ -82,12 +84,13 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param threadPool thread pool
      */
     @Autowired
-    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig, ThreadPool threadPool) {
+    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig, ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
         this.stateRepository = stateRepository;
         this.structureDataProvider = structureDataProvider;
         this.invertedIndex = invertedIndex;
         this.motifSearchConfig = motifSearchConfig;
         this.threadPool = threadPool;
+        this.structureIndexProvider = structureIndexProvider;
     }
 
     /**
@@ -258,7 +261,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
             // write renumbered structure
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
-            context.processed.add(new StructureInformation(structureIdentifier, revision, assemblyInformation));
+            context.processed.add(new StructureInformation(structureIdentifier, structureIndexProvider.nextStructureIndex(), revision, assemblyInformation));
         } catch (IOException e) {
             throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
         } catch (ParsingException e) {

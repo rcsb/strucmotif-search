@@ -60,8 +60,9 @@ public class StateRepositoryImpl implements StateRepository {
      */
     protected StructureInformation handleKnownSplit(String[] split) {
         String structureIdentifier = split[0];
-        Revision revision = new Revision(Integer.parseInt(split[1]), Integer.parseInt(split[2]));
-        Map<String, Set<String>> assemblyInformation = IntStream.range(3, split.length)
+        int structureIndex = Integer.parseInt(split[1]);
+        Revision revision = new Revision(Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+        Map<String, Set<String>> assemblyInformation = IntStream.range(4, split.length)
                 .mapToObj(i -> {
                     String[] assemblySplit = split[i].split(ASSEMBLY_INFORMATION_DELIMITER);
                     String assemblyId = assemblySplit[0];
@@ -71,7 +72,7 @@ public class StateRepositoryImpl implements StateRepository {
                 })
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
 
-        return new StructureInformation(structureIdentifier, revision, assemblyInformation);
+        return new StructureInformation(structureIdentifier, structureIndex, revision, assemblyInformation);
     }
 
     @Override

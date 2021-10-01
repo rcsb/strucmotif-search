@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
 import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.springframework.stereotype.Service;
@@ -16,8 +15,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,8 +29,6 @@ public class StateRepositoryImpl implements StateRepository {
     private static final String ASSEMBLY_INFORMATION_DELIMITER = ";";
     private final Path knownPath;
     private final Path dirtyPath;
-    // maps from struct_oper_id to all assemblies this transformation is part of
-    private final Map<String, Map<String, Set<String>>> reverseAssemblyInformation;
 
     /**
      * Construct a state repository instance.
@@ -43,31 +38,6 @@ public class StateRepositoryImpl implements StateRepository {
         Path rootPath = Paths.get(motifSearchConfig.getRootPath());
         this.knownPath = rootPath.resolve(MotifSearchConfig.STATE_KNOWN_LIST);
         this.dirtyPath = rootPath.resolve(MotifSearchConfig.STATE_DIRTY_LIST);
-        this.reverseAssemblyInformation = loadAssemblyInformation();
-    }
-
-    private Map<String, Map<String, Set<String>>> loadAssemblyInformation() {
-        Collection<StructureInformation> data = selectKnown();
-        return data.stream()
-                .map(s -> {
-                    String structureIdentifier = s.getStructureIdentifier();
-                    Map<String, Set<String>> assemblyInformation = s.getAssemblyInformation();
-                    Map<String, Set<String>> reversed = new HashMap<>();
-                    for (Map.Entry<String, Set<String>> partial : assemblyInformation.entrySet()) {
-                        String assemblyId = partial.getKey();
-                        for (String structOperId : partial.getValue()) {
-                            Set<String> mappedAssemblyIds = reversed.computeIfAbsent(structOperId, e -> new HashSet<>());
-                            mappedAssemblyIds.add(assemblyId);
-                        }
-                    }
-                    return new Pair<>(structureIdentifier, reversed);
-                })
-                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-    }
-
-    @Override
-    public Map<String, Set<String>> selectAssemblyMap(String structureIdentifier) {
-        return reverseAssemblyInformation.get(structureIdentifier);
     }
 
     @Override

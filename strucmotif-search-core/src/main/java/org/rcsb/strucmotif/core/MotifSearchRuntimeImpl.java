@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.StateRepository;
+import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final MotifSearchConfig motifSearchConfig;
     private final AlignmentService alignmentService;
     private final StructureDataProvider structureDataProvider;
-    private final StateRepository stateRepository;
+    private final AssemblyInformationProvider assemblyInformationProvider;
 
     /**
      * Injectable constructor.
@@ -44,16 +44,16 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
      * @param motifSearchConfig app config
      * @param alignmentService alignment service
      * @param structureDataProvider structure data provider
-     * @param stateRepository global state, derived from loaded ddata
+     * @param assemblyInformationProvider all known assemblies
      */
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StateRepository stateRepository) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, AssemblyInformationProvider assemblyInformationProvider) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
         this.alignmentService = alignmentService;
         this.structureDataProvider = structureDataProvider;
-        this.stateRepository = stateRepository;
+        this.assemblyInformationProvider = assemblyInformationProvider;
 
         // initialize structure cache (if active)
         try {
@@ -159,7 +159,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 .parallelStream()
                 .flatMap(targetStructure -> {
                     Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
-                    return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository, motifSearchConfig.isUndefinedAssemblies());
+                    return targetStructure.paths(residueIndexSwaps, structure, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
                 })
                 .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                 .limit(limit)
@@ -182,7 +182,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                     .parallelStream()
                     .flatMap(targetStructure -> {
                         Structure structure = structureDataProvider.readRenumbered(targetStructure.getStructureIdentifier());
-                        return targetStructure.paths(residueIndexSwaps, structure, hitScorer, stateRepository, motifSearchConfig.isUndefinedAssemblies());
+                        return targetStructure.paths(residueIndexSwaps, structure, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
                     })
                     .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
                     .forEach(hit -> {

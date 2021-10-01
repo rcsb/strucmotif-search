@@ -16,6 +16,8 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
+import org.rcsb.strucmotif.io.AssemblyInformationProvider;
+import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
@@ -89,7 +91,8 @@ public class MotifSearchIntegrationTest {
         };
 
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
-        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, stateRepository);
+        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
+        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, assemblyInformationProvider);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 

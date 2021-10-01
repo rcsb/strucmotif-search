@@ -13,7 +13,7 @@ import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.StateRepository;
+import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -119,15 +119,15 @@ public class TargetStructure {
      * @param residueIndexSwaps how residues were rearranged
      * @param structure provides assembly information
      * @param hitScorer the hit scorer
-     * @param stateRepository provides prepared assembly information
+     * @param assemblyInformationProvider provides prepared assembly information
      * @param undefinedAssemblies allow hits without assembly?
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository, boolean undefinedAssemblies) {
-        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, hitScorer, stateRepository, undefinedAssemblies));
+    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, hitScorer, assemblyInformationProvider, undefinedAssemblies));
     }
 
-    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, StateRepository stateRepository, boolean undefinedAssemblies) {
+    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
         List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = indexSelections.stream()
                 .map(indexSelection -> {
@@ -139,7 +139,7 @@ public class TargetStructure {
         // determine all assembly ids that this collection of label selections appears in
         int residueCount = labelSelections.size();
         // this is the inverted mapping from opers to assemblies that contain this expression - can't use structure map here
-        Map<String, Set<String>> assemblyMap = stateRepository.selectAssemblyMap(structureIdentifier);
+        Map<String, Set<String>> assemblyMap = assemblyInformationProvider.selectAssemblyMap(structureIdentifier);
         Map<String, Long> assemblyCounts;
 
         if (assemblyMap.isEmpty()) {

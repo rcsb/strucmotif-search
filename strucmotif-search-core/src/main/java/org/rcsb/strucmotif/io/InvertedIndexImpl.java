@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.cif.binary.codec.MessagePackCodec;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -15,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
@@ -30,6 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * The implementation of the inverted index.
@@ -39,7 +42,10 @@ public class InvertedIndexImpl implements InvertedIndex {
     private static final Logger logger = LoggerFactory.getLogger(InvertedIndexImpl.class);
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
+    private static final int BUFFER_SIZE = 65536;
     private final Path basePath;
+    private final boolean gzipped;
+    private final String extension;
     private boolean paths;
 
     /**
@@ -48,6 +54,8 @@ public class InvertedIndexImpl implements InvertedIndex {
      */
     public InvertedIndexImpl(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
+        this.gzipped = motifSearchConfig.isInvertedIndexGzip();
+        this.extension = ".msg" + (gzipped ? ".gz" : "");
         this.paths = false;
     }
 
@@ -73,12 +81,19 @@ public class InvertedIndexImpl implements InvertedIndex {
             data.putAll(map);
 
             // serialize message
-            byte[] bytes = MessagePackCodec.encode(data);
+            ByteArrayOutputStream outputStream = MessagePack.encode(data);
             Path path = getPath(residuePairDescriptor);
 
-            Files.write(path, bytes);
+            write(path, outputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private void write(Path path, ByteArrayOutputStream data) throws IOException {
+        try (OutputStream outputStream = Files.newOutputStream(path)) {
+            OutputStream actual = gzipped ? new GZIPOutputStream(outputStream, BUFFER_SIZE) : outputStream;
+            data.writeTo(actual);
         }
     }
 
@@ -113,7 +128,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     private Stream<Map.Entry<String, Object>> getData(InputStream inputStream) throws IOException {
-        return MessagePackCodec.decode(inputStream).entrySet().stream();
+        return MessagePack.decode(inputStream).entrySet().stream();
     }
 
     /**
@@ -123,19 +138,20 @@ public class InvertedIndexImpl implements InvertedIndex {
      * @throws IOException reading failed
      */
     protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
-            Path path = getPath(residuePairDescriptor);
-            return new BufferedInputStream(Files.newInputStream(path), 65536);
+        Path path = getPath(residuePairDescriptor);
+        InputStream inputStream = Files.newInputStream(path);
+        return gzipped ? new GZIPInputStream(inputStream, BUFFER_SIZE) : new BufferedInputStream(inputStream, BUFFER_SIZE);
     }
 
     private Path getPath(ResiduePairDescriptor residuePairDescriptor) {
         String bin = residuePairDescriptor.toString();
         String uberbin = bin.substring(0, 2);
-        return basePath.resolve(uberbin).resolve(bin + ".msg");
+        return basePath.resolve(uberbin).resolve(bin + extension);
     }
 
     private Map<String, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
         try {
-            return MessagePackCodec.decode(getInputStream(residuePairDescriptor));
+            return MessagePack.decode(getInputStream(residuePairDescriptor));
         } catch (IOException e) {
             return Collections.emptyMap();
         }
@@ -197,10 +213,10 @@ public class InvertedIndexImpl implements InvertedIndex {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             // serialize message
-            byte[] bytes = MessagePackCodec.encode(filteredMap);
+            ByteArrayOutputStream outputStream = MessagePack.encode(filteredMap);
             Path path = getPath(residuePairDescriptor);
 
-            Files.write(path, bytes);
+            write(path, outputStream);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

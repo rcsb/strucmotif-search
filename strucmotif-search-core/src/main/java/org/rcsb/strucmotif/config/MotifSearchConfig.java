@@ -67,6 +67,10 @@ public class MotifSearchConfig {
      */
     private boolean renumberedGzip = true;
     /**
+     * Gzip inverted index files? Yields smaller files that are slower to read.
+     */
+    private boolean invertedIndexGzip = false;
+    /**
      * Number of allowed tries during file download before an {@link java.io.IOException} is thrown.
      */
     private int downloadTries = 1;
@@ -313,6 +317,22 @@ public class MotifSearchConfig {
      */
     public void setRenumberedGzip(boolean renumberedGzip) {
         this.renumberedGzip = renumberedGzip;
+    }
+
+    /**
+     * Gzip inverted index files?
+     * @return a Boolean
+     */
+    public boolean isInvertedIndexGzip() {
+        return invertedIndexGzip;
+    }
+
+    /**
+     * Set gzip inverted index files.
+     * @param invertedIndexGzip a Boolean
+     */
+    public void setInvertedIndexGzip(boolean invertedIndexGzip) {
+        this.invertedIndexGzip = invertedIndexGzip;
     }
 
     /**

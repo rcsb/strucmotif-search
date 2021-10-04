@@ -58,6 +58,7 @@ class StructureWriterImplTest {
     public void whenWritingAF_A0A0R0FWM3_F1_thenContractHonored() throws IOException {
         MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
         motifSearchConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        motifSearchConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
         StructureWriter structureWriter = new StructureWriterImpl(motifSearchConfig);
 
         String id = "AF-A0A0R0FWM3-F1";

@@ -35,7 +35,7 @@ public class MotifSearchConfig {
      * Hard limit on the number of results returned. Will stop jobs when this number of hits has been accepted. Acts as
      * a safeguard against too simple queries that will return an overwhelming number of results.
      */
-    private int maxResults = 10000;
+    private int maxResults = 50000;
     /**
      * How many decimal places to report for scores.
      */
@@ -48,7 +48,7 @@ public class MotifSearchConfig {
      * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
      * speed substantially. A value of 400 works good with 12GB of heap, the higher the faster.
      */
-    private int updateChunkSize = 400;
+    private int updateChunkSize = 2400;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -69,7 +69,7 @@ public class MotifSearchConfig {
     /**
      * Gzip inverted index files? Yields smaller files that are slower to read.
      */
-    private boolean invertedIndexGzip = false;
+    private boolean invertedIndexGzip = true;
     /**
      * Number of allowed tries during file download before an {@link java.io.IOException} is thrown.
      */
@@ -82,7 +82,7 @@ public class MotifSearchConfig {
      * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
      * Hits without assembly are report as '0'.
      */
-    private boolean undefinedAssemblies = false;
+    private boolean undefinedAssemblies = true;
     /**
      * Filter for residues with a certain quality/confidence. Only relevant when combined with
      * {@link ResidueQualityStrategy}.
@@ -91,7 +91,7 @@ public class MotifSearchConfig {
     /**
      * Filter for residues with a certain quality/confidence. Update 'qualityThreshold' accordingly to use this.
      */
-    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.NONE;
+    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF;
     /**
      * List of all identifiers ever registered.
      */

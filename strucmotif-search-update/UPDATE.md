@@ -54,14 +54,14 @@ might require a full load.
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `1` |
-| `inverted-index-gzip` | Gzip index files? | `false` |
+| `inverted-index-gzip` | Gzip index files? | `true` |
 | `number-threads` | Number of worker threads | available processors |
 | `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
 | `renumbered-gzip` | Gzip BinaryCIF files? | `true` |
 | `residue-quality-cutoff` | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0` |
-| `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `NONE` |
+| `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `qa_metric_local_above_cutoff` |
 | `root-path` | Path where data files will be written | `/opt/data/` |
-| `undefined-assemblies` | Index structures without assembly information? | `false` |
-| `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `400` |
+| `undefined-assemblies` | Index structures without assembly information? | `true` |
+| `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `2400` |
 
 Configure by placing your `application.properties` on the classpath.

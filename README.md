@@ -90,11 +90,11 @@ class Demo {
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `in-memory-strategy` | Preload structure data for increased performance? | `OFF` |
-| `max-results` | Maximum number of results that will be returned | `10000` |
+| `max-results` | Maximum number of results that will be returned | `50000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
 | `root-path` | Path where data files are read from | `/opt/data/` |
-| `undefined-assemblies` | Return hits without assembly information? | `false` |
+| `undefined-assemblies` | Return hits without assembly information? | `true` |
 
 Configure by placing your `application.properties` on the classpath.
 

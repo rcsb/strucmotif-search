@@ -69,7 +69,7 @@ public class MotifSearchConfig {
     /**
      * Gzip inverted index files? Yields smaller files that are slower to read.
      */
-    private boolean invertedIndexGzip = true;
+    private boolean invertedIndexGzip = false;
     /**
      * Number of allowed tries during file download before an {@link java.io.IOException} is thrown.
      */

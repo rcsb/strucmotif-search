@@ -54,20 +54,35 @@ public class InvertedIndexRunner {
         System.out.println("Average throughput:");
         System.out.println(times.stream().mapToLong(l -> l).average().orElseThrow());
 
-        //initial timings with label_asym_id in data
-        //Read 557295 elements in 454 ms
-        //Read 247221 elements in 237 ms
-        //Read 587850 elements in 350 ms
-        //Read 412914 elements in 263 ms
-        //Read 380211 elements in 294 ms
-        //Read 642704 elements in 448 ms
-        //Read 507038 elements in 323 ms
-        //Read 391000 elements in 341 ms
-        //Read 630326 elements in 511 ms
-        //Read 479498 elements in 290 ms
+        //2021-10-04 11:11:01.270 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will be gzipped - extension: .msg.gz
+        //Read 552360 elements in 3534 ms
+        //Read 513735 elements in 3199 ms
+        //Read 539428 elements in 3738 ms
+        //Read 721375 elements in 5275 ms
+        //Read 558558 elements in 3794 ms
+        //Read 761731 elements in 5991 ms
+        //Read 632861 elements in 4733 ms
+        //Read 698068 elements in 5189 ms
+        //Read 753067 elements in 5831 ms
+        //Read 516964 elements in 3981 ms
         //
         //Average throughput:
-        //351.1
+        //4526.5
+
+        //2021-10-04 11:18:54.911 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will not be gzipped - extension: .msg
+        //Read 587244 elements in 270 ms
+        //Read 587985 elements in 261 ms
+        //Read 808860 elements in 269 ms
+        //Read 560564 elements in 223 ms
+        //Read 792576 elements in 282 ms
+        //Read 532212 elements in 179 ms
+        //Read 538596 elements in 201 ms
+        //Read 544274 elements in 190 ms
+        //Read 572425 elements in 243 ms
+        //Read 520086 elements in 159 ms
+        //
+        //Average throughput:
+        //227.7
     }
 
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())

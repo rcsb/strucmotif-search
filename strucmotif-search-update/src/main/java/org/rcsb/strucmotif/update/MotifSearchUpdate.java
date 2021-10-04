@@ -330,8 +330,8 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @return an InputStream
      */
     private InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
-        if (item.getUrl() != null) {
-            URL url = item.getUrl();
+        URL url = item.getUrl();
+        if (url != null) {
             logger.info("[{}] [{}] Processing {}", context.partitionContext, item.getStructureIdentifier(), url);
             return url.openStream();
         }
@@ -351,7 +351,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 ResiduePairDescriptor full = entry.getKey();
                 Map<Integer, Collection<ResiduePairIdentifier>> output = entry.getValue();
 
-                if (bufferCount.incrementAndGet() % 100000 == 0) {
+                if (bufferCount.incrementAndGet() % 10000 == 0) {
                     logger.info("[{}] {} / {}",
                             context.partitionContext,
                             bufferCount,

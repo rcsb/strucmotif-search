@@ -23,6 +23,8 @@ import org.rcsb.strucmotif.config.ResidueQualityStrategy;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -56,6 +58,7 @@ import java.util.Set;
  */
 @Service
 public class StructureWriterImpl implements StructureWriter {
+    private static final Logger logger = LoggerFactory.getLogger(StructureWriterImpl.class);
     private final CifOptions options;
     private final ResidueQualityStrategy residueQualityStrategy;
     private final double residueQualityCutoff;
@@ -74,6 +77,11 @@ public class StructureWriterImpl implements StructureWriter {
                 .build();
         this.residueQualityStrategy = motifSearchConfig.getResidueQualityStrategy();
         this.residueQualityCutoff = motifSearchConfig.getResidueQualityCutoff();
+        if (residueQualityStrategy == ResidueQualityStrategy.NONE) {
+            logger.info("All valid residues be indexed");
+        } else {
+            logger.info("Residues will be filtered by {} with a cutoff of {}", residueQualityStrategy, residueQualityCutoff);
+        }
     }
 
     @Override

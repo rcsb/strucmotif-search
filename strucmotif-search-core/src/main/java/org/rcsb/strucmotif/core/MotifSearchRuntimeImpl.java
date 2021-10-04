@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The default strucmotif-search runtime.
@@ -111,7 +112,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             // get all valid targets
             targetAssembler.assemble(result);
 
-            int hits = scoreHits(parameters, result, consumer, queryStructure.getResidueIndexSwaps());
+            int hits = consumeHits(parameters, result, consumer, queryStructure.getResidueIndexSwaps());
             logger.info("[{}] Accepted {} hits in {} ms",
                     query.hashCode(),
                     hits,
@@ -131,13 +132,15 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 query.hashCode(),
                 queryStructure.getStructureIdentifier(),
                 queryStructure.getIndexSelections());
-        logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Cutoff: {}",
+        logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}, Limit: {}",
                 query.hashCode(),
                 query.getExchanges(),
                 parameters.getBackboneDistanceTolerance(),
                 parameters.getSideChainDistanceTolerance(),
                 parameters.getAngleTolerance(),
-                parameters.getRmsdCutoff());
+                parameters.getAtomPairingScheme(),
+                parameters.getRmsdCutoff(),
+                parameters.getLimit());
 
         return new MotifSearchResult(query);
     }
@@ -158,15 +161,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 parameters.getAtomPairingScheme(),
                 alignmentService);
 
-        List<Hit> hits = threadPool.submit(() -> result.getTargetStructures()
-                .values()
-                .parallelStream()
-                .flatMap(targetStructure -> {
-                    String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
-                    Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
-                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
-                })
-                .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
+        List<Hit> hits = threadPool.submit(() -> hits(result, parameters, hitScorer, residueIndexSwaps)
                 .limit(limit)
                 .collect(Collectors.toList())).get();
 
@@ -174,7 +169,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         return hits;
     }
 
-    private int scoreHits(Parameters parameters, MotifSearchResult result, Consumer<Hit> consumer, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {
+    private int consumeHits(Parameters parameters, MotifSearchResult result, Consumer<Hit> consumer, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {
         result.getTimings().scoreHitsStart();
         AtomicInteger hits = new AtomicInteger();
         HitScorer hitScorer = new HitScorer(result.getQuery().getQueryStructure().getResidues(),
@@ -182,15 +177,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 alignmentService);
 
         threadPool.submit(() -> {
-            result.getTargetStructures()
-                    .values()
-                    .parallelStream()
-                    .flatMap(targetStructure -> {
-                        String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
-                        Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
-                        return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
-                    })
-                    .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff())
+            hits(result, parameters, hitScorer, residueIndexSwaps)
                     .forEach(hit -> {
                         hits.incrementAndGet();
                         consumer.accept(hit);
@@ -200,5 +187,17 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
         result.getTimings().scoreHitsStop();
         return hits.get();
+    }
+
+    private Stream<Hit> hits(MotifSearchResult result, Parameters parameters, HitScorer hitScorer, List<Integer> residueIndexSwaps) {
+        return result.getTargetStructures()
+                .values()
+                .parallelStream()
+                .flatMap(targetStructure -> {
+                    String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
+                    Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
+                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
+                })
+                .filter(hit -> hit.getRootMeanSquareDeviation() <= parameters.getRmsdCutoff());
     }
 }

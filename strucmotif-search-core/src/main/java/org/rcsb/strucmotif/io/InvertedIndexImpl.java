@@ -56,6 +56,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
         this.gzipped = motifSearchConfig.isInvertedIndexGzip();
         this.extension = ".msg" + (gzipped ? ".gz" : "");
+        logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);
         this.paths = false;
     }
 

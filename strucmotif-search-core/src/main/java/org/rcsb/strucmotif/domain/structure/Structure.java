@@ -123,7 +123,8 @@ public class Structure {
         }
 
         if (labelAsymId == null) {
-            throw new NoSuchElementException("Didn't find chain that contains residue index: " + residueIndex);
+            throw new NoSuchElementException("Didn't find chain in '" + structureIdentifier + "' that contains residue index: " +
+                    residueIndex + " - Chain offsets: " + chainOffsets.entrySet().stream().map(e -> e.getKey() + " -> " + Arrays.toString(e.getValue())).collect(Collectors.toList()) + "\n");
         }
 
         int labelSeqId = this.labelSeqId[residueIndex];

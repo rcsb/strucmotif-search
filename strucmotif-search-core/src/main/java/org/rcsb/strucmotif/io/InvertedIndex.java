@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -33,4 +34,16 @@ public interface InvertedIndex {
      * @param structureIdentifiers what to remove
      */
     void delete(Collection<Integer> structureIdentifiers);
+
+    /**
+     * Scans the entire index and returns all referenced descriptors.
+     * @return a collection of all descriptors
+     */
+    Set<ResiduePairDescriptor> reportKnownDescriptors();
+
+    /**
+     * Scans the entire index and returns all referenced structure indices.
+     * @return a collection of all structure indices
+     */
+    Set<Integer> reportKnownKeys();
 }

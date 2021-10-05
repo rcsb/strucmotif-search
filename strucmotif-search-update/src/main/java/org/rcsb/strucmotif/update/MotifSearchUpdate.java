@@ -169,6 +169,18 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 break;
             case RECOVER:
                 remove(stateRepository.selectDirty());
+
+                logger.info("Screening for lingering structures in the index");
+                Set<Integer> knownToIndex = invertedIndex.reportKnownKeys();
+                Set<Integer> knownToState = stateRepository.reportKnownKeys();
+                Set<Integer> lingeringInIndex = knownToIndex.stream()
+                        .filter(i -> !knownToState.contains(i))
+                        .collect(Collectors.toSet());
+                if (lingeringInIndex.size() > 0) {
+                    logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
+                    invertedIndex.delete(lingeringInIndex);
+                }
+
                 break;
         }
 
@@ -390,9 +402,12 @@ public class MotifSearchUpdate implements CommandLineRunner {
         // inverted index is expensive and should be done as batch
         if (identifiers.size() > 0) {
             Set<Integer> mapped = identifiers.stream()
+                    .filter(structureIndexProvider::containsKey)
                     .map(structureIndexProvider::selectStructureIndex)
                     .collect(Collectors.toSet());
-            invertedIndex.delete(mapped);
+            if (mapped.size() > 0) {
+                invertedIndex.delete(mapped);
+            }
             stateRepository.deleteKnown(identifiers);
             stateRepository.deleteDirty(identifiers);
         }

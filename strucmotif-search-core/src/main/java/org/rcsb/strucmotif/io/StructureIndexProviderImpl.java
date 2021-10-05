@@ -1,6 +1,8 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayDeque;
@@ -10,6 +12,7 @@ import java.util.Map;
 
 @Service
 public class StructureIndexProviderImpl implements StructureIndexProvider {
+    private static final Logger logger = LoggerFactory.getLogger(StructureIndexProviderImpl.class);
     private final Deque<Integer> reuse;
     private int next;
     private final Map<Integer, String> forward;
@@ -43,10 +46,23 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
 
             reuse.add(i);
         }
+
+        if (forward.size() != backward.size()) {
+            logger.warn("Mappings are not bidirectional: {} identifiers, {} indices", forward.size(), backward.size());
+        }
+        if (containsKey(null)) {
+            logger.warn("Mappings contain 'null' key");
+        }
+
+        logger.info("{} mappings, {} keys will be reused, after that the next index will be {}", forward.size(), reuse.size(), next);
     }
 
     @Override
     public String selectStructureIdentifier(int structureIndex) {
+        if (!containsKey(structureIndex)) {
+            logger.warn("No value for " + structureIndex + " - perform a 'RECOVER' update to remove lingering structures from index");
+        }
+
         return forward.get(structureIndex);
     }
 
@@ -58,7 +74,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     @Override
     public int selectOrMintStructureIndex(String structureIdentifier) {
         if (backward.containsKey(structureIdentifier)) {
-            return backward.get(structureIdentifier);
+            return backward.get("No value for " + structureIdentifier);
         }
 
         return nextStructureIndex();
@@ -72,5 +88,15 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
         }
 
         return next++;
+    }
+
+    @Override
+    public boolean containsKey(String structureIdentifier) {
+        return backward.containsKey(structureIdentifier);
+    }
+
+    @Override
+    public boolean containsKey(int structureIndex) {
+        return forward.containsKey(structureIndex);
     }
 }

@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -162,29 +163,24 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     @Override
     public void delete(Collection<Integer> removals) {
-        if (!Files.exists(basePath)) {
-            return;
-        }
-
         try {
             logger.info("Removing {} structures from inverted index", removals.size());
 
             AtomicInteger counter = new AtomicInteger();
             // walk whole lookup
-            Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
-                    .parallel()
-                    // ignore directories
-                    .filter(path -> !Files.isDirectory(path))
-                    .peek(path -> {
-                        if (counter.incrementAndGet() % 10000 == 0) {
-                            logger.info("{} bins of inverted index cleaned",
-                                    counter.get());
-                        }
-                    })
+            indexFiles()
+                    .peek(path -> progress(counter, 10000, "{} bins of inverted index cleaned"))
                     .map(this::createResiduePairDescriptor)
                     .forEach(residuePairDescriptor -> delete(residuePairDescriptor, removals));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private void progress(AtomicInteger counter, int interval, String message) {
+        int i = counter.incrementAndGet();
+        if (i % interval == 0) {
+            logger.info(message, i);
         }
     }
 
@@ -264,5 +260,47 @@ public class InvertedIndexImpl implements InvertedIndex {
             // length 4
             return new Object[] { index1, index2, structOperId1, structOperId2 };
         }
+    }
+
+    @Override
+    public Set<ResiduePairDescriptor> reportKnownDescriptors() {
+        try {
+            logger.info("Collecting all known descriptors at {}", basePath);
+            AtomicInteger counter = new AtomicInteger();
+            return indexFiles()
+                    .peek(p -> progress(counter, 10000, "{} bins scanned"))
+                    .map(this::createResiduePairDescriptor)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public Set<Integer> reportKnownKeys() {
+        try {
+            logger.info("Collecting all known keys at {}", basePath);
+            AtomicInteger counter = new AtomicInteger();
+            return indexFiles()
+                    .peek(p -> progress(counter, 10000, "{} bins scanned"))
+                    .map(this::createResiduePairDescriptor)
+                    .map(this::getMap)
+                    .map(Map::keySet)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private Stream<Path> indexFiles() throws IOException {
+        if (!Files.exists(basePath)) {
+            return Stream.empty();
+        }
+
+        return Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
+                .parallel()
+                // ignore directories
+                .filter(p -> !Files.isDirectory(p) && p.getFileName().toString().contains(extension));
     }
 }

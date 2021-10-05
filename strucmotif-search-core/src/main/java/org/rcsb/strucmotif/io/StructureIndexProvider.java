@@ -31,4 +31,18 @@ public interface StructureIndexProvider {
      * @return an int that is guaranteed to uniquely identify a structure in the inverted index
      */
     int nextStructureIndex();
+
+    /**
+     * Check if this structure identifier is known.
+     * @param structureIdentifier the String
+     * @return true if this key has a mapping
+     */
+    boolean containsKey(String structureIdentifier);
+
+    /**
+     * Check if this structure index is known.
+     * @param structureIndex the int
+     * @return true if this key has a mapping
+     */
+    boolean containsKey(int structureIndex);
 }

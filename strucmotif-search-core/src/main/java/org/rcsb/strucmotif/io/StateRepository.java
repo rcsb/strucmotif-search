@@ -3,6 +3,8 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 
 import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The state of the application consists of two lists of structure identifiers:
@@ -17,6 +19,17 @@ public interface StateRepository {
      * @return a collection of ids and their corresponding revision
      */
     Collection<StructureInformation> selectKnown();
+
+    /**
+     * Scans the entire index and returns all referenced structure indices.
+     * @return a collection of all structure indices
+     */
+    default Set<Integer> reportKnownKeys() {
+        return selectKnown()
+                .stream()
+                .map(StructureInformation::getStructureIndex)
+                .collect(Collectors.toSet());
+    }
 
     /**
      * The set of currently 'dirty' ids. Will be populated when update starts and emptied upon successful completion.

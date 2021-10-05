@@ -148,7 +148,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 logger.warn("Update state is dirty - Problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
                 logger.info("Recovering from dirty state");
-                remove(stateRepository.selectDirty());
+                recover(stateRepository.selectDirty());
             }
         }
 
@@ -168,19 +168,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 remove(getDeltaMinusIdentifiers(requested));
                 break;
             case RECOVER:
-                remove(stateRepository.selectDirty());
-
-                logger.info("Screening for lingering structures in the index");
-                Set<Integer> knownToIndex = invertedIndex.reportKnownKeys();
-                Set<Integer> knownToState = stateRepository.reportKnownKeys();
-                Set<Integer> lingeringInIndex = knownToIndex.stream()
-                        .filter(i -> !knownToState.contains(i))
-                        .collect(Collectors.toSet());
-                if (lingeringInIndex.size() > 0) {
-                    logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
-                    invertedIndex.delete(lingeringInIndex);
-                }
-
+                recover(stateRepository.selectDirty());
                 break;
         }
 
@@ -479,5 +467,22 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 .stream()
                 .map(StructureInformation::getStructureIdentifier)
                 .collect(Collectors.toSet());
+    }
+
+    private void recover(Collection<String> ditry) {
+        remove(ditry);
+
+        // this will happen when writing to the inverted index fails: then bins can be corrupted and filled with structure indices that point nowhere
+        logger.info("Screening for lingering structures in the index");
+        Set<Integer> knownToIndex = invertedIndex.reportKnownKeys();
+        Set<Integer> knownToState = stateRepository.reportKnownKeys();
+        Set<Integer> lingeringInIndex = knownToIndex.stream()
+                .filter(i -> !knownToState.contains(i))
+                .collect(Collectors.toSet());
+        if (lingeringInIndex.size() > 0) {
+            logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
+            invertedIndex.delete(lingeringInIndex);
+        }
+
     }
 }

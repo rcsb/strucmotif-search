@@ -173,7 +173,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     public InputStream getOriginalInputStream(String structureIdentifier) {
         try {
             Path originalPath = getOriginalStructurePath(structureIdentifier);
-            if (Files.exists(originalPath)) {
+            if (Files.isReadable(originalPath)) {
                 return Files.newInputStream(originalPath);
             } else {
                 return getCifFetchUrl(structureIdentifier).openStream();
@@ -209,13 +209,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         } catch (IOException e1) {
             try {
                 Path renumberedPath = getRenumberedStructurePath(structureIdentifier);
-                return readFromInputStream(Files.newInputStream(renumberedPath));
-            } catch (IOException e2) {
-                try {
+                if (Files.isReadable(renumberedPath)) {
+                    return readFromInputStream(Files.newInputStream(renumberedPath));
+                } else {
                     return readFromInputStream(getCifFetchUrl(structureIdentifier).openStream());
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e);
                 }
+            } catch (IOException e2) {
+                throw new UncheckedIOException(e2);
             }
         }
     }

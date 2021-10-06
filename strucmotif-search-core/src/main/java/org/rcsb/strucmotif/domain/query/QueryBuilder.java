@@ -63,7 +63,7 @@ public class QueryBuilder {
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
     public MandatoryBuilder defineByPdbIdAndSelection(String structureIdentifier, List<LabelSelection> selection) {
-        Structure structure = structureDataProvider.readSome(structureIdentifier);
+        Structure structure = structureDataProvider.readOriginal(structureIdentifier);
         return defineByStructureAndSelection(structure, selection);
     }
 

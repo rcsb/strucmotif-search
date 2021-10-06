@@ -329,7 +329,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param context context for logging purposes
      * @return an InputStream
      */
-    private InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
+    protected InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
         URL url = item.getUrl();
         if (url != null) {
             logger.info("[{}] [{}] Processing {}", context.partitionContext, item.getStructureIdentifier(), url);

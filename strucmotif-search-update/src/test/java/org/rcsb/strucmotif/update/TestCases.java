@@ -1,6 +1,8 @@
 package org.rcsb.strucmotif.update;
 
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
 
 /**
  * Some small structures and their expected properties when processed by the update routine.
@@ -16,16 +18,38 @@ enum TestCases {
     AF_Q8SY76("af-q8sy76-f1-model_v1.cif"); // helix
 
     private final String filename;
+    private final String key;
 
     TestCases(String name) {
         this.filename = name;
+        this.key = filename.split("\\.")[0].replace("-model_v1", "");
     }
 
     public String getFilename() {
         return filename;
     }
 
+    public String getKey() {
+        return key;
+    }
+
     public InputStream getInputStream() {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(this.filename);
+    }
+
+    public static InputStream getInputStream(String key) {
+        return Arrays.stream(TestCases.values())
+                .filter(t -> t.getKey().equalsIgnoreCase(key))
+                .findFirst()
+                .map(TestCases::getInputStream)
+                .orElseThrow(() -> new NoSuchElementException("Couldn't find resource for case '" + key + "'"));
+    }
+
+    public String getExpression() {
+        if (filename.equalsIgnoreCase(key)) {
+            return key;
+        } else {
+            return key + ",https://rcsb.org"; // any URL works here
+        }
     }
 }

@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.12.3
+Unreleased
 -------------
 ### Breaking changes
 - change index keys from `String` to `int` - this allows more efficient storage of non-PDB identifiers
@@ -12,6 +12,8 @@ strucmotif-search 0.12.3
 - make `StructureWriterImpl` configurable
 - support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein) 
 
+strucmotif-search 0.12.3
+-------------
 ### Bug fix
 - compute correct transformation & RMSD for transformed residues
 

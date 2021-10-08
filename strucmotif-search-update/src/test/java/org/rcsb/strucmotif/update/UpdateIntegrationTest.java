@@ -40,7 +40,6 @@ public class UpdateIntegrationTest {
     private static final List<TestCases> UPDATE_OVERLAP = List.of(TestCases.PDB_2RLL, TestCases.PDB_4TUT);
     private MotifSearchConfig config;
     private Path path;
-    private Path indexPath;
     private Path renumberedPath;
     private StateRepository state;
     private StructureDataProvider data;
@@ -51,7 +50,7 @@ public class UpdateIntegrationTest {
     public void setup() throws IOException {
         this.config = new MotifSearchConfig();
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
-        this.indexPath = path.resolve("index");
+        Path indexPath = path.resolve("index");
         Files.createDirectories(indexPath);
         this.renumberedPath = path.resolve("renumbered");
         Files.createDirectories(renumberedPath);

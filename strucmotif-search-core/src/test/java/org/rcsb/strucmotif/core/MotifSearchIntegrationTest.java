@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
+import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
@@ -16,11 +17,12 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
+import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
 import org.rcsb.strucmotif.io.StateRepositoryImpl;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.rcsb.strucmotif.io.StructureReaderImpl;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.BufferedReader;
@@ -38,24 +40,19 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-@SpringBootTest
 public class MotifSearchIntegrationTest {
-    @Autowired
     private StructureReader structureReader;
-    @Autowired
-    private KruskalMotifPruner kruskalMotifPruner;
-    @Autowired
-    private NoOperationMotifPruner noOperationMotifPruner;
-    @Autowired
-    private ThreadPool threadPool;
-    @Autowired
-    private MotifSearchConfig motifSearchConfig;
-    @Autowired
-    private AlignmentService alignmentService;
     private QueryBuilder queryBuilder;
 
     @BeforeEach
     public void init() {
+        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
+        ThreadPool threadPool = new ThreadPoolImpl(motifSearchConfig);
+        NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner(motifSearchConfig);
+        KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner(motifSearchConfig);
+        this.structureReader = new StructureReaderImpl();
+        AlignmentService alignmentService = new QuaternionAlignmentService();
+
         InvertedIndexImpl invertedIndex = new InvertedIndexImpl(motifSearchConfig) {
             @Override
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
@@ -76,7 +73,7 @@ public class MotifSearchIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepositoryImpl stateRepository = new StateRepositoryImpl(motifSearchConfig) {
+        StateRepository stateRepository = new StateRepositoryImpl(motifSearchConfig) {
             @Override
             public Collection<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -89,7 +86,7 @@ public class MotifSearchIntegrationTest {
         };
 
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool);
-        MotifSearchRuntimeImpl motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, stateRepository);
+        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, stateRepository);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 

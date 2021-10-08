@@ -4,7 +4,7 @@
 
     <groupId>org.rcsb</groupId>
     <artifactId>strucmotif-search</artifactId>
-    <version>0.12.3-SNAPSHOT</version>
+    <version>0.12.4-SNAPSHOT</version>
     <modules>
         <module>strucmotif-search-core</module>
         <module>strucmotif-search-benchmark</module>

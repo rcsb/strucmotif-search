@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-Unreleased
+strucmotif-search 0.12.3
 -------------
 ### Breaking changes
 - change index keys from `String` to `int` - this allows more efficient storage of non-PDB identifiers

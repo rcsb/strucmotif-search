@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-Unreleased
+strucmotif-search 0.12.3
 -------------
 ### Bug fix
 - compute correct transformation & RMSD for transformed residues

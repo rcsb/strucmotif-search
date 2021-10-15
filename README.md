@@ -99,7 +99,7 @@ class Demo {
 Configure by placing your `application.properties` on the classpath.
 
 ## Index Structure Data and Run Updates
-You will need to process your corpus of structure data before using the service. This will create an optized version of
+You will need to process your corpus of structure data before using the service. This will create an optimized version of
 all structure files and add them to an inverted index that allows efficient searching.
 
 Details can be found in:

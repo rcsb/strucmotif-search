@@ -12,7 +12,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.math.Algebra;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -79,14 +79,15 @@ public class ResidueGraph {
             normalVectorMap.put(indexSelection, normalVector(backbone, sideChain));
         }
 
-        Map<String, Set<String>> assemblyMap = structure.getAssemblies();
+        Map<String, String[]> assemblyMap = structure.getAssemblies();
         // handle case where undefined assemblies are allowed and no assembly info is present
         if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
-            Set<String> chains = structure.getLabelSelections()
+            assemblyMap.put("0", structure.getLabelSelections()
                     .stream()
                     .map(LabelSelection::getLabelAsymId)
-                    .collect(Collectors.toSet());
-            assemblyMap.put("0", chains.stream().map(c -> c + "_1").collect(Collectors.toSet()));
+                    .distinct()
+                    .map(c -> c + "_1")
+                    .toArray(String[]::new));
         }
 
         this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, squaredCutoff, allowTransformed, assemblyMap);
@@ -111,11 +112,14 @@ public class ResidueGraph {
                 .stream()
                 .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
         // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
-        Map<String, Set<String>> assemblyMap = structure.getAssemblies();
+        Map<String, String[]> assemblyMap = structure.getAssemblies();
 
         // handle case where undefined assemblies are allowed and no assembly info is present
         if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
-            assemblyMap.put("0", chainMap.keySet().stream().map(c -> c + "_1").collect(Collectors.toSet()));
+            assemblyMap.put("0", chainMap.keySet()
+                    .stream()
+                    .map(c -> c + "_1")
+                    .toArray(String[]::new));
         }
 
         List<float[]> originalBackboneVectors = new ArrayList<>();
@@ -135,7 +139,7 @@ public class ResidueGraph {
         // all chains to generate
         List<String> assemblyInformation = assemblyMap.values()
                 .stream()
-                .flatMap(Collection::stream)
+                .flatMap(Arrays::stream)
                 .distinct()
                 .collect(Collectors.toList());
 
@@ -179,16 +183,19 @@ public class ResidueGraph {
         this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, squaredCutoff, allowTransformed, assemblyMap);
     }
 
-    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed, Map<String, Set<String>> assemblyMap) {
+    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed, Map<String, String[]> assemblies) {
         // temporary ResidueGrid to efficient distance calculation
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
+        Map<String, List<String>> assemblyMap = assemblies.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue())));
 
         // if needed: check for first occurrence of chain (which may or may not be identity transform)
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         Set<String> acceptedChains = new HashSet<>();
         Set<String> acceptedOperators = new HashSet<>();
         if (!allowTransformed) {
-            for (Set<String> chainExprs : assemblyMap.values()) {
+            for (List<String> chainExprs : assemblyMap.values()) {
                 for (String chainExpr : chainExprs) {
                     String chain = chainExpr.split("_")[0];
                     if (!acceptedChains.contains(chain)) {

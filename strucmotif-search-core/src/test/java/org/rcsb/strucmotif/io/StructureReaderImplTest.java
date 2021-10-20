@@ -8,6 +8,7 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ class StructureReaderImplTest {
         assertEquals(2, structure.getAssemblies()
                 .values()
                 .stream()
-                .flatMap(Collection::stream)
+                .flatMap(Arrays::stream)
                 .map(oper -> oper.split("_")[1])
                 .distinct()
                 .count());

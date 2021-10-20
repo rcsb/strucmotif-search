@@ -156,7 +156,7 @@ public class StructureReaderImpl implements StructureReader {
             }
 
             Map<String, Transformation> transformations = buildTransformations();
-            Map<String, Set<String>> assemblies = AssemblyInformation.of(mmCifFile);
+            Map<String, String[]> assemblies = AssemblyInformation.of(mmCifFile);
             return new Structure(structureIdentifier,
                     chainOffsets,
                     convertOffsets(labelSeqIdCollapsed),

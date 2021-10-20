@@ -27,7 +27,7 @@ public class Structure {
     private final short[] x;
     private final short[] y;
     private final short[] z;
-    private final Map<String, Set<String>> assemblies;
+    private final Map<String, String[]> assemblies;
     private final Map<String, Transformation> transformations;
 
     /**
@@ -53,7 +53,7 @@ public class Structure {
                      short[] x,
                      short[] y,
                      short[] z,
-                     Map<String, Set<String>> assemblies,
+                     Map<String, String[]> assemblies,
                      Map<String, Transformation> transformations) {
         this.structureIdentifier = structureIdentifier;
         this.chainOffsets = chainOffsets;
@@ -168,7 +168,7 @@ public class Structure {
      * Access to assembly information.
      * @return Map of all assemblies [assemblyId, (label_asym_id x struct_oper_id)[]]
      */
-    public Map<String, Set<String>> getAssemblies() {
+    public Map<String, String[]> getAssemblies() {
         return assemblies;
     }
 

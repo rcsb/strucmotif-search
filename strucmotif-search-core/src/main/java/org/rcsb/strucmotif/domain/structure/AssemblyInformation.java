@@ -4,8 +4,8 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +24,7 @@ public class AssemblyInformation {
      * Construct assembly information instance from source file.
      * @param mmCifFile source file
      */
-    public static Map<String, Set<String>> of(MmCifFile mmCifFile) {
+    public static Map<String, String[]> of(MmCifFile mmCifFile) {
         /*
         loop_
         _pdbx_struct_assembly_gen.assembly_id
@@ -40,7 +40,7 @@ public class AssemblyInformation {
         #
          */
         PdbxStructAssemblyGen pdbxStructAssemblyGen = mmCifFile.getFirstBlock().getPdbxStructAssemblyGen();
-        Map<String, Set<String>> assemblyInformation = new LinkedHashMap<>();
+        Map<String, Set<String>> assemblyInformation = new HashMap<>();
         if (pdbxStructAssemblyGen.isDefined()) {
             for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
                 String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
@@ -52,7 +52,9 @@ public class AssemblyInformation {
                 sorted.addAll(operList);
             }
         }
-        return assemblyInformation;
+        return assemblyInformation.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, v -> v.getValue().toArray(String[]::new)));
     }
 
     private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");

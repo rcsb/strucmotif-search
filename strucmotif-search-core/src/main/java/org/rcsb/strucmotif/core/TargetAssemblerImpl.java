@@ -102,6 +102,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
 
             // consume by target structures
+            // TODO try to avoid object/map creation here and consume stream directly
             consume(response, residuePairIdentifiers);
 
             logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",

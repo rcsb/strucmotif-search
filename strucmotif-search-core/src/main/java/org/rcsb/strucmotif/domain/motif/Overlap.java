@@ -95,12 +95,12 @@ public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, I
     }
 
     /**
-     * Determines the overlap between 2 {@link IndexResiduePairIdentifier} instances.
+     * Determines the overlap between 2 {@link IndexSelectionResiduePairIdentifier} instances.
      * @param residuePairIdentifier1 the first instance
      * @param residuePairIdentifier2 the second instance
      * @return a description of the observed overlap
      */
-    public static Overlap ofResiduePairIdentifiers(IndexResiduePairIdentifier residuePairIdentifier1, IndexResiduePairIdentifier residuePairIdentifier2) {
+    public static Overlap ofResiduePairIdentifiers(IndexSelectionResiduePairIdentifier residuePairIdentifier1, IndexSelectionResiduePairIdentifier residuePairIdentifier2) {
         IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
         IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
         IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();

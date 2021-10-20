@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.domain.structure.IndexSelection;
 /**
  * A {@link ResiduePairIdentifier} based on {@link IndexSelection} instances, created by the residue graph.
  */
-public class IndexResiduePairIdentifier implements ResiduePairIdentifier {
+public class IndexSelectionResiduePairIdentifier implements ResiduePairIdentifier {
     private final IndexSelection indexSelection1;
     private final IndexSelection indexSelection2;
 
@@ -14,7 +14,7 @@ public class IndexResiduePairIdentifier implements ResiduePairIdentifier {
      * @param indexSelection1 the first datum
      * @param indexSelection2 the second datum
      */
-    public IndexResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2) {
+    public IndexSelectionResiduePairIdentifier(IndexSelection indexSelection1, IndexSelection indexSelection2) {
         this.indexSelection1 = indexSelection1;
         this.indexSelection2 = indexSelection2;
     }

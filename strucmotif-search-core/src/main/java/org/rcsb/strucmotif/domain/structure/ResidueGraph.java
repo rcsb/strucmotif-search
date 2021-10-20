@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.IndexResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -439,7 +439,7 @@ public class ResidueGraph {
                 sideChainDistance,
                 angle);
         // LabelSelection is needed to be able to map position-specific exchanges accurately
-        ResiduePairIdentifier residuePairIdentifier = new IndexResiduePairIdentifier(indexSelection1,
+        ResiduePairIdentifier residuePairIdentifier = new IndexSelectionResiduePairIdentifier(indexSelection1,
                 indexSelection2);
         return new ResiduePairOccurrence(residuePairDescriptor, residuePairIdentifier);
     }

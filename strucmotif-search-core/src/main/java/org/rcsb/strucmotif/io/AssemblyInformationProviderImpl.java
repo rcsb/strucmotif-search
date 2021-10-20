@@ -25,9 +25,9 @@ public class AssemblyInformationProviderImpl implements AssemblyInformationProvi
         return data.stream()
                 .map(s -> {
                     String structureIdentifier = s.getStructureIdentifier();
-                    Map<String, Set<String>> assemblyInformation = s.getAssemblyInformation();
+                    Map<String, String[]> assemblyInformation = s.getAssemblyInformation();
                     Map<String, Set<String>> reversed = new HashMap<>();
-                    for (Map.Entry<String, Set<String>> partial : assemblyInformation.entrySet()) {
+                    for (Map.Entry<String, String[]> partial : assemblyInformation.entrySet()) {
                         String assemblyId = partial.getKey();
                         for (String structOperId : partial.getValue()) {
                             Set<String> mappedAssemblyIds = reversed.computeIfAbsent(structOperId, e -> new HashSet<>());

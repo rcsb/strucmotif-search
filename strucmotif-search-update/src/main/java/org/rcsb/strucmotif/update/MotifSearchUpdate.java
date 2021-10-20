@@ -258,7 +258,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             boolean hasRevision = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory().isDefined();
             // if revision isn't set (happens e.g. for ModelArchive files) then set to 1.0 by default
             Revision revision = hasRevision ? new Revision(mmCifFile) : new Revision(1, 0);
-            Map<String, Set<String>> assemblyInformation = AssemblyInformation.of(mmCifFile);
+            Map<String, String[]> assemblyInformation = AssemblyInformation.of(mmCifFile);
 
             // write renumbered structure
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
@@ -348,7 +348,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         AtomicInteger bufferCount = new AtomicInteger();
         threadPool.submit(() -> {
             context.buffer.entrySet().parallelStream().forEach(entry -> {
-                ResiduePairDescriptor full = entry.getKey();
+                ResiduePairDescriptor key = entry.getKey();
                 Map<Integer, Collection<ResiduePairIdentifier>> output = entry.getValue();
 
                 if (bufferCount.incrementAndGet() % 10000 == 0) {
@@ -358,7 +358,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
                             bufferTotal);
                 }
 
-                invertedIndex.insert(full, output);
+                invertedIndex.insert(key, output);
 
                 // writing takes additional heap - ease burden by dropping processed output bins
                 output.clear();

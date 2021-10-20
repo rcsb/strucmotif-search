@@ -62,12 +62,12 @@ public class StateRepositoryImpl implements StateRepository {
         String structureIdentifier = split[0];
         int structureIndex = Integer.parseInt(split[1]);
         Revision revision = new Revision(Integer.parseInt(split[2]), Integer.parseInt(split[3]));
-        Map<String, Set<String>> assemblyInformation = IntStream.range(4, split.length)
+        Map<String, String[]> assemblyInformation = IntStream.range(4, split.length)
                 .mapToObj(i -> {
                     String[] assemblySplit = split[i].split(ASSEMBLY_INFORMATION_DELIMITER);
                     String assemblyId = assemblySplit[0];
-                    Set<String> operList = Arrays.stream(assemblySplit, 1, assemblySplit.length)
-                            .collect(Collectors.toSet());
+                    String[] operList = Arrays.stream(assemblySplit, 1, assemblySplit.length)
+                            .toArray(String[]::new);
                     return new Pair<>(assemblyId, operList);
                 })
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));

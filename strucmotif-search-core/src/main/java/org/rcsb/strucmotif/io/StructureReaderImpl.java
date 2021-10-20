@@ -20,10 +20,8 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -64,7 +62,8 @@ public class StructureReaderImpl implements StructureReader {
         // the 'state'
         private String lastLabelAsymId;
         private int lastLabelSeqId;
-        private final Map<String, int[]> chainOffsets;
+        private final List<String> chainIds;
+        private final List<Integer> chainOffsets;
         private final List<Integer> labelSeqIdCollapsed;
         private final List<Integer> residueOffsets;
         private final List<ResidueType> residueTypes;
@@ -93,7 +92,8 @@ public class StructureReaderImpl implements StructureReader {
 
             this.lastLabelAsymId = null;
             this.lastLabelSeqId = -1;
-            this.chainOffsets = new LinkedHashMap<>();
+            this.chainIds = new ArrayList<>();
+            this.chainOffsets = new ArrayList<>();
             this.labelSeqIdCollapsed = new ArrayList<>();
             this.residueOffsets = new ArrayList<>();
             this.residueTypes = new ArrayList<>();
@@ -132,6 +132,14 @@ public class StructureReaderImpl implements StructureReader {
             return out;
         }
 
+        private String[] convertStrings(List<String> values) {
+            String[] out = new String[values.size()];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = values.get(i);
+            }
+            return out;
+        }
+
         private Structure build() {
             int residueIndex = 0;
             for (int row = 0; row < atomSite.getRowCount(); row++) {
@@ -141,13 +149,13 @@ public class StructureReaderImpl implements StructureReader {
                 boolean residueChange = labelSeqId != lastLabelSeqId;
 
                 if (chainChange) {
-                    chainOffsets.put(labelAsymId, new int[] { residueIndex, residueIndex });
+                    chainIds.add(labelAsymId);
+                    chainOffsets.add(residueIndex);
                 }
 
                 if (chainChange || residueChange) {
                     lastLabelAsymId = labelAsymId;
                     lastLabelSeqId = labelSeqId;
-                    chainOffsets.get(labelAsymId)[1] = residueIndex;
                     labelSeqIdCollapsed.add(labelSeqId);
                     residueOffsets.add(row);
                     residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
@@ -155,16 +163,23 @@ public class StructureReaderImpl implements StructureReader {
                 }
             }
 
+            // track last seen residueIndex
+            chainOffsets.add(residueIndex);
             Map<String, Transformation> transformations = buildTransformations();
             Map<String, String[]> assemblies = AssemblyInformation.of(mmCifFile);
+
             return new Structure(structureIdentifier,
-                    chainOffsets,
+                    convertStrings(chainIds),
+                    convertOffsets(chainOffsets),
                     convertOffsets(labelSeqIdCollapsed),
                     convertOffsets(residueOffsets),
                     convertResidueTypes(residueTypes),
                     labelAtomId,
                     x, y, z,
-                    assemblies, transformations);
+                    assemblies.keySet().toArray(String[]::new),
+                    assemblies.values().toArray(String[][]::new),
+                    transformations.keySet().toArray(String[]::new),
+                    transformations.values().toArray(Transformation[]::new));
         }
 
         private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");

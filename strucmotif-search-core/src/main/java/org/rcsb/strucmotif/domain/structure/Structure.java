@@ -4,9 +4,11 @@ import org.rcsb.strucmotif.domain.Transformation;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -15,7 +17,8 @@ import java.util.stream.IntStream;
  */
 public class Structure {
     private final String structureIdentifier;
-    private final Map<String, int[]> chainOffsets;
+    private final String[] chainIds;
+    private final int[] chainOffsets;
     private final int[] labelSeqId;
     private final int chainCount;
     private final int residueCount;
@@ -26,12 +29,15 @@ public class Structure {
     private final short[] x;
     private final short[] y;
     private final short[] z;
-    private final Map<String, String[]> assemblies;
-    private final Map<String, Transformation> transformations;
+    private final String[] assemblyIds;
+    private final String[][] chainsReferencedByAssembly;
+    private final String[] transformationIds;
+    private final Transformation[] transformations;
 
     /**
      * Create a structure view.
      * @param structureIdentifier the identifier
+     * @param chainIds registered chains
      * @param chainOffsets residue indices where label_asym_id changes
      * @param labelSeqId array of all label_seq_id
      * @param residueOffsets the offset of each residue in the atom_site category
@@ -40,11 +46,14 @@ public class Structure {
      * @param x the x coords of each atom
      * @param y the y coords of each atom
      * @param z the z coords of each atom
-     * @param assemblies all assemblies
+     * @param assemblyIds all registered assemblies
+     * @param chainsReferencedByAssembly all chains that are associated to a certain assembly
+     * @param transformationIds all registered transformations
      * @param transformations all transformations
      */
     public Structure(String structureIdentifier,
-                     Map<String, int[]> chainOffsets,
+                     String[] chainIds,
+                     int[] chainOffsets,
                      int[] labelSeqId,
                      int[] residueOffsets,
                      byte[] residueTypes,
@@ -52,22 +61,37 @@ public class Structure {
                      short[] x,
                      short[] y,
                      short[] z,
-                     Map<String, String[]> assemblies,
-                     Map<String, Transformation> transformations) {
+                     String[] assemblyIds,
+                     String[][] chainsReferencedByAssembly,
+                     String[] transformationIds,
+                     Transformation[] transformations) {
         this.structureIdentifier = structureIdentifier;
-        this.chainOffsets = chainOffsets;
+        this.chainIds = chainIds;
+        this.chainOffsets = chainOffsets; // note, this array is actually 1 pos longer than the chainIds
         this.labelSeqId = labelSeqId;
         this.residueOffsets = residueOffsets;
         this.residueTypes = residueTypes;
-        this.chainCount = chainOffsets.size();
+        this.chainCount = chainIds.length;
         this.residueCount = residueOffsets.length;
         this.atomCount = labelAtomId.length;
         this.labelAtomId = labelAtomId;
         this.x = x;
         this.y = y;
         this.z = z;
-        this.assemblies = assemblies;
+        this.assemblyIds = assemblyIds;
+        this.chainsReferencedByAssembly = chainsReferencedByAssembly;
+        this.transformationIds = transformationIds;
         this.transformations = transformations;
+    }
+
+    private int indexOf(String[] values, String v) {
+        Objects.requireNonNull(v);
+        for (int i = 0; i < values.length; i++) {
+            if (v.equals(values[i])) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /**
@@ -99,13 +123,15 @@ public class Structure {
      * @throws NoSuchElementException if the chain/residue cannot be found
      */
     public int getResidueIndex(String labelAsymId, int labelSeqId) {
-        if (!chainOffsets.containsKey(labelAsymId)) {
+        int chainIndex = indexOf(chainIds, labelAsymId);
+        if (chainIndex == -1) {
             throw new NoSuchElementException("Didn't find chain: " + labelAsymId);
         }
 
-        int[] chainOffset = chainOffsets.get(labelAsymId);
+        int chainStart = chainOffsets[chainIndex];
+        int chainEnd = chainOffsets[chainIndex + 1];
         // on the sub-array binary search works
-        int index = Arrays.binarySearch(this.labelSeqId, chainOffset[0], chainOffset[1] + 1, labelSeqId);
+        int index = Arrays.binarySearch(this.labelSeqId, chainStart, chainEnd, labelSeqId);
         if (index < 0) {
             throw new NoSuchElementException("Didn't find residue with label_seq_id " + labelSeqId + " in chain " + labelAsymId);
         }
@@ -113,19 +139,19 @@ public class Structure {
     }
 
     public LabelSelection getLabelSelection(int residueIndex) {
-        String labelAsymId = null;
-        for (Map.Entry<String, int[]> entry : chainOffsets.entrySet()) {
-            int[] offsets =  entry.getValue();
-            if (residueIndex >= offsets[0] && residueIndex <= offsets[1]) {
-                labelAsymId = entry.getKey();
+        int chainIndex = -1;
+        for (int i = 0; i < chainIds.length; i++) {
+            if (residueIndex >= chainOffsets[i] && residueIndex <= chainOffsets[i + 1]) {
+                chainIndex = i;
             }
         }
 
-        if (labelAsymId == null) {
+        if (chainIndex == -1) {
             throw new NoSuchElementException("Didn't find chain in '" + structureIdentifier + "' that contains residue index: " +
-                    residueIndex + " - Chain offsets: " + chainOffsets.entrySet().stream().map(e -> e.getKey() + " -> " + Arrays.toString(e.getValue())).collect(Collectors.toList()) + "\n");
+                    residueIndex + " - Chain offsets: " + Arrays.toString(chainIds) + " -> " + Arrays.toString(chainOffsets) + "\n");
         }
 
+        String labelAsymId = chainIds[chainIndex];
         int labelSeqId = this.labelSeqId[residueIndex];
         return new LabelSelection(labelAsymId, null, labelSeqId);
     }
@@ -168,6 +194,10 @@ public class Structure {
      * @return Map of all assemblies [assemblyId, (label_asym_id x struct_oper_id)[]]
      */
     public Map<String, String[]> getAssemblies() {
+        Map<String, String[]> assemblies  = new LinkedHashMap<>();
+        for (int i = 0; i < assemblyIds.length; i++) {
+            assemblies.put(assemblyIds[i], this.chainsReferencedByAssembly[i]);
+        }
         return assemblies;
     }
 
@@ -176,6 +206,10 @@ public class Structure {
      * @return Map of transformations [struct_oper_id, Transformation]
      */
     public Map<String, Transformation> getTransformations() {
+        Map<String, Transformation> transformations = new LinkedHashMap<>();
+        for (int i = 0; i < transformationIds.length; i++) {
+            transformations.put(transformationIds[i], this.transformations[i]);
+        }
         return transformations;
     }
 
@@ -185,7 +219,8 @@ public class Structure {
      * @return a Transformation object
      */
     public Transformation getTransformation(String structOperIdentifier) {
-        return transformations.get(structOperIdentifier);
+        int transformationIndex = indexOf(transformationIds, structOperIdentifier);
+        return transformations[transformationIndex];
     }
 
     /**
@@ -229,7 +264,7 @@ public class Structure {
         Map<LabelAtomId, float[]> out = new EnumMap<>(LabelAtomId.class);
         int offsetStart = residueOffsets[residueIndex];
         int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomId.length : residueOffsets[residueIndex + 1];
-        Transformation transformation = transformations.get(structOperIdentifier);
+        Transformation transformation = getTransformation(structOperIdentifier);
 
         // happens e.g. for 7a3x, there assembly '1' references opers '2' and '3'
         if (transformation == null) {

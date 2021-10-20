@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
+import javax.xml.crypto.dsig.Transform;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,7 +37,8 @@ public class QuaternionAlignmentServiceTest {
     public void whenOriginalExample_thenRmsdMatches() {
         // https://theobald.brandeis.edu/qcp/main.c
         Structure structure1 = new Structure("1tst",
-                Map.of("A", new int[] { 0, 6 }),
+                new String[] {"A" },
+                new int[] { 0, 6 },
                 new int[]  { 1, 2, 3, 4, 5, 6, 7 },
                 new int[] { 0, 1, 2, 3, 4, 5, 6 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -44,11 +46,14 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{-2.803, 0.893, 1.368, -1.651, -0.440, 2.551, 0.105}),
                 Helpers.convertCoordsToShort(new double[]{-15.373, -16.062, -12.371, -12.153, -15.218, -13.273, -11.330}),
                 Helpers.convertCoordsToShort(new double[]{24.556, 25.147, 25.885, 28.177, 30.068, 31.372, 33.567 }),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
 
         Structure structure2 = new Structure("2tst",
-                Map.of("A", new int[] { 0, 6 }),
+                new String[] {"A" },
+                new int[] { 0, 6 },
                 new int[]  { 1, 2, 3, 4, 5, 6, 7 },
                 new int[] { 0, 1, 2, 3, 4, 5, 6 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -56,8 +61,10 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{-14.739, -12.473, -14.802, -17.782, -16.124, -15.029, -18.577}),
                 Helpers.convertCoordsToShort(new double[]{-18.673, -15.810, -13.307, -14.852, -14.617, -11.037, -10.001}),
                 Helpers.convertCoordsToShort(new double[]{15.040, 16.074, 14.408, 16.171, 19.584f, 18.902, 17.996}),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
 
         List<Integer> indices = List.of(0, 1, 2, 3, 4, 5, 6);
         List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
@@ -69,7 +76,8 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenSelfAlign_thenRmsdIsZeroAndTransformationIsIdentity() {
         Structure structure = new Structure("1tst",
-                Map.of("A", new int[] { 0, 2 }),
+                new String[] {"A" },
+                new int[] { 0, 2 },
                 new int[]  { 1, 2, 3 },
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -77,8 +85,10 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{6.994, 9.429, 5.547}),
                 Helpers.convertCoordsToShort(new double[]{8.354, 7.479, 0.158}),
                 Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
 
         List<Integer> indices = List.of(0, 1, 2);
         List<Map<LabelAtomId, float[]>> residues = indices.stream().map(structure::manifestResidue).collect(Collectors.toList());
@@ -96,7 +106,8 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenAlign1And2_thenRmsdAndTransformationMatches() {
         Structure structure1 = new Structure("1tst",
-                Map.of("A", new int[] { 0, 2 }),
+                new String[] {"A" },
+                new int[] { 0, 2 },
                 new int[]  { 1, 2, 3 },
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -104,10 +115,13 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{6.994, 9.429, 5.547}),
                 Helpers.convertCoordsToShort(new double[]{8.354, 7.479, 0.158}),
                 Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
         Structure structure2 = new Structure("2tst",
-                Map.of("A", new int[] { 0, 2 }),
+                new String[] {"A" },
+                new int[] { 0, 2 },
                 new int[]  { 1, 2, 3 },
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -115,8 +129,10 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{3.908, 4.588, 12.080}),
                 Helpers.convertCoordsToShort(new double[]{12.066, 6.531, 12.645}),
                 Helpers.convertCoordsToShort(new double[]{-6.159, -9.119, -7.073}),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
 
         List<Integer> indices = List.of(0, 1, 2);
         List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
@@ -135,7 +151,8 @@ public class QuaternionAlignmentServiceTest {
     @Test
     public void whenAlign3And4_thenRmsdAndTransformationMatches() {
         Structure structure3 = new Structure("1tst",
-                Map.of("A", new int[] { 0, 2 }),
+                new String[] {"A" },
+                new int[] { 0, 2 },
                 new int[]  { 1, 2, 3 },
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -143,10 +160,13 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{5.055, 7.320, 6.021}),
                 Helpers.convertCoordsToShort(new double[]{74.865, 76.960, 74.874}),
                 Helpers.convertCoordsToShort(new double[]{22.585, 20.325, 17.385}),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
         Structure structure4 = new Structure("2tst",
-                Map.of("A", new int[] { 0, 2 }),
+                new String[] {"A" },
+                new int[] { 0, 2 },
                 new int[]  { 1, 2, 3 },
                 new int[] { 0, 1, 2 },
                 Helpers.convertEnumToByte(ResidueType.HISTIDINE, ResidueType.ASPARTIC_ACID, ResidueType.SERINE, ResidueType.LYSINE, ResidueType.LYSINE, ResidueType.SERINE, ResidueType.PHENYLALANINE),
@@ -154,8 +174,10 @@ public class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{5.055, 7.321, 6.020}),
                 Helpers.convertCoordsToShort(new double[]{74.864, 76.962, 74.873}),
                 Helpers.convertCoordsToShort(new double[]{22.583, 20.326, 17.386}),
-                Map.of("1", new String[] { "A" }),
-                Map.of("1", Transformation.IDENTITY_TRANSFORMATION));
+                new String[] { "1" },
+                new String[][] { { "A" } },
+                new String[] { "1" },
+                new Transformation[] { Transformation.IDENTITY_TRANSFORMATION });
 
         List<Integer> indices = List.of(0, 1, 2);
         List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure3::manifestResidue).collect(Collectors.toList());

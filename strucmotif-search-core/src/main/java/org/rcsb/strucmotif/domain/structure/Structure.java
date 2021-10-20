@@ -264,11 +264,14 @@ public class Structure {
         Map<LabelAtomId, float[]> out = new EnumMap<>(LabelAtomId.class);
         int offsetStart = residueOffsets[residueIndex];
         int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomId.length : residueOffsets[residueIndex + 1];
-        Transformation transformation = getTransformation(structOperIdentifier);
+        int transformationIndex = indexOf(transformationIds, structOperIdentifier);
+        Transformation transformation;
 
         // happens e.g. for 7a3x, there assembly '1' references opers '2' and '3'
-        if (transformation == null) {
+        if (transformationIndex == -1) {
             transformation = Transformation.IDENTITY_TRANSFORMATION;
+        } else {
+            transformation = transformations[transformationIndex];
         }
 
         for (int i = offsetStart; i < offsetEnd; i++) {

@@ -83,7 +83,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             data.putAll(map);
 
             // serialize message
-            try (ByteArrayOutputStream outputStream = MessagePack.encode(data)) {
+            try (ByteArrayOutputStream outputStream = InvertedIndexCodec.encode(data)) {
                 Path path = getPath(residuePairDescriptor);
                 write(path, outputStream);
             }
@@ -131,7 +131,7 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     @SuppressWarnings("unchecked")
     private Stream<Map.Entry<Integer, Object>> getData(InputStream inputStream) throws IOException {
-        return ((Map<Integer, Object>) MessagePack.decode(inputStream)).entrySet().stream();
+        return ((Map<Integer, Object>) InvertedIndexCodec.decode(inputStream)).entrySet().stream();
     }
 
     /**
@@ -155,7 +155,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     @SuppressWarnings("unchecked")
     private Map<Integer, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
-            return (Map<Integer, Object>) MessagePack.decode(inputStream);
+            return (Map<Integer, Object>) InvertedIndexCodec.decode(inputStream);
         } catch (IOException e) {
             return Collections.emptyMap();
         }
@@ -212,7 +212,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             // serialize message
-            try (ByteArrayOutputStream outputStream = MessagePack.encode(filteredMap)) {
+            try (ByteArrayOutputStream outputStream = InvertedIndexCodec.encode(filteredMap)) {
                 Path path = getPath(residuePairDescriptor);
                 write(path, outputStream);
             }

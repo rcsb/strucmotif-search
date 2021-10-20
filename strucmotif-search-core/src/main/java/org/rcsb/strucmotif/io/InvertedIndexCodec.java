@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Decodes and encodes MessagePack data.
  */
-class MessagePack {
+class InvertedIndexCodec {
     public static ByteArrayOutputStream encode(Map<?, ?> input) {
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

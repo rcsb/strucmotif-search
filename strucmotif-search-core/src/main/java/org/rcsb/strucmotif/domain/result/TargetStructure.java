@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -120,15 +121,16 @@ public class TargetStructure {
      * @param structure the structure data
      * @param structureIdentifier the structureIdentifier
      * @param hitScorer the hit scorer
+     * @param rmsdCutoff what hits to ignore
      * @param assemblyInformationProvider provides prepared assembly information
      * @param undefinedAssemblies allow hits without assembly?
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
-        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, structureIdentifier, hitScorer, assemblyInformationProvider, undefinedAssemblies));
+    public Stream<Hit> paths(List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, structureIdentifier, hitScorer, rmsdCutoff, assemblyInformationProvider, undefinedAssemblies));
     }
 
-    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+    private Stream<Hit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
         List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = indexSelections.stream()
                 .map(indexSelection -> {
@@ -175,6 +177,10 @@ public class TargetStructure {
                     }
 
                     AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));
+                    // filter away high-RMSD hits
+                    if (alignmentResult.getRootMeanSquareDeviation() >= rmsdCutoff) {
+                        return null;
+                    }
 
                     return new Hit(structureIdentifier,
                             entry.getKey(),
@@ -182,7 +188,8 @@ public class TargetStructure {
                             Arrays.asList(residueTypes),
                             alignmentResult.getRootMeanSquareDeviation(),
                             alignmentResult.getTransformation());
-                });
+                })
+                .filter(Objects::nonNull);
     }
 
     private List<IndexSelection> orderIndexSelections(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps) {

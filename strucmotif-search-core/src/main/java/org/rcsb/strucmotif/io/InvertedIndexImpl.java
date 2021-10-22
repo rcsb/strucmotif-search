@@ -8,7 +8,6 @@ import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Map<Integer, Collection<ResiduePairIdentifier>> residuePairOccurrences) {
+    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket bucket) {
         if (!paths) {
             ensureDirectoriesExist();
             this.paths = true;
@@ -70,9 +69,9 @@ public class InvertedIndexImpl implements InvertedIndex {
 
         try {
             Path path = getPath(residuePairDescriptor);
-            ResiduePairIdentifierBucket bucket = Bucket.merge(getBucket(residuePairDescriptor), new ResiduePairIdentifierBucket(residuePairOccurrences));
+            ResiduePairIdentifierBucket b = Bucket.merge(getBucket(residuePairDescriptor), bucket);
 
-            try (ByteArrayOutputStream outputStream = BucketCodec.encode(bucket)) {
+            try (ByteArrayOutputStream outputStream = BucketCodec.encode(b)) {
                 write(path, outputStream);
             }
         } catch (IOException e) {
@@ -90,7 +89,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public Bucket select(ResiduePairDescriptor residuePairDescriptor) {
+    public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
             // TODO keep track of flip status - probably outside of here

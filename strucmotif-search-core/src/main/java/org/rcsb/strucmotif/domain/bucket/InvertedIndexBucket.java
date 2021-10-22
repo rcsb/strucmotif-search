@@ -108,9 +108,23 @@ public class InvertedIndexBucket implements Bucket {
         }
     }
 
+    public int[] getOccurrencePositions() {
+        int start = positionOffsets[structurePointer];
+        int end = lastPosition;
+        int[] out = new int[end - start + 1];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = start + i * 2;
+        }
+        return out;
+    }
+
     @Override
     public int getStructureIndex() {
         return structureIndices[structurePointer];
+    }
+
+    public int getStructureIndex(int i) {
+        return structureIndices[i];
     }
 
     @Override
@@ -118,15 +132,33 @@ public class InvertedIndexBucket implements Bucket {
         return positionData[positionPointer];
     }
 
+    public int getIndex1(int i) {
+        return positionData[i];
+    }
+
     @Override
     public int getIndex2() {
         return positionData[positionPointer + 1];
+    }
+
+    public int getIndex2(int i) {
+        return positionData[i];
     }
 
     @Override
     public String getStructOperId1() {
         if (positionPointer == nextPositionWithOperator) {
             return operatorData[operatorPointer];
+        } else {
+            return DEFAULT_OPERATOR;
+        }
+    }
+
+    public String getStructOperId1(int i) {
+        // TODO consider map instead of bs, these arrays should be rather sparse though
+        int j = Arrays.binarySearch(operatorIndices, i);
+        if (j != -1) {
+            return operatorData[j];
         } else {
             return DEFAULT_OPERATOR;
         }
@@ -140,6 +172,15 @@ public class InvertedIndexBucket implements Bucket {
         // the first index has no operator, the next operator occurs for the second index
         } else if (positionPointer + 1 == nextPositionWithOperator) {
             return operatorData[operatorPointer];
+        } else {
+            return DEFAULT_OPERATOR;
+        }
+    }
+
+    public String getStructOperId2(int i) {
+        int j = Arrays.binarySearch(operatorIndices, i);
+        if (j != -1) {
+            return operatorData[j];
         } else {
             return DEFAULT_OPERATOR;
         }

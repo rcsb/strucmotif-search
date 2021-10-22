@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -44,10 +45,20 @@ public class InvertedIndexImplTest {
 
     @Test
     public void whenAccessingSpecificBin_thenObserveAssemblies() {
-        assertTrue(invertedIndex.select(BIN_WITH_ASSEMBLY)
-                .map(Pair::getSecond)
-                .flatMap(Arrays::stream)
-                .flatMap(ResiduePairIdentifier::indexSelections)
-                .anyMatch(indexSelector -> !indexSelector.getStructOperId().equals("1")));
+        InvertedIndexBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);
+        int nonIdentity = 0;
+        while (bucket.hasNextStructure()) {
+            bucket.moveStructure();
+            while (bucket.hasNextOccurrence()) {
+                bucket.moveOccurrence();
+                if (!bucket.getStructOperId1().equals("1")) {
+                    nonIdentity++;
+                }
+                if (!bucket.getStructOperId2().equals("1")) {
+                    nonIdentity++;
+                }
+            }
+        }
+        assertTrue(nonIdentity > 0);
     }
 }

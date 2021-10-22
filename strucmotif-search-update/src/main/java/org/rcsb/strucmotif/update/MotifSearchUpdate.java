@@ -6,6 +6,7 @@ import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
+import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
@@ -349,7 +350,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         threadPool.submit(() -> {
             context.buffer.entrySet().parallelStream().forEach(entry -> {
                 ResiduePairDescriptor key = entry.getKey();
-                Map<Integer, Collection<ResiduePairIdentifier>> output = entry.getValue();
+                ResiduePairIdentifierBucket output = new ResiduePairIdentifierBucket(entry.getValue());
 
                 if (bufferCount.incrementAndGet() % 10000 == 0) {
                     logger.info("[{}] {} / {}",
@@ -359,9 +360,6 @@ public class MotifSearchUpdate implements CommandLineRunner {
                 }
 
                 invertedIndex.insert(key, output);
-
-                // writing takes additional heap - ease burden by dropping processed output bins
-                output.clear();
             });
             return null;
         }).get();

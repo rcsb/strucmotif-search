@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
@@ -27,7 +28,7 @@ public interface InvertedIndex {
      * @param residuePairDescriptor the bin for which occurrences should the lookup be performed
      * @return a {@link Stream} of all occurrences, grouped by their structure identifier
      */
-    Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor);
+    Bucket select(ResiduePairDescriptor residuePairDescriptor);
 
     /**
      * Removes all information on a set of structures from the index.

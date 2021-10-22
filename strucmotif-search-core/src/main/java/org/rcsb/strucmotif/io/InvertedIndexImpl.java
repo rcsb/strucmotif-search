@@ -1,13 +1,14 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.bucket.Bucket;
+import org.rcsb.strucmotif.domain.bucket.BucketCodec;
+import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
+import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -69,22 +69,10 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
 
         try {
-            Map<Integer, Object> data = residuePairOccurrences.entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey,
-                            entry -> entry.getValue()
-                                    .stream()
-                                    .map(this::createObjectArray)
-                                    .toArray()));
+            Path path = getPath(residuePairDescriptor);
+            ResiduePairIdentifierBucket bucket = Bucket.merge(getBucket(residuePairDescriptor), new ResiduePairIdentifierBucket(residuePairOccurrences));
 
-            Map<Integer, Object> map = getMap(residuePairDescriptor);
-
-            // read already present target identifiers and add to list to write
-            data.putAll(map);
-
-            // serialize message
-            try (ByteArrayOutputStream outputStream = InvertedIndexCodec.encode(data)) {
-                Path path = getPath(residuePairDescriptor);
+            try (ByteArrayOutputStream outputStream = BucketCodec.encode(bucket)) {
                 write(path, outputStream);
             }
         } catch (IOException e) {
@@ -102,36 +90,14 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor residuePairDescriptor) {
+    public Bucket select(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            return getPairs(inputStream, residuePairDescriptor);
+            // TODO keep track of flip status - probably outside of here
+            return BucketCodec.decode(inputStream);
         } catch (IOException e) {
-            return Stream.empty();
+            return Bucket.EMPTY_BUCKET;
         }
-    }
-
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> getPairs(InputStream inputStream, ResiduePairDescriptor residuePairDescriptor) throws IOException {
-        return getData(inputStream)
-                .map(entry -> {
-                    int id = entry.getKey();
-                    Object[] array = (Object[]) entry.getValue();
-                    InvertedIndexResiduePairIdentifier[] value = new InvertedIndexResiduePairIdentifier[array.length];
-                    for (int i = 0; i < array.length; i++) {
-                        value[i] = createResiduePairIdentifier(array[i], residuePairDescriptor);
-                    }
-                    return new Pair<>(id, value);
-                });
-    }
-
-    private InvertedIndexResiduePairIdentifier createResiduePairIdentifier(Object raw, ResiduePairDescriptor residuePairDescriptor) {
-        Object[] data = (Object[]) raw;
-        return new InvertedIndexResiduePairIdentifier(data, residuePairDescriptor.isFlipped());
-    }
-
-    @SuppressWarnings("unchecked")
-    private Stream<Map.Entry<Integer, Object>> getData(InputStream inputStream) throws IOException {
-        return ((Map<Integer, Object>) InvertedIndexCodec.decode(inputStream)).entrySet().stream();
     }
 
     /**
@@ -152,12 +118,11 @@ public class InvertedIndexImpl implements InvertedIndex {
         return basePath.resolve(uberbin).resolve(bin + extension);
     }
 
-    @SuppressWarnings("unchecked")
-    private Map<Integer, Object> getMap(ResiduePairDescriptor residuePairDescriptor) {
+    private InvertedIndexBucket getBucket(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
-            return (Map<Integer, Object>) InvertedIndexCodec.decode(inputStream);
+            return BucketCodec.decode(inputStream);
         } catch (IOException e) {
-            return Collections.emptyMap();
+            return Bucket.EMPTY_BUCKET;
         }
     }
 
@@ -197,22 +162,19 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     private void delete(ResiduePairDescriptor residuePairDescriptor, Collection<Integer> removals) {
         try {
-            Map<Integer, Object> map = getMap(residuePairDescriptor);
+            InvertedIndexBucket bucket = getBucket(residuePairDescriptor);
+            Set<Integer> structureIndices = bucket.getStructureIndices();
 
             // if no entry would be removed: don't bother and return
-            if (removals.stream().noneMatch(map::containsKey)) {
+            if (removals.stream().noneMatch(structureIndices::contains)) {
                 return;
             }
 
             // remove all occurrences of structure identifiers
-            Map<Integer, Object> filteredMap = map.entrySet()
-                    .stream()
-                    // let only entries pass if their key is not in removal set
-                    .filter(entry -> !removals.contains(entry.getKey()))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            ResiduePairIdentifierBucket filteredBucket = Bucket.removeByKey(bucket, removals);
 
             // serialize message
-            try (ByteArrayOutputStream outputStream = InvertedIndexCodec.encode(filteredMap)) {
+            try (ByteArrayOutputStream outputStream = BucketCodec.encode(filteredBucket)) {
                 Path path = getPath(residuePairDescriptor);
                 write(path, outputStream);
             }
@@ -244,24 +206,6 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
     }
 
-    private Object[] createObjectArray(ResiduePairIdentifier residuePairIdentifier) {
-        IndexSelection identifier1 = residuePairIdentifier.getIndexSelection1();
-        int index1 = identifier1.getIndex();
-        String structOperId1 = identifier1.getStructOperId();
-        IndexSelection identifier2 = residuePairIdentifier.getIndexSelection2();
-        int index2 = identifier2.getIndex();
-        String structOperId2 = identifier2.getStructOperId();
-
-        // implicitly: don't write struct_oper_id if identity
-        if ("1".equals(structOperId1) && "1".equals(structOperId2)) {
-            // length 2
-            return new Object[] { index1, index2 };
-        } else {
-            // length 4
-            return new Object[] { index1, index2, structOperId1, structOperId2 };
-        }
-    }
-
     @Override
     public Set<ResiduePairDescriptor> reportKnownDescriptors() {
         try {
@@ -284,8 +228,8 @@ public class InvertedIndexImpl implements InvertedIndex {
             return indexFiles()
                     .peek(p -> progress(counter, 10000, "{} bins scanned"))
                     .map(this::createResiduePairDescriptor)
-                    .map(this::getMap)
-                    .map(Map::keySet)
+                    .map(this::getBucket)
+                    .map(Bucket::getStructureIndices)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
         } catch (IOException e) {

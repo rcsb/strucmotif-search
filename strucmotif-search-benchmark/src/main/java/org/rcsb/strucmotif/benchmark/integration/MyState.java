@@ -49,6 +49,7 @@ public class MyState {
         }
     }
 
+    @SuppressWarnings("Duplicates")
     private String prepareUri(String raw, String structureIdentifier) {
         String pdbId = structureIdentifier.toLowerCase();
         String PDBID = pdbId.toUpperCase();

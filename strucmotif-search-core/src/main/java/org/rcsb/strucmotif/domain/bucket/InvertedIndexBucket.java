@@ -105,7 +105,7 @@ public class InvertedIndexBucket implements Bucket {
 
     public int[] getOccurrencePositions() {
         int start = positionOffsets[structurePointer];
-        int end = lastPosition + 2;
+        int end = lastPosition;
         int[] out = new int[(end - start) / 2];
         for (int i = 0; i < out.length; i++) {
             out[i] = start + i * 2;

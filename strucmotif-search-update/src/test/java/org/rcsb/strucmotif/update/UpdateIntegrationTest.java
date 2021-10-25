@@ -75,7 +75,7 @@ public class UpdateIntegrationTest {
             @Override
             protected InputStream handleInputStream(UpdateItem item, Context context) {
                 return TestCases.getInputStream(item.getStructureIdentifier());
-            };
+            }
         };
     }
 

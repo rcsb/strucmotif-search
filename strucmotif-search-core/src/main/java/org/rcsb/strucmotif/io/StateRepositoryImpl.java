@@ -149,6 +149,10 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     private void delete(Collection<String> removals, Path destination) {
+        if (!Files.exists(destination)) {
+            return;
+        }
+
         try (Stream<String> lines = Files.lines(destination)) {
             String output = lines.filter(line -> removals.stream().noneMatch(line::startsWith))
                     .collect(Collectors.joining("\n", "", "\n"));

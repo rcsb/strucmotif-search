@@ -62,11 +62,11 @@ public class MotifSearchIntegrationTest {
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("index/" + residuePairDescriptor + ".msg.gz");
+                        .getResourceAsStream("index/" + residuePairDescriptor + ".msg");
                 if (inputStream == null) {
                     throw new IOException();
                 }
-                return new GZIPInputStream(inputStream);
+                return inputStream;
             }
         };
 

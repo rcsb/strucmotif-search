@@ -48,4 +48,9 @@ public class IndexSelectionResiduePairIdentifier implements ResiduePairIdentifie
     public IndexSelection getIndexSelection2() {
         return indexSelection2;
     }
+
+    @Override
+    public String toString() {
+        return indexSelection1 + " & " + indexSelection2;
+    }
 }

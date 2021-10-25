@@ -6,45 +6,36 @@ import org.rcsb.strucmotif.domain.structure.IndexSelection;
  * A {@link ResiduePairIdentifier} defined by data from the inverted index. Just a wrapper for the raw data array.
  */
 public class InvertedIndexResiduePairIdentifier implements ResiduePairIdentifier {
-    private final Object[] data;
-    private final boolean flipped;
+    private final int index1;
+    private final int index2;
+    private final String structOperId1;
+    private final String structOperId2;
 
-    /**
-     * Construct an identifier based on raw data.
-     * @param data an Object[] from the inverted index
-     * @param flipped true iff positions are flipped by the contract of {@link ResiduePairDescriptor}
-     */
-    public InvertedIndexResiduePairIdentifier(Object[] data, boolean flipped) {
-        // length 2: { index1, index2 };
-        // length 4: { index1, index2, structOperId1, structOperId2 };
-        this.data = data;
-        this.flipped = flipped;
-    }
-
-    @Override
-    public String getStructOperId1() {
-        if (data.length < 4) {
-            return "1";
-        }
-        return (String) data[!flipped ? 2 : 3];
+    public InvertedIndexResiduePairIdentifier(int index1, int index2, String structOperId1, String structOperId2) {
+        this.index1 = index1;
+        this.index2 = index2;
+        this.structOperId1 = structOperId1;
+        this.structOperId2 = structOperId2;
     }
 
     @Override
     public int getIndex1() {
-        return (int) data[!flipped ? 0 : 1];
-    }
-
-    @Override
-    public String getStructOperId2() {
-        if (data.length < 4) {
-            return "1";
-        }
-        return (String) data[!flipped ? 3 : 2];
+        return index1;
     }
 
     @Override
     public int getIndex2() {
-        return (int) data[!flipped ? 1 : 0];
+        return index2;
+    }
+
+    @Override
+    public String getStructOperId1() {
+        return structOperId1;
+    }
+
+    @Override
+    public String getStructOperId2() {
+        return structOperId2;
     }
 
     @Override

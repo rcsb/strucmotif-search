@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BucketCodec {
@@ -29,7 +28,9 @@ public class BucketCodec {
 
     private static int[] decodeIntArray(DataInputStream inputStream) throws IOException {
         int[] out = new int[readArrayLength(inputStream)];
-        Arrays.fill(out, readInt(inputStream));
+        for (int i = 0; i < out.length; i++) {
+            out[i] = readInt(inputStream);
+        }
         return out;
     }
 
@@ -68,12 +69,14 @@ public class BucketCodec {
                 return inputStream.readInt();
         }
 
-        throw new IllegalArgumentException("Unknown MessagePack type 0x" + type + ", expected a int here!");
+        throw new IllegalArgumentException("Unknown MessagePack type 0x" + Integer.toHexString(type) + ", expected a int here!");
     }
 
     private static String[] decodeStringArray(DataInputStream inputStream) throws IOException {
         String[] out = new String[readArrayLength(inputStream)];
-        Arrays.fill(out, readString(inputStream));
+        for (int i = 0; i < out.length; i++) {
+            out[i] = readString(inputStream);
+        }
         return out;
     }
 
@@ -104,7 +107,7 @@ public class BucketCodec {
                 return readUnsignedInt(inputStream);
         }
 
-        throw new IllegalArgumentException("Unknown/expected MessagePack type 0x" + type + ", expected a StringArray here!");
+        throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected a StringArray here!");
     }
 
     private static int readArrayLength(DataInputStream inputStream) throws IOException {
@@ -118,7 +121,7 @@ public class BucketCodec {
         } else if (type == 0xDD) { // Array32
             return readUnsignedInt(inputStream);
         } else {
-            throw new IllegalArgumentException("Malformed binary file, expected an array here!");
+            throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected array length here!");
         }
     }
 
@@ -139,7 +142,7 @@ public class BucketCodec {
         int structureCount = bucket.getStructureCount();
         int[] structureIndices = new int[structureCount];
         int[] positionOffsets = new int[structureCount];
-        int[] positionData = new int[bucket.getResiduePairCount()];
+        int[] positionData = new int[bucket.getResiduePairCount() * 2];
         List<Integer> operatorIndicesList = new ArrayList<>();
         List<String> operatorDataList = new ArrayList<>();
 
@@ -183,20 +186,20 @@ public class BucketCodec {
     }
 
     private static void encodeIntArray(int[] value, DataOutputStream outputStream) throws IOException {
-        writeLength(value.length, outputStream);
+        writeArrayLength(value.length, outputStream);
         for (int v : value) {
             writeInt(v, outputStream);
         }
     }
 
     private static void encodeStringArray(String[] value, DataOutputStream outputStream) throws IOException {
-        writeLength(value.length, outputStream);
+        writeArrayLength(value.length, outputStream);
         for (String v : value) {
             writeString(v, outputStream);
         }
     }
 
-    private static void writeLength(int length, DataOutputStream outputStream) throws IOException {
+    private static void writeArrayLength(int length, DataOutputStream outputStream) throws IOException {
         if (length < 0x10) {
             outputStream.writeByte(length | 0x90);
         } else if (length < 0x10000) {

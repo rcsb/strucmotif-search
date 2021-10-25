@@ -20,7 +20,7 @@ public class MotifSearchConfig {
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */
-    private String rootPath = "/opt/data/";
+    private String rootPath = "/opt/data-test/";
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
      * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
@@ -48,7 +48,7 @@ public class MotifSearchConfig {
      * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
      * speed substantially. A value of 400 works good with 12GB of heap, the higher the faster.
      */
-    private int updateChunkSize = 2400;
+    private int updateChunkSize = 1600;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -82,7 +82,7 @@ public class MotifSearchConfig {
      * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
      * Hits without assembly are report as '0'.
      */
-    private boolean undefinedAssemblies = true;
+    private boolean undefinedAssemblies = false;
     /**
      * Filter for residues with a certain quality/confidence. Only relevant when combined with
      * {@link ResidueQualityStrategy}.
@@ -91,7 +91,7 @@ public class MotifSearchConfig {
     /**
      * Filter for residues with a certain quality/confidence. Update 'qualityThreshold' accordingly to use this.
      */
-    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF;
+    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.NONE;
     /**
      * List of all identifiers ever registered.
      */

@@ -15,7 +15,6 @@ public class InvertedIndexRunner {
 
     public static void main(String[] args) {
         MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        Path path = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
 
         InvertedIndexImpl invertedIndex = new InvertedIndexImpl(motifSearchConfig);
         List<ResiduePairDescriptor> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());
@@ -28,7 +27,7 @@ public class InvertedIndexRunner {
 
             long c = 0;
             for (ResiduePairDescriptor descriptor : selected) {
-                c += invertedIndex.select(descriptor).count();
+                c += invertedIndex.select(descriptor).getStructureCount();
 
             }
             long time = (System.nanoTime() - start) / 1000 / 1000;

@@ -1,10 +1,29 @@
 package org.rcsb.strucmotif.domain.bucket;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class InvertedIndexBucket implements Bucket {
+    private static final Map<Integer, String> EMPTY_MAP = Collections.emptyMap();
+    private static final int[] EMPTY_ARRAY = new int[0];
+    public static final InvertedIndexBucket EMPTY_BUCKET = new InvertedIndexBucket(EMPTY_ARRAY, EMPTY_ARRAY, EMPTY_ARRAY, EMPTY_ARRAY, new String[0]) {
+        @Override
+        public boolean hasNextStructure() {
+            return false;
+        }
+
+        @Override
+        public boolean hasNextOccurrence() {
+            return false;
+        }
+    };
+
     // these are of equal length, equal to the number of referenced structures/entries
     private final int[] structureIndices; // just structure indices
     private final int[] positionOffsets; // points to the start index in the positionData array
@@ -12,45 +31,35 @@ public class InvertedIndexBucket implements Bucket {
     // length is equal to 2 * the number of residue pairs in this whole bin
     private final int[] positionData; // has the structure [occ1_index1, occ1_index2, occ2_index1, occ2_index2, occ3_index1, ...]
 
-    // these are of equal length, might be 0, will only contain explicit values if operator is not equal to "1"
-    private final int[] operatorIndices; // points to the index in the positionData array, each position with a non-default operator has an entry in this array, but definition in ascending order
-    private final String[] operatorData; // just struct_oper_id strings
-
     private int structurePointer; // the current position in the structureIndices/positionOffsets arrays
 
     private int positionPointer; // the current position in the positionData array
     private int lastPosition; // the last valid position in the positionData array that references the first position of a residue pair (after that the array will reference the next structure or end)
 
-    private int operatorPointer; // the current position in the operator array
-    private int nextPositionWithOperator; // the next positionPointer that requires handling of struct_oper_id
+    private final Map<Integer, String> operators;
 
     public InvertedIndexBucket(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
         this.structureIndices = structureIndices;
         this.positionOffsets = positionOffsets;
         this.positionData = positionData;
-        this.operatorIndices = operatorIndices;
-        this.operatorData = operatorData;
+        if (operatorIndices.length > 0) {
+            this.operators = new HashMap<>();
+            for (int i = 0; i < operatorIndices.length; i++) {
+                operators.put(operatorIndices[i], operatorData[i]);
+            }
+        } else {
+            this.operators = EMPTY_MAP;
+        }
 
         this.structurePointer = -1;
-        this.operatorPointer = 0;
-        syncOperatorState();
     }
 
     private void syncStructureState() {
+        if (structurePointer >= positionOffsets.length) {
+            throw new NoSuchElementException("No next structure");
+        }
         this.positionPointer = positionOffsets[structurePointer];
-        this.lastPosition = hasNextStructure() ? positionOffsets[structurePointer + 1] - 2 : positionOffsets.length - 2;
-    }
-
-    private void syncOperatorState() {
-        this.nextPositionWithOperator = hasOperator() ? operatorIndices[operatorPointer] : -1;
-    }
-
-    private boolean hasOperator() {
-        return operatorPointer < operatorIndices.length;
-    }
-
-    private boolean hasNextOperator() {
-        return operatorPointer + 1 < operatorIndices.length;
+        this.lastPosition = hasNextStructure() ? positionOffsets[structurePointer + 1] : positionData.length;
     }
 
     @Override
@@ -88,30 +97,16 @@ public class InvertedIndexBucket implements Bucket {
 
     @Override
     public void moveOccurrence() {
-        // if this position has 1 or 2 operators then the operatorPointer must be advanced
-        boolean operatorStateDirty = false;
-        if (positionPointer == operatorPointer) {
-            operatorPointer++;
-            operatorStateDirty = true;
-        }
-        if (positionPointer == operatorPointer || positionPointer + 1 == operatorPointer) {
-            operatorPointer++;
-            operatorStateDirty = true;
-        }
-        if (operatorStateDirty) {
-            syncOperatorState();
-        }
-
         positionPointer += 2;
-        if (positionPointer >= lastPosition) {
+        if (positionPointer > lastPosition) {
             throw new IllegalStateException("Can't move to occurrence in another structure without calling moveStructure() first");
         }
     }
 
     public int[] getOccurrencePositions() {
         int start = positionOffsets[structurePointer];
-        int end = lastPosition;
-        int[] out = new int[end - start + 1];
+        int end = lastPosition + 2;
+        int[] out = new int[(end - start) / 2];
         for (int i = 0; i < out.length; i++) {
             out[i] = start + i * 2;
         }
@@ -132,7 +127,7 @@ public class InvertedIndexBucket implements Bucket {
         return positionData[positionPointer];
     }
 
-    public int getIndex1(int i) {
+    public int getIndex(int i) {
         return positionData[i];
     }
 
@@ -141,48 +136,20 @@ public class InvertedIndexBucket implements Bucket {
         return positionData[positionPointer + 1];
     }
 
-    public int getIndex2(int i) {
-        return positionData[i];
-    }
-
     @Override
     public String getStructOperId1() {
-        if (positionPointer == nextPositionWithOperator) {
-            return operatorData[operatorPointer];
-        } else {
-            return DEFAULT_OPERATOR;
-        }
+        String oper = operators.get(positionPointer);
+        return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
     }
 
-    public String getStructOperId1(int i) {
-        // TODO consider map instead of bs, these arrays should be rather sparse though
-        int j = Arrays.binarySearch(operatorIndices, i);
-        if (j != -1) {
-            return operatorData[j];
-        } else {
-            return DEFAULT_OPERATOR;
-        }
+    public String getStructOperId(int i) {
+        String oper = operators.get(i);
+        return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
     }
 
     @Override
     public String getStructOperId2() {
-        // the first index has an operator, this one might too
-        if (positionPointer == nextPositionWithOperator && hasNextOperator() && positionPointer == operatorIndices[operatorPointer + 1]) {
-            return operatorData[operatorPointer + 1];
-        // the first index has no operator, the next operator occurs for the second index
-        } else if (positionPointer + 1 == nextPositionWithOperator) {
-            return operatorData[operatorPointer];
-        } else {
-            return DEFAULT_OPERATOR;
-        }
-    }
-
-    public String getStructOperId2(int i) {
-        int j = Arrays.binarySearch(operatorIndices, i);
-        if (j != -1) {
-            return operatorData[j];
-        } else {
-            return DEFAULT_OPERATOR;
-        }
+        String oper = operators.get(positionPointer + 1);
+        return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
     }
 }

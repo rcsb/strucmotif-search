@@ -69,9 +69,9 @@ public class InvertedIndexImpl implements InvertedIndex {
 
         try {
             Path path = getPath(residuePairDescriptor);
-            ResiduePairIdentifierBucket b = Bucket.merge(getBucket(residuePairDescriptor), bucket);
+            ResiduePairIdentifierBucket merged = Bucket.merge(getBucket(residuePairDescriptor), bucket);
 
-            try (ByteArrayOutputStream outputStream = BucketCodec.encode(b)) {
+            try (ByteArrayOutputStream outputStream = BucketCodec.encode(merged)) {
                 write(path, outputStream);
             }
         } catch (IOException e) {
@@ -92,10 +92,9 @@ public class InvertedIndexImpl implements InvertedIndex {
     public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            // TODO keep track of flip status - probably outside of here
             return BucketCodec.decode(inputStream);
         } catch (IOException e) {
-            return Bucket.EMPTY_BUCKET;
+            return InvertedIndexBucket.EMPTY_BUCKET;
         }
     }
 
@@ -121,7 +120,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
             return BucketCodec.decode(inputStream);
         } catch (IOException e) {
-            return Bucket.EMPTY_BUCKET;
+            return InvertedIndexBucket.EMPTY_BUCKET;
         }
     }
 

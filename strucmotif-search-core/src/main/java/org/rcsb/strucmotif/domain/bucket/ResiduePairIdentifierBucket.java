@@ -40,7 +40,6 @@ public class ResiduePairIdentifierBucket implements Bucket {
     public void moveStructure() {
         currentStructure = structureIterator.next();
         identifierIterator = currentStructure.getValue().iterator();
-        currentIdentifier = identifierIterator.next();
     }
 
     @Override

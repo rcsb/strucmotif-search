@@ -1,12 +1,10 @@
 package org.rcsb.strucmotif.domain.bucket;
 
-import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -69,9 +67,7 @@ public interface Bucket {
                 if (bucket instanceof ResiduePairIdentifierBucket) {
                     residuePairIdentifier = ((ResiduePairIdentifierBucket) bucket).getResiduePairIdentifier();
                 } else {
-                    IndexSelection indexSelection1 = new IndexSelection(bucket.getStructOperId1(), bucket.getIndex1());
-                    IndexSelection indexSelection2 = new IndexSelection(bucket.getStructOperId2(), bucket.getIndex2());
-                    residuePairIdentifier = new IndexSelectionResiduePairIdentifier(indexSelection1, indexSelection2);
+                    residuePairIdentifier = new InvertedIndexResiduePairIdentifier(bucket.getIndex1(), bucket.getIndex2(), bucket.getStructOperId1(), bucket.getStructOperId2());
                 }
                 identifiers.add(residuePairIdentifier);
             }
@@ -83,66 +79,4 @@ public interface Bucket {
         addAll(map, bucket, true, removals);
         return new ResiduePairIdentifierBucket(map);
     }
-
-    InvertedIndexBucket EMPTY_BUCKET = new InvertedIndexBucket(null, null, null, null, null) {
-        @Override
-        public Set<Integer> getStructureIndices() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public boolean hasNextStructure() {
-            return false;
-        }
-
-        @Override
-        public boolean hasNextOccurrence() {
-            return false;
-        }
-
-        @Override
-        public void moveStructure() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public void moveOccurrence() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int getStructureCount() {
-            return 0;
-        }
-
-        @Override
-        public int getResiduePairCount() {
-            return 0;
-        }
-
-        @Override
-        public int getStructureIndex() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int getIndex1() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public int getIndex2() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getStructOperId1() {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String getStructOperId2() {
-            throw new UnsupportedOperationException();
-        }
-    };
 }

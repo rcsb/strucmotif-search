@@ -1,7 +1,9 @@
 package org.rcsb.strucmotif.core;
 
+import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -20,11 +22,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The default strucmotif-search target assembler.
@@ -81,13 +84,17 @@ public class TargetAssemblerImpl implements TargetAssembler {
             ResiduePairDescriptor residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
-            threadPool.submit(() -> {
-                residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                        // create views on inverted index data
-                        .map(invertedIndex::select)
-                        .forEach(bucket -> consume(response, bucket, allowed, ignored));
-                return null;
-            }).get();
+            Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
+                    .flatMap(this::select)
+                    // if there is a whitelist, this entry has to occur therein
+                    .filter(pair -> allowed.isEmpty() || allowed.contains(pair.getFirst()))
+                    // cannot occur in blacklist
+                    .filter(pair -> !ignored.contains(pair.getFirst()))
+                    .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
+
+            // TODO try to avoid object creation
+            // TODO try to consume stream directly
+            consume(response, residuePairIdentifiers);
 
             logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",
                     response.getQuery().hashCode(),
@@ -108,28 +115,52 @@ public class TargetAssemblerImpl implements TargetAssembler {
         response.setNumberOfTargetStructures(structureCount);
     }
 
-    private void consume(MotifSearchResult response, InvertedIndexBucket bucket, Set<Integer> allowed, Set<Integer> ignored) {
-        boolean allowing = !allowed.isEmpty();
-        boolean ignoring = !ignored.isEmpty();
+    private static <T> T[] concat(T[] first, T[] second) {
+        T[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
+    }
 
+    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor) {
+        InvertedIndexBucket bucket = invertedIndex.select(descriptor);
+        @SuppressWarnings("unchecked")
+        Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
+
+        int i = 0;
+        while (bucket.hasNextStructure()) {
+            bucket.moveStructure();
+            int structureIndex = bucket.getStructureIndex();
+            int[] occurrencePositions = bucket.getOccurrencePositions();
+            InvertedIndexResiduePairIdentifier[] identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length];
+
+            for (int j = 0; j < occurrencePositions.length; j++) {
+                identifiers[j] = createResiduePairIdentifier(bucket, descriptor.isFlipped(), occurrencePositions[j]);
+            }
+
+            out[i] = new Pair<>(structureIndex, identifiers);
+            i++;
+        }
+
+        return Arrays.stream(out);
+    }
+
+    private InvertedIndexResiduePairIdentifier createResiduePairIdentifier(InvertedIndexBucket bucket, boolean flipped, int i) {
+        if (!flipped) {
+            return new InvertedIndexResiduePairIdentifier(bucket.getIndex(i), bucket.getIndex(i + 1), bucket.getStructOperId(i), bucket.getStructOperId(i + 1));
+        } else {
+            return new InvertedIndexResiduePairIdentifier(bucket.getIndex(i + 1), bucket.getIndex(i), bucket.getStructOperId(i + 1), bucket.getStructOperId(i));
+        }
+    }
+
+    private void consume(MotifSearchResult response, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
         Map<Integer, TargetStructure> targetStructures = response.getTargetStructures();
         QueryStructure queryStructure = response.getQuery().getQueryStructure();
-        Map<Integer, TargetStructure> processed = new HashMap<>();
 
         if (targetStructures == null) {
             // first generation: all the paths are valid
-            while (bucket.hasNextStructure()) {
-                bucket.moveStructure();
-                int structureIndex = bucket.getStructureIndex();
-                // filtering is enough at this point as it will affect all later operations accordingly
-                if ((ignoring && ignored.contains(structureIndex)) || (allowing && !allowed.contains(structureIndex))) {
-                    continue;
-                }
-                int[] occurrencePositions = bucket.getOccurrencePositions();
-                TargetStructure targetStructure = new TargetStructure(structureIndex, bucket, occurrencePositions);
-
-                processed.put(structureIndex, targetStructure);
-            }
+            response.setTargetStructures(data.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue()))));
         } else {
             // subsequent generations
             int pathGeneration = response.incrementAndGetPathGeneration();
@@ -141,26 +172,21 @@ public class TargetAssemblerImpl implements TargetAssembler {
                 overlapProfile[i] = Overlap.ofResiduePairIdentifiers((IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(i), (IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(pathGeneration));
             }
 
-            while (bucket.hasNextStructure()) {
-                bucket.moveStructure();
-                int structureIndex = bucket.getStructureIndex();
-                // no paths for this bucket
-                if (targetStructures.containsKey(structureIndex)) {
-                    continue;
-                }
-                TargetStructure targetStructure = targetStructures.get(structureIndex);
+            // focus on valid target structures as this set should be smaller
+            response.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
+                            .parallelStream()
+                            .filter(entry -> {
+                                InvertedIndexResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());
+                                // candidate must have valid path to extend from previous generation
+                                if (residuePairIdentifiers == null) {
+                                    return false;
+                                }
 
-                while (bucket.hasNextOccurrence()) {
-                    targetStructure.consume(...);
-                    bucket.moveOccurrence();
-                }
-
-                // TODO reject target structures if not expanded
-                // TODO prune target structures
-                processed.put(structureIndex, targetStructure);
-            }
+                                // append target structure by whatever the new target identifiers for this structure have to offer
+                                return entry.getValue().consume(residuePairIdentifiers, overlapProfile);
+                            })
+                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                    .get());
         }
-
-        response.setTargetStructures(processed);
     }
 }

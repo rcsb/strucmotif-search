@@ -82,6 +82,7 @@ public class ResiduePairIdentifierBucket implements Bucket {
         return currentIdentifier.getStructOperId2();
     }
 
+    @Override
     public ResiduePairIdentifier getResiduePairIdentifier() {
         return currentIdentifier;
     }

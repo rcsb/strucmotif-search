@@ -40,6 +40,8 @@ public interface Bucket {
 
     String getStructOperId2();
 
+    ResiduePairIdentifier getResiduePairIdentifier();
+
     static ResiduePairIdentifierBucket merge(Bucket bucket1, Bucket bucket2) {
         Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
         addAll(map, bucket1, false, null);
@@ -62,13 +64,7 @@ public interface Bucket {
             while (bucket.hasNextOccurrence()) {
                 bucket.moveOccurrence();
 
-                ResiduePairIdentifier residuePairIdentifier;
-                // if short-cut to pair-identifiers is available: use it
-                if (bucket instanceof ResiduePairIdentifierBucket) {
-                    residuePairIdentifier = ((ResiduePairIdentifierBucket) bucket).getResiduePairIdentifier();
-                } else {
-                    residuePairIdentifier = new InvertedIndexResiduePairIdentifier(bucket.getIndex1(), bucket.getIndex2(), bucket.getStructOperId1(), bucket.getStructOperId2());
-                }
+                ResiduePairIdentifier residuePairIdentifier = bucket.getResiduePairIdentifier();
                 identifiers.add(residuePairIdentifier);
             }
         }

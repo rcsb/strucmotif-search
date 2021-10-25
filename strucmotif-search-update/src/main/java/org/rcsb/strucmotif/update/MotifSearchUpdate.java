@@ -481,6 +481,5 @@ public class MotifSearchUpdate implements CommandLineRunner {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }
-
     }
 }

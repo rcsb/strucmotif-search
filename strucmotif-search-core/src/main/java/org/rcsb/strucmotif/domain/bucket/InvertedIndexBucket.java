@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.domain.bucket;
 
+import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -58,7 +61,7 @@ public class InvertedIndexBucket implements Bucket {
         if (structurePointer >= positionOffsets.length) {
             throw new NoSuchElementException("No next structure");
         }
-        this.positionPointer = positionOffsets[structurePointer];
+        this.positionPointer = positionOffsets[structurePointer] - 2;
         this.lastPosition = hasNextStructure() ? positionOffsets[structurePointer + 1] : positionData.length;
     }
 
@@ -92,7 +95,7 @@ public class InvertedIndexBucket implements Bucket {
 
     @Override
     public boolean hasNextOccurrence() {
-        return positionPointer + 2 <= lastPosition;
+        return positionPointer + 2 < lastPosition;
     }
 
     @Override
@@ -151,5 +154,10 @@ public class InvertedIndexBucket implements Bucket {
     public String getStructOperId2() {
         String oper = operators.get(positionPointer + 1);
         return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
+    }
+
+    @Override
+    public ResiduePairIdentifier getResiduePairIdentifier() {
+        return new InvertedIndexResiduePairIdentifier(getIndex1(), getIndex2(), getStructOperId1(), getStructOperId2());
     }
 }

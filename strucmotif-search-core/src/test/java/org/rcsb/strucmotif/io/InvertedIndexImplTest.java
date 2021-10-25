@@ -11,6 +11,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -43,13 +44,15 @@ public class InvertedIndexImplTest {
     @Test
     public void whenAccessingSpecificBin_thenObserveAssemblies() {
         InvertedIndexBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);
-        int all = 0;
+        int structures = 0;
+        int occurrences = 0;
         int nonIdentity = 0;
         while (bucket.hasNextStructure()) {
             bucket.moveStructure();
+            structures++;
             while (bucket.hasNextOccurrence()) {
                 bucket.moveOccurrence();
-                all++;
+                occurrences++;
                 if (!bucket.getStructOperId1().equals("1")) {
                     nonIdentity++;
                 }
@@ -58,7 +61,8 @@ public class InvertedIndexImplTest {
                 }
             }
         }
-        assertEquals(39, all);
+        assertEquals(13, structures);
+        assertEquals(39, occurrences);
         assertTrue(nonIdentity > 0);
     }
 }

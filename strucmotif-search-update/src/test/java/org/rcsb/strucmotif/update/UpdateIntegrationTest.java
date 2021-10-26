@@ -49,6 +49,7 @@ public class UpdateIntegrationTest {
     @BeforeEach
     public void setup() throws IOException {
         this.config = new MotifSearchConfig();
+        config.setUndefinedAssemblies(true);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
         Path indexPath = path.resolve("index");
         Files.createDirectories(indexPath);

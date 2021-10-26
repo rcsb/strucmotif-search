@@ -79,22 +79,30 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
         response.getTimings().pathsStart();
         // retrieve target identifiers per query motif descriptor
-        for (ResiduePairOccurrence residuePairOccurrence : queryStructure.getResiduePairOccurrences()) {
+        int steps = queryStructure.getResiduePairOccurrences().size();
+        for (int i = 0; i < steps; i++) {
             long s = System.nanoTime();
+            ResiduePairOccurrence residuePairOccurrence = queryStructure.getResiduePairOccurrences().get(i);
             ResiduePairDescriptor residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                    .flatMap(this::select)
-                    // if there is a whitelist, this entry has to occur therein
-                    .filter(pair -> allowed.isEmpty() || allowed.contains(pair.getFirst()))
-                    // cannot occur in blacklist
-                    .filter(pair -> !ignored.contains(pair.getFirst()))
+                    .flatMap(descriptor -> select(descriptor, allowed, ignored))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
 
             // TODO try to avoid object creation
             // TODO try to consume stream directly
             consume(response, residuePairIdentifiers);
+
+            // update allowed set for next iteration
+            if (i + 1 < steps) {
+                Set<Integer> keys = response.getTargetStructures().keySet();
+                if (i == 0 && allowed.isEmpty()) {
+                    allowed.addAll(keys);
+                } else {
+                    allowed.removeIf(v -> !keys.contains(v));
+                }
+            }
 
             logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",
                     response.getQuery().hashCode(),
@@ -121,7 +129,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return result;
     }
 
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor) {
+    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
         @SuppressWarnings("unchecked")
         Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
@@ -130,6 +138,16 @@ public class TargetAssemblerImpl implements TargetAssembler {
         while (bucket.hasNextStructure()) {
             bucket.moveStructure();
             int structureIndex = bucket.getStructureIndex();
+
+            // if there is a whitelist, this entry has to occur therein
+            if (!allowed.isEmpty() && !allowed.contains(structureIndex)) {
+                continue;
+            }
+            // cannot occur in blacklist
+            if (ignored.contains(structureIndex)) {
+                continue;
+            }
+
             int[] occurrencePositions = bucket.getOccurrencePositions();
             InvertedIndexResiduePairIdentifier[] identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length];
 
@@ -141,7 +159,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             i++;
         }
 
-        return Arrays.stream(out);
+        return Arrays.stream(out).limit(i);
     }
 
     private InvertedIndexResiduePairIdentifier createResiduePairIdentifier(InvertedIndexBucket bucket, boolean flipped, int i) {

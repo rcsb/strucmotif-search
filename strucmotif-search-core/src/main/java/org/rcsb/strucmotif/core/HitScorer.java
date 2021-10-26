@@ -37,6 +37,14 @@ public class HitScorer {
     }
 
     /**
+     * The collection of residues that potential hits are aligned to.
+     * @return all manifested residues of the query motif
+     */
+    public List<Map<LabelAtomId, float[]>> getQueryResidues() {
+        return queryResidues;
+    }
+
+    /**
      * Align a set of residues to the reference.
      * @param targetResidues collection of residues
      * @return an {@link AlignmentResult}

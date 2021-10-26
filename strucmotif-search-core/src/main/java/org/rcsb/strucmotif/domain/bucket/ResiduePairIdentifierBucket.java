@@ -7,9 +7,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Represents a bucket that was created by the update process.
+ */
 public class ResiduePairIdentifierBucket implements Bucket {
     private final Map<Integer, Collection<ResiduePairIdentifier>> data;
-    private final Iterator<Map.Entry<Integer, Collection<ResiduePairIdentifier>>> structureIterator;
+    private Iterator<Map.Entry<Integer, Collection<ResiduePairIdentifier>>> structureIterator;
     private final int residuePairCount;
     private Map.Entry<Integer, Collection<ResiduePairIdentifier>> currentStructure;
     private Iterator<ResiduePairIdentifier> identifierIterator;
@@ -85,5 +88,10 @@ public class ResiduePairIdentifierBucket implements Bucket {
     @Override
     public ResiduePairIdentifier getResiduePairIdentifier() {
         return currentIdentifier;
+    }
+
+    @Override
+    public void reset() {
+        this.structureIterator = data.entrySet().iterator();
     }
 }

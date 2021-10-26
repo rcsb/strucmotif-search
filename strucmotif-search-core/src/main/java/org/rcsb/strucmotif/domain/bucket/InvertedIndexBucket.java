@@ -12,9 +12,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Gives access to the decoded data of an inverted index bucket.
+ */
 public class InvertedIndexBucket implements Bucket {
     private static final Map<Integer, String> EMPTY_MAP = Collections.emptyMap();
     private static final int[] EMPTY_ARRAY = new int[0];
+    /**
+     * An empty bucket which will refuse to iterate on structures or occurrences.
+     */
     public static final InvertedIndexBucket EMPTY_BUCKET = new InvertedIndexBucket(EMPTY_ARRAY, EMPTY_ARRAY, EMPTY_ARRAY, EMPTY_ARRAY, new String[0]) {
         @Override
         public boolean hasNextStructure() {
@@ -159,5 +165,10 @@ public class InvertedIndexBucket implements Bucket {
     @Override
     public ResiduePairIdentifier getResiduePairIdentifier() {
         return new InvertedIndexResiduePairIdentifier(getIndex1(), getIndex2(), getStructOperId1(), getStructOperId2());
+    }
+
+    @Override
+    public void reset() {
+        this.structurePointer = -1;
     }
 }

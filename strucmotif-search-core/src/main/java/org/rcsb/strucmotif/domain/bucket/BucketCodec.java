@@ -9,7 +9,16 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Serializes and deserializes buckets with a custom MessagePack encoding.
+ */
 public class BucketCodec {
+    /**
+     * Read the content of a {@link InvertedIndexBucket} from a stream.
+     * @param inputStream source data
+     * @return the corresponding bucket
+     * @throws IOException if reading/decoding fails
+     */
     public static InvertedIndexBucket decode(InputStream inputStream) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(inputStream);
         InvertedIndexBucket bucket = decodeInternal(dataInputStream);
@@ -129,6 +138,12 @@ public class BucketCodec {
         return (int) (inputStream.readInt() & 0xFFFFFFFFL);
     }
 
+    /**
+     * Encode a bucket as stream of bytes in MessagePack format.
+     * @param bucket the source
+     * @return the corresponding byte stream
+     * @throws IOException if writing/encoding fails
+     */
     public static ByteArrayOutputStream encode(ResiduePairIdentifierBucket bucket) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);

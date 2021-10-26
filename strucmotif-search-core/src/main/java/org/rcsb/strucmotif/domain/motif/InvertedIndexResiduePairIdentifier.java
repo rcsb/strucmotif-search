@@ -11,6 +11,13 @@ public class InvertedIndexResiduePairIdentifier implements ResiduePairIdentifier
     private final String structOperId1;
     private final String structOperId2;
 
+    /**
+     * Construct an identifier from 2 indices and 2 structOperIds.
+     * @param index1 the first index
+     * @param index2 the second index
+     * @param structOperId1 the first operator
+     * @param structOperId2 the second operator
+     */
     public InvertedIndexResiduePairIdentifier(int index1, int index2, String structOperId1, String structOperId2) {
         this.index1 = index1;
         this.index2 = index2;

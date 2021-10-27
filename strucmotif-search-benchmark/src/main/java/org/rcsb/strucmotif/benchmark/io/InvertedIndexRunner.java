@@ -34,8 +34,23 @@ public class InvertedIndexRunner {
         }
 
         System.out.println();
-        System.out.println("Average throughput:");
+        System.out.println("Average time:");
         System.out.println(times.stream().mapToLong(l -> l).average().orElseThrow());
+
+        //2021-10-27 14:39:15.286 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will not be gzipped - extension: .msg
+        //Read 616421 elements in 216 ms
+        //Read 497808 elements in 118 ms
+        //Read 481498 elements in 110 ms
+        //Read 534879 elements in 114 ms
+        //Read 640341 elements in 126 ms
+        //Read 733743 elements in 139 ms
+        //Read 876002 elements in 168 ms
+        //Read 707873 elements in 143 ms
+        //Read 765972 elements in 158 ms
+        //Read 645154 elements in 121 ms
+        //
+        //Average time:
+        //141.3
 
         //2021-10-04 11:11:01.270 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will be gzipped - extension: .msg.gz
         //Read 552360 elements in 3534 ms
@@ -49,7 +64,7 @@ public class InvertedIndexRunner {
         //Read 753067 elements in 5831 ms
         //Read 516964 elements in 3981 ms
         //
-        //Average throughput:
+        //Average time:
         //4526.5
 
         //2021-10-04 11:18:54.911 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will not be gzipped - extension: .msg
@@ -64,7 +79,7 @@ public class InvertedIndexRunner {
         //Read 572425 elements in 243 ms
         //Read 520086 elements in 159 ms
         //
-        //Average throughput:
+        //Average time:
         //227.7
     }
 }

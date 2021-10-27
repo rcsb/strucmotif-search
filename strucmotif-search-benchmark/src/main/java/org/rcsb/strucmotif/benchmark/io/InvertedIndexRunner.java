@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.benchmark.io;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ public class InvertedIndexRunner {
     public static void main(String[] args) {
         MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
 
-        InvertedIndexImpl invertedIndex = new InvertedIndexImpl(motifSearchConfig);
+        InvertedIndex invertedIndex = new InvertedIndexImpl(motifSearchConfig);
         List<ResiduePairDescriptor> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());
         List<Long> times = new ArrayList<>();
 

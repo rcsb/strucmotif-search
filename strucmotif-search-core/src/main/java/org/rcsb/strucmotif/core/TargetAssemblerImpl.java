@@ -109,6 +109,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     residuePairDescriptor,
                     (System.nanoTime() - s) / 1000 / 1000,
                     response.getTargetStructures().size());
+
+            if (i > 0 && i + 1 < steps && allowed.isEmpty()) {
+                logger.info("[{}] No more valid extensions - terminating early", response.getQuery().hashCode());
+                break;
+            }
         }
         response.getTimings().pathsStop();
 

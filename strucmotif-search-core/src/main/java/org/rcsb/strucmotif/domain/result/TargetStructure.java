@@ -83,7 +83,6 @@ public class TargetStructure {
      */
     public boolean consume(InvertedIndexResiduePairIdentifier[] residuePairIdentifiers, Overlap[] overlapProfile) {
         List<InvertedIndexResiduePairIdentifier[]> extendedPaths = new ArrayList<>();
-        System.out.println();
 
         // for each possibly extending candidate:
         for (InvertedIndexResiduePairIdentifier candidateResiduePairIdentifier : residuePairIdentifiers) {

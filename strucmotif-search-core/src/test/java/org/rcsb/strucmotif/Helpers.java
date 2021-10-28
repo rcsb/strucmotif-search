@@ -46,6 +46,8 @@ public class Helpers {
         Path projectRoot = Paths.get("/Users/sebastian/IdeaProjects/strucmotif-search/");
         Path resourcePath = projectRoot.resolve("strucmotif-search-core").resolve("src").resolve("test").resolve("resources");
 
+        Files.copy(dataRoot.resolve(MotifSearchConfig.STATE_KNOWN_LIST), resourcePath.resolve(MotifSearchConfig.STATE_KNOWN_LIST), StandardCopyOption.REPLACE_EXISTING);
+
         Files.list(dataRoot.resolve(MotifSearchConfig.RENUMBERED_DIRECTORY))
                 .filter(p -> p.toFile().getName().endsWith(".bcif.gz"))
                 .forEach(source -> {

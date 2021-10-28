@@ -1,12 +1,17 @@
 package org.rcsb.strucmotif.domain.bucket;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,6 +29,65 @@ public class BucketCodec {
         InvertedIndexBucket bucket = decodeInternal(dataInputStream);
         dataInputStream.close();
         return bucket;
+    }
+
+    public static void main(String[] args) throws IOException {
+        long s1 = System.nanoTime();
+        Path msg = Paths.get("/opt/data-test/index/AL/AL-4-5-4.msg");
+        InputStream inputStream = new BufferedInputStream(Files.newInputStream(msg), 65536);
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        int[] structureIndices = decodeIntArray(dataInputStream);
+        int[] positionOffsets = decodeIntArray(dataInputStream);
+        int[] positionData = decodeIntArray(dataInputStream);
+        int[] operatorIndices = decodeIntArray(dataInputStream);
+        String[] operatorData = decodeStringArray(dataInputStream);
+        System.out.println("Decoded MessagePack in " + (System.nanoTime() - s1) / 1000 / 1000 + " ms");
+        System.out.println(structureIndices.length + " " + positionOffsets.length + " " + positionData.length + " " + operatorIndices.length + " " + operatorData.length);
+        System.out.println("MessagePack size: " + Files.size(msg) / 1024 + " kb");
+
+        long s3 = System.nanoTime();
+        ByteArrayOutputStream outputStream = BucketCodec.encode(new InvertedIndexBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData));
+        outputStream.toByteArray();
+        System.out.println("Encoded MessagePack in " + (System.nanoTime() - s3) / 1000 / 1000 + " ms");
+
+        long s4 = System.nanoTime();
+        ColferBucket colferBucket = new ColferBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        Path colf = Paths.get("/Users/sebastian/Downloads/test.colf");
+        colferBucket.marshal(byteArrayOutputStream);
+        byteArrayOutputStream.flush();
+        byteArrayOutputStream.close();
+        byte[] bytes = byteArrayOutputStream.toByteArray();
+        Files.write(colf, bytes);
+        System.out.println("Encoded Colfer in " + (System.nanoTime() - s4) / 1000 / 1000 + " ms");
+
+        long s2 = System.nanoTime();
+        inputStream = new BufferedInputStream(Files.newInputStream(colf), 65536);
+        colferBucket.unmarshal(inputStream.readAllBytes());
+        System.out.println("Decoded Colfer in " + (System.nanoTime() - s2) / 1000 / 1000 + " ms");
+        System.out.println(colferBucket.getStructureIndices().length + " " + colferBucket.getPositionOffsets().length + " " + colferBucket.getPositionData().length + " " + colferBucket.getOperatorIndices().length + " " + colferBucket.getOperatorData().length);
+        System.out.println("Colfer size: " + Files.size(colf) / 1024 + " kb");
+
+        System.out.println(Arrays.equals(structureIndices, colferBucket.getStructureIndices()));
+        System.out.println(Arrays.equals(positionOffsets, colferBucket.getPositionOffsets()));
+        System.out.println(Arrays.equals(positionData, colferBucket.getPositionData()));
+        System.out.println(Arrays.equals(operatorIndices, colferBucket.getOperatorIndices()));
+        System.out.println(Arrays.equals(operatorData, colferBucket.getOperatorData()));
+
+        //Decoded MessagePack in 174 ms
+        //125773 125773 2247458 75997 75997
+        //MessagePack size: 7391 kb
+        //Encoded MessagePack in 292 ms
+        //Encoded Colfer in 80 ms
+        //Decoded Colfer in 32 ms
+        //125773 125773 2247458 75997 75997
+        //Colfer size: 5609 kb
+        //true
+        //true
+        //true
+        //true
+        //true
     }
 
     private static InvertedIndexBucket decodeInternal(DataInputStream inputStream) throws IOException {
@@ -144,7 +208,7 @@ public class BucketCodec {
      * @return the corresponding byte stream
      * @throws IOException if writing/encoding fails
      */
-    public static ByteArrayOutputStream encode(ResiduePairIdentifierBucket bucket) throws IOException {
+    public static ByteArrayOutputStream encode(Bucket bucket) throws IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
         encodeInternal(bucket, dataOutputStream);

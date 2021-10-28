@@ -147,6 +147,7 @@ public class MotifSearchIntegrationTest {
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
                 .buildParameters()
+                .whitelist(Set.of("2MNR")) // TODO remove
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));

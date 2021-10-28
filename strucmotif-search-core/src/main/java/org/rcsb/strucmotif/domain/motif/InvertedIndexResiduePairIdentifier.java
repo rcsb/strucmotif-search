@@ -54,4 +54,9 @@ public class InvertedIndexResiduePairIdentifier implements ResiduePairIdentifier
     public IndexSelection getIndexSelection2() {
         return new IndexSelection(getStructOperId2(), getIndex2());
     }
+
+    @Override
+    public String toString() {
+        return structOperId1 + "-" + index1 + " & " + structOperId2 + "-" + index2;
+    }
 }

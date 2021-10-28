@@ -83,6 +83,7 @@ public class TargetStructure {
      */
     public boolean consume(InvertedIndexResiduePairIdentifier[] residuePairIdentifiers, Overlap[] overlapProfile) {
         List<InvertedIndexResiduePairIdentifier[]> extendedPaths = new ArrayList<>();
+        System.out.println();
 
         // for each possibly extending candidate:
         for (InvertedIndexResiduePairIdentifier candidateResiduePairIdentifier : residuePairIdentifiers) {
@@ -157,7 +158,6 @@ public class TargetStructure {
                     .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
                     .map(assemblyMap::get)
                     .flatMap(Collection::stream)
-                    .peek(System.out::println)
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         }
 

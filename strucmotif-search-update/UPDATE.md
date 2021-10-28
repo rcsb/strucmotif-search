@@ -54,6 +54,7 @@ might require a full load.
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `1` |
+| `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
 | `inverted-index-gzip` | Gzip index files? | `false` |
 | `number-threads` | Number of worker threads | available processors |
 | `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |

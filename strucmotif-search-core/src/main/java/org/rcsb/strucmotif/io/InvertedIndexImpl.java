@@ -1,8 +1,11 @@
 package org.rcsb.strucmotif.io;
 
+import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
-import org.rcsb.strucmotif.domain.bucket.BucketCodec;
+import org.rcsb.strucmotif.io.codec.BucketCodec;
+import org.rcsb.strucmotif.io.codec.ColferCodec;
+import org.rcsb.strucmotif.io.codec.MessagePackCodec;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -46,6 +49,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     private final Path basePath;
     private final boolean gzipped;
     private final String extension;
+    private final BucketCodec bucketCodec;
     private boolean paths;
 
     /**
@@ -55,7 +59,21 @@ public class InvertedIndexImpl implements InvertedIndex {
     public InvertedIndexImpl(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
         this.gzipped = motifSearchConfig.isInvertedIndexGzip();
-        this.extension = ".msg" + (gzipped ? ".gz" : "");
+        String extension;
+        InvertedIndexBackend backend = motifSearchConfig.getInvertedIndexBackend();
+        switch (backend) {
+            case COLFER:
+                extension = ".colf";
+                bucketCodec = new ColferCodec();
+                break;
+            case MESSAGE_PACK:
+                extension = ".msg";
+                bucketCodec = new MessagePackCodec();
+                break;
+            default:
+                throw new IllegalArgumentException("No backend registered for " + backend);
+        }
+        this.extension = extension + (gzipped ? ".gz" : "");
         logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);
         this.paths = false;
     }
@@ -71,7 +89,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             Path path = getPath(residuePairDescriptor);
             ResiduePairIdentifierBucket merged = Bucket.merge(getBucket(residuePairDescriptor), bucket);
 
-            try (ByteArrayOutputStream outputStream = BucketCodec.encode(merged)) {
+            try (ByteArrayOutputStream outputStream = bucketCodec.encode(merged)) {
                 write(path, outputStream);
             }
         } catch (IOException e) {
@@ -92,7 +110,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            return BucketCodec.decode(inputStream);
+            return bucketCodec.decode(inputStream);
         } catch (IOException e) {
             return InvertedIndexBucket.EMPTY_BUCKET;
         }
@@ -118,7 +136,7 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     private InvertedIndexBucket getBucket(ResiduePairDescriptor residuePairDescriptor) {
         try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
-            return BucketCodec.decode(inputStream);
+            return bucketCodec.decode(inputStream);
         } catch (IOException e) {
             return InvertedIndexBucket.EMPTY_BUCKET;
         }
@@ -172,7 +190,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             ResiduePairIdentifierBucket filteredBucket = Bucket.removeByKey(bucket, removals);
 
             // serialize message
-            try (ByteArrayOutputStream outputStream = BucketCodec.encode(filteredBucket)) {
+            try (ByteArrayOutputStream outputStream = bucketCodec.encode(filteredBucket)) {
                 Path path = getPath(residuePairDescriptor);
                 write(path, outputStream);
             }

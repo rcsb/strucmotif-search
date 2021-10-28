@@ -93,6 +93,10 @@ public class MotifSearchConfig {
      */
     private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.NONE;
     /**
+     * How is inverted index data stored?
+     */
+    private InvertedIndexBackend invertedIndexBackend = InvertedIndexBackend.COLFER;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -414,5 +418,21 @@ public class MotifSearchConfig {
      */
     public void setResidueQualityStrategy(ResidueQualityStrategy residueQualityStrategy) {
         this.residueQualityStrategy = residueQualityStrategy;
+    }
+
+    /**
+     * How is inverted index data stored?
+     * @return current InvertedIndexBackend
+     */
+    public InvertedIndexBackend getInvertedIndexBackend() {
+        return invertedIndexBackend;
+    }
+
+    /**
+     * Update how inverted index data is stored.
+     * @param invertedIndexBackend the implementation
+     */
+    public void setInvertedIndexBackend(InvertedIndexBackend invertedIndexBackend) {
+        this.invertedIndexBackend = invertedIndexBackend;
     }
 }

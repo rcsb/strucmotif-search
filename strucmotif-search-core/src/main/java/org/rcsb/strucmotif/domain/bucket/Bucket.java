@@ -5,6 +5,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,5 +142,84 @@ public interface Bucket {
         Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
         addAll(map, bucket, true, removals);
         return new ResiduePairIdentifierBucket(map);
+    }
+
+    class BucketArrays {
+        private final int[] structureIndices;
+        private final int[] positionOffsets;
+        private final int[] positionData;
+        private final int[] operatorIndices;
+        private final String[] operatorData;
+
+        BucketArrays(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
+            this.structureIndices = structureIndices;
+            this.positionOffsets = positionOffsets;
+            this.positionData = positionData;
+            this.operatorIndices = operatorIndices;
+            this.operatorData = operatorData;
+        }
+
+        public int[] getStructureIndices() {
+            return structureIndices;
+        }
+
+        public int[] getPositionOffsets() {
+            return positionOffsets;
+        }
+
+        public int[] getPositionData() {
+            return positionData;
+        }
+
+        public int[] getOperatorIndices() {
+            return operatorIndices;
+        }
+
+        public String[] getOperatorData() {
+            return operatorData;
+        }
+    }
+
+    static BucketArrays toArrays(Bucket bucket) {
+        int structureCount = bucket.getStructureCount();
+        int[] structureIndices = new int[structureCount];
+        int[] positionOffsets = new int[structureCount];
+        int[] positionData = new int[bucket.getResiduePairCount() * 2];
+        List<Integer> operatorIndicesList = new ArrayList<>();
+        List<String> operatorDataList = new ArrayList<>();
+
+        int structurePointer = 0;
+        int positionPointer = 0;
+        while (bucket.hasNextStructure()) {
+            bucket.moveStructure();
+            structureIndices[structurePointer] = bucket.getStructureIndex();
+            positionOffsets[structurePointer] = positionPointer;
+
+            while (bucket.hasNextOccurrence()) {
+                bucket.moveOccurrence();
+                positionData[positionPointer] = bucket.getIndex1();
+                positionData[positionPointer + 1] = bucket.getIndex2();
+
+                String structOperId1 = bucket.getStructOperId1();
+                String structOperId2 = bucket.getStructOperId2();
+                if (!structOperId1.equals(Bucket.DEFAULT_OPERATOR)) {
+                    operatorIndicesList.add(positionPointer);
+                    operatorDataList.add(structOperId1);
+                }
+                if (!structOperId2.equals(Bucket.DEFAULT_OPERATOR)) {
+                    operatorIndicesList.add(positionPointer + 1);
+                    operatorDataList.add(structOperId2);
+                }
+
+                positionPointer += 2;
+            }
+
+            structurePointer++;
+        }
+
+        int[] operatorIndices = operatorIndicesList.stream().mapToInt(Integer::intValue).toArray();
+        String[] operatorData = operatorDataList.toArray(String[]::new);
+
+        return new BucketArrays(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
     }
 }

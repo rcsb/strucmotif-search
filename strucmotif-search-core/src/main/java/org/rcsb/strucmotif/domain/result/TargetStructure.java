@@ -157,6 +157,7 @@ public class TargetStructure {
                     .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
                     .map(assemblyMap::get)
                     .flatMap(Collection::stream)
+                    .peek(System.out::println)
                     .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         }
 

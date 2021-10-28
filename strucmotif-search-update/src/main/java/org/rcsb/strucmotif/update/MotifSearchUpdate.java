@@ -66,7 +66,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        SpringApplication.run(MotifSearchUpdate.class, args);
+        SpringApplication.run(MotifSearchUpdate.class, "ADD", "3CB3",  "2HNE",  "3OPS",  "3D47",  "3SN1",  "4KEM",  "3CK5",  "3UGV",  "3QPE",  "1DTN",  "4IP4",  "4DWD",  "4M6U",  "3N4F",  "2HXU",  "3BJS",  "2MNR",  "1YEY",  "2NQL",  "3D46",  "2OO6",  "2P3Z",  "2PPG",  "2OG9",  "3TOY",  "3V5F",  "3SN0",  "4H83",  "4IP5",  "3OZM",  "3TCS",  "4A35",  "2QGY",  "2GGE",  "5XD7",  "2DW6",  "3BOX",  "6VIM",  "2HZG",  "3N4E",  "2GDQ",  "4X2P",  "3UXL",  "3H12",  "3GO2",  "2PP0",  "4FP1",  "4HPN",  "3T9P",  "3OP2",  "3TJ4",  "4JN7",  "3RR1",  "3MSY",  "3P3B",  "4JN8",  "3EKG",  "1MRA",  "2GSH",  "3TTE",  "1TZZ",  "2QQ6",  "5XD8",  "3OZY",  "3U4F",  "3FXG",  "4H1Z",  "3SJN",  "4H19",  "2PP3",  "3T8Q",  "2P0I",  "2I5Q",  "2HXT",  "3RRA",  "3CYJ",  "3V5C",  "1MDL",  "1MNS",  "4GGB",  "2OZ3",  "4DN1",  "2POZ",  "5OLC",  "3SN4",  "4HNC",  "1MDR",  "3NO1",  "2DW7",  "3VCC",  "3CXO",  "3UXK",  "2PP1",  "2OVL");
     }
 
     private final StateRepository stateRepository;

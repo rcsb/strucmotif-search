@@ -20,7 +20,7 @@ public class MotifSearchConfig {
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */
-    private String rootPath = "/opt/data-test/";
+    private String rootPath = "/opt/data-2/";
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
      * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the

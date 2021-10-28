@@ -61,7 +61,7 @@ public class MotifSearchIntegrationTest {
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("index/" + residuePairDescriptor + ".msg");
+                        .getResourceAsStream("index/" + residuePairDescriptor + ".colf");
                 if (inputStream == null) {
                     throw new IOException();
                 }

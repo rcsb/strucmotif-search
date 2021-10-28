@@ -6,6 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,10 +57,9 @@ public class BucketCodec {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         Path colf = Paths.get("/Users/sebastian/Downloads/test.colf");
         colferBucket.marshal(byteArrayOutputStream);
-        byteArrayOutputStream.flush();
-        byteArrayOutputStream.close();
-        byte[] bytes = byteArrayOutputStream.toByteArray();
-        Files.write(colf, bytes);
+        try (OutputStream os = Files.newOutputStream(colf)) {
+            byteArrayOutputStream.writeTo(os);
+        }
         System.out.println("Encoded Colfer in " + (System.nanoTime() - s4) / 1000 / 1000 + " ms");
 
         long s2 = System.nanoTime();

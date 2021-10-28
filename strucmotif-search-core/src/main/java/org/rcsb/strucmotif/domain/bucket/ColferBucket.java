@@ -72,42 +72,44 @@ public class ColferBucket {
 
         if (operatorData.length != 0) {
             out.write(4);
-            String[] a = operatorData;
-
-            int x = a.length;
-
-            while (x > 0x7f) {
-                out.write(x | 0x80);
-                x >>>= 7;
-            }
-            out.write(x);
-
-            for (int ai = 0; ai < a.length; ai++) {
-                String s = a[ai];
-                if (s == null) {
-                    s = "";
-                    a[ai] = s;
-                }
-
-                int length = s.length();
-                while (length > 0x7f) {
-                    out.write(length | 0x80);
-                    length >>>= 7;
-                }
-                out.write(length);
-
-                for (int sIndex = 0, sLength = s.length(); sIndex < sLength; sIndex++) {
-                    char c = s.charAt(sIndex);
-                    if (c < '\u0080') {
-                        out.write(c);
-                    } else {
-                        throw new IllegalArgumentException("Non-ASCII characters aren't supported");
-                    }
-                }
-            }
+            writeStringArray(out, operatorData);
         }
 
         out.write(0x7f);
+    }
+
+    private void writeStringArray(OutputStream out, String[] data) throws IOException {
+        int x = data.length;
+
+        while (x > 0x7f) {
+            out.write(x | 0x80);
+            x >>>= 7;
+        }
+        out.write(x);
+
+        for (int ai = 0; ai < data.length; ai++) {
+            String s = data[ai];
+            if (s == null) {
+                s = "";
+                data[ai] = s;
+            }
+
+            int length = s.length();
+            while (length > 0x7f) {
+                out.write(length | 0x80);
+                length >>>= 7;
+            }
+            out.write(length);
+
+            for (int sIndex = 0, sLength = s.length(); sIndex < sLength; sIndex++) {
+                char c = s.charAt(sIndex);
+                if (c < '\u0080') {
+                    out.write(c);
+                } else {
+                    throw new IllegalArgumentException("Non-ASCII characters aren't supported");
+                }
+            }
+        }
     }
 
     private void writeIntArray(OutputStream out, int[] data) throws IOException {
@@ -253,42 +255,22 @@ public class ColferBucket {
             throw new InputMismatchException("colfer: unknown header at byte " + (i - 1));
     }
 
-    /**
-     * Gets org.rcsb.strucmotif.model/test.bucket.structureIndices.
-     * @return the value.
-     */
     public int[] getStructureIndices() {
         return structureIndices;
     }
 
-    /**
-     * Gets org.rcsb.strucmotif.model/test.bucket.positionOffsets.
-     * @return the value.
-     */
     public int[] getPositionOffsets() {
         return positionOffsets;
     }
 
-    /**
-     * Gets org.rcsb.strucmotif.model/test.bucket.positionData.
-     * @return the value.
-     */
     public int[] getPositionData() {
         return positionData;
     }
 
-    /**
-     * Gets org.rcsb.strucmotif.model/test.bucket.operatorIndices.
-     * @return the value.
-     */
     public int[] getOperatorIndices() {
         return operatorIndices;
     }
 
-    /**
-     * Gets org.rcsb.strucmotif.model/test.bucket.operatorData.
-     * @return the value.
-     */
     public String[] getOperatorData() {
         return operatorData;
     }

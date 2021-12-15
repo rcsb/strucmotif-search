@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.12.6
+-------------
+### General
+- Adds some docs
+
 strucmotif-search 0.12.5
 -------------
 ### General

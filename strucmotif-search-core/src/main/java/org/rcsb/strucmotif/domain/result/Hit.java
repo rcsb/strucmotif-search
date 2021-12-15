@@ -40,14 +40,26 @@ public class Hit {
         this.transformation = transformation;
     }
 
+    /**
+     * The structure identifier of this hit.
+     * @return a String
+     */
     public String getStructureIdentifier() {
         return structureIdentifier;
     }
 
+    /**
+     * The assembly identifier of this hit.
+     * @return a String, '0' if no assembly information was present and undefined assemblies are allowed
+     */
     public String getAssemblyIdentifier() {
         return assemblyIdentifier;
     }
 
+    /**
+     * Get all label selections of this hit.
+     * @return a collection of label selections
+     */
     public List<LabelSelection> getLabelSelections() {
         return labelSelections;
     }

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.12.7
+-------------
+### General
+- Downgrade some dependencies to address staging errors
+
 strucmotif-search 0.12.6
 -------------
 ### General

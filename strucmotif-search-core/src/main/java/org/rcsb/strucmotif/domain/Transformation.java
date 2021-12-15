@@ -17,6 +17,9 @@ public class Transformation {
             { 0, 0, 1, 0 },
             { 0, 0, 0, 1 }
     };
+    /**
+     * Neutral/identity transformation.
+     */
     public static final Transformation IDENTITY_TRANSFORMATION = new Transformation(IDENTITY_MATRIX_4D) {
         @Override
         public void transform(float[] out, float[] v) {
@@ -33,6 +36,11 @@ public class Transformation {
         this.transformation = transformation;
     }
 
+    /**
+     * Create a Transformation from a nested float array.
+     * @param transformation raw values
+     * @return 4x4 matrix
+     */
     public static Transformation of(float[][] transformation) {
         if (Arrays.deepEquals(IDENTITY_MATRIX_4D, transformation)) {
             return IDENTITY_TRANSFORMATION;

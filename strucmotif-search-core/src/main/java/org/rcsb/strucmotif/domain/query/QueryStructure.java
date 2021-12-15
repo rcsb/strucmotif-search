@@ -139,6 +139,10 @@ public class QueryStructure {
                 sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection2());
     }
 
+    /**
+     * Get the identifier of this query structure.
+     * @return a String
+     */
     public String getStructureIdentifier() {
         return structureIdentifier;
     }
@@ -175,6 +179,10 @@ public class QueryStructure {
         return residuePairDescriptors;
     }
 
+    /**
+     * Get all residues of this query structure.
+     * @return a collection of residues
+     */
     public List<Map<LabelAtomId, float[]>> getResidues() {
         return residues;
     }

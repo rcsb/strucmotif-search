@@ -12,6 +12,21 @@ Unreleased
 - make `StructureWriterImpl` configurable
 - support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein) 
 
+strucmotif-search 0.12.6
+-------------
+### General
+- Adds some docs
+
+strucmotif-search 0.12.5
+-------------
+### General
+- Update other dependency
+
+strucmotif-search 0.12.4
+-------------
+### Bug fix
+- Update log4j dependency
+
 strucmotif-search 0.12.3
 -------------
 ### Bug fix

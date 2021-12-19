@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.12.8
+-------------
+### Bug fix
+- Update log4j dependency
+
 strucmotif-search 0.12.7
 -------------
 ### General

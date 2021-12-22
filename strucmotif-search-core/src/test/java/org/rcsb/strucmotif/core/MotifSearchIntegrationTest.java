@@ -205,4 +205,45 @@ public class MotifSearchIntegrationTest {
         MotifSearchQuery motifSearchQuery = queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery();
         assertEquals(6, motifSearchQuery.getQueryStructure().getResidues().size(), "not all residues present");
     }
+
+    /**
+     * Test subset queries for PDB entries, models, or both.
+     */
+    @Test
+    public void whenSearchingForSubset_thenCriteriaHonored() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("4oog"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("C", "1", 42),
+                new LabelSelection("C", "1", 45),
+                new LabelSelection("C", "1", 49),
+                new LabelSelection("C", "2", 42),
+                new LabelSelection("C", "2", 45),
+                new LabelSelection("C", "2", 49));
+
+        int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters()
+                .targetList(TargetList.ALL)
+                .buildQuery()
+                .run()
+                .getHits()
+                .size();
+        assertTrue(fullQueryCount > 0);
+
+        int modelQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters()
+                .targetList(TargetList.MODELS)
+                .buildQuery()
+                .run()
+                .getHits()
+                .size();
+        assertEquals(0, modelQueryCount);
+
+        int pdbQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters()
+                .targetList(TargetList.PDB)
+                .buildQuery()
+                .run()
+                .getHits()
+                .size();
+        assertEquals(fullQueryCount, pdbQueryCount);
+    }
 }

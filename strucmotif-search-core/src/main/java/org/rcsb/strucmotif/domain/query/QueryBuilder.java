@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.config.MotifPruningStrategy;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.TargetList;
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
@@ -268,6 +269,7 @@ public class QueryBuilder {
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<String> whitelist;
         private final Set<String> blacklist;
+        private TargetList targetList;
 
         OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, Parameters parameters) {
             this.structureIdentifier = structureIdentifier;
@@ -278,6 +280,7 @@ public class QueryBuilder {
             this.exchanges = new HashMap<>();
             this.whitelist = new HashSet<>();
             this.blacklist = new HashSet<>();
+            this.targetList = TargetList.ALL;
         }
 
         /**
@@ -313,6 +316,16 @@ public class QueryBuilder {
         }
 
         /**
+         * Narrow down a search to a specific target set.
+         * @param targetList the target list of choice
+         * @return this builder
+         */
+        public OptionalStepBuilder targetList(TargetList targetList) {
+            this.targetList = targetList;
+            return this;
+        }
+
+        /**
          * Build the actual container.
          * @return the immutable instance of all query parameters
          */
@@ -326,6 +339,7 @@ public class QueryBuilder {
                     exchanges,
                     whitelist,
                     blacklist,
+                    targetList,
                     motifSearchConfig);
         }
     }

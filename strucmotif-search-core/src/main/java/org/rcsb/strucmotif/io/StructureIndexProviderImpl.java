@@ -74,7 +74,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     @Override
     public int selectOrMintStructureIndex(String structureIdentifier) {
         if (backward.containsKey(structureIdentifier)) {
-            return backward.get("No value for " + structureIdentifier);
+            return backward.get(structureIdentifier);
         }
 
         return nextStructureIndex();

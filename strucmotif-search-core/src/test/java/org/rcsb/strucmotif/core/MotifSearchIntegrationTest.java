@@ -212,13 +212,12 @@ public class MotifSearchIntegrationTest {
      */
     @Test
     public void whenSearchingForSubset_thenCriteriaHonored() {
-        Structure structure = structureReader.readFromInputStream(getOriginalBcif("4oog"));
-        List<LabelSelection> labelSelections = List.of(new LabelSelection("C", "1", 42),
-                new LabelSelection("C", "1", 45),
-                new LabelSelection("C", "1", 49),
-                new LabelSelection("C", "2", 42),
-                new LabelSelection("C", "2", 45),
-                new LabelSelection("C", "2", 49));
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 162), // K
+                new LabelSelection("A", "1", 193), // D
+                new LabelSelection("A", "1", 219), // E
+                new LabelSelection("A", "1", 245), // E
+                new LabelSelection("A", "1", 295)); // H
 
         int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()

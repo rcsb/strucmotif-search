@@ -60,6 +60,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         int backboneDistanceTolerance = parameters.getBackboneDistanceTolerance();
         int sideChainDistanceTolerance = parameters.getSideChainDistanceTolerance();
         int angleTolerance = parameters.getAngleTolerance();
+
         Map<LabelSelection, Set<ResidueType>> labelSelectionExchanges = query.getExchanges();
         Map<IndexSelection, Set<ResidueType>> exchanges = labelSelectionExchanges.entrySet()
                 .stream()
@@ -68,6 +69,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     int residueIndex = queryStructure.getStructure().getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
+
         Set<Integer> allowed = query.getWhitelist()
                 .stream()
                 .map(structureIndexProvider::selectStructureIndex)

@@ -339,7 +339,6 @@ public class QueryBuilder {
                     exchanges,
                     whitelist,
                     blacklist,
-                    targetList,
                     motifSearchConfig);
         }
     }

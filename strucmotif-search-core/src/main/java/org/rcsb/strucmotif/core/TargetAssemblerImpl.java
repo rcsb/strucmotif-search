@@ -71,11 +71,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
 
-        Stream<Integer> targetList = targetListStream(query.getTargetList());
-        Stream<Integer> requested = query.getWhitelist()
+        TargetList targetList = query.getTargetList();
+        Set<Integer> targets = targetList == TargetList.ALL ? null : structureIndexProvider.selectByTargetList(targetList);
+        Set<Integer> allowed = query.getWhitelist()
                 .stream()
-                .map(structureIndexProvider::selectStructureIndex);
-        Set<Integer> allowed = Stream.concat(targetList, requested)
+                .map(structureIndexProvider::selectStructureIndex)
                 .collect(Collectors.toSet());
         Set<Integer> ignored = query.getBlacklist()
                 .stream()
@@ -92,7 +92,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
             // sort into target structures
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                    .flatMap(descriptor -> select(descriptor, allowed, ignored))
+                    .flatMap(descriptor -> select(descriptor, targets, allowed, ignored))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
 
             // TODO try to avoid object creation
@@ -133,25 +133,13 @@ public class TargetAssemblerImpl implements TargetAssembler {
         response.setNumberOfTargetStructures(structureCount);
     }
 
-    private Stream<Integer> targetListStream(TargetList targetList) {
-        switch (targetList) {
-            case ALL:
-                // possible to shortcut here as implicitly all registered structure will be allowed
-                return Stream.empty();
-            case PDB: case MODELS:
-                return structureIndexProvider.selectByTargetList(targetList).stream();
-            default:
-                throw new UnsupportedOperationException(targetList + " isn't handled");
-        }
-    }
-
     private static <T> T[] concat(T[] first, T[] second) {
         T[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
     }
 
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor, Set<Integer> allowed, Set<Integer> ignored) {
+    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor, Set<Integer> targets, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
         @SuppressWarnings("unchecked")
         Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
@@ -167,6 +155,10 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
             // cannot occur in blacklist
             if (ignored.contains(structureIndex)) {
+                continue;
+            }
+            // check 'global' target list - might be null if it's desired to skip this step, might be empty if legitimately no structures match
+            if (targets != null && !targets.contains(structureIndex)) {
                 continue;
             }
 

@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.io;
 
+import org.rcsb.strucmotif.domain.query.TargetList;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,9 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class StructureIndexProviderImpl implements StructureIndexProvider {
@@ -17,11 +20,15 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     private int next;
     private final Map<Integer, String> forward;
     private final Map<String, Integer> backward;
+    private final Set<Integer> pdbs;
+    private final Set<Integer> models;
 
     public StructureIndexProviderImpl(StateRepository stateRepository) {
         this.reuse = new ArrayDeque<>();
         this.forward = new HashMap<>();
         this.backward = new HashMap<>();
+        this.pdbs = new HashSet<>();
+        this.models = new HashSet<>();
 
         // determine the largest known id
         int max = -1; // let's start at 0, negative values are perfectly fine too (and will happen when counter overflows)
@@ -30,6 +37,14 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
             String structureIdentifier = structureInformation.getStructureIdentifier();
             forward.put(structureIndex, structureIdentifier);
             backward.put(structureIdentifier, structureIndex);
+
+            // keep track whether indices are PDB or model
+            if (TargetList.PDB.test(structureIdentifier)) {
+                pdbs.add(structureIndex);
+            } else {
+                models.add(structureIndex);
+            }
+
             if (structureIndex > max) {
                 max = structureIndex;
             }
@@ -48,19 +63,25 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
         }
 
         if (forward.size() != backward.size()) {
-            logger.warn("Mappings are not bidirectional: {} identifiers, {} indices", forward.size(), backward.size());
+            throw new IllegalStateException("Mappings are not bidirectional: " + forward.size() + " identifiers, " + backward.size() + " indices");
         }
         if (containsKey(null)) {
-            logger.warn("Mappings contain 'null' key");
+            throw new IllegalStateException("Mappings contain 'null' key");
         }
 
-        logger.info("{} mappings, {} keys will be reused, after that the next index will be {}", forward.size(), reuse.size(), next);
+        logger.info("{} mappings ({} PDB entries, {} computed structure models)",
+                forward.size(),
+                pdbs.size(),
+                models.size());
+        logger.info("{} keys will be reused, after that the next index will be {}",
+                reuse.size(),
+                next);
     }
 
     @Override
     public String selectStructureIdentifier(int structureIndex) {
         if (!containsKey(structureIndex)) {
-            logger.warn("No value for " + structureIndex + " - perform a 'RECOVER' update to remove lingering structures from index");
+            throw new IllegalStateException("No value for " + structureIndex + " - perform a 'RECOVER' update to remove lingering structures from index");
         }
 
         return forward.get(structureIndex);
@@ -98,5 +119,19 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     @Override
     public boolean containsKey(int structureIndex) {
         return forward.containsKey(structureIndex);
+    }
+
+    @Override
+    public Set<Integer> selectByTargetList(TargetList targetList) {
+        switch (targetList) {
+            case PDB:
+                return pdbs;
+            case MODELS:
+                return models;
+            case ALL:
+                return forward.keySet();
+            default:
+                throw new UnsupportedOperationException(targetList + " isn't handled");
+        }
     }
 }

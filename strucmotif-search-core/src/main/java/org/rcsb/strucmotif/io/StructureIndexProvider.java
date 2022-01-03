@@ -1,5 +1,9 @@
 package org.rcsb.strucmotif.io;
 
+import org.rcsb.strucmotif.domain.query.TargetList;
+
+import java.util.Set;
+
 /**
  * Maps between structure indices (a compact int representation that is e.g. stored in the inverted index) and readable
  * Strings (that can be PDB-IDs or longer, namespaced identifiers used by computed structure models).
@@ -45,4 +49,11 @@ public interface StructureIndexProvider {
      * @return true if this key has a mapping
      */
     boolean containsKey(int structureIndex);
+
+    /**
+     * Get all registered indices of a particular type.
+     * @param targetList search space identifier (PDB entries, computed structure models, everything)
+     * @return a collection of all relevant structure indices
+     */
+    Set<Integer> selectByTargetList(TargetList targetList);
 }

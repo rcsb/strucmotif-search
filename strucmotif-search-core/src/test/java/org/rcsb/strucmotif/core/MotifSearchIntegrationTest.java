@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.config.TargetList;
+import org.rcsb.strucmotif.domain.query.TargetList;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;

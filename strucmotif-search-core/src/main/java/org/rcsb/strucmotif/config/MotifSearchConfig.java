@@ -82,7 +82,7 @@ public class MotifSearchConfig {
      * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
      * Hits without assembly are report as '0'.
      */
-    private boolean undefinedAssemblies = false;
+    private boolean undefinedAssemblies = true;
     /**
      * Filter for residues with a certain quality/confidence. Only relevant when combined with
      * {@link ResidueQualityStrategy}.
@@ -91,7 +91,7 @@ public class MotifSearchConfig {
     /**
      * Filter for residues with a certain quality/confidence. Update 'qualityThreshold' accordingly to use this.
      */
-    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.NONE;
+    private ResidueQualityStrategy residueQualityStrategy = ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF;
     /**
      * How is inverted index data stored?
      */

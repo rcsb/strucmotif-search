@@ -10,6 +10,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
+import org.rcsb.strucmotif.domain.query.TargetList;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
@@ -70,9 +71,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
 
-        Set<Integer> allowed = query.getWhitelist()
+        Stream<Integer> targetList = targetListStream(query.getTargetList());
+        Stream<Integer> requested = query.getWhitelist()
                 .stream()
-                .map(structureIndexProvider::selectStructureIndex)
+                .map(structureIndexProvider::selectStructureIndex);
+        Set<Integer> allowed = Stream.concat(targetList, requested)
                 .collect(Collectors.toSet());
         Set<Integer> ignored = query.getBlacklist()
                 .stream()
@@ -128,6 +131,18 @@ public class TargetAssemblerImpl implements TargetAssembler {
                 response.getTimings().getPathsTime());
         response.setNumberOfPaths(pathCount);
         response.setNumberOfTargetStructures(structureCount);
+    }
+
+    private Stream<Integer> targetListStream(TargetList targetList) {
+        switch (targetList) {
+            case ALL:
+                // possible to shortcut here as implicitly all registered structure will be allowed
+                return Stream.empty();
+            case PDB: case MODELS:
+                return structureIndexProvider.selectByTargetList(targetList).stream();
+            default:
+                throw new UnsupportedOperationException(targetList + " isn't handled");
+        }
     }
 
     private static <T> T[] concat(T[] first, T[] second) {

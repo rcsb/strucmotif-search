@@ -10,7 +10,8 @@ Unreleased
 - support hits without assembly information (`strucmotif.undefined-assemblies` must be true)
 - optionally, index only residues with 'good quality' (e.g., based on B-factor values)
 - make `StructureWriterImpl` configurable
-- support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein) 
+- support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein)
+- filter by TargetList (`PDB`, `MODELS`, or `ALL`) to restrict overall search space of queries
 
 strucmotif-search 0.12.8
 -------------

@@ -3,7 +3,7 @@
     <parent>
         <artifactId>strucmotif-search</artifactId>
         <groupId>org.rcsb</groupId>
-        <version>0.12.9-SNAPSHOT</version>
+        <version>0.12.10-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -13,24 +13,38 @@
         <dependency>
             <groupId>org.rcsb</groupId>
             <artifactId>strucmotif-search-core</artifactId>
-            <version>0.12.9-SNAPSHOT</version>
+            <version>0.12.10-SNAPSHOT</version>
         </dependency>
 
         <!-- TODO better solution? these are needed when JAR is used directly but should not be propagated if module is used programmatically -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
-            <version>2.17.0</version>
+            <version>2.17.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.17.0</version>
+            <version>2.17.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.17.0</version>
+            <version>2.17.1</version>
+        </dependency>
+
+        <!-- test dependencies -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <version>2.6.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.junit.vintage</groupId>
+                    <artifactId>junit-vintage-engine</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- test dependencies -->

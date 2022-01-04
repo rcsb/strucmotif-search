@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.TargetList;
+import org.rcsb.strucmotif.domain.query.SearchSpace;
 
 import java.util.Set;
 
@@ -52,8 +52,8 @@ public interface StructureIndexProvider {
 
     /**
      * Get all registered indices of a particular type.
-     * @param targetList search space identifier (PDB entries, computed structure models, everything)
+     * @param searchSpace search space identifier (PDB entries, computed structure models, everything)
      * @return a collection of all relevant structure indices
      */
-    Set<Integer> selectByTargetList(TargetList targetList);
+    Set<Integer> selectBySearchSpace(SearchSpace searchSpace);
 }

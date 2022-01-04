@@ -12,21 +12,21 @@ class TargetListTest {
     @Test
     public void whenHandlingPdbIds_thenArchiveEntriesRetained() {
         assertEquals(3, TEST_CASES.stream()
-                .filter(TargetList.PDB)
+                .filter(SearchSpace.PDB)
                 .count());
     }
 
     @Test
     public void whenHandlingModelIds_thenArchiveEntriesIgnored() {
         assertEquals(2, TEST_CASES.stream()
-                .filter(TargetList.MODELS)
+                .filter(SearchSpace.MODELS)
                 .count());
     }
 
     @Test
     public void whenAllTargetList_thenNoOperation() {
         assertEquals(TEST_CASES.size(), TEST_CASES.stream()
-                .filter(TargetList.ALL)
+                .filter(SearchSpace.ALL)
                 .count());
     }
 }

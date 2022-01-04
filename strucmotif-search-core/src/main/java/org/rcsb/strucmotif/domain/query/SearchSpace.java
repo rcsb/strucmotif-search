@@ -6,7 +6,7 @@ import java.util.function.Predicate;
  * Controls the set of allowed targets, effectively providing high-level control to find exclusively PDB structures, or
  * exclusively computed structure models.
  */
-public enum TargetList implements Predicate<String> {
+public enum SearchSpace implements Predicate<String> {
     /**
      * Return only PDB-entries.
      */
@@ -26,7 +26,7 @@ public enum TargetList implements Predicate<String> {
 
     private final Predicate<String> condition;
 
-    TargetList(Predicate<String> condition) {
+    SearchSpace(Predicate<String> condition) {
         this.condition = condition;
     }
 

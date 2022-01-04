@@ -10,7 +10,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
-import org.rcsb.strucmotif.domain.query.TargetList;
+import org.rcsb.strucmotif.domain.query.SearchSpace;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
@@ -71,8 +71,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
 
-        TargetList targetList = query.getTargetList();
-        Set<Integer> targets = targetList == TargetList.ALL ? null : structureIndexProvider.selectByTargetList(targetList);
+        SearchSpace searchSpaceValue = query.getSearchSpace();
+        Set<Integer> searchSpace = searchSpaceValue == SearchSpace.ALL ? null : structureIndexProvider.selectBySearchSpace(searchSpaceValue);
         Set<Integer> allowed = query.getWhitelist()
                 .stream()
                 .map(structureIndexProvider::selectStructureIndex)
@@ -92,7 +92,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
             // sort into target structures
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                    .flatMap(descriptor -> select(descriptor, targets, allowed, ignored))
+                    .flatMap(descriptor -> select(descriptor, searchSpace, allowed, ignored))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
 
             // TODO try to avoid object creation
@@ -139,7 +139,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return result;
     }
 
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor, Set<Integer> targets, Set<Integer> allowed, Set<Integer> ignored) {
+    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
         @SuppressWarnings("unchecked")
         Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
@@ -157,8 +157,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
             if (ignored.contains(structureIndex)) {
                 continue;
             }
-            // check 'global' target list - might be null if it's desired to skip this step, might be empty if legitimately no structures match
-            if (targets != null && !targets.contains(structureIndex)) {
+            // check 'global' search space - might be null if it's desired to skip this step, might be empty if legitimately no structures match
+            if (searchSpace != null && !searchSpace.contains(structureIndex)) {
                 continue;
             }
 

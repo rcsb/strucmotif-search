@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.TargetList;
+import org.rcsb.strucmotif.domain.query.SearchSpace;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
             backward.put(structureIdentifier, structureIndex);
 
             // keep track whether indices are PDB or model
-            if (TargetList.PDB.test(structureIdentifier)) {
+            if (SearchSpace.PDB.test(structureIdentifier)) {
                 pdbs.add(structureIndex);
             } else {
                 models.add(structureIndex);
@@ -122,8 +122,8 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     }
 
     @Override
-    public Set<Integer> selectByTargetList(TargetList targetList) {
-        switch (targetList) {
+    public Set<Integer> selectBySearchSpace(SearchSpace searchSpace) {
+        switch (searchSpace) {
             case PDB:
                 return pdbs;
             case MODELS:
@@ -131,7 +131,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
             case ALL:
                 return forward.keySet();
             default:
-                throw new UnsupportedOperationException(targetList + " isn't handled");
+                throw new UnsupportedOperationException(searchSpace + " isn't handled");
         }
     }
 }

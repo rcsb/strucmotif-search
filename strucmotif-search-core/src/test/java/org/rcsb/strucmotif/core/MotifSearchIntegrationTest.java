@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.query.TargetList;
+import org.rcsb.strucmotif.domain.query.SearchSpace;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
@@ -221,7 +221,7 @@ public class MotifSearchIntegrationTest {
 
         int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .targetList(TargetList.ALL)
+                .targetList(SearchSpace.ALL)
                 .buildQuery()
                 .run()
                 .getHits()
@@ -230,7 +230,7 @@ public class MotifSearchIntegrationTest {
 
         int modelQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .targetList(TargetList.MODELS)
+                .targetList(SearchSpace.MODELS)
                 .buildQuery()
                 .run()
                 .getHits()
@@ -239,7 +239,7 @@ public class MotifSearchIntegrationTest {
 
         int pdbQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .targetList(TargetList.PDB)
+                .targetList(SearchSpace.PDB)
                 .buildQuery()
                 .run()
                 .getHits()

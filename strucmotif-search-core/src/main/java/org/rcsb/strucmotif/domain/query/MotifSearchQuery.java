@@ -36,7 +36,7 @@ public class MotifSearchQuery {
     private final Map<LabelSelection, Set<ResidueType>> exchanges;
     private final Collection<String> whitelist;
     private final Collection<String> blacklist;
-    private final TargetList targetList;
+    private final SearchSpace searchSpace;
     private final MotifSearchConfig config;
 
     MotifSearchQuery(MotifSearchRuntime motifSearchRuntime,
@@ -48,7 +48,7 @@ public class MotifSearchQuery {
                      Map<LabelSelection, Set<ResidueType>> exchanges,
                      Collection<String> whitelist,
                      Collection<String> blacklist,
-                     TargetList targetList,
+                     SearchSpace searchSpace,
                      MotifSearchConfig config) {
         this.motifSearchRuntime = motifSearchRuntime;
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(structure, labelSelections, residues);
@@ -57,7 +57,7 @@ public class MotifSearchQuery {
         this.exchanges = exchanges;
         this.whitelist = whitelist;
         this.blacklist = blacklist;
-        this.targetList = targetList;
+        this.searchSpace = searchSpace;
         this.config = config;
     }
 
@@ -102,11 +102,11 @@ public class MotifSearchQuery {
     }
 
     /**
-     * Access to the applied target list.
+     * Access to the applied search space.
      * @return ALL, PDB, or MODELS
      */
-    public TargetList getTargetList() {
-        return targetList;
+    public SearchSpace getSearchSpace() {
+        return searchSpace;
     }
 
     /**

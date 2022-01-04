@@ -316,11 +316,11 @@ public class QueryBuilder {
 
         /**
          * Narrow down a search to a specific target set.
-         * @param targetList the target list of choice
+         * @param searchSpace the search space of choice
          * @return this builder
          */
-        public OptionalStepBuilder targetList(SearchSpace targetList) {
-            this.searchSpace = targetList;
+        public OptionalStepBuilder searchSpace(SearchSpace searchSpace) {
+            this.searchSpace = searchSpace;
             return this;
         }
 

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class TargetListTest {
+class SearchSpaceTest {
     private static final Set<String> TEST_CASES = Set.of("1acj", "1MUW", "1eXr", "AF-Q8W3K0-F1", "ma-bak-cepc-0001");
 
     @Test
@@ -24,7 +24,7 @@ class TargetListTest {
     }
 
     @Test
-    public void whenAllTargetList_thenNoOperation() {
+    public void whenAllSearchSpace_thenNoOperation() {
         assertEquals(TEST_CASES.size(), TEST_CASES.stream()
                 .filter(SearchSpace.ALL)
                 .count());

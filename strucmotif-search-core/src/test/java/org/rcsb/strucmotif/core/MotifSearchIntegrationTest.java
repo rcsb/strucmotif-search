@@ -221,7 +221,7 @@ public class MotifSearchIntegrationTest {
 
         int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .targetList(SearchSpace.ALL)
+                .searchSpace(SearchSpace.ALL)
                 .buildQuery()
                 .run()
                 .getHits()
@@ -230,7 +230,7 @@ public class MotifSearchIntegrationTest {
 
         int modelQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .targetList(SearchSpace.MODELS)
+                .searchSpace(SearchSpace.MODELS)
                 .buildQuery()
                 .run()
                 .getHits()
@@ -239,7 +239,7 @@ public class MotifSearchIntegrationTest {
 
         int pdbQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .targetList(SearchSpace.PDB)
+                .searchSpace(SearchSpace.PDB)
                 .buildQuery()
                 .run()
                 .getHits()

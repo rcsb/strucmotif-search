@@ -19,6 +19,7 @@ import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.rcsb.strucmotif.math.Partition;
+import org.rcsb.strucmotif.update.extractor.KeyExtractorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,9 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -60,6 +64,7 @@ import java.util.stream.Collectors;
 @EntityScan("org.rcsb.strucmotif")
 public class MotifSearchUpdate implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchUpdate.class);
+    private static final Set<String> STRUCTURE_EXTENSIONS = Set.of(".cif", ".cif.gz", ".bcif", ".bcif.gz");
 
     /**
      * Entry point from the command-line.
@@ -102,11 +107,15 @@ public class MotifSearchUpdate implements CommandLineRunner {
     public void run(String[] args) throws Exception {
         if (args.length < 1) {
             System.out.println("Too few arguments");
+            System.out.println();
             System.out.println("Usage: java -Xmx12G -jar update.jar operation ...");
             System.out.println("Valid operation values: " + Arrays.toString(Operation.values()));
             System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
             System.out.println("If you want to update entries you have to explicitly remove them first");
+            System.out.println();
             System.out.println("Example: java -Xmx12G -jar update.jar ADD 1acj 1exr 4hhb");
+            System.out.println("Example: java -Xmx12G -jar update.jar ADD path /opt/data/pdb/");
+            System.out.println();
             System.out.println("You can also provide URLs to index non-archived CIF files, in that case you must provide a unique, preferably namespaced identifier which will be used to index this item");
             System.out.println("Example: java -Xmx12G -jar update.jar ADD AF-Q76EI6-F1,https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif MA-9Z55Z,file:///path/to/ma-9z55z.cif");
             return;
@@ -119,6 +128,11 @@ public class MotifSearchUpdate implements CommandLineRunner {
         System.arraycopy(args, 1, ids, 0, ids.length);
         if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
+        } else if (ids.length == 2 && ids[0].equalsIgnoreCase("path")) {
+            requested = Files.walk(Paths.get(ids[1]))
+                    .filter(path -> STRUCTURE_EXTENSIONS.contains(path.toFile().getName().toLowerCase()))
+                    .map(this::mapFile)
+                    .collect(Collectors.toList());
         } else {
             requested = Arrays.stream(ids)
                     // upper-case PDB-IDs, leave URLs be
@@ -174,6 +188,14 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         logger.info("Finished update operation");
+    }
+
+    private UpdateItem mapFile(Path path) {
+        try {
+            return new UpdateItem(KeyExtractorFactory.getKey(path.toFile().getName()), path.toUri().toURL());
+        } catch (MalformedURLException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /**

@@ -14,7 +14,7 @@ public class AlphaFoldKeyExtractor implements KeyExtractor {
     @Override
     public String getKey(String resource) {
         // https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif -> AF-Q76EI6-F1
-        String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/")) : resource;
+        String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/") + 1) : resource;
         return name.replaceAll("(?i)-model_v\\d+\\.b?cif(?:\\.gz)?", "").toUpperCase();
     }
 }

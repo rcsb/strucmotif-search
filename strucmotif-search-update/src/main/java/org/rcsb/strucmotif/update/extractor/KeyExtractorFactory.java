@@ -21,9 +21,10 @@ public class KeyExtractorFactory {
      * @return a {@link KeyExtractor} that supports this namespace, the generic implementation if none matches
      */
     public static KeyExtractor getKeyExtractor(String resource) {
-        String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/")) : resource;
+        String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/") + 1) : resource;
+        String upperCase = name.toUpperCase();
         for (KeyExtractor keyExtractor : INSTANCE.nonGeneric) {
-            if (name.startsWith(keyExtractor.getNameSpace())) {
+            if (upperCase.startsWith(keyExtractor.getNameSpace())) {
                 return keyExtractor;
             }
         }

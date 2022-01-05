@@ -30,4 +30,13 @@ public class KeyExtractorFactory {
         }
         return INSTANCE.generic;
     }
+
+    /**
+     * Short-cut to extract keys.
+     * @param resource the resource
+     * @return the extracted key
+     */
+    public static String getKey(String resource) {
+        return getKeyExtractor(resource).getKey(resource);
+    }
 }

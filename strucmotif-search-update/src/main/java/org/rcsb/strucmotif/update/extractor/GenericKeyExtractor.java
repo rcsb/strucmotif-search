@@ -11,7 +11,7 @@ public class GenericKeyExtractor implements KeyExtractor {
     @Override
     public String getKey(String resource) {
 //        /path/to/1abc.cif -> 1ABC
-        String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/")) : resource;
+        String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/") + 1) : resource;
         return name.replaceAll("(?i)\\.b?cif(?:\\.gz)?", "").toUpperCase();
     }
 }

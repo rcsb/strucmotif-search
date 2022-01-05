@@ -12,6 +12,7 @@ Unreleased
 - make `StructureWriterImpl` configurable
 - support indexing of non-archived structures by reading from local file or URL (this allows to index e.g. AlphaFold data and search therein)
 - filter by SearchSpace (`PDB`, `MODELS`, or `ALL`) to restrict overall search space of queries
+- add support for [colfer](https://github.com/pascaldekloe/colfer) backend to store inverted index data
 
 strucmotif-search 0.12.9
 -------------

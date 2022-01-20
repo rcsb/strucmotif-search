@@ -105,7 +105,7 @@ public class MotifSearchQuery {
      * Access to the applied search space.
      * @return ALL, PDB, or MODELS
      */
-    public StructureDeterminationMethodology getSearchSpace() {
+    public StructureDeterminationMethodology getStructureDeterminationMethodology() {
         return structureDeterminationMethodology;
     }
 

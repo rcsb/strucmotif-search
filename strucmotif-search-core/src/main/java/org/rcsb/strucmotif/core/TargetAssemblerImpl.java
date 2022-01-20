@@ -71,7 +71,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
 
-        StructureDeterminationMethodology structureDeterminationMethodologyValue = query.getSearchSpace();
+        StructureDeterminationMethodology structureDeterminationMethodologyValue = query.getStructureDeterminationMethodology();
         Set<Integer> searchSpace = structureDeterminationMethodologyValue == StructureDeterminationMethodology.ALL ? null : structureIndexProvider.selectBySearchSpace(structureDeterminationMethodologyValue);
         Set<Integer> allowed = query.getWhitelist()
                 .stream()

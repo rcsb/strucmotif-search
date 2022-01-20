@@ -6,15 +6,16 @@ import java.util.function.Predicate;
  * Controls the set of allowed targets, effectively providing high-level control to find exclusively PDB structures, or
  * exclusively computed structure models.
  */
-public enum SearchSpace implements Predicate<String> {
+public enum StructureDeterminationMethodology implements Predicate<String> {
     /**
      * Return only PDB-entries.
      */
-    PDB(s -> s.matches(Constants.PDB_REGEX)),
+    EXPERIMENTAL(s -> s.matches(Constants.PDB_REGEX)),
     /**
      * Return only computed structure models.
      */
-    MODELS(s -> !s.matches(Constants.PDB_REGEX)),
+    COMPUTATIONAL(s -> !s.matches(Constants.PDB_REGEX)),
+    // TODO impl INTEGRATIVE
     /**
      * Return all hits, regardless of provenance.
      */
@@ -26,7 +27,7 @@ public enum SearchSpace implements Predicate<String> {
 
     private final Predicate<String> condition;
 
-    SearchSpace(Predicate<String> condition) {
+    StructureDeterminationMethodology(Predicate<String> condition) {
         this.condition = condition;
     }
 

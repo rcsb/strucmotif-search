@@ -268,7 +268,7 @@ public class QueryBuilder {
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<String> whitelist;
         private final Set<String> blacklist;
-        private SearchSpace searchSpace;
+        private StructureDeterminationMethodology structureDeterminationMethodology;
 
         OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, Parameters parameters) {
             this.structureIdentifier = structureIdentifier;
@@ -279,7 +279,7 @@ public class QueryBuilder {
             this.exchanges = new HashMap<>();
             this.whitelist = new HashSet<>();
             this.blacklist = new HashSet<>();
-            this.searchSpace = SearchSpace.ALL;
+            this.structureDeterminationMethodology = StructureDeterminationMethodology.ALL;
         }
 
         /**
@@ -316,11 +316,11 @@ public class QueryBuilder {
 
         /**
          * Narrow down a search to a specific target set.
-         * @param searchSpace the search space of choice
+         * @param structureDeterminationMethodology the search space of choice
          * @return this builder
          */
-        public OptionalStepBuilder searchSpace(SearchSpace searchSpace) {
-            this.searchSpace = searchSpace;
+        public OptionalStepBuilder structureDeterminationMethodology(StructureDeterminationMethodology structureDeterminationMethodology) {
+            this.structureDeterminationMethodology = structureDeterminationMethodology;
             return this;
         }
 
@@ -338,7 +338,7 @@ public class QueryBuilder {
                     exchanges,
                     whitelist,
                     blacklist,
-                    searchSpace,
+                    structureDeterminationMethodology,
                     motifSearchConfig);
         }
     }

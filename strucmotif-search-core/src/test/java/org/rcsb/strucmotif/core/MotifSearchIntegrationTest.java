@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.query.SearchSpace;
+import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
@@ -221,7 +221,7 @@ public class MotifSearchIntegrationTest {
 
         int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .searchSpace(SearchSpace.ALL)
+                .structureDeterminationMethodology(StructureDeterminationMethodology.ALL)
                 .buildQuery()
                 .run()
                 .getHits()
@@ -230,7 +230,7 @@ public class MotifSearchIntegrationTest {
 
         int modelQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .searchSpace(SearchSpace.MODELS)
+                .structureDeterminationMethodology(StructureDeterminationMethodology.COMPUTATIONAL)
                 .buildQuery()
                 .run()
                 .getHits()
@@ -239,7 +239,7 @@ public class MotifSearchIntegrationTest {
 
         int pdbQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .searchSpace(SearchSpace.PDB)
+                .structureDeterminationMethodology(StructureDeterminationMethodology.EXPERIMENTAL)
                 .buildQuery()
                 .run()
                 .getHits()

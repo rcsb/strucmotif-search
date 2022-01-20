@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.SearchSpace;
+import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,15 +20,15 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     private int next;
     private final Map<Integer, String> forward;
     private final Map<String, Integer> backward;
-    private final Set<Integer> pdbs;
-    private final Set<Integer> models;
+    private final Set<Integer> experimental;
+    private final Set<Integer> computational;
 
     public StructureIndexProviderImpl(StateRepository stateRepository) {
         this.reuse = new ArrayDeque<>();
         this.forward = new HashMap<>();
         this.backward = new HashMap<>();
-        this.pdbs = new HashSet<>();
-        this.models = new HashSet<>();
+        this.experimental = new HashSet<>();
+        this.computational = new HashSet<>();
 
         // determine the largest known id
         int max = -1; // let's start at 0, negative values are perfectly fine too (and will happen when counter overflows)
@@ -39,10 +39,10 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
             backward.put(structureIdentifier, structureIndex);
 
             // keep track whether indices are PDB or model
-            if (SearchSpace.PDB.test(structureIdentifier)) {
-                pdbs.add(structureIndex);
+            if (StructureDeterminationMethodology.EXPERIMENTAL.test(structureIdentifier)) {
+                experimental.add(structureIndex);
             } else {
-                models.add(structureIndex);
+                computational.add(structureIndex);
             }
 
             if (structureIndex > max) {
@@ -71,8 +71,8 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
 
         logger.info("{} mappings ({} PDB entries, {} computed structure models)",
                 forward.size(),
-                pdbs.size(),
-                models.size());
+                experimental.size(),
+                computational.size());
         logger.info("{} keys will be reused, after that the next index will be {}",
                 reuse.size(),
                 next);
@@ -122,16 +122,16 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     }
 
     @Override
-    public Set<Integer> selectBySearchSpace(SearchSpace searchSpace) {
-        switch (searchSpace) {
-            case PDB:
-                return pdbs;
-            case MODELS:
-                return models;
+    public Set<Integer> selectBySearchSpace(StructureDeterminationMethodology structureDeterminationMethodology) {
+        switch (structureDeterminationMethodology) {
+            case EXPERIMENTAL:
+                return experimental;
+            case COMPUTATIONAL:
+                return computational;
             case ALL:
                 return forward.keySet();
             default:
-                throw new UnsupportedOperationException(searchSpace + " isn't handled");
+                throw new UnsupportedOperationException(structureDeterminationMethodology + " isn't handled");
         }
     }
 }

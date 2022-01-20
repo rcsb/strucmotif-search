@@ -130,10 +130,11 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             long start = System.nanoTime();
             this.structureCache = new HashMap<>();
 
-            Partition<Path> partitions = new Partition<>(paths, motifSearchConfig.getUpdateChunkSize());
+            int loadingChunkSize = motifSearchConfig.getLoadingChunkSize();
+            Partition<Path> partitions = new Partition<>(paths, loadingChunkSize);
             logger.info("Formed {} partitions of {} structures",
                     partitions.size(),
-                    motifSearchConfig.getUpdateChunkSize()); // TODO maybe this should be a different param
+                    loadingChunkSize);
 
             for (int i = 0; i < partitions.size(); i++) {
                 String partitionContext = (i + 1) + " / " + partitions.size();

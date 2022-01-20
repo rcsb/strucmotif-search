@@ -50,6 +50,12 @@ public class MotifSearchConfig {
      */
     private int updateChunkSize = 1600;
     /**
+     * The batch size during app initialization. Only relevant if `in-memory-strategy` is set to `heap`. The specified
+     * number of structures will be loaded into memory before logging process. This mainly serves as checkpoint during
+     * initialization.
+     */
+    private int loadingChunkSize = 12800;
+    /**
      * The maximum motif size, any larger user input will be rejected.
      */
     private int maxMotifSize = 10;
@@ -247,6 +253,22 @@ public class MotifSearchConfig {
      */
     public void setUpdateChunkSize(int updateChunkSize) {
         this.updateChunkSize = updateChunkSize;
+    }
+
+    /**
+     * How many structures to load before flushing to the in-memory structure cache.
+     * @return an int
+     */
+    public int getLoadingChunkSize() {
+        return loadingChunkSize;
+    }
+
+    /**
+     * Set how many structures to load before reporting process.
+     * @param loadingChunkSize an int
+     */
+    public void setLoadingChunkSize(int loadingChunkSize) {
+        this.loadingChunkSize = loadingChunkSize;
     }
 
     /**

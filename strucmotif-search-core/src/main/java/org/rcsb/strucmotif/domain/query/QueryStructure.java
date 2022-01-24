@@ -76,7 +76,7 @@ public class QueryStructure {
     }
 
     /**
-     * Determine an unique path through this structure which captures/passes all residue pairs. Each residue must be
+     * Determine a unique path through this structure which captures/passes all residue pairs. Each residue must be
      * present at least once.
      * @param residuePairOccurrences the collection of residue pair occurrences to process
      * @param exchanges set of exchanges (exchange-heavy residues will get evaluated late/last)
@@ -196,7 +196,7 @@ public class QueryStructure {
     }
 
     /**
-     * This allows re-arranging residues in hits so they have the same order as the query.
+     * This allows re-arranging residues in hits, so they have the same order as the query.
      * @return an array tracks how residues were swapped
      */
     public List<Integer> getResidueIndexSwaps() {

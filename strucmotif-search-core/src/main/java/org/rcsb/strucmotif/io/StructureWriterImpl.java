@@ -157,7 +157,7 @@ public class StructureWriterImpl implements StructureWriter {
 
             // skip non-first alt-locs
             if (!currentLabelAltId.isEmpty() &&
-                    // if label atom id matches the last one accepted (and component didnt change) we are in trouble
+                    // if label atom id matches the last one accepted (and component didn't change) we are in trouble
                     currentLabelAsymId.equals(lastAcceptedLabelAsymId) &&
                     currentLabelSeqId == lastAcceptedLabelSeqId &&
                     currentLabelAtomId.equals(lastAcceptedAtomLabelId)) {

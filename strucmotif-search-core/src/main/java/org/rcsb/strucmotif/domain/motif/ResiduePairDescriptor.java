@@ -28,7 +28,7 @@ public class ResiduePairDescriptor {
                                  DistanceType backboneDistance,
                                  DistanceType sideChainDistance,
                                  AngleType angle) {
-        // determine if need to implicitly flip
+        // determine if descriptor needs to be flip implicitly
         this.flipped = residueType1.getOneLetterCode().compareTo(residueType2.getOneLetterCode()) > 0;
         this.residueType1 = flipped ? residueType2 : residueType1;
         this.residueType2 = flipped ? residueType1 : residueType2;

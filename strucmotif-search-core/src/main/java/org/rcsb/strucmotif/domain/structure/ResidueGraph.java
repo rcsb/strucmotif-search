@@ -38,8 +38,8 @@ public class ResidueGraph {
     /**
      * Construct a residue graph.
      * @param structure the context
-     * @param labelSelections residue keys (may be subset, may be all)
-     * @param residues residue coordinates (may be subset, may be all)
+     * @param labelSelections residue keys (maybe subset, maybe all)
+     * @param residues residue coordinates (maybe subset, maybe all)
      * @param squaredCutoff maximum distance of residue pairs to index
      * @param allowTransformed allow pairs between 2 transformed chains?
      * @param allowUndefinedAssemblies set to true for computed structure models

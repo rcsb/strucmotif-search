@@ -46,7 +46,7 @@ public class MotifSearchConfig {
     private int decimalPlacesMatrix = 3;
     /**
      * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
-     * speed substantially. A value of 400 works good with 12GB of heap, the higher the faster.
+     * speed substantially. A value of 400 works good with 12 GB of heap, the higher the faster.
      */
     private int updateChunkSize = 1600;
     /**

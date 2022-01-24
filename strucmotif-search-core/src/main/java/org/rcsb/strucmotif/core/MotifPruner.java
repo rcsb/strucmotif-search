@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Pruning motifs is advantageous as it saves time (less lookups) and avoids too rigid criteria enforced during search.
+ * Pruning motifs is advantageous as it saves time (fewer lookups) and avoids too rigid criteria enforced during search.
  */
 public interface MotifPruner {
     /**

@@ -53,7 +53,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     private boolean paths;
 
     /**
-     * Construct a inverted index instance.
+     * Construct an inverted index instance.
      * @param motifSearchConfig the config
      */
     public InvertedIndexImpl(MotifSearchConfig motifSearchConfig) {

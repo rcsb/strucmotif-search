@@ -10,6 +10,9 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.InputMismatchException;
 
+/**
+ * Serializes and deserializes buckets with a custom colfer implementation. See https://github.com/pascaldekloe/colfer.
+ */
 public class ColferCodec implements BucketCodec {
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -180,7 +183,6 @@ public class ColferCodec implements BucketCodec {
         out.write(0x7f);
     }
 
-    @SuppressWarnings("Duplicates")
     private void writeIntArray(OutputStream out, int[] data) throws IOException {
         int x = data.length;
         while (x > 0x7f) {
@@ -199,7 +201,6 @@ public class ColferCodec implements BucketCodec {
         }
     }
 
-    @SuppressWarnings("Duplicates")
     private void writeStringArray(OutputStream out, String[] data) throws IOException {
         int x = data.length;
 

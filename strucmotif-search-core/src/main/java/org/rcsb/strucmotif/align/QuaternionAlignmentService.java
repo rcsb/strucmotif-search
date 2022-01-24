@@ -217,7 +217,7 @@ public class QuaternionAlignmentService implements AlignmentService {
             }
         }
 
-        /* the abs() is to guard against extremely small, but *negative* numbers due to floating point error */
+        /* the abs() is to guard against tiny, but *negative* numbers due to floating point error */
         rms = Math.sqrt(Math.abs(2.0 * (E0 - mxEigenV) / referencePoints.size()));
 
         a11 = SxxpSyy + Szz - mxEigenV;

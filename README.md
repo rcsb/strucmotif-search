@@ -53,7 +53,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.12.3</version>
+  <version>0.13.0</version>
 </dependency>
 ```
 
@@ -91,6 +91,8 @@ class Demo {
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `in-memory-strategy` | Preload structure data for increased performance? | `OFF` |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
+| `inverted-index-gzipped` | Are inverted index files compressed? | `false` |
+| `loading-chunk-size` | Batch size when holding structure data in memory | `12800` |
 | `max-results` | Maximum number of results that will be returned | `50000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
@@ -104,7 +106,7 @@ You will need to process your corpus of structure data before using the service.
 all structure files and add them to an inverted index that allows efficient searching.
 
 Details can be found in:
-https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md
+[UPDATE.md](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md)
 
 ## Publication
 Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

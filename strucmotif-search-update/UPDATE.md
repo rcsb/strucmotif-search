@@ -44,6 +44,17 @@ indexing and searching in the deposited coordinates. Hits will be identified by 
 Also, you likely want to ignore low-confidence predictions to avoid false-positives as well as to save storage and 
 lower the processing time of queries. Use `residue-quality-strategy` and `residue-quality-cutoff` for that.
 
+It's also possible to index whole directories. The directory will be walked and all CIF/BinaryCIF files will be 
+processed. The library will try to extract reasonable keys from the provided file names, this process is based on 
+resource-specific prefixes (`AF-` and `MA-` for AlphaFold and ModelArchive, respectively).
+```java
+class Demo {
+    public static void main(String[] args) {
+        MotifSearchUpdate.main(new String[] { "ADD", "path", "/opt/data/pdb/" });
+    }
+}
+```
+
 ## Configuration
 Several application properties are only relevant for the update part of the application. Changes to these parameters 
 might require a full load.

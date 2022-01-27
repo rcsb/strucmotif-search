@@ -91,7 +91,7 @@ public class MotifSearchIntegrationTest {
 
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
+        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, motifSearchConfig);
         MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider);
         this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }

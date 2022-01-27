@@ -151,7 +151,7 @@ public class TargetStructure {
                 return Stream.empty();
             }
 
-            assemblyCounts = Map.of(AssemblyInformation.UNKNOWN_ASSEMBLY_IDENTIFIER, (long) residueCount);
+            assemblyCounts = Map.of(assemblyInformationProvider.getUndefinedAssemblyIdentifier(), (long) residueCount);
         } else {
             assemblyCounts = labelSelections.stream()
                     .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())

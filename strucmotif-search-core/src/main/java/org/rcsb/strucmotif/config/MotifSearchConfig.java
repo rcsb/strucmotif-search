@@ -103,6 +103,10 @@ public class MotifSearchConfig {
      */
     private InvertedIndexBackend invertedIndexBackend = InvertedIndexBackend.COLFER;
     /**
+     * What identifier to use when undefined assemblies are allowed?
+     */
+    private String undefinedAssemblyIdentifier = "0";
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -456,5 +460,21 @@ public class MotifSearchConfig {
      */
     public void setInvertedIndexBackend(InvertedIndexBackend invertedIndexBackend) {
         this.invertedIndexBackend = invertedIndexBackend;
+    }
+
+    /**
+     * What's the fallback identifier for undefined assemblies.
+     * @return a String
+     */
+    public String getUndefinedAssemblyIdentifier() {
+        return undefinedAssemblyIdentifier;
+    }
+
+    /**
+     * Set the fallback identifier for undefined assemblies.
+     * @param undefinedAssemblyIdentifier a String
+     */
+    public void setUndefinedAssemblyIdentifier(String undefinedAssemblyIdentifier) {
+        this.undefinedAssemblyIdentifier = undefinedAssemblyIdentifier;
     }
 }

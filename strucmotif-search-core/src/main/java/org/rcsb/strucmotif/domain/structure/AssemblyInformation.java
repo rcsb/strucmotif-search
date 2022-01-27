@@ -18,8 +18,6 @@ import java.util.stream.Stream;
  * Assembly definitions for a structure.
  */
 public class AssemblyInformation {
-    public static final String UNKNOWN_ASSEMBLY_IDENTIFIER = "0";
-
     /**
      * Construct assembly information instance from source file.
      * @param mmCifFile source file

@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.io;
 
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.springframework.stereotype.Service;
@@ -18,9 +19,11 @@ public class AssemblyInformationProviderImpl implements AssemblyInformationProvi
     private static final Map<String, Set<String>> UNDEFINED_ASSEMBLIES = Collections.emptyMap();
     // maps from struct_oper_id to all assemblies this transformation is part of
     private final Map<String, Map<String, Set<String>>> reverseAssemblyInformation;
+    private final MotifSearchConfig motifSearchConfig;
 
-    public AssemblyInformationProviderImpl(StateRepository stateRepository) {
+    public AssemblyInformationProviderImpl(StateRepository stateRepository, MotifSearchConfig motifSearchConfig) {
         this.reverseAssemblyInformation = loadAssemblyInformation(stateRepository);
+        this.motifSearchConfig = motifSearchConfig;
     }
 
     private Map<String, Map<String, Set<String>>> loadAssemblyInformation(StateRepository stateRepository) {
@@ -51,5 +54,10 @@ public class AssemblyInformationProviderImpl implements AssemblyInformationProvi
     @Override
     public Map<String, Set<String>> selectAssemblyMap(String structureIdentifier) {
         return reverseAssemblyInformation.getOrDefault(structureIdentifier, UNDEFINED_ASSEMBLIES);
+    }
+
+    @Override
+    public String getUndefinedAssemblyIdentifier() {
+        return motifSearchConfig.getUndefinedAssemblyIdentifier();
     }
 }

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.13.2
+-------------
+### Added
+- make `undefined-assembly-identifier` configurable
+
 strucmotif-search 0.13.1
 -------------
 ### Added

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.13.1
+-------------
+### Added
+- make `undefined-assemblies` flag a parameter during query execution rather than tying it to the runtime (`undefined-assemblies` still must be set to true during indexing)
+
 strucmotif-search 0.13.0
 -------------
 ### Breaking changes

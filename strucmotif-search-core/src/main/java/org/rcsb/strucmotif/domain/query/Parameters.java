@@ -14,11 +14,12 @@ public class Parameters {
     private final AtomPairingScheme atomPairingScheme;
     private final MotifPruner motifPruner;
     private final int limit;
+    private final boolean undefinedAssemblies;
     static final int DEFAULT_BACKBONE_DISTANCE_TOLERANCE = 1;
     static final int DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE = 1;
     static final int DEFAULT_ANGLE_TOLERANCE = 1;
 
-    Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit) {
+    Parameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit, boolean undefinedAssemblies) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
@@ -26,6 +27,7 @@ public class Parameters {
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
         this.limit = resultLimit;
+        this.undefinedAssemblies = undefinedAssemblies;
     }
 
     /**
@@ -61,6 +63,14 @@ public class Parameters {
     }
 
     /**
+     * Report if results will be filtered by RMSD.
+     * @return true if search will omit hits above a certain threshold.
+     */
+    public boolean hasRmsdCutoff() {
+        return rmsdCutoff != Float.MAX_VALUE;
+    }
+
+    /**
      * How are atoms paired?
      * @return the atom pairing scheme
      */
@@ -90,5 +100,13 @@ public class Parameters {
      */
     public boolean hasLimit() {
         return limit != Integer.MAX_VALUE;
+    }
+
+    /**
+     * Report if undefined assemblies (if they were indexed) can be returned.
+     * @return true if this search will allow undefined assemblies
+     */
+    public boolean isUndefinedAssemblies() {
+        return undefinedAssemblies;
     }
 }

@@ -5,14 +5,17 @@ import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class AssemblyInformationProviderImpl implements AssemblyInformationProvider {
+    private static final Map<String, Set<String>> UNDEFINED_ASSEMBLIES = Collections.emptyMap();
     // maps from struct_oper_id to all assemblies this transformation is part of
     private final Map<String, Map<String, Set<String>>> reverseAssemblyInformation;
 
@@ -34,13 +37,19 @@ public class AssemblyInformationProviderImpl implements AssemblyInformationProvi
                             mappedAssemblyIds.add(assemblyId);
                         }
                     }
+
+                    // compact representation by not storing empty maps explicitly
+                    if (reversed.isEmpty()) {
+                        return null;
+                    }
                     return new Pair<>(structureIdentifier, reversed);
                 })
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
     }
 
     @Override
     public Map<String, Set<String>> selectAssemblyMap(String structureIdentifier) {
-        return reverseAssemblyInformation.get(structureIdentifier);
+        return reverseAssemblyInformation.getOrDefault(structureIdentifier, UNDEFINED_ASSEMBLIES);
     }
 }

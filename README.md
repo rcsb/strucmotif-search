@@ -97,7 +97,6 @@ class Demo {
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
 | `root-path` | Path where data files are read from | `/opt/data/` |
-| `undefined-assemblies` | Return hits without assembly information? | `true` |
 
 Configure by placing your `application.properties` on the classpath.
 

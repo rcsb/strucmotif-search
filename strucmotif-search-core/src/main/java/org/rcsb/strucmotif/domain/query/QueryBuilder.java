@@ -135,6 +135,7 @@ public class QueryBuilder {
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
         private int limit;
+        private boolean undefinedAssemblies;
 
         MandatoryBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
             this.structureIdentifier = structureIdentifier;
@@ -149,6 +150,7 @@ public class QueryBuilder {
             // defines the 'default' motif pruning strategy
             this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
+            this.undefinedAssemblies = false;
         }
 
         /**
@@ -241,6 +243,16 @@ public class QueryBuilder {
         }
 
         /**
+         * Return undefined assemblies (if indexed).
+         * @param undefinedAssemblies a boolean
+         * @return this builder
+         */
+        public MandatoryBuilder undefinedAssemblies(boolean undefinedAssemblies) {
+            this.undefinedAssemblies = undefinedAssemblies;
+            return this;
+        }
+
+        /**
          * Creates a {@link Parameters} instance based on all values. Proceeds to the next step.
          * @return the optional argument step
          */
@@ -251,7 +263,8 @@ public class QueryBuilder {
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner,
-                    limit);
+                    limit,
+                    undefinedAssemblies);
             return new OptionalStepBuilder(structureIdentifier, structure, labelSelections, residues, parameters);
         }
     }

@@ -196,7 +196,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 .flatMap(targetStructure -> {
                     String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
                     Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
-                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, parameters.getRmsdCutoff(), assemblyInformationProvider, motifSearchConfig.isUndefinedAssemblies());
+                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, parameters.getRmsdCutoff(), assemblyInformationProvider, parameters.isUndefinedAssemblies());
                 });
     }
 }

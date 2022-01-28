@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Captures global state of the update process.
  */
-class Context {
+public class Context {
     final Set<String> known;
     final Set<StructureInformation> processed;
     String partitionContext;

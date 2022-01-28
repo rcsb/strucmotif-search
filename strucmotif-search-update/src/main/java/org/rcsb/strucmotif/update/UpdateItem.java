@@ -7,7 +7,7 @@ import java.net.URL;
  * Can also point to external resources or local files via a URL. In that case, you must make sure to provide a unique,
  * yet compact structureIdentifier.<p>
  */
-class UpdateItem {
+public class UpdateItem {
     private final String structureIdentifier;
     private final URL url;
 

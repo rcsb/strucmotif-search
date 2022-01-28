@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.13.3
+-------------
+### Added
+- some update classes are now public
+
 strucmotif-search 0.13.2
 -------------
 ### Added

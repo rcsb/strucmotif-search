@@ -130,7 +130,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             requested = getAllIdentifiers();
         } else if (ids.length == 2 && ids[0].equalsIgnoreCase("path")) {
             requested = Files.walk(Paths.get(ids[1]))
-                    .filter(path -> STRUCTURE_EXTENSIONS.contains(path.toFile().getName().toLowerCase()))
+                    .filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))
                     .map(this::mapFile)
                     .collect(Collectors.toList());
         } else {

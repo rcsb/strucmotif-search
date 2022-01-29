@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+Unreleased
+-------------
+### Bug fix
+- detect files to load by extension
+
 strucmotif-search 0.13.3
 -------------
 ### Added

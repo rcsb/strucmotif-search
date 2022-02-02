@@ -1,6 +1,10 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.13.6
+-------------
+- add impl & extension to backend enum
+
 strucmotif-search 0.13.5
 -------------
 ### Bug fix

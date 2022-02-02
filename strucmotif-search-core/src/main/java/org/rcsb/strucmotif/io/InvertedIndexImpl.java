@@ -4,8 +4,6 @@ import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
-import org.rcsb.strucmotif.io.codec.ColferCodec;
-import org.rcsb.strucmotif.io.codec.MessagePackCodec;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -59,21 +57,9 @@ public class InvertedIndexImpl implements InvertedIndex {
     public InvertedIndexImpl(MotifSearchConfig motifSearchConfig) {
         this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
         this.gzipped = motifSearchConfig.isInvertedIndexGzip();
-        String extension;
         InvertedIndexBackend backend = motifSearchConfig.getInvertedIndexBackend();
-        switch (backend) {
-            case COLFER:
-                extension = ".colf";
-                bucketCodec = new ColferCodec();
-                break;
-            case MESSAGE_PACK:
-                extension = ".msg";
-                bucketCodec = new MessagePackCodec();
-                break;
-            default:
-                throw new IllegalArgumentException("No backend registered for " + backend);
-        }
-        this.extension = extension + (gzipped ? ".gz" : "");
+        this.bucketCodec = backend.getBucketCodec();
+        this.extension = backend.getExtension() + (gzipped ? ".gz" : "");
         logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);
         this.paths = false;
     }

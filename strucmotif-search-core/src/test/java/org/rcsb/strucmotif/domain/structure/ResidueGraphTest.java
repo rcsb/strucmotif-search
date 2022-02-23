@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.structure;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -33,12 +34,15 @@ class ResidueGraphTest {
     }
 
     private static final float TEST_DISTANCE_CUTOFF = 20;
-    private static final float TEST_SQUARED_DISTANCE_CUTOFF = TEST_DISTANCE_CUTOFF * TEST_DISTANCE_CUTOFF;
     private StructureReader structureReader;
+    private MotifSearchConfig motifSearchConfig;
 
     @BeforeEach
     public void init() {
         structureReader = new StructureReaderImpl();
+        motifSearchConfig = new MotifSearchConfig();
+        motifSearchConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
+        motifSearchConfig.setUndefinedAssemblies(false);
     }
 
     @Test
@@ -48,7 +52,7 @@ class ResidueGraphTest {
         for (String perm : perms) {
             InputStream resource = getResource("cif/1acj-" + perm + ".cif");
             Structure structure = structureReader.readFromInputStream(resource);
-            ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
             Set<String> descriptors = residueGraph.residuePairOccurrencesSequential()
                     .map(ResiduePairOccurrence::getResiduePairDescriptor)
                     .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
@@ -64,7 +68,7 @@ class ResidueGraphTest {
     public void whenReadingRenumbered3vvk_then6Valid() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
@@ -88,7 +92,7 @@ class ResidueGraphTest {
     public void whenReadingRenumbered1dsd_then8ValidInChainC() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
@@ -114,7 +118,7 @@ class ResidueGraphTest {
     public void whenReadingOriginal200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         assertEquals(5949, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -144,7 +148,7 @@ class ResidueGraphTest {
     public void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -174,7 +178,7 @@ class ResidueGraphTest {
     public void whenReadingRenumbered200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         assertEquals(5949,  residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -204,7 +208,7 @@ class ResidueGraphTest {
     public void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -240,7 +244,7 @@ class ResidueGraphTest {
     public void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
         List<ResiduePairDescriptor> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, TEST_SQUARED_DISTANCE_CUTOFF, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         List<ResiduePairIdentifier> identifiers = residueGraph.residuePairOccurrencesParallel()
                 .filter(wordOccurrence -> residuePairDescriptors.contains(wordOccurrence.getResiduePairDescriptor()))
@@ -256,7 +260,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingRNA_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, 15 * 15, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         assertTrue(residueGraph.getNumberOfPairings() > 0);
     }
@@ -264,7 +268,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingStructureWithoutIdentityOper_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7a3x"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, 15 * 15, false, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
         assertTrue(residueGraph.getNumberOfPairings() > 0);
     }

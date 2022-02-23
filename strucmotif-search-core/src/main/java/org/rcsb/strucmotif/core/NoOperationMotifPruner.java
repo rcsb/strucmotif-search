@@ -29,7 +29,7 @@ public class NoOperationMotifPruner implements MotifPruner {
 
     @Override
     public List<ResiduePairOccurrence> prune(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig.getSquaredDistanceCutoff(), true, motifSearchConfig.isUndefinedAssemblies());
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig, true);
 
         return residueGraph.residuePairOccurrencesSequential()
                 .collect(Collectors.toList());

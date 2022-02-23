@@ -315,7 +315,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         try {
-            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig.getSquaredDistanceCutoff(), false, motifSearchConfig.isUndefinedAssemblies());
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();

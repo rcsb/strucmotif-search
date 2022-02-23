@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.domain.structure;
 
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -40,11 +41,10 @@ public class ResidueGraph {
      * @param structure the context
      * @param labelSelections residue keys (maybe subset, maybe all)
      * @param residues residue coordinates (maybe subset, maybe all)
-     * @param squaredCutoff maximum distance of residue pairs to index
+     * @param motifSearchConfig global config
      * @param allowTransformed allow pairs between 2 transformed chains?
-     * @param allowUndefinedAssemblies set to true for computed structure models
      */
-    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, float squaredCutoff, boolean allowTransformed, boolean allowUndefinedAssemblies) {
+    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, MotifSearchConfig motifSearchConfig, boolean allowTransformed) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -81,8 +81,8 @@ public class ResidueGraph {
 
         Map<String, String[]> assemblyMap = structure.getAssemblies();
         // handle case where undefined assemblies are allowed and no assembly info is present
-        if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
-            assemblyMap.put("0", structure.getLabelSelections()
+        if (motifSearchConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
+            assemblyMap.put(motifSearchConfig.getUndefinedAssemblyIdentifier(), structure.getLabelSelections()
                     .stream()
                     .map(LabelSelection::getLabelAsymId)
                     .distinct()
@@ -90,17 +90,16 @@ public class ResidueGraph {
                     .toArray(String[]::new));
         }
 
-        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, squaredCutoff, allowTransformed, assemblyMap);
+        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, motifSearchConfig.getSquaredDistanceCutoff(), allowTransformed, assemblyMap);
     }
 
     /**
      * Construct a new residue graph from a full structure.
      * @param structure data
-     * @param squaredCutoff maximum dot product between atoms to consider
+     * @param motifSearchConfig global config
      * @param allowTransformed set to true during QueryStructure evaluation
-     * @param allowUndefinedAssemblies set to true for computed structure models
      */
-    public ResidueGraph(Structure structure, float squaredCutoff, boolean allowTransformed, boolean allowUndefinedAssemblies) {
+    public ResidueGraph(Structure structure, MotifSearchConfig motifSearchConfig, boolean allowTransformed) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -115,8 +114,8 @@ public class ResidueGraph {
         Map<String, String[]> assemblyMap = structure.getAssemblies();
 
         // handle case where undefined assemblies are allowed and no assembly info is present
-        if (allowUndefinedAssemblies && assemblyMap.isEmpty()) {
-            assemblyMap.put("0", chainMap.keySet()
+        if (motifSearchConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
+            assemblyMap.put(motifSearchConfig.getUndefinedAssemblyIdentifier(), chainMap.keySet()
                     .stream()
                     .map(c -> c + "_1")
                     .toArray(String[]::new));
@@ -180,7 +179,7 @@ public class ResidueGraph {
             }
         }
 
-        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, squaredCutoff, allowTransformed, assemblyMap);
+        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, motifSearchConfig.getSquaredDistanceCutoff(), allowTransformed, assemblyMap);
     }
 
     private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed, Map<String, String[]> assemblies) {

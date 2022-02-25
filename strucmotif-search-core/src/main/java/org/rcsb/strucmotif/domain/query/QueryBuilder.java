@@ -8,6 +8,7 @@ import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -119,6 +120,16 @@ public class QueryBuilder {
     }
 
     /**
+     * Use a motif definition to start.
+     * @param motifDefinition a pre-defined motif
+     * @return mandatory parameter step
+     */
+    public MandatoryBuilder defineByMotif(MotifDefinition motifDefinition) {
+        return defineByPdbIdAndSelection(motifDefinition.getStructureIdentifier(), motifDefinition.getLabelSelections())
+                .propagateExchanges(motifDefinition.getPositionSpecificExchanges());
+    }
+
+    /**
      * Parameters are considered mandatory arguments (in the sense that some value has to be given - nonetheless,
      * default values will be used). But internally these values are strictly required. No input validation is performed
      * whatsoever.
@@ -136,6 +147,7 @@ public class QueryBuilder {
         private MotifPruner motifPruner;
         private int limit;
         private boolean undefinedAssemblies;
+        private Set<PositionSpecificExchange> upstreamExchanges;
 
         MandatoryBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
             this.structureIdentifier = structureIdentifier;
@@ -253,6 +265,16 @@ public class QueryBuilder {
         }
 
         /**
+         * Allow to set downstream exchanges via upstream definition.
+         * @param upstreamExchanges exchanges from a motif definition
+         * @return this builder
+         */
+        MandatoryBuilder propagateExchanges(Set<PositionSpecificExchange> upstreamExchanges) {
+            this.upstreamExchanges = upstreamExchanges;
+            return this;
+        }
+
+        /**
          * Creates a {@link Parameters} instance based on all values. Proceeds to the next step.
          * @return the optional argument step
          */
@@ -265,7 +287,7 @@ public class QueryBuilder {
                     motifPruner,
                     limit,
                     undefinedAssemblies);
-            return new OptionalStepBuilder(structureIdentifier, structure, labelSelections, residues, parameters);
+            return new OptionalStepBuilder(structureIdentifier, structure, labelSelections, residues, parameters, upstreamExchanges);
         }
     }
 
@@ -283,16 +305,21 @@ public class QueryBuilder {
         private final Set<String> blacklist;
         private StructureDeterminationMethodology structureDeterminationMethodology;
 
-        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, Parameters parameters) {
+        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, Parameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.labelSelections = labelSelections;
             this.residues = residues;
             this.parameters = parameters;
-            this.exchanges = new HashMap<>();
+            this.exchanges = upstreamExchanges == null || upstreamExchanges.isEmpty() ? new HashMap<>() : explodeExchanges(upstreamExchanges);
             this.whitelist = new HashSet<>();
             this.blacklist = new HashSet<>();
             this.structureDeterminationMethodology = StructureDeterminationMethodology.ALL;
+        }
+
+        private Map<LabelSelection, Set<ResidueType>> explodeExchanges(Set<PositionSpecificExchange> exchanges) {
+            return exchanges.stream()
+                    .collect(Collectors.toMap(PositionSpecificExchange::getLabelSelection, PositionSpecificExchange::getResidueTypes));
         }
 
         /**

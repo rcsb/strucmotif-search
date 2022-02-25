@@ -11,8 +11,9 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.domain.Pair;
+import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
@@ -20,6 +21,7 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Tolerance-specific benchmark via JMH.
@@ -36,7 +38,7 @@ public class ToleranceBenchmark {
      */
     @Benchmark
     public void searchForSerineProtease(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.HDS, tolerance, state));
+        blackhole.consume(run(MotifDefinition.HDS, tolerance, state));
     }
 
     /**
@@ -46,7 +48,7 @@ public class ToleranceBenchmark {
      */
     @Benchmark
     public void searchForAminopeptidase(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.KDDDE, tolerance, state));
+        blackhole.consume(run(MotifDefinition.KDDDE, tolerance, state));
     }
 
     /**
@@ -56,7 +58,7 @@ public class ToleranceBenchmark {
      */
     @Benchmark
     public void searchForZincCoordination(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.CHH, tolerance, state));
+        blackhole.consume(run(MotifDefinition.CHH, tolerance, state));
     }
 
     /**
@@ -66,7 +68,7 @@ public class ToleranceBenchmark {
      */
     @Benchmark
     public void searchForEnolaseSuperfamily(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.KDEEH, tolerance, state));
+        blackhole.consume(run(MotifDefinition.KDEEH, tolerance, state));
     }
 
     /**
@@ -76,7 +78,7 @@ public class ToleranceBenchmark {
      */
     @Benchmark
     public void searchForEnolaseSuperfamilyExchanges(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.KDEEH_EXCHANGES, tolerance, state));
+        blackhole.consume(run(MotifDefinition.KDEEH_EXCHANGES, tolerance, state));
     }
 
     /**
@@ -86,19 +88,21 @@ public class ToleranceBenchmark {
      */
     @Benchmark
     public void searchForQuadruplex(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.GGGG, tolerance, state));
+        blackhole.consume(run(MotifDefinition.GGGG, tolerance, state));
     }
 
-    private MotifSearchResult run(Motifs motif, int tolerance, MyState state) {
+    private MotifSearchResult run(MotifDefinition motif, int tolerance, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
         QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+                .atomPairingScheme(AtomPairingScheme.ALL)
+                .rmsdCutoff(2.0f)
                 .backboneDistanceTolerance(tolerance)
                 .sideChainDistanceTolerance(tolerance)
                 .angleTolerance(tolerance)
                 .buildParameters();
 
-        PositionSpecificExchange[] exchanges = motif.getPositionSpecificExchanges();
-        if (exchanges.length > 0) {
+        Set<PositionSpecificExchange> exchanges = motif.getPositionSpecificExchanges();
+        if (exchanges.size() > 0) {
             for (PositionSpecificExchange exchange : exchanges) {
                 builder.addPositionSpecificExchange(exchange.getLabelSelection(), exchange.getResidueTypes());
             }

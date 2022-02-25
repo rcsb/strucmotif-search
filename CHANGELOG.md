@@ -7,6 +7,9 @@ unreleased
 - make default assembly identifier in residue graph configurable
 - add motif definitions, registry & search support
 
+### Breaking changes
+- Motifs replaced by more flexible MotifDefinitionRegistry
+
 strucmotif-search 0.13.6
 -------------
 ### Added

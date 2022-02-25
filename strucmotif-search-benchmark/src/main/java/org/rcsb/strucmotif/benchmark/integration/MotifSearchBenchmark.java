@@ -8,14 +8,17 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
-import org.rcsb.strucmotif.Motifs;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.motif.MotifDefinition;
+import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
+import org.rcsb.strucmotif.domain.query.QueryBuilder;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Generic benchmark via JMH.
@@ -29,7 +32,7 @@ public class MotifSearchBenchmark {
     @Benchmark
     public void searchForCatalyticTriad(Blackhole blackhole, MyState state) {
         // catalytic activity - the trivial case
-        blackhole.consume(run(Motifs.HDS, state));
+        blackhole.consume(run(MotifDefinition.HDS, state));
     }
 
     /**
@@ -39,7 +42,7 @@ public class MotifSearchBenchmark {
      */
     @Benchmark
     public void searchForAminoPeptidase(Blackhole blackhole, MyState state) {
-        blackhole.consume(run(Motifs.KDDDE, state));
+        blackhole.consume(run(MotifDefinition.KDDDE, state));
     }
 
     /**
@@ -50,7 +53,7 @@ public class MotifSearchBenchmark {
     @Benchmark
     public void searchForIonCoordination(Blackhole blackhole, MyState state) {
         // ion fixation - 3 residues with ambiguity
-        blackhole.consume(run(Motifs.CHH, state));
+        blackhole.consume(run(MotifDefinition.CHH, state));
     }
 
     /**
@@ -61,7 +64,7 @@ public class MotifSearchBenchmark {
     @Benchmark
     public void searchForSuperfamilyTemplate(Blackhole blackhole, MyState state) {
         // superfamily template - 5 residues with ambiguity
-        blackhole.consume(run(Motifs.KDEEH, state));
+        blackhole.consume(run(MotifDefinition.KDEEH, state));
     }
 
     /**
@@ -72,7 +75,7 @@ public class MotifSearchBenchmark {
     @Benchmark
     public void searchForSuperfamilyTemplateExchanges(Blackhole blackhole, MyState state) {
         // superfamily template - 5 residues with ambiguity
-        blackhole.consume(run(Motifs.KDEEH_EXCHANGES, state));
+        blackhole.consume(run(MotifDefinition.KDEEH_EXCHANGES, state));
     }
 
     /**
@@ -83,16 +86,24 @@ public class MotifSearchBenchmark {
     @Benchmark
     public void searchForRNAComplex(Blackhole blackhole, MyState state) {
         // RNA interaction motif - 4 residues with total ambiguity
-        blackhole.consume(run(Motifs.GGGG, state));
+        blackhole.consume(run(MotifDefinition.GGGG, state));
     }
 
-    private MotifSearchResult run(Motifs motif, MyState state) {
+    private MotifSearchResult run(MotifDefinition motif, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        return state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
-                .buildParameters()
-                .buildQuery()
+                .buildParameters();
+
+        Set<PositionSpecificExchange> exchanges = motif.getPositionSpecificExchanges();
+        if (exchanges.size() > 0) {
+            for (PositionSpecificExchange exchange : exchanges) {
+                builder.addPositionSpecificExchange(exchange.getLabelSelection(), exchange.getResidueTypes());
+            }
+        }
+
+        return builder.buildQuery()
                 .run();
     }
 

@@ -147,19 +147,16 @@ public class InvertedIndexBucket implements Bucket {
 
     @Override
     public String getStructOperId1() {
-        String oper = operators.get(positionPointer);
-        return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
+        return operators.getOrDefault(positionPointer, DEFAULT_OPERATOR);
     }
 
     public String getStructOperId(int i) {
-        String oper = operators.get(i);
-        return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
+        return operators.getOrDefault(i, DEFAULT_OPERATOR);
     }
 
     @Override
     public String getStructOperId2() {
-        String oper = operators.get(positionPointer + 1);
-        return Objects.requireNonNullElse(oper, DEFAULT_OPERATOR);
+        return operators.getOrDefault(positionPointer + 1, DEFAULT_OPERATOR);
     }
 
     @Override

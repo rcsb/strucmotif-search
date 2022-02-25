@@ -1,8 +1,16 @@
 Strucmotif-search Changelog
 =============
 
+unreleased
+-------------
+### Added
+- make default assembly identifier in residue graph configurable
+- add motif definitions
+- add motif definition registry
+
 strucmotif-search 0.13.6
 -------------
+### Added
 - add impl & extension to backend enum
 
 strucmotif-search 0.13.5

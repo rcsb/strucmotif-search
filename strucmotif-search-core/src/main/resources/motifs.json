@@ -1,0 +1,17 @@
+[
+  {
+    "structureIdentifier": "6zwf",
+    "title": "NOS bridge",
+    "description": "A covalent crosslink between a cysteine and a lysine residue with a NOS bridge that serves as an allosteric redox switch in the transaldolase enzyme of Neisseria gonorrhoeae, the pathogen that causes gonorrhoea.",
+    "labelSelections": [{
+      "label_asym_id": "A",
+      "struct_oper_id": "1",
+      "label_seq_id": 9
+    }, {
+      "label_asym_id": "A",
+      "struct_oper_id": "1",
+      "label_seq_id": 39
+    }],
+    "positionSpecificExchanges": []
+  }
+]

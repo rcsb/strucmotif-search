@@ -444,22 +444,19 @@ public class ResidueGraph {
     }
 
     private Stream<Pair<IndexSelection, IndexSelection>> pairs(IndexSelection residue1, boolean parallel) {
-        try {
-            // retrieve all neighbors for id
-            if (parallel) {
-                return backboneDistances.get(residue1)
-                        .keySet()
-                        .parallelStream()
-                        .map(residue2 -> new Pair<>(residue1, residue2));
-            } else {
-                return backboneDistances.get(residue1)
-                        .keySet()
-                        .stream()
-                        .map(residue2 -> new Pair<>(residue1, residue2));
-            }
-        } catch (NullPointerException e) {
-            // value can be empty
-            return Stream.empty();
+        // retrieve all neighbors for id
+        Map<IndexSelection, Float> map = backboneDistances.get(residue1);
+        // can be empty
+        if (map == null) return Stream.empty();
+
+        if (parallel) {
+            return map.keySet()
+                    .parallelStream()
+                    .map(residue2 -> new Pair<>(residue1, residue2));
+        } else {
+            return map.keySet()
+                    .stream()
+                    .map(residue2 -> new Pair<>(residue1, residue2));
         }
     }
 }

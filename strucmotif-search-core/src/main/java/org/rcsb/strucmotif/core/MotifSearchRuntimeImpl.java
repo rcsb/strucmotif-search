@@ -2,11 +2,14 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
-import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-import org.rcsb.strucmotif.domain.query.Parameters;
-import org.rcsb.strucmotif.domain.query.QueryStructure;
-import org.rcsb.strucmotif.domain.result.Hit;
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.AssamSearchContext;
+import org.rcsb.strucmotif.domain.SpriteSearchContext;
+import org.rcsb.strucmotif.domain.query.AssamParameters;
+import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.result.AssamHit;
+import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.domain.result.SpriteHit;
+import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -69,16 +72,15 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     }
 
     @Override
-    public MotifSearchResult performSearch(MotifSearchQuery query) {
+    public AssamMotifSearchResult performSearch(AssamSearchContext context) {
         try {
-            QueryStructure queryStructure = query.getQueryStructure();
-            Parameters parameters = query.getParameters();
-            MotifSearchResult result = createResultContainer(query, queryStructure, parameters);
+            AssamSearchQuery query = context.getQuery();
+            AssamMotifSearchResult result = context.getResult();
 
             // get all valid targets
-            targetAssembler.assemble(result);
+            targetAssembler.assemble(context);
 
-            List<Hit> hits = scoreHits(parameters, result, queryStructure.getResidueIndexSwaps());
+            List<AssamHit> hits = scoreHits(context);
             logger.info("[{}] Accepted {} hits in {} ms",
                     query.hashCode(),
                     hits.size(),
@@ -103,16 +105,15 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     }
 
     @Override
-    public void performSearch(MotifSearchQuery query, Consumer<Hit> consumer) {
+    public void performSearch(AssamSearchContext context, Consumer<AssamHit> consumer) {
         try {
-            QueryStructure queryStructure = query.getQueryStructure();
-            Parameters parameters = query.getParameters();
-            MotifSearchResult result = createResultContainer(query, queryStructure, parameters);
+            AssamSearchQuery query = context.getQuery();
+            AssamMotifSearchResult result = context.getResult();
 
             // get all valid targets
-            targetAssembler.assemble(result);
+            targetAssembler.assemble(context);
 
-            int hits = consumeHits(parameters, result, consumer, queryStructure.getResidueIndexSwaps());
+            int hits = consumeHits(context, consumer);
             logger.info("[{}] Accepted {} hits in {} ms",
                     query.hashCode(),
                     hits,
@@ -127,24 +128,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
     }
 
-    private MotifSearchResult createResultContainer(MotifSearchQuery query, QueryStructure queryStructure, Parameters parameters) {
-        logger.info("[{}] Query: {} with {}",
-                query.hashCode(),
-                queryStructure.getStructureIdentifier(),
-                queryStructure.getIndexSelections());
-        logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}, Limit: {}",
-                query.hashCode(),
-                query.getExchanges(),
-                parameters.getBackboneDistanceTolerance(),
-                parameters.getSideChainDistanceTolerance(),
-                parameters.getAngleTolerance(),
-                parameters.getAtomPairingScheme(),
-                parameters.getRmsdCutoff(),
-                parameters.getLimit());
-
-        return new MotifSearchResult(query);
-    }
-
     private static Throwable unwrapException(Throwable throwable) {
         Objects.requireNonNull(throwable);
         Throwable rootCause = throwable;
@@ -154,14 +137,18 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         return rootCause;
     }
 
-    private List<Hit> scoreHits(Parameters parameters, MotifSearchResult result, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {
+    private List<AssamHit> scoreHits(AssamSearchContext context) throws ExecutionException, InterruptedException {
+        AssamSearchQuery query = context.getQuery();
+        AssamParameters parameters = query.getParameters();
+        AssamMotifSearchResult result = context.getResult();
+
         result.getTimings().scoreHitsStart();
         int limit = Math.min(parameters.getLimit(), motifSearchConfig.getMaxResults());
-        HitScorer hitScorer = new HitScorer(result.getQuery().getQueryStructure().getResidues(),
+        HitScorer hitScorer = new HitScorer(query.getQueryStructure().getResidues(),
                 parameters.getAtomPairingScheme(),
                 alignmentService);
 
-        List<Hit> hits = threadPool.submit(() -> hits(result, parameters, hitScorer, residueIndexSwaps)
+        List<AssamHit> hits = threadPool.submit(() -> hits(context, hitScorer)
                 .limit(limit)
                 .collect(Collectors.toList())).get();
 
@@ -169,15 +156,19 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         return hits;
     }
 
-    private int consumeHits(Parameters parameters, MotifSearchResult result, Consumer<Hit> consumer, List<Integer> residueIndexSwaps) throws ExecutionException, InterruptedException {
+    private int consumeHits(AssamSearchContext context, Consumer<AssamHit> consumer) throws ExecutionException, InterruptedException {
+        AssamSearchQuery query = context.getQuery();
+        AssamParameters parameters = query.getParameters();
+        AssamMotifSearchResult result = context.getResult();
+
         result.getTimings().scoreHitsStart();
         AtomicInteger hits = new AtomicInteger();
-        HitScorer hitScorer = new HitScorer(result.getQuery().getQueryStructure().getResidues(),
+        HitScorer hitScorer = new HitScorer(query.getQueryStructure().getResidues(),
                 parameters.getAtomPairingScheme(),
                 alignmentService);
 
         threadPool.submit(() -> {
-            hits(result, parameters, hitScorer, residueIndexSwaps)
+            hits(context, hitScorer)
                     .forEach(hit -> {
                         hits.incrementAndGet();
                         consumer.accept(hit);
@@ -189,8 +180,13 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         return hits.get();
     }
 
-    private Stream<Hit> hits(MotifSearchResult result, Parameters parameters, HitScorer hitScorer, List<Integer> residueIndexSwaps) {
-        return result.getTargetStructures()
+    private Stream<AssamHit> hits(AssamSearchContext context, HitScorer hitScorer) {
+        AssamSearchQuery query = context.getQuery();
+        List<Integer> residueIndexSwaps = query.getQueryStructure().getResidueIndexSwaps();
+        AssamParameters parameters = query.getParameters();
+
+        return context.getResult()
+                .getTargetStructures()
                 .values()
                 .parallelStream()
                 .flatMap(targetStructure -> {
@@ -198,5 +194,16 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                     Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
                     return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, parameters.getRmsdCutoff(), assemblyInformationProvider, parameters.isUndefinedAssemblies());
                 });
+    }
+
+    @Override
+    public SpriteMotifSearchResult performSearch(SpriteSearchContext context) {
+        // TODO impl
+        return null;
+    }
+
+    @Override
+    public void performSearch(SpriteSearchContext context, Consumer<SpriteHit> consumer) {
+        // TODO impl
     }
 }

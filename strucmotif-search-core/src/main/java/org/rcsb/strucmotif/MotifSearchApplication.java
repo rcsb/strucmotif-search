@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif;
 
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
+import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
+import org.rcsb.strucmotif.domain.query.SpriteContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +15,8 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @EntityScan("org.rcsb.strucmotif")
 public class MotifSearchApplication {
-    static QueryBuilder queryBuilder;
+    static AssamContextBuilder assamQueryBuilder;
+    static SpriteContextBuilder spriteQueryBuilder;
 
     /**
      * Default entry point.
@@ -26,10 +28,12 @@ public class MotifSearchApplication {
 
     /**
      * Constructor.
-     * @param queryBuilder injectable query builder
+     * @param assamQueryBuilder injectable query builder (1 motif -> n structures)
+     * @param spriteQueryBuilder injectable query builder (1 structure -> n motifs)
      */
     @Autowired
-    public MotifSearchApplication(QueryBuilder queryBuilder) {
-        MotifSearchApplication.queryBuilder = queryBuilder;
+    public MotifSearchApplication(AssamContextBuilder assamQueryBuilder, SpriteContextBuilder spriteQueryBuilder) {
+        MotifSearchApplication.assamQueryBuilder = assamQueryBuilder;
+        MotifSearchApplication.spriteQueryBuilder = spriteQueryBuilder;
     }
 }

@@ -6,7 +6,7 @@ import org.rcsb.strucmotif.MotifSearch;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
+import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class MyState {
     private final MotifSearchConfig config = new MotifSearchConfig();
     private final StructureReaderImpl structureReader = new StructureReaderImpl();
-    public final QueryBuilder queryBuilder = MotifSearch.newQuery();
+    public final AssamContextBuilder queryBuilder = MotifSearch.assam();
     public final Map<MotifDefinition, Pair<Structure, List<LabelSelection>>> structureMap;
 
     /**

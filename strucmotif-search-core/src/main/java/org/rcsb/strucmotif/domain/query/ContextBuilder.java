@@ -1,4 +1,4 @@
 package org.rcsb.strucmotif.domain.query;
 
-public interface Parameters {
+public interface ContextBuilder {
 }

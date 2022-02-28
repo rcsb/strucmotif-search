@@ -17,10 +17,9 @@ public class MessagePackCodec implements BucketCodec {
      * Read the content of a {@link InvertedIndexBucket} from a stream.
      * @param byteBuffer source data
      * @return the corresponding bucket
-     * @throws IOException if reading/decoding fails
      */
     @Override
-    public InvertedIndexBucket decode(ByteBuffer byteBuffer) throws IOException {
+    public InvertedIndexBucket decode(ByteBuffer byteBuffer) {
         int[] structureIndices = decodeIntArray(byteBuffer);
         int[] positionOffsets = decodeIntArray(byteBuffer);
         int[] positionData = decodeIntArray(byteBuffer);

@@ -1,8 +1,11 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-import org.rcsb.strucmotif.domain.result.Hit;
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.AssamSearchContext;
+import org.rcsb.strucmotif.domain.SpriteSearchContext;
+import org.rcsb.strucmotif.domain.result.AssamHit;
+import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.domain.result.SpriteHit;
+import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
 
 import java.util.function.Consumer;
 
@@ -10,17 +13,11 @@ import java.util.function.Consumer;
  * Performs motif search queries and returns the corresponding result object.
  */
 public interface MotifSearchRuntime {
-    /**
-     * Performs a structural motif search run for a given query.
-     * @param query the query, specifying motif and all parameters
-     * @return the result container
-     */
-    MotifSearchResult performSearch(MotifSearchQuery query);
+    AssamMotifSearchResult performSearch(AssamSearchContext context);
 
-    /**
-     * Performs a structural motif search for a given query.
-     * @param query the query, specifying motif and all parameters
-     * @param consumer some terminal operation that will be applied to each accepted hit
-     */
-    void performSearch(MotifSearchQuery query, Consumer<Hit> consumer);
+    void performSearch(AssamSearchContext context, Consumer<AssamHit> consumer);
+
+    SpriteMotifSearchResult performSearch(SpriteSearchContext context);
+
+    void performSearch(SpriteSearchContext context, Consumer<SpriteHit> consumer);
 }

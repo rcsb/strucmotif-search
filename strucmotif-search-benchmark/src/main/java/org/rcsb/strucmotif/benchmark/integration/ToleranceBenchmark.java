@@ -15,8 +15,8 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
+import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -91,9 +91,9 @@ public class ToleranceBenchmark {
         blackhole.consume(run(MotifDefinition.GGGG, tolerance, state));
     }
 
-    private MotifSearchResult run(MotifDefinition motif, int tolerance, MyState state) {
+    private AssamMotifSearchResult run(MotifDefinition motif, int tolerance, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        QueryBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+        AssamContextBuilder.OptionalStepBuilder builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
                 .backboneDistanceTolerance(tolerance)
@@ -108,8 +108,7 @@ public class ToleranceBenchmark {
             }
         }
 
-        return builder.buildQuery()
-            .run();
+        return builder.buildContext().run();
     }
 
     /**

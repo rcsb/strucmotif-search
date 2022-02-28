@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.core;
 
+import org.rcsb.strucmotif.domain.AssamSearchContext;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
@@ -7,11 +8,11 @@ import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-import org.rcsb.strucmotif.domain.query.Parameters;
-import org.rcsb.strucmotif.domain.query.QueryStructure;
+import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.query.AssamParameters;
+import org.rcsb.strucmotif.domain.query.AssamQueryStructure;
 import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -54,10 +55,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
     }
 
     @Override
-    public void assemble(MotifSearchResult response) throws ExecutionException, InterruptedException {
-        MotifSearchQuery query = response.getQuery();
-        QueryStructure queryStructure = query.getQueryStructure();
-        Parameters parameters = query.getParameters();
+    public void assemble(AssamSearchContext context) throws ExecutionException, InterruptedException {
+        AssamSearchQuery query = context.getQuery();
+        AssamQueryStructure queryStructure = query.getQueryStructure();
+        AssamParameters parameters = query.getParameters();
+        AssamMotifSearchResult result = context.getResult();
         int backboneDistanceTolerance = parameters.getBackboneDistanceTolerance();
         int sideChainDistanceTolerance = parameters.getSideChainDistanceTolerance();
         int angleTolerance = parameters.getAngleTolerance();
@@ -82,7 +84,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                 .map(structureIndexProvider::selectStructureIndex)
                 .collect(Collectors.toSet());
 
-        response.getTimings().pathsStart();
+        result.getTimings().pathsStart();
         // retrieve target identifiers per query motif descriptor
         int steps = queryStructure.getResiduePairOccurrences().size();
         for (int i = 0; i < steps; i++) {
@@ -97,11 +99,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
             // TODO try to avoid object creation
             // TODO try to consume stream directly
-            consume(response, residuePairIdentifiers);
+            consume(context, residuePairIdentifiers);
 
             // update allowed set for next iteration
             if (i + 1 < steps) {
-                Set<Integer> keys = response.getTargetStructures().keySet();
+                Set<Integer> keys = result.getTargetStructures().keySet();
                 if (i == 0 && allowed.isEmpty()) {
                     allowed.addAll(keys);
                 } else {
@@ -110,27 +112,27 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
 
             logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",
-                    response.getQuery().hashCode(),
+                    query.hashCode(),
                     residuePairDescriptor,
                     (System.nanoTime() - s) / 1000 / 1000,
-                    response.getTargetStructures().size());
+                    result.getTargetStructures().size());
 
             if (i > 0 && i + 1 < steps && allowed.isEmpty()) {
-                logger.info("[{}] No more valid extensions - terminating early", response.getQuery().hashCode());
+                logger.info("[{}] No more valid extensions - terminating early", query.hashCode());
                 break;
             }
         }
-        response.getTimings().pathsStop();
+        result.getTimings().pathsStop();
 
-        int pathCount = response.getTargetStructures().values().stream().mapToInt(TargetStructure::getNumberOfValidPaths).sum();
-        int structureCount = response.getTargetStructures().size();
+        int pathCount = result.getTargetStructures().values().stream().mapToInt(TargetStructure::getNumberOfValidPaths).sum();
+        int structureCount = result.getTargetStructures().size();
         logger.info("[{}] Found {} valid paths ({} target structures) in {} ms",
-                response.getQuery().hashCode(),
+                query.hashCode(),
                 pathCount,
                 structureCount,
-                response.getTimings().getPathsTime());
-        response.setNumberOfPaths(pathCount);
-        response.setNumberOfTargetStructures(structureCount);
+                result.getTimings().getPathsTime());
+        result.setNumberOfPaths(pathCount);
+        result.setNumberOfTargetStructures(structureCount);
     }
 
     private static <T> T[] concat(T[] first, T[] second) {
@@ -184,18 +186,20 @@ public class TargetAssemblerImpl implements TargetAssembler {
         }
     }
 
-    private void consume(MotifSearchResult response, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
-        Map<Integer, TargetStructure> targetStructures = response.getTargetStructures();
-        QueryStructure queryStructure = response.getQuery().getQueryStructure();
+    private void consume(AssamSearchContext context, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
+        AssamSearchQuery query = context.getQuery();
+        AssamMotifSearchResult result = context.getResult();
+        Map<Integer, TargetStructure> targetStructures = result.getTargetStructures();
+        AssamQueryStructure queryStructure = query.getQueryStructure();
 
         if (targetStructures == null) {
             // first generation: all the paths are valid
-            response.setTargetStructures(data.entrySet()
+            result.setTargetStructures(data.entrySet()
                     .stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, v -> new TargetStructure(v.getKey(), v.getValue()))));
         } else {
             // subsequent generations
-            int pathGeneration = response.incrementAndGetPathGeneration();
+            int pathGeneration = result.incrementAndGetPathGeneration();
 
             // generate overlap profile
             Overlap[] overlapProfile = new Overlap[pathGeneration];
@@ -205,7 +209,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
 
             // focus on valid target structures as this set should be smaller
-            response.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
+            result.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
                             .parallelStream()
                             .filter(entry -> {
                                 InvertedIndexResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());

@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
+import org.rcsb.strucmotif.domain.AssamSearchContext;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
@@ -29,10 +30,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The entry point to create {@link MotifSearchQuery} instances.
+ * The entry point to create {@link AssamSearchQuery} instances.
  */
 @Service
-public class QueryBuilder {
+public class AssamContextBuilder implements ContextBuilder {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -48,7 +49,7 @@ public class QueryBuilder {
      * @param motifSearchConfig injectable config
      */
     @Autowired
-    public QueryBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
+    public AssamContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
         this.structureDataProvider = structureDataProvider;
         this.kruskalMotifPruner = kruskalMotifPruner;
         this.noOperationMotifPruner = noOperationMotifPruner;
@@ -154,13 +155,13 @@ public class QueryBuilder {
             this.structure = structure;
             this.labelSelections = labelSelections;
             this.residues = residues;
-            this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
-            this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
-            this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
+            this.backboneDistanceTolerance = AssamParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
+            this.sideChainDistanceTolerance = AssamParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
+            this.angleTolerance = AssamParameters.DEFAULT_ANGLE_TOLERANCE;
             this.rmsdCutoff = Float.MAX_VALUE;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
-            this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
+            this.motifPruner = AssamContextBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
             this.undefinedAssemblies = false;
         }
@@ -233,10 +234,10 @@ public class QueryBuilder {
         public MandatoryBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL:
-                    this.motifPruner = QueryBuilder.this.kruskalMotifPruner;
+                    this.motifPruner = AssamContextBuilder.this.kruskalMotifPruner;
                     break;
                 case NONE:
-                    this.motifPruner = QueryBuilder.this.noOperationMotifPruner;
+                    this.motifPruner = AssamContextBuilder.this.noOperationMotifPruner;
                     break;
                 default:
                     throw new UnsupportedOperationException("Unhandled case: " + motifPruningStrategy);
@@ -275,11 +276,11 @@ public class QueryBuilder {
         }
 
         /**
-         * Creates a {@link Parameters} instance based on all values. Proceeds to the next step.
+         * Creates a {@link AssamParameters} instance based on all values. Proceeds to the next step.
          * @return the optional argument step
          */
         public OptionalStepBuilder buildParameters() {
-            Parameters parameters = new Parameters(backboneDistanceTolerance,
+            AssamParameters parameters = new AssamParameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
                     rmsdCutoff,
@@ -299,13 +300,13 @@ public class QueryBuilder {
         private final Structure structure;
         private final List<LabelSelection> labelSelections;
         private final List<Map<LabelAtomId, float[]>> residues;
-        private final Parameters parameters;
+        private final AssamParameters parameters;
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<String> whitelist;
         private final Set<String> blacklist;
         private StructureDeterminationMethodology structureDeterminationMethodology;
 
-        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, Parameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
+        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, AssamParameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.labelSelections = labelSelections;
@@ -368,9 +369,8 @@ public class QueryBuilder {
          * Build the actual container.
          * @return the immutable instance of all query parameters
          */
-        public MotifSearchQuery buildQuery() {
-            return new MotifSearchQuery(motifSearchRuntime,
-                    structureIdentifier,
+        public AssamSearchContext buildContext() {
+            AssamSearchQuery query = new AssamSearchQuery(structureIdentifier,
                     structure,
                     labelSelections,
                     residues,
@@ -378,8 +378,8 @@ public class QueryBuilder {
                     exchanges,
                     whitelist,
                     blacklist,
-                    structureDeterminationMethodology,
-                    motifSearchConfig);
+                    structureDeterminationMethodology);
+            return new AssamSearchContext(motifSearchRuntime, motifSearchConfig, query);
         }
     }
 }

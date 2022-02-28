@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.domain.result;
 
-import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,8 +7,7 @@ import java.util.Map;
 /**
  * The state and results of a motif search run.
  */
-public class MotifSearchResult {
-    private final MotifSearchQuery query;
+public class AssamMotifSearchResult implements SearchResult<AssamHit> {
     private final Timings timings;
 
     /**
@@ -19,33 +16,24 @@ public class MotifSearchResult {
     private int pathGeneration;
     private Map<Integer, TargetStructure> targetStructures;
 
-    private List<Hit> hits;
+    private List<AssamHit> hits;
     private int numberOfPaths;
     private int numberOfTargetStructures;
 
     /**
      * Construct a result container.
-     * @param query the initial query
      */
-    public MotifSearchResult(MotifSearchQuery query) {
-        this.query = query;
+    public AssamMotifSearchResult() {
         this.timings = new Timings();
         this.pathGeneration = 0;
         this.hits = new ArrayList<>();
     }
 
     /**
-     * The initial query.
-     * @return a query
-     */
-    public MotifSearchQuery getQuery() {
-        return query;
-    }
-
-    /**
      * Associated timings.
      * @return timings object
      */
+    @Override
     public Timings getTimings() {
         return timings;
     }
@@ -70,7 +58,7 @@ public class MotifSearchResult {
      * Update the collection of currently valid hits.
      * @param hits a collection of hits
      */
-    public void setHits(List<Hit> hits) {
+    public void setHits(List<AssamHit> hits) {
         this.hits = hits;
     }
 
@@ -78,7 +66,8 @@ public class MotifSearchResult {
      * Access all (currently) valid hits.
      * @return a collection of hits
      */
-    public List<Hit> getHits() {
+    @Override
+    public List<AssamHit> getHits() {
         return hits;
     }
 

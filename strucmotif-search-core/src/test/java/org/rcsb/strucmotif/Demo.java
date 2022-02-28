@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Demo {
     public static void main(String[] args) {
-        MotifSearch.newQuery()
+        MotifSearch.assam()
                 // several ways can be used to define the query motif - e.g., specify a PDB entry id
                 .defineByPdbIdAndSelection("4cha",
                         // and a collection of sequence positions to extract residues to use as motif
@@ -17,7 +17,7 @@ public class Demo {
                 .rmsdCutoff(1.0)
                 .buildParameters()
                 // retrieve container with complete query
-                .buildQuery()
+                .buildContext()
                 // execute query
                 .run()
                 .getHits()

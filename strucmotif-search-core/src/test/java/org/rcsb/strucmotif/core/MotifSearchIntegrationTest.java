@@ -9,11 +9,11 @@ import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-import org.rcsb.strucmotif.domain.query.QueryBuilder;
+import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
 import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
-import org.rcsb.strucmotif.domain.result.Hit;
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.result.AssamHit;
+import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -47,7 +47,7 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
 public class MotifSearchIntegrationTest {
     private StructureReader structureReader;
-    private QueryBuilder queryBuilder;
+    private AssamContextBuilder queryBuilder;
 
     @BeforeEach
     public void init() {
@@ -94,7 +94,7 @@ public class MotifSearchIntegrationTest {
         TargetAssembler targetAssembler = new TargetAssemblerImpl(invertedIndex, threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, motifSearchConfig);
         MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider);
-        this.queryBuilder = new QueryBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
+        this.queryBuilder = new AssamContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class MotifSearchIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", -62),
                     new LabelSelection("A", "1", -245),
                     new LabelSelection("A", "1", -295));
-            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery().run();
+            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
         });
     }
 
@@ -115,7 +115,7 @@ public class MotifSearchIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 1062),
                     new LabelSelection("A", "1", 10245),
                     new LabelSelection("A", "1", 10295));
-            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery().run();
+            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
         });
     }
 
@@ -127,7 +127,7 @@ public class MotifSearchIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 62), // K
                             new LabelSelection("A", "1", 245), // E
                             new LabelSelection("A", "1", 295)); // H
-            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery().run();
+            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
         });
     }
 
@@ -144,7 +144,7 @@ public class MotifSearchIntegrationTest {
                         new LabelSelection("A", "1", 245), // E
                         new LabelSelection("A", "1", 295)); // H
 
-        QueryBuilder.OptionalStepBuilder buildParameters = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        AssamContextBuilder.OptionalStepBuilder buildParameters = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
@@ -153,13 +153,13 @@ public class MotifSearchIntegrationTest {
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 295), Set.of(ResidueType.HISTIDINE, ResidueType.LYSINE));
 
-        MotifSearchResult response = buildParameters.buildQuery().run();
+        AssamMotifSearchResult response = buildParameters.buildContext().run();
 
         assertEquals(422, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()
-                .map(Hit::getResidueTypes)
+                .map(AssamHit::getResidueTypes)
                 .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
                 .collect(Collectors.toList());
@@ -187,7 +187,7 @@ public class MotifSearchIntegrationTest {
 
         // print all results
         assertTrue(response.getHits().stream()
-                .map(Hit::getRootMeanSquareDeviation)
+                .map(AssamHit::getRootMeanSquareDeviation)
                 .anyMatch(s -> s < 0.5), "no low-RMSD hits observed");
     }
 
@@ -204,7 +204,10 @@ public class MotifSearchIntegrationTest {
                         new LabelSelection("C", "2", 45),
                         new LabelSelection("C", "2", 49));
 
-        MotifSearchQuery motifSearchQuery = queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildQuery();
+        AssamSearchQuery motifSearchQuery = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters()
+                .buildContext()
+                .getQuery();
         assertEquals(6, motifSearchQuery.getQueryStructure().getResidues().size(), "not all residues present");
     }
 
@@ -223,7 +226,7 @@ public class MotifSearchIntegrationTest {
         int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .structureDeterminationMethodology(StructureDeterminationMethodology.ALL)
-                .buildQuery()
+                .buildContext()
                 .run()
                 .getHits()
                 .size();
@@ -232,7 +235,7 @@ public class MotifSearchIntegrationTest {
         int modelQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .structureDeterminationMethodology(StructureDeterminationMethodology.COMPUTATIONAL)
-                .buildQuery()
+                .buildContext()
                 .run()
                 .getHits()
                 .size();
@@ -241,7 +244,7 @@ public class MotifSearchIntegrationTest {
         int pdbQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .structureDeterminationMethodology(StructureDeterminationMethodology.EXPERIMENTAL)
-                .buildQuery()
+                .buildContext()
                 .run()
                 .getHits()
                 .size();

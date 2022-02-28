@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.AssamSearchContext;
 
 import java.util.concurrent.ExecutionException;
 
@@ -15,9 +15,9 @@ public interface TargetAssembler {
     /**
      * Search: i.e. find all paths through all target structures which reasonably resemble the structure of the query
      * motif.
-     * @param response the container to work on
+     * @param context the container to work on
      * @throws ExecutionException thrown by multi-threading impl
      * @throws InterruptedException thrown by multi-threading impl
      */
-    void assemble(MotifSearchResult response) throws ExecutionException, InterruptedException;
+    void assemble(AssamSearchContext context) throws ExecutionException, InterruptedException;
 }

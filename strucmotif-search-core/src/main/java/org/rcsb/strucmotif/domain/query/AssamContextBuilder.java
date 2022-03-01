@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * The entry point to create {@link AssamSearchQuery} instances.
  */
 @Service
-public class AssamContextBuilder implements ContextBuilder {
+public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.MandatoryAssamBuilder, AssamSearchContext> {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -64,7 +64,7 @@ public class AssamContextBuilder implements ContextBuilder {
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MandatoryBuilder defineByPdbIdAndSelection(String structureIdentifier, List<LabelSelection> selection) {
+    public MandatoryAssamBuilder defineByPdbIdAndSelection(String structureIdentifier, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readOriginal(structureIdentifier);
         return defineByStructureAndSelection(structure, selection);
     }
@@ -76,7 +76,7 @@ public class AssamContextBuilder implements ContextBuilder {
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MandatoryBuilder defineByFileAndSelection(InputStream inputStream, List<LabelSelection> selection) {
+    public MandatoryAssamBuilder defineByFileAndSelection(InputStream inputStream, List<LabelSelection> selection) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         return defineByStructureAndSelection(structure, selection);
     }
@@ -89,7 +89,7 @@ public class AssamContextBuilder implements ContextBuilder {
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MandatoryBuilder defineByStructureAndSelection(Structure structure, List<LabelSelection> labelSelections) {
+    public MandatoryAssamBuilder defineByStructureAndSelection(Structure structure, List<LabelSelection> labelSelections) {
         try {
             List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
 
@@ -99,7 +99,7 @@ public class AssamContextBuilder implements ContextBuilder {
             }
 
             String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
-            return new MandatoryBuilder(structureIdentifier, structure, labelSelections, residues);
+            return new MandatoryAssamBuilder(structureIdentifier, structure, labelSelections, residues);
         } catch (NoSuchElementException e) {
             // this happens when trying to access residues that are not part of the structure
             throw new IllegalQueryDefinitionException(e.getMessage());
@@ -111,7 +111,7 @@ public class AssamContextBuilder implements ContextBuilder {
      * @param inputStream the data to ready - all components are considered the motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByFile(InputStream inputStream) {
+    public MandatoryAssamBuilder defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         List<LabelSelection> labelSelections = structure.getLabelSelections()
                 .stream()
@@ -125,7 +125,7 @@ public class AssamContextBuilder implements ContextBuilder {
      * @param motifDefinition a pre-defined motif
      * @return mandatory parameter step
      */
-    public MandatoryBuilder defineByMotif(MotifDefinition motifDefinition) {
+    public MandatoryAssamBuilder defineByMotif(MotifDefinition motifDefinition) {
         return defineByPdbIdAndSelection(motifDefinition.getStructureIdentifier(), motifDefinition.getLabelSelections())
                 .propagateExchanges(motifDefinition.getPositionSpecificExchanges());
     }
@@ -135,7 +135,7 @@ public class AssamContextBuilder implements ContextBuilder {
      * default values will be used). But internally these values are strictly required. No input validation is performed
      * whatsoever.
      */
-    public class MandatoryBuilder {
+    public class MandatoryAssamBuilder implements ContextBuilder.MandatoryBuilder<MandatoryAssamBuilder, AssamSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<LabelSelection> labelSelections;
@@ -150,14 +150,14 @@ public class AssamContextBuilder implements ContextBuilder {
         private boolean undefinedAssemblies;
         private Set<PositionSpecificExchange> upstreamExchanges;
 
-        MandatoryBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
+        MandatoryAssamBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.labelSelections = labelSelections;
             this.residues = residues;
-            this.backboneDistanceTolerance = AssamParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
-            this.sideChainDistanceTolerance = AssamParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
-            this.angleTolerance = AssamParameters.DEFAULT_ANGLE_TOLERANCE;
+            this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
+            this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
+            this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
             this.rmsdCutoff = Float.MAX_VALUE;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
@@ -171,7 +171,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param backboneDistanceTolerance the tolerance to use
          * @return this builder
          */
-        public MandatoryBuilder backboneDistanceTolerance(int backboneDistanceTolerance) {
+        @Override
+        public MandatoryAssamBuilder backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
@@ -181,7 +182,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param sideChainDistanceTolerance the tolerance to use
          * @return this builder
          */
-        public MandatoryBuilder sideChainDistanceTolerance(int sideChainDistanceTolerance) {
+        @Override
+        public MandatoryAssamBuilder sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
@@ -191,7 +193,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param angleTolerance the tolerance to use
          * @return this builder
          */
-        public MandatoryBuilder angleTolerance(int angleTolerance) {
+        @Override
+        public MandatoryAssamBuilder angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
@@ -201,7 +204,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param rmsdCutoff the RMSD cutoff above which hits are filtered
          * @return this builder
          */
-        public MandatoryBuilder rmsdCutoff(double rmsdCutoff) {
+        @Override
+        public MandatoryAssamBuilder rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
@@ -211,7 +215,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param atomPairingScheme how to pair atoms for alignment routine
          * @return this builder
          */
-        public MandatoryBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
+        @Override
+        public MandatoryAssamBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
         }
@@ -221,7 +226,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param motifPruner the implementation to prune motifs
          * @return this builder
          */
-        public MandatoryBuilder motifPruningStrategy(MotifPruner motifPruner) {
+        @Override
+        public MandatoryAssamBuilder motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
             return this;
         }
@@ -231,7 +237,8 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param motifPruningStrategy the strategy to prune motifs
          * @return this builder
          */
-        public MandatoryBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
+        @Override
+        public MandatoryAssamBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL:
                     this.motifPruner = AssamContextBuilder.this.kruskalMotifPruner;
@@ -250,7 +257,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param limit the maximum number of hits below the RMSD threshold
          * @return this builder
          */
-        public MandatoryBuilder limitResults(int limit) {
+        public MandatoryAssamBuilder limitResults(int limit) {
             this.limit = limit;
             return this;
         }
@@ -260,7 +267,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param undefinedAssemblies a boolean
          * @return this builder
          */
-        public MandatoryBuilder undefinedAssemblies(boolean undefinedAssemblies) {
+        public MandatoryAssamBuilder undefinedAssemblies(boolean undefinedAssemblies) {
             this.undefinedAssemblies = undefinedAssemblies;
             return this;
         }
@@ -270,7 +277,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param upstreamExchanges exchanges from a motif definition
          * @return this builder
          */
-        MandatoryBuilder propagateExchanges(Set<PositionSpecificExchange> upstreamExchanges) {
+        MandatoryAssamBuilder propagateExchanges(Set<PositionSpecificExchange> upstreamExchanges) {
             this.upstreamExchanges = upstreamExchanges;
             return this;
         }
@@ -279,7 +286,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * Creates a {@link AssamParameters} instance based on all values. Proceeds to the next step.
          * @return the optional argument step
          */
-        public OptionalStepBuilder buildParameters() {
+        public OptionalAssamBuilder buildParameters() {
             AssamParameters parameters = new AssamParameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
@@ -288,14 +295,14 @@ public class AssamContextBuilder implements ContextBuilder {
                     motifPruner,
                     limit,
                     undefinedAssemblies);
-            return new OptionalStepBuilder(structureIdentifier, structure, labelSelections, residues, parameters, upstreamExchanges);
+            return new OptionalAssamBuilder(structureIdentifier, structure, labelSelections, residues, parameters, upstreamExchanges);
         }
     }
 
     /**
      * Optional parameters of the algorithm.
      */
-    public class OptionalStepBuilder {
+    public class OptionalAssamBuilder implements OptionalBuilder<AssamSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<LabelSelection> labelSelections;
@@ -306,7 +313,7 @@ public class AssamContextBuilder implements ContextBuilder {
         private final Set<String> blacklist;
         private StructureDeterminationMethodology structureDeterminationMethodology;
 
-        OptionalStepBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, AssamParameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
+        OptionalAssamBuilder(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, AssamParameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.labelSelections = labelSelections;
@@ -329,7 +336,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param residueTypes all allowed types
          * @return this builder
          */
-        public OptionalStepBuilder addPositionSpecificExchange(LabelSelection labelSelection, Collection<ResidueType> residueTypes) {
+        public OptionalAssamBuilder addPositionSpecificExchange(LabelSelection labelSelection, Collection<ResidueType> residueTypes) {
             Set<ResidueType> exchange = exchanges.computeIfAbsent(labelSelection, k -> new LinkedHashSet<>());
             exchange.addAll(residueTypes);
             return this;
@@ -340,7 +347,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param structureIdentifiers a collection of structure identifiers
          * @return this builder
          */
-        public OptionalStepBuilder whitelist(Collection<String> structureIdentifiers) {
+        public OptionalAssamBuilder whitelist(Collection<String> structureIdentifiers) {
             this.whitelist.addAll(structureIdentifiers);
             return this;
         }
@@ -350,7 +357,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param structureIdentifiers a collection of structure identifiers
          * @return this builder
          */
-        public OptionalStepBuilder blacklist(Collection<String> structureIdentifiers) {
+        public OptionalAssamBuilder blacklist(Collection<String> structureIdentifiers) {
             this.blacklist.addAll(structureIdentifiers);
             return this;
         }
@@ -360,7 +367,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * @param structureDeterminationMethodology the search space of choice
          * @return this builder
          */
-        public OptionalStepBuilder structureDeterminationMethodology(StructureDeterminationMethodology structureDeterminationMethodology) {
+        public OptionalAssamBuilder structureDeterminationMethodology(StructureDeterminationMethodology structureDeterminationMethodology) {
             this.structureDeterminationMethodology = structureDeterminationMethodology;
             return this;
         }
@@ -369,6 +376,7 @@ public class AssamContextBuilder implements ContextBuilder {
          * Build the actual container.
          * @return the immutable instance of all query parameters
          */
+        @Override
         public AssamSearchContext buildContext() {
             AssamSearchQuery query = new AssamSearchQuery(structureIdentifier,
                     structure,

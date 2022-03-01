@@ -15,9 +15,6 @@ public class AssamParameters implements Parameters {
     private final MotifPruner motifPruner;
     private final int limit;
     private final boolean undefinedAssemblies;
-    static final int DEFAULT_BACKBONE_DISTANCE_TOLERANCE = 1;
-    static final int DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE = 1;
-    static final int DEFAULT_ANGLE_TOLERANCE = 1;
 
     AssamParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit, boolean undefinedAssemblies) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
@@ -34,6 +31,7 @@ public class AssamParameters implements Parameters {
      * The specified backbone distance tolerance value.
      * @return the tolerance value
      */
+    @Override
     public int getBackboneDistanceTolerance() {
         return backboneDistanceTolerance;
     }
@@ -42,6 +40,7 @@ public class AssamParameters implements Parameters {
      * The specified side-chain distance tolerance value.
      * @return the tolerance value
      */
+    @Override
     public int getSideChainDistanceTolerance() {
         return sideChainDistanceTolerance;
     }
@@ -50,6 +49,7 @@ public class AssamParameters implements Parameters {
      * The specified angle tolerance value.
      * @return the tolerance value
      */
+    @Override
     public int getAngleTolerance() {
         return angleTolerance;
     }
@@ -58,6 +58,7 @@ public class AssamParameters implements Parameters {
      * At which RMSD are hits filtered?
      * @return the rmsd cutoff value
      */
+    @Override
     public float getRmsdCutoff() {
         return rmsdCutoff;
     }
@@ -66,6 +67,7 @@ public class AssamParameters implements Parameters {
      * Report if results will be filtered by RMSD.
      * @return true if search will omit hits above a certain threshold.
      */
+    @Override
     public boolean hasRmsdCutoff() {
         return rmsdCutoff != Float.MAX_VALUE;
     }
@@ -74,6 +76,7 @@ public class AssamParameters implements Parameters {
      * How are atoms paired?
      * @return the atom pairing scheme
      */
+    @Override
     public AtomPairingScheme getAtomPairingScheme() {
         return atomPairingScheme;
     }
@@ -82,6 +85,7 @@ public class AssamParameters implements Parameters {
      * The motif pruning strategy applied.
      * @return motif pruning impl
      */
+    @Override
     public MotifPruner getMotifPruner() {
         return motifPruner;
     }

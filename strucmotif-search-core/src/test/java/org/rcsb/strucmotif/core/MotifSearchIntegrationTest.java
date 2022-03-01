@@ -143,7 +143,7 @@ public class MotifSearchIntegrationTest {
                         new LabelSelection("A", "1", 245), // E
                         new LabelSelection("A", "1", 295)); // H
 
-        AssamContextBuilder.OptionalStepBuilder buildParameters = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        AssamContextBuilder.OptionalAssamBuilder buildParameters = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)

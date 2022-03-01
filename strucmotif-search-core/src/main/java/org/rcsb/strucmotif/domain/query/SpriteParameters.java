@@ -10,25 +10,21 @@ public class SpriteParameters implements Parameters {
     private final float rmsdCutoff;
     private final AtomPairingScheme atomPairingScheme;
     private final MotifPruner motifPruner;
-    private final boolean undefinedAssemblies;
-    static final int DEFAULT_BACKBONE_DISTANCE_TOLERANCE = 1;
-    static final int DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE = 1;
-    static final int DEFAULT_ANGLE_TOLERANCE = 1;
 
-    SpriteParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, boolean undefinedAssemblies) {
+    SpriteParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
         this.rmsdCutoff = rmsdCutoff;
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
-        this.undefinedAssemblies = undefinedAssemblies;
     }
 
     /**
      * The specified backbone distance tolerance value.
      * @return the tolerance value
      */
+    @Override
     public int getBackboneDistanceTolerance() {
         return backboneDistanceTolerance;
     }
@@ -37,6 +33,7 @@ public class SpriteParameters implements Parameters {
      * The specified side-chain distance tolerance value.
      * @return the tolerance value
      */
+    @Override
     public int getSideChainDistanceTolerance() {
         return sideChainDistanceTolerance;
     }
@@ -45,6 +42,7 @@ public class SpriteParameters implements Parameters {
      * The specified angle tolerance value.
      * @return the tolerance value
      */
+    @Override
     public int getAngleTolerance() {
         return angleTolerance;
     }
@@ -53,6 +51,7 @@ public class SpriteParameters implements Parameters {
      * At which RMSD are hits filtered?
      * @return the rmsd cutoff value
      */
+    @Override
     public float getRmsdCutoff() {
         return rmsdCutoff;
     }
@@ -61,6 +60,7 @@ public class SpriteParameters implements Parameters {
      * Report if results will be filtered by RMSD.
      * @return true if search will omit hits above a certain threshold.
      */
+    @Override
     public boolean hasRmsdCutoff() {
         return rmsdCutoff != Float.MAX_VALUE;
     }
@@ -69,6 +69,7 @@ public class SpriteParameters implements Parameters {
      * How are atoms paired?
      * @return the atom pairing scheme
      */
+    @Override
     public AtomPairingScheme getAtomPairingScheme() {
         return atomPairingScheme;
     }
@@ -77,15 +78,8 @@ public class SpriteParameters implements Parameters {
      * The motif pruning strategy applied.
      * @return motif pruning impl
      */
+    @Override
     public MotifPruner getMotifPruner() {
         return motifPruner;
-    }
-
-    /**
-     * Report if undefined assemblies (if they were indexed) can be returned.
-     * @return true if this search will allow undefined assemblies
-     */
-    public boolean isUndefinedAssemblies() {
-        return undefinedAssemblies;
     }
 }

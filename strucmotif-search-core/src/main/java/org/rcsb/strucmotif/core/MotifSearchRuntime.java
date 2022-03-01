@@ -13,11 +13,11 @@ import java.util.function.Consumer;
  * Performs motif search queries and returns the corresponding result object.
  */
 public interface MotifSearchRuntime {
-    AssamMotifSearchResult performSearch(AssamSearchContext context);
+    void performSearch(AssamSearchContext context);
 
     void performSearch(AssamSearchContext context, Consumer<AssamHit> consumer);
 
-    SpriteMotifSearchResult performSearch(SpriteSearchContext context);
+    void performSearch(SpriteSearchContext context);
 
     void performSearch(SpriteSearchContext context, Consumer<SpriteHit> consumer);
 }

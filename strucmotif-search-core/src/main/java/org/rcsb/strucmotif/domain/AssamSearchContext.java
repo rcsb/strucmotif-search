@@ -68,7 +68,8 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
      * @return the result container
      */
     public AssamMotifSearchResult run() {
-        return runtime.performSearch(this);
+        runtime.performSearch(this);
+        return this.getResult();
     }
 
     /**

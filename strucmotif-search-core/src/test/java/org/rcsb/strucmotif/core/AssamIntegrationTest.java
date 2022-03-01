@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class MotifSearchIntegrationTest {
+public class AssamIntegrationTest {
     private StructureReader structureReader;
     private AssamContextBuilder queryBuilder;
 

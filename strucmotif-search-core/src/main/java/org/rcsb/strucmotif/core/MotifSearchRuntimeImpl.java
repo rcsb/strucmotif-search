@@ -9,7 +9,6 @@ import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
-import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -72,7 +71,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     }
 
     @Override
-    public AssamMotifSearchResult performSearch(AssamSearchContext context) {
+    public void performSearch(AssamSearchContext context) {
         try {
             AssamSearchQuery query = context.getQuery();
             AssamMotifSearchResult result = context.getResult();
@@ -92,8 +91,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
             result.setHits(hits);
             result.getTimings().queryStop();
-
-            return result;
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -197,9 +194,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     }
 
     @Override
-    public SpriteMotifSearchResult performSearch(SpriteSearchContext context) {
+    public void performSearch(SpriteSearchContext context) {
         // TODO impl
-        return null;
     }
 
     @Override

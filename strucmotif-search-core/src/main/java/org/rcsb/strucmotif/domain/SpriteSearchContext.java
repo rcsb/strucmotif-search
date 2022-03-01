@@ -68,7 +68,8 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
      * @return the result container
      */
     public SpriteMotifSearchResult run() {
-        return runtime.performSearch(this);
+        runtime.performSearch(this);
+        return this.getResult();
     }
 
     /**

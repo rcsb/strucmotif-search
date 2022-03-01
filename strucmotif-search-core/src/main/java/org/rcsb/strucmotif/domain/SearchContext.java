@@ -22,6 +22,10 @@ public interface SearchContext<Q extends SearchQuery<P, S>, P extends Parameters
 
     void runAndConsume(Consumer<H> hitConsumer);
 
+    /**
+     * Dispatch this query and write each accepted hit to a file. Overwrites existing files, doesn't keep hits in memory.
+     * @param path destination
+     */
     void runAndWriteToPath(Path path);
 
     R getResult();

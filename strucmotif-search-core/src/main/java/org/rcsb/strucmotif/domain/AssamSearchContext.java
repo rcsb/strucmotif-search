@@ -10,21 +10,11 @@ import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-public class AssamSearchContext implements SearchContext<AssamSearchQuery, AssamParameters, AssamQueryStructure, AssamMotifSearchResult, AssamHit> {
+public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, AssamParameters, AssamQueryStructure, AssamMotifSearchResult, AssamHit> {
     private static final Logger logger = LoggerFactory.getLogger(AssamSearchContext.class);
     private final MotifSearchRuntime runtime;
     private final MotifSearchConfig config;
@@ -89,66 +79,30 @@ public class AssamSearchContext implements SearchContext<AssamSearchQuery, Assam
         getRuntime().performSearch(this, hitConsumer);
     }
 
-    /**
-     * Dispatch this query and write each accepted hit to a file. Overwrites existing files, doesn't keep hits in memory.
-     * @param path destination
-     */
-    public void runAndWriteToPath(Path path) {
-        try {
-            Files.writeString(path, composeHeader(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-
-        runAndConsume(hit -> {
-            String output = composeOutput(hit, config.getDecimalPlacesScore(), config.getDecimalPlacesMatrix());
-            try {
-                Files.writeString(path, output, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-    }
-
-    private static final String COLUMN_DELIMITER = ",";
-    private static final String VALUE_DELIMITER = ";";
-    private String composeHeader() {
-        return "pdb_id" + COLUMN_DELIMITER +
-                "assembly_id" + COLUMN_DELIMITER +
-                "rmsd_score" + COLUMN_DELIMITER +
-                "residue_ids" + COLUMN_DELIMITER +
-                "residue_types" + COLUMN_DELIMITER +
+    @Override
+    protected String composeHeader() {
+        return "pdb_id" + AbstractSearchContext.COLUMN_DELIMITER +
+                "assembly_id" + AbstractSearchContext.COLUMN_DELIMITER +
+                "rmsd_score" + AbstractSearchContext.COLUMN_DELIMITER +
+                "residue_ids" + AbstractSearchContext.COLUMN_DELIMITER +
+                "residue_types" + AbstractSearchContext.COLUMN_DELIMITER +
                 "transformation" + System.lineSeparator();
     }
 
-    private String composeOutput(AssamHit hit, int scorePlaces, int matrixPlaces) {
+    @Override
+    protected String composeOutput(AssamHit hit) {
         float[] original = hit.getTransformation().getFlattenedTransformation();
         List<Float> matrix = new ArrayList<>();
         for (float v : original) {
-            matrix.add(truncate(v, matrixPlaces));
+            matrix.add(truncate(v, config.getDecimalPlacesMatrix()));
         }
 
-        return hit.getStructureIdentifier() + COLUMN_DELIMITER +
-                hit.getAssemblyIdentifier() + COLUMN_DELIMITER +
-                truncate(hit.getRootMeanSquareDeviation(), scorePlaces) + COLUMN_DELIMITER +
-                toString(hit.getLabelSelections()) + COLUMN_DELIMITER +
-                toString(hit.getResidueTypes()) + COLUMN_DELIMITER +
+        return hit.getStructureIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                hit.getAssemblyIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                truncate(hit.getRootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.getLabelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.getResidueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();
-    }
-
-    private String toString(Collection<?> collection) {
-        return collection.stream().map(Object::toString).collect(Collectors.joining(VALUE_DELIMITER, "[", "]"));
-    }
-
-    /**
-     * Truncate floats to any number of decimal places.
-     * @param value the raw value
-     * @return a float with the specified number of decimal places
-     */
-    private float truncate(float value, int decimalPlaces) {
-        return BigDecimal.valueOf(value)
-                .setScale(decimalPlaces, RoundingMode.HALF_UP)
-                .floatValue();
     }
 
     @Override

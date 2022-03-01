@@ -4,9 +4,10 @@ import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -15,29 +16,37 @@ import java.nio.charset.StandardCharsets;
 public class MessagePackCodec implements BucketCodec {
     /**
      * Read the content of a {@link InvertedIndexBucket} from a stream.
-     * @param byteBuffer source data
+     * @param inputStream source data
      * @return the corresponding bucket
+     * @throws IOException if reading/decoding fails
      */
     @Override
-    public InvertedIndexBucket decode(ByteBuffer byteBuffer) {
-        int[] structureIndices = decodeIntArray(byteBuffer);
-        int[] positionOffsets = decodeIntArray(byteBuffer);
-        int[] positionData = decodeIntArray(byteBuffer);
-        int[] operatorIndices = decodeIntArray(byteBuffer);
-        String[] operatorData = decodeStringArray(byteBuffer);
+    public InvertedIndexBucket decode(InputStream inputStream) throws IOException {
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        InvertedIndexBucket bucket = decodeInternal(dataInputStream);
+        dataInputStream.close();
+        return bucket;
+    }
+
+    private InvertedIndexBucket decodeInternal(DataInputStream inputStream) throws IOException {
+        int[] structureIndices = decodeIntArray(inputStream);
+        int[] positionOffsets = decodeIntArray(inputStream);
+        int[] positionData = decodeIntArray(inputStream);
+        int[] operatorIndices = decodeIntArray(inputStream);
+        String[] operatorData = decodeStringArray(inputStream);
         return new InvertedIndexBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
     }
 
-    private int[] decodeIntArray(ByteBuffer byteBuffer) {
-        int[] out = new int[readArrayLength(byteBuffer)];
+    private int[] decodeIntArray(DataInputStream inputStream) throws IOException {
+        int[] out = new int[readArrayLength(inputStream)];
         for (int i = 0; i < out.length; i++) {
-            out[i] = readInt(byteBuffer);
+            out[i] = readInt(inputStream);
         }
         return out;
     }
 
-    private int readInt(ByteBuffer byteBuffer) {
-        final int int8 = byteBuffer.get();
+    private int readInt(DataInputStream inputStream) throws IOException {
+        final int int8 = inputStream.readByte();
         final int type = int8 & 0xFF;
 
         // positive FixInt
@@ -53,43 +62,43 @@ public class MessagePackCodec implements BucketCodec {
         switch (type) {
             // uint8
             case 0xCC:
-                return byteBuffer.get() & 0xFF;
+                return inputStream.readByte() & 0xFF;
             // uint16
             case 0xCD:
-                return byteBuffer.getShort() & 0xFFFF;
+                return inputStream.readShort() & 0xFFFF;
             // uint32
             case 0xCE:
-                return readUnsignedInt(byteBuffer);
+                return readUnsignedInt(inputStream);
             // int8
             case 0xD0:
-                return byteBuffer.get();
+                return inputStream.readByte();
             // int16
             case 0xD1:
-                return byteBuffer.getShort();
+                return inputStream.readShort();
             // int32
             case 0xD2:
-                return byteBuffer.getInt();
+                return inputStream.readInt();
         }
 
         throw new IllegalArgumentException("Unknown MessagePack type 0x" + Integer.toHexString(type) + ", expected a int here!");
     }
 
-    private String[] decodeStringArray(ByteBuffer byteBuffer) {
-        String[] out = new String[readArrayLength(byteBuffer)];
+    private String[] decodeStringArray(DataInputStream inputStream) throws IOException {
+        String[] out = new String[readArrayLength(inputStream)];
         for (int i = 0; i < out.length; i++) {
-            out[i] = readString(byteBuffer);
+            out[i] = readString(inputStream);
         }
         return out;
     }
 
-    private String readString(ByteBuffer byteBuffer) {
-        byte[] bytes = new byte[readStringLength(byteBuffer)];
-        byteBuffer.get(bytes);
+    private String readString(DataInputStream inputStream) throws IOException {
+        byte[] bytes = new byte[readStringLength(inputStream)];
+        inputStream.readFully(bytes);
         return new String(bytes, StandardCharsets.US_ASCII);
     }
 
-    private int readStringLength(ByteBuffer byteBuffer) {
-        final int int8 = byteBuffer.get();
+    private int readStringLength(DataInputStream inputStream) throws IOException {
+        final int int8 = inputStream.readByte();
         final int type = int8 & 0xFF;
 
         // FixStr
@@ -100,35 +109,35 @@ public class MessagePackCodec implements BucketCodec {
         switch (type) {
             // str8
             case 0xD9:
-                return byteBuffer.get() & 0xFF;
+                return inputStream.readByte() & 0xFF;
             // str16
             case 0xDA:
-                return byteBuffer.getShort() & 0xFFFF;
+                return inputStream.readShort() & 0xFFFF;
             // str32
             case 0xDB:
-                return readUnsignedInt(byteBuffer);
+                return readUnsignedInt(inputStream);
         }
 
         throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected a StringArray here!");
     }
 
-    private int readArrayLength(ByteBuffer byteBuffer) {
-        final int int8 = byteBuffer.get();
+    private int readArrayLength(DataInputStream inputStream) throws IOException {
+        final int int8 = inputStream.readByte();
         final int type = int8 & 0xFF;
 
         if ((type & 0xF0) == 0x90) { // FixArray
             return type & 0x0F;
         } else if (type == 0xDC) { // Array16
-            return byteBuffer.getShort() & 0xFFFF;
+            return inputStream.readShort() & 0xFFFF;
         } else if (type == 0xDD) { // Array32
-            return readUnsignedInt(byteBuffer);
+            return readUnsignedInt(inputStream);
         } else {
             throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected array length here!");
         }
     }
 
-    private int readUnsignedInt(ByteBuffer byteBuffer) {
-        return (int) (byteBuffer.getInt() & 0xFFFFFFFFL);
+    private int readUnsignedInt(DataInputStream inputStream) throws IOException {
+        return (int) (inputStream.readInt() & 0xFFFFFFFFL);
     }
 
     /**

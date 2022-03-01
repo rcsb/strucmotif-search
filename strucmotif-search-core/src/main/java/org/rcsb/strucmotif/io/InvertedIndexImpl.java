@@ -14,13 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -94,26 +94,24 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     @Override
     public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
-        try {
+        try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
             // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            return bucketCodec.decode(getByteBuffer(residuePairDescriptor));
+            return bucketCodec.decode(inputStream);
         } catch (IOException e) {
             return InvertedIndexBucket.EMPTY_BUCKET;
         }
     }
 
     /**
-     * Acquire a ByteBuffer for a descriptor in read-mode.
+     * Acquire the input stream for a descriptor.
      * @param residuePairDescriptor the descriptor of interest
-     * @return the corresponding {@link ByteBuffer}
+     * @return the corresponding input stream
      * @throws IOException reading failed
      */
-    protected ByteBuffer getByteBuffer(ResiduePairDescriptor residuePairDescriptor) throws IOException {
+    protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
         Path path = getPath(residuePairDescriptor);
-        try (RandomAccessFile file = new RandomAccessFile(path.toFile(), "r")) {
-            FileChannel fileChannel = file.getChannel();
-            return fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-        }
+        InputStream inputStream = Files.newInputStream(path);
+        return gzipped ? new GZIPInputStream(inputStream, BUFFER_SIZE) : new BufferedInputStream(inputStream, BUFFER_SIZE);
     }
 
     private Path getPath(ResiduePairDescriptor residuePairDescriptor) {
@@ -123,8 +121,8 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     private InvertedIndexBucket getBucket(ResiduePairDescriptor residuePairDescriptor) {
-        try {
-            return bucketCodec.decode(getByteBuffer(residuePairDescriptor));
+        try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
+            return bucketCodec.decode(inputStream);
         } catch (IOException e) {
             return InvertedIndexBucket.EMPTY_BUCKET;
         }

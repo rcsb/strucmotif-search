@@ -11,7 +11,6 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,14 +22,14 @@ public class InvertedIndexImplTest {
     public void init() {
         invertedIndex = new InvertedIndexImpl(new MotifSearchConfig()) {
             @Override
-            protected ByteBuffer getByteBuffer(ResiduePairDescriptor residuePairDescriptor) throws IOException {
+            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("index/" + residuePairDescriptor + ".colf");
                 if (inputStream == null) {
                     throw new IOException();
                 }
-                return ByteBuffer.wrap(inputStream.readAllBytes());
+                return inputStream;
             }
         };
     }

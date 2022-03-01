@@ -8,32 +8,31 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.QueryBuilder;
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
-import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
+import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
-import org.rcsb.strucmotif.io.InvertedIndexImpl;
 import org.rcsb.strucmotif.io.StateRepository;
-import org.rcsb.strucmotif.io.StateRepositoryImpl;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
 import org.rcsb.strucmotif.io.StructureReader;
+import org.rcsb.strucmotif.io.InvertedIndexImpl;
+import org.rcsb.strucmotif.io.StateRepositoryImpl;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -60,14 +59,14 @@ public class MotifSearchIntegrationTest {
 
         InvertedIndexImpl invertedIndex = new InvertedIndexImpl(motifSearchConfig) {
             @Override
-            protected ByteBuffer getByteBuffer(ResiduePairDescriptor residuePairDescriptor) throws IOException {
+            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here
                 InputStream inputStream = Thread.currentThread().getContextClassLoader()
                         .getResourceAsStream("index/" + residuePairDescriptor + ".colf");
                 if (inputStream == null) {
                     throw new IOException();
                 }
-                return ByteBuffer.wrap(inputStream.readAllBytes());
+                return inputStream;
             }
         };
 

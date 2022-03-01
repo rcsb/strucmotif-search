@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.InputStream;
 
 /**
  * Persistence of inverted index buckets.
@@ -13,11 +13,11 @@ import java.nio.ByteBuffer;
 public interface BucketCodec {
     /**
      * Deserialize a bucket from an InputStream.
-     * @param byteBuffer data source
+     * @param inputStream data source
      * @return the decoded bucket
      * @throws IOException reading failed
      */
-    InvertedIndexBucket decode(ByteBuffer byteBuffer) throws IOException;
+    InvertedIndexBucket decode(InputStream inputStream) throws IOException;
 
     /**
      * Serialize a bucket as binary stream.

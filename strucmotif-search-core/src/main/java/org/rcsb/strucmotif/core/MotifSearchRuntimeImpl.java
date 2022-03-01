@@ -4,6 +4,7 @@ import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.AssamSearchContext;
 import org.rcsb.strucmotif.domain.SpriteSearchContext;
+import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.AssamParameters;
 import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
 import org.rcsb.strucmotif.domain.result.AssamHit;
@@ -12,8 +13,12 @@ import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
+import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.SingleStructureIndexProvider;
+import org.rcsb.strucmotif.io.SingleStructureInvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
+import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,7 +207,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         logger.info("[{}] Extracted {} residue pairs",
                 context.getId(),
                 residueGraph.getNumberOfPairings());
+        InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);
 
+        for (MotifDefinition motifDefinition : this.motifDefinitionRegistry.getMotifDefinitions()) {
+            logger.info("Testing " + motifDefinition.getTitle());
+        }
+    }
+
+    private void assemble(SpriteSearchContext context) {
 
     }
 

@@ -33,10 +33,10 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
 
     public MotifDefinitionRegistryImpl() {
         this.motifDefinitions = new ArrayList<>();
+        init();
     }
 
-    @PostConstruct
-    public void init() {
+    private void init() {
         logger.info("Initializing motif definition registry");
 
         logger.debug("Loading hard-coded definitions");

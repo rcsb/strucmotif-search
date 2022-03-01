@@ -14,7 +14,6 @@ class MotifDefinitionRegistryTest {
     @BeforeEach
     public void init() {
         this.registry = new MotifDefinitionRegistryImpl();
-        registry.init();
     }
 
     @Test

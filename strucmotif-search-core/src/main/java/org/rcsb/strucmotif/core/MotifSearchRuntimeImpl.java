@@ -41,6 +41,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final StructureDataProvider structureDataProvider;
     private final StructureIndexProvider structureIndexProvider;
     private final AssemblyInformationProvider assemblyInformationProvider;
+    private final MotifDefinitionRegistry motifDefinitionRegistry;
 
     /**
      * Injectable constructor.
@@ -51,9 +52,10 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
      * @param structureDataProvider structure data provider
      * @param structureIndexProvider maps from index to identifier
      * @param assemblyInformationProvider all known assemblies
+     * @param motifDefinitionRegistry all known motifs
      */
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StructureIndexProvider structureIndexProvider, AssemblyInformationProvider assemblyInformationProvider) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StructureIndexProvider structureIndexProvider, AssemblyInformationProvider assemblyInformationProvider, MotifDefinitionRegistry motifDefinitionRegistry) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
@@ -61,6 +63,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         this.structureDataProvider = structureDataProvider;
         this.structureIndexProvider = structureIndexProvider;
         this.assemblyInformationProvider = assemblyInformationProvider;
+        this.motifDefinitionRegistry = motifDefinitionRegistry;
 
         // initialize structure cache (if active)
         try {

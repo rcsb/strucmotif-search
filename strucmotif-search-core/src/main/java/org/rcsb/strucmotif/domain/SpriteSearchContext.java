@@ -7,7 +7,6 @@ import org.rcsb.strucmotif.domain.query.SpriteQueryStructure;
 import org.rcsb.strucmotif.domain.query.SpriteSearchQuery;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
-import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,9 +41,6 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
                 parameters.getAngleTolerance(),
                 parameters.getAtomPairingScheme(),
                 parameters.getRmsdCutoff());
-
-        ResidueGraph residueGraph = new ResidueGraph(queryStructure.getStructure(), config, false);
-        logger.info("[{}] Extracted {} residue pairs", id, residueGraph.getNumberOfPairings());
 
         return new SpriteMotifSearchResult();
     }

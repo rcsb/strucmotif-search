@@ -9,6 +9,7 @@ import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -197,7 +198,12 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
     @Override
     public void performSearch(SpriteSearchContext context) {
-        // TODO impl
+        ResidueGraph residueGraph = context.getQuery().getQueryStructure().getResidueGraph();
+        logger.info("[{}] Extracted {} residue pairs",
+                context.getId(),
+                residueGraph.getNumberOfPairings());
+
+
     }
 
     @Override

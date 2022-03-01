@@ -9,6 +9,7 @@ import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
 import org.rcsb.strucmotif.domain.SpriteSearchContext;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +72,10 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      */
     public MandatorySpriteBuilder defineByStructure(Structure structure) {
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
-        return new MandatorySpriteBuilder(structureIdentifier, structure);
+
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+
+        return new MandatorySpriteBuilder(structureIdentifier, structure, residueGraph);
     }
 
     /**
@@ -82,6 +86,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     public class MandatorySpriteBuilder implements MandatoryBuilder<MandatorySpriteBuilder, SpriteSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
+        private final ResidueGraph residueGraph;
         private int backboneDistanceTolerance;
         private int sideChainDistanceTolerance;
         private int angleTolerance;
@@ -89,9 +94,10 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
 
-        MandatorySpriteBuilder(String structureIdentifier, Structure structure) {
+        MandatorySpriteBuilder(String structureIdentifier, Structure structure, ResidueGraph residueGraph) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
+            this.residueGraph = residueGraph;
             this.backboneDistanceTolerance = AssamParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = AssamParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = AssamParameters.DEFAULT_ANGLE_TOLERANCE;
@@ -199,7 +205,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner);
-            return new OptionalSpriteBuilder(structureIdentifier, structure, parameters);
+            return new OptionalSpriteBuilder(structureIdentifier, structure, residueGraph, parameters);
         }
     }
 
@@ -209,11 +215,13 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     public class OptionalSpriteBuilder implements OptionalBuilder<SpriteSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
+        private final ResidueGraph residueGraph;
         private final SpriteParameters parameters;
 
-        OptionalSpriteBuilder(String structureIdentifier, Structure structure, SpriteParameters parameters) {
+        OptionalSpriteBuilder(String structureIdentifier, Structure structure, ResidueGraph residueGraph, SpriteParameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
+            this.residueGraph = residueGraph;
             this.parameters = parameters;
         }
 
@@ -225,6 +233,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         public SpriteSearchContext buildContext() {
             SpriteSearchQuery query = new SpriteSearchQuery(structureIdentifier,
                     structure,
+                    residueGraph,
                     parameters);
             return new SpriteSearchContext(motifSearchRuntime, motifSearchConfig, query);
         }

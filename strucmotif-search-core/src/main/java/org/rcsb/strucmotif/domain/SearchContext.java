@@ -12,6 +12,8 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public interface SearchContext<Q extends SearchQuery<P, S>, P extends Parameters, S extends QueryStructure, R extends SearchResult<H>, H extends Hit> {
+    int getId();
+
     MotifSearchRuntime getRuntime();
 
     MotifSearchConfig getConfig();

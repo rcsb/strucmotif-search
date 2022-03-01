@@ -76,7 +76,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     @Override
     public void performSearch(AssamSearchContext context) {
         try {
-            AssamSearchQuery query = context.getQuery();
             AssamMotifSearchResult result = context.getResult();
 
             // get all valid targets
@@ -84,7 +83,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
             List<AssamHit> hits = scoreHits(context);
             logger.info("[{}] Accepted {} hits in {} ms",
-                    query.hashCode(),
+                    context.getId(),
                     hits.size(),
                     result.getTimings().getScoreHitsTime());
 
@@ -115,7 +114,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
             int hits = consumeHits(context, consumer);
             logger.info("[{}] Accepted {} hits in {} ms",
-                    query.hashCode(),
+                    context.getId(),
                     hits,
                     result.getTimings().getScoreHitsTime());
         } catch (Exception e) {

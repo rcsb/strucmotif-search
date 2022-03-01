@@ -32,11 +32,11 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
         AssamQueryStructure queryStructure = query.getQueryStructure();
         AssamParameters parameters = query.getParameters();
         logger.info("[{}] Query: {} with {}",
-                query.hashCode(),
+                id,
                 queryStructure.getStructureIdentifier(),
                 queryStructure.getIndexSelections());
         logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}, Limit: {}",
-                query.hashCode(),
+                id,
                 query.getExchanges(),
                 parameters.getBackboneDistanceTolerance(),
                 parameters.getSideChainDistanceTolerance(),

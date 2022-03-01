@@ -33,10 +33,10 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
         SpriteQueryStructure queryStructure = query.getQueryStructure();
         SpriteParameters parameters = query.getParameters();
         logger.info("[{}] Query: {}",
-                query.hashCode(),
+                id,
                 queryStructure.getStructureIdentifier());
         logger.info("[{}] Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}",
-                query.hashCode(),
+                id,
                 parameters.getBackboneDistanceTolerance(),
                 parameters.getSideChainDistanceTolerance(),
                 parameters.getAngleTolerance(),
@@ -44,6 +44,7 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
                 parameters.getRmsdCutoff());
 
         ResidueGraph residueGraph = new ResidueGraph(queryStructure.getStructure(), config, false);
+        logger.info("[{}] Extracted {} residue pairs", id, residueGraph.getNumberOfPairings());
 
         return new SpriteMotifSearchResult();
     }

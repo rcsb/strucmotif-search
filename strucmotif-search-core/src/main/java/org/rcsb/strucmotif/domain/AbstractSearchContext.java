@@ -20,6 +20,16 @@ import java.util.stream.Collectors;
 public abstract class AbstractSearchContext<Q extends SearchQuery<P, S>, P extends Parameters, S extends QueryStructure, R extends SearchResult<H>, H extends Hit> implements SearchContext<Q, P, S, R, H> {
     protected static final String COLUMN_DELIMITER = ",";
     protected static final String VALUE_DELIMITER = ";";
+    protected final int id;
+
+    protected AbstractSearchContext() {
+        this.id = hashCode();
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
 
     @Override
     public void runAndWriteToPath(Path path) {

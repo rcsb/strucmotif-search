@@ -112,13 +112,13 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
 
             logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",
-                    query.hashCode(),
+                    context.getId(),
                     residuePairDescriptor,
                     (System.nanoTime() - s) / 1000 / 1000,
                     result.getTargetStructures().size());
 
             if (i > 0 && i + 1 < steps && allowed.isEmpty()) {
-                logger.info("[{}] No more valid extensions - terminating early", query.hashCode());
+                logger.info("[{}] No more valid extensions - terminating early", context.getId());
                 break;
             }
         }
@@ -127,7 +127,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         int pathCount = result.getTargetStructures().values().stream().mapToInt(TargetStructure::getNumberOfValidPaths).sum();
         int structureCount = result.getTargetStructures().size();
         logger.info("[{}] Found {} valid paths ({} target structures) in {} ms",
-                query.hashCode(),
+                context.getId(),
                 pathCount,
                 structureCount,
                 result.getTimings().getPathsTime());

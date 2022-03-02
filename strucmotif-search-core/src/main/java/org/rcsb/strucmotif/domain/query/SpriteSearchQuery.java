@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.domain.query;
 
-import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 /**
@@ -12,9 +11,8 @@ public class SpriteSearchQuery implements SearchQuery<SpriteParameters, SpriteQu
 
     SpriteSearchQuery(String structureIdentifier,
                      Structure structure,
-                     ResidueGraph residueGraph,
                      SpriteParameters parameters) {
-        this.queryStructure = new SpriteQueryStructure(structureIdentifier, structure, residueGraph);
+        this.queryStructure = new SpriteQueryStructure(structureIdentifier, structure);
         this.parameters = parameters;
     }
 

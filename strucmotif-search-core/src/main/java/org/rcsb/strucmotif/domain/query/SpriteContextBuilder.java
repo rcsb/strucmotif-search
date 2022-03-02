@@ -11,6 +11,8 @@ import org.rcsb.strucmotif.domain.SpriteSearchContext;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.SingleStructureInvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -74,8 +76,9 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
 
         ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);
 
-        return new MandatorySpriteBuilder(structureIdentifier, structure, residueGraph);
+        return new MandatorySpriteBuilder(structureIdentifier, structure, invertedIndex);
     }
 
     /**
@@ -86,7 +89,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     public class MandatorySpriteBuilder implements MandatoryBuilder<MandatorySpriteBuilder, SpriteSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
-        private final ResidueGraph residueGraph;
+        private final InvertedIndex invertedIndex;
         private int backboneDistanceTolerance;
         private int sideChainDistanceTolerance;
         private int angleTolerance;
@@ -94,10 +97,10 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
 
-        MandatorySpriteBuilder(String structureIdentifier, Structure structure, ResidueGraph residueGraph) {
+        MandatorySpriteBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
-            this.residueGraph = residueGraph;
+            this.invertedIndex = invertedIndex;
             this.backboneDistanceTolerance = AssamParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = AssamParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = AssamParameters.DEFAULT_ANGLE_TOLERANCE;
@@ -205,7 +208,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner);
-            return new OptionalSpriteBuilder(structureIdentifier, structure, residueGraph, parameters);
+            return new OptionalSpriteBuilder(structureIdentifier, structure, invertedIndex, parameters);
         }
     }
 
@@ -215,13 +218,13 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     public class OptionalSpriteBuilder implements OptionalBuilder<SpriteSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
-        private final ResidueGraph residueGraph;
+        private final InvertedIndex invertedIndex;
         private final SpriteParameters parameters;
 
-        OptionalSpriteBuilder(String structureIdentifier, Structure structure, ResidueGraph residueGraph, SpriteParameters parameters) {
+        OptionalSpriteBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex, SpriteParameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
-            this.residueGraph = residueGraph;
+            this.invertedIndex = invertedIndex;
             this.parameters = parameters;
         }
 
@@ -233,9 +236,8 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         public SpriteSearchContext buildContext() {
             SpriteSearchQuery query = new SpriteSearchQuery(structureIdentifier,
                     structure,
-                    residueGraph,
                     parameters);
-            return new SpriteSearchContext(motifSearchRuntime, motifSearchConfig, query);
+            return new SpriteSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, query);
         }
     }
 }

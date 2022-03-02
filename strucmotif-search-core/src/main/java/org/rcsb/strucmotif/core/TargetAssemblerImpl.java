@@ -37,19 +37,16 @@ import java.util.stream.Stream;
 @Service
 public class TargetAssemblerImpl implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
-    private final InvertedIndex invertedIndex;
     private final ThreadPool threadPool;
     private final StructureIndexProvider structureIndexProvider;
 
     /**
      * Injectable constructor.
-     * @param invertedIndex inverted index
      * @param threadPool thread pool
      * @param structureIndexProvider maps from structureIdentifiers to indices
      */
     @Autowired
-    public TargetAssemblerImpl(InvertedIndex invertedIndex, ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
-        this.invertedIndex = invertedIndex;
+    public TargetAssemblerImpl(ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
         this.threadPool = threadPool;
         this.structureIndexProvider = structureIndexProvider;
     }
@@ -59,6 +56,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         AssamSearchQuery query = context.getQuery();
         AssamQueryStructure queryStructure = query.getQueryStructure();
         AssamParameters parameters = query.getParameters();
+        InvertedIndex invertedIndex = context.getInvertedIndex();
         AssamMotifSearchResult result = context.getResult();
         int backboneDistanceTolerance = parameters.getBackboneDistanceTolerance();
         int sideChainDistanceTolerance = parameters.getSideChainDistanceTolerance();
@@ -94,7 +92,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
             // sort into target structures
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                    .flatMap(descriptor -> select(descriptor, searchSpace, allowed, ignored))
+                    .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
 
             // TODO try to avoid object creation
@@ -141,7 +139,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return result;
     }
 
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
+    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(InvertedIndex invertedIndex, ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
         @SuppressWarnings("unchecked")
         Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];

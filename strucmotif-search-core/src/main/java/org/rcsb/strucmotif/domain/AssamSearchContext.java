@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.domain.query.AssamQueryStructure;
 import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.io.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +19,14 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     private static final Logger logger = LoggerFactory.getLogger(AssamSearchContext.class);
     private final MotifSearchRuntime runtime;
     private final MotifSearchConfig config;
+    private final InvertedIndex invertedIndex;
     private final AssamSearchQuery query;
     private final AssamMotifSearchResult result;
 
-    public AssamSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, AssamSearchQuery query) {
+    public AssamSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex, AssamSearchQuery query) {
         this.runtime = motifSearchRuntime;
         this.config = motifSearchConfig;
+        this.invertedIndex = invertedIndex;
         this.query = query;
         this.result = initializeResultContainer();
     }
@@ -56,6 +59,11 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     @Override
     public MotifSearchConfig getConfig() {
         return config;
+    }
+
+    @Override
+    public InvertedIndex getInvertedIndex() {
+        return invertedIndex;
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.query.SearchQuery;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.SearchResult;
+import org.rcsb.strucmotif.io.InvertedIndex;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -31,4 +32,6 @@ public interface SearchContext<Q extends SearchQuery<P, S>, P extends Parameters
     void runAndWriteToPath(Path path);
 
     R getResult();
+
+    InvertedIndex getInvertedIndex();
 }

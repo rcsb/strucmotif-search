@@ -14,6 +14,7 @@ import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
     private final NoOperationMotifPruner noOperationMotifPruner;
     private final MotifSearchRuntime motifSearchRuntime;
     private final MotifSearchConfig motifSearchConfig;
+    private final InvertedIndex invertedIndex;
 
     /**
      * Construct a new query builder.
@@ -47,14 +49,16 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
      * @param noOperationMotifPruner injectable nop motif pruner
      * @param motifSearchRuntime injectable runtime
      * @param motifSearchConfig injectable config
+     * @param invertedIndex injectable inverted index
      */
     @Autowired
-    public AssamContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
+    public AssamContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex) {
         this.structureDataProvider = structureDataProvider;
         this.kruskalMotifPruner = kruskalMotifPruner;
         this.noOperationMotifPruner = noOperationMotifPruner;
         this.motifSearchRuntime = motifSearchRuntime;
         this.motifSearchConfig = motifSearchConfig;
+        this.invertedIndex = invertedIndex;
     }
 
     /**
@@ -387,7 +391,7 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
                     whitelist,
                     blacklist,
                     structureDeterminationMethodology);
-            return new AssamSearchContext(motifSearchRuntime, motifSearchConfig, query);
+            return new AssamSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, query);
         }
     }
 }

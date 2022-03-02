@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.domain.query.SpriteQueryStructure;
 import org.rcsb.strucmotif.domain.query.SpriteSearchQuery;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
+import org.rcsb.strucmotif.io.InvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,12 +19,14 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     private static final Logger logger = LoggerFactory.getLogger(SpriteSearchContext.class);
     private final MotifSearchRuntime runtime;
     private final MotifSearchConfig config;
+    private final InvertedIndex invertedIndex;
     private final SpriteSearchQuery query;
     private final SpriteMotifSearchResult result;
 
-    public SpriteSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig config, SpriteSearchQuery query) {
+    public SpriteSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig config, InvertedIndex invertedIndex, SpriteSearchQuery query) {
         this.runtime = motifSearchRuntime;
         this.config = config;
+        this.invertedIndex = invertedIndex;
         this.query = query;
         this.result = initializeResultContainer();
     }
@@ -53,6 +56,11 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     @Override
     public MotifSearchConfig getConfig() {
         return config;
+    }
+
+    @Override
+    public InvertedIndex getInvertedIndex() {
+        return invertedIndex;
     }
 
     @Override

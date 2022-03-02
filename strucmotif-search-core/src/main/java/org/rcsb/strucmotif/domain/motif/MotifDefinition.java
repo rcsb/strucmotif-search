@@ -13,14 +13,16 @@ import java.util.Set;
  * Identifier-based representation of motifs.
  */
 public class MotifDefinition {
-    public static final MotifDefinition HDS = new MotifDefinition("4cha",
+    public static final MotifDefinition HDS = new MotifDefinition("HDS",
+            "4cha",
             "catalytic triad",
             "Many proteases use serine as a nucleophilic residue during catalysis. The catalytic triad is composed of three residues, which are commonly distributed over two polypeptide chains. Most proteases are zymogens that require activation by proteolytic processing to prevent uncontrolled digestion of proteins within the cell.",
             List.of(new LabelSelection("B", "1", 42), // H
                     new LabelSelection("B", "1", 87), // D
                     new LabelSelection("C", "1", 47))); // S
 
-    public static final MotifDefinition KDDDE = new MotifDefinition("1lap",
+    public static final MotifDefinition KDDDE = new MotifDefinition("KDDDE",
+            "1lap",
             "aminopeptidase",
             "Aminopeptidases play important roles in protein degradation by removing residue from the N-terminus of a of polypeptide chains. The active site of leucine aminopeptidase contains two nearby zinc ions.",
             List.of(new LabelSelection("A", "1", 250), // H
@@ -29,14 +31,16 @@ public class MotifDefinition {
                     new LabelSelection("A", "1", 332), // D
                     new LabelSelection("A", "1", 334))); // E
 
-    public static final MotifDefinition CHH = new MotifDefinition("1g2f",
+    public static final MotifDefinition CHH = new MotifDefinition("CHH",
+            "1g2f",
             "simplified zinc finger",
             "DNA binding proteins often contain His2/Cys2 zinc fingers. These motifs are composed of two cysteine and two histidine residues which adopt a ββα structure wrapping around a single zinc ion.",
             List.of(new LabelSelection("F", "1", 7), // C
                     new LabelSelection("F", "1", 25), // H
                     new LabelSelection("F", "1", 29))); // H
 
-    public static final MotifDefinition CHCH = new MotifDefinition("1g2f",
+    public static final MotifDefinition CHCH = new MotifDefinition("CHCH",
+            "1g2f",
             "original zinc finger",
             "DNA binding proteins often contain His2/Cys2 zinc fingers. These motifs are composed of two cysteine and two histidine residues which adopt a ββα structure wrapping around a single zinc ion.",
             List.of(new LabelSelection("F", "1", 7), // C
@@ -44,7 +48,8 @@ public class MotifDefinition {
                     new LabelSelection("F", "1", 25), // H
                     new LabelSelection("F", "1", 29))); // H
 
-    public static final MotifDefinition KDEEH = new MotifDefinition("2mnr",
+    public static final MotifDefinition KDEEH = new MotifDefinition("KDEEH",
+            "2mnr",
             "enolase superfamily",
             "The enolase superfamily refers to a group of proteins diverse in sequence and structure that are all capable of abstracting a proton from a carboxylic acid. Isofunctional exchanges are crucial to represent this superfamily accurately by a structural motif.",
             List.of(new LabelSelection("A", "1", 162), // K
@@ -53,7 +58,8 @@ public class MotifDefinition {
                     new LabelSelection("A", "1", 245), // E
                     new LabelSelection("A", "1", 295))); // H
 
-    public static final MotifDefinition KDEEH_EXCHANGES = new MotifDefinition("2mnr",
+    public static final MotifDefinition KDEEH_EXCHANGES = new MotifDefinition("KDEEH_EXCHANGES",
+            "2mnr",
             "enolase superfamily with exchanges",
             "The enolase superfamily refers to a group of proteins diverse in sequence and structure that are all capable of abstracting a proton from a carboxylic acid. Isofunctional exchanges are crucial to represent this superfamily accurately by a structural motif.",
             List.of(new LabelSelection("A", "1", 162), // K
@@ -65,7 +71,8 @@ public class MotifDefinition {
                     new PositionSpecificExchange(new LabelSelection("A", "1", 245), ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE),
                     new PositionSpecificExchange(new LabelSelection("A", "1", 295), ResidueType.HISTIDINE, ResidueType.LYSINE)));
 
-    public static final MotifDefinition GGGG = new MotifDefinition("3ibk",
+    public static final MotifDefinition GGGG = new MotifDefinition("GGGG",
+            "3ibk",
             "RNA G-tetrad",
             "G-tetrads are a common association motif in RNA and DNA. They are exclusively composed of guanine and stabilized by Hoogsteen base pairings. The negative charges of four oxygen atoms coordinate monovalent ions such as K+ and individual tetrads tend to be stacked one on another.",
             List.of(new LabelSelection("A", "1", 4), // G
@@ -73,17 +80,19 @@ public class MotifDefinition {
                     new LabelSelection("B", "1", 4), // G
                     new LabelSelection("B", "1", 10))); // G
 
+    private final String motifIdentifier;
     private final String structureIdentifier;
     private final String title;
     private final String description;
     private final List<LabelSelection> labelSelections;
     private final Set<PositionSpecificExchange> positionSpecificExchanges;
 
-    public MotifDefinition(String structureIdentifier, String title, String description, List<LabelSelection> labelSelections) {
-        this(structureIdentifier, title, description, labelSelections, Collections.emptySet());
+    public MotifDefinition(String motifIdentifier, String structureIdentifier, String title, String description, List<LabelSelection> labelSelections) {
+        this(motifIdentifier, structureIdentifier, title, description, labelSelections, Collections.emptySet());
     }
 
-    public MotifDefinition(String structureIdentifier, String title, String description, List<LabelSelection> labelSelections, Set<PositionSpecificExchange> positionSpecificExchanges) {
+    public MotifDefinition(String motifIdentifier, String structureIdentifier, String title, String description, List<LabelSelection> labelSelections, Set<PositionSpecificExchange> positionSpecificExchanges) {
+        this.motifIdentifier = motifIdentifier;
         this.structureIdentifier = structureIdentifier;
         this.title = title;
         this.description = description;
@@ -131,23 +140,29 @@ public class MotifDefinition {
         return positionSpecificExchanges;
     }
 
+    public String getMotifIdentifier() {
+        return motifIdentifier;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MotifDefinition that = (MotifDefinition) o;
-        return structureIdentifier.equals(that.structureIdentifier) && labelSelections.equals(that.labelSelections) && positionSpecificExchanges.equals(that.positionSpecificExchanges);
+        return Objects.equals(motifIdentifier, that.motifIdentifier) && Objects.equals(structureIdentifier, that.structureIdentifier) && Objects.equals(title, that.title) && Objects.equals(description, that.description) && Objects.equals(labelSelections, that.labelSelections) && Objects.equals(positionSpecificExchanges, that.positionSpecificExchanges);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(structureIdentifier, labelSelections, positionSpecificExchanges);
+        return Objects.hash(motifIdentifier, structureIdentifier, title, description, labelSelections, positionSpecificExchanges);
     }
 
     @Override
     public String toString() {
         return "MotifDefinition{" +
-                "structureIdentifier='" + structureIdentifier + '\'' +
+                "motifIdentifier='" + motifIdentifier + '\'' +
+                ", structureIdentifier='" + structureIdentifier + '\'' +
+                ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", labelSelections=" + labelSelections +
                 ", positionSpecificExchanges=" + positionSpecificExchanges +

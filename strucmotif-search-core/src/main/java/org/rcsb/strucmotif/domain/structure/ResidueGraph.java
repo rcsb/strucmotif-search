@@ -34,6 +34,7 @@ public class ResidueGraph {
     private final Map<IndexSelection, Map<IndexSelection, Float>> backboneDistances;
     private final Map<IndexSelection, Map<IndexSelection, Float>> sideChainDistances;
     private final Map<IndexSelection, Map<IndexSelection, Float>> angles;
+    private final int numberOfResidues;
     private final int numberOfPairings;
 
     /**
@@ -90,6 +91,7 @@ public class ResidueGraph {
                     .toArray(String[]::new));
         }
 
+        this.numberOfResidues = backboneVectors.size();
         this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, motifSearchConfig.getSquaredDistanceCutoff(), allowTransformed, assemblyMap);
     }
 
@@ -179,6 +181,7 @@ public class ResidueGraph {
             }
         }
 
+        this.numberOfResidues = transformedBackboneVectors.size();
         this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, motifSearchConfig.getSquaredDistanceCutoff(), allowTransformed, assemblyMap);
     }
 
@@ -458,5 +461,9 @@ public class ResidueGraph {
                     .stream()
                     .map(residue2 -> new Pair<>(residue1, residue2));
         }
+    }
+
+    public int getNumberOfResidues() {
+        return numberOfResidues;
     }
 }

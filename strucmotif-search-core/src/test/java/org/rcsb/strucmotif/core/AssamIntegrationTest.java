@@ -52,8 +52,8 @@ public class AssamIntegrationTest {
     public void init() {
         MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
         ThreadPool threadPool = new ThreadPoolImpl(motifSearchConfig);
-        NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner(motifSearchConfig);
-        KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner(motifSearchConfig);
+        NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
+        KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
         this.structureReader = new StructureReaderImpl();
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
@@ -92,8 +92,7 @@ public class AssamIntegrationTest {
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, motifSearchConfig);
-        MotifDefinitionRegistry motifDefinitionRegistry = new MotifDefinitionRegistryImpl();
-        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider, motifDefinitionRegistry);
+        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider);
         this.queryBuilder = new AssamContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig, invertedIndex);
     }
 

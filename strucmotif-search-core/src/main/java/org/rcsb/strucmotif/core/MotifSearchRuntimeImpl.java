@@ -4,12 +4,15 @@ import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.AssamSearchContext;
 import org.rcsb.strucmotif.domain.SpriteSearchContext;
-import org.rcsb.strucmotif.domain.motif.MotifDefinition;
+import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.query.AssamParameters;
 import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.query.SpriteParameters;
+import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
+import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -21,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -42,7 +46,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final StructureDataProvider structureDataProvider;
     private final StructureIndexProvider structureIndexProvider;
     private final AssemblyInformationProvider assemblyInformationProvider;
-    private final MotifDefinitionRegistry motifDefinitionRegistry;
 
     /**
      * Injectable constructor.
@@ -53,10 +56,9 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
      * @param structureDataProvider structure data provider
      * @param structureIndexProvider maps from index to identifier
      * @param assemblyInformationProvider all known assemblies
-     * @param motifDefinitionRegistry all known motifs
      */
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StructureIndexProvider structureIndexProvider, AssemblyInformationProvider assemblyInformationProvider, MotifDefinitionRegistry motifDefinitionRegistry) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StructureIndexProvider structureIndexProvider, AssemblyInformationProvider assemblyInformationProvider) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
@@ -64,7 +66,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         this.structureDataProvider = structureDataProvider;
         this.structureIndexProvider = structureIndexProvider;
         this.assemblyInformationProvider = assemblyInformationProvider;
-        this.motifDefinitionRegistry = motifDefinitionRegistry;
 
         // initialize structure cache (if active)
         try {
@@ -197,13 +198,55 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
     @Override
     public void performSearch(SpriteSearchContext context) {
-        for (MotifDefinition motifDefinition : this.motifDefinitionRegistry.getMotifDefinitions()) {
+        SpriteMotifSearchResult result = context.getResult();
+        List<SpriteHit> hits = result.getHits();
+        for (EnrichedMotifDefinition motifDefinition : context.getQuery().getMotifDefinitions()) {
             logger.info("Testing " + motifDefinition.getTitle());
+
+            AssamSearchContext subcontext = createSubContext(context, motifDefinition);
+            AssamMotifSearchResult subresult = subcontext.getResult();
+            // delegate to traditional route
+            performSearch(subcontext);
+
+            if (subresult.getHits().isEmpty()) {
+                continue;
+            }
+            for (AssamHit subhit : subresult.getHits()) {
+                hits.add(new SpriteHit(motifDefinition.getMotifIdentifier(),
+                        subhit.getLabelSelections(),
+                        subhit.getResidueTypes(),
+                        subhit.getRootMeanSquareDeviation(),
+                        subhit.getTransformation()));
+            }
         }
     }
 
-    private void assemble(SpriteSearchContext context) {
+    private AssamSearchContext createSubContext(SpriteSearchContext parentContext, EnrichedMotifDefinition motifDefinition) {
+        SpriteParameters parentParameters = parentContext.getQuery().getParameters();
+        AssamParameters parameters = new AssamParameters(parentParameters.getBackboneDistanceTolerance(),
+                parentParameters.getSideChainDistanceTolerance(),
+                parentParameters.getAngleTolerance(),
+                parentParameters.getRmsdCutoff(),
+                parentParameters.getAtomPairingScheme(),
+                parentParameters.getMotifPruner(),
+                Integer.MAX_VALUE,
+                false);
 
+        AssamSearchQuery query = new AssamSearchQuery(motifDefinition.getStructureIdentifier(),
+                motifDefinition.getStructure(),
+                motifDefinition.getLabelSelections(),
+                motifDefinition.getResidues(),
+                parameters,
+                Collections.emptyMap(),
+                Collections.emptySet(),
+                Collections.emptySet(),
+                StructureDeterminationMethodology.ALL,
+                motifSearchConfig);
+
+        return new AssamSearchContext(parentContext.getRuntime(),
+                parentContext.getConfig(),
+                parentContext.getInvertedIndex(),
+                query);
     }
 
     @Override

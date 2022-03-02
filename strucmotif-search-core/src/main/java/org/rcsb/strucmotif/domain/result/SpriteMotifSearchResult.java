@@ -5,8 +5,7 @@ import java.util.List;
 
 public class SpriteMotifSearchResult implements SearchResult<SpriteHit> {
     private final Timings timings;
-
-    private List<SpriteHit> hits;
+    private final List<SpriteHit> hits;
 
     /**
      * Construct a result container.

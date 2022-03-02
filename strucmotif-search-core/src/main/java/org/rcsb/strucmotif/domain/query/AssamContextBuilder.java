@@ -390,7 +390,8 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
                     exchanges,
                     whitelist,
                     blacklist,
-                    structureDeterminationMethodology);
+                    structureDeterminationMethodology,
+                    motifSearchConfig);
             return new AssamSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, query);
         }
     }

@@ -32,7 +32,7 @@ public class AssamQueryStructure implements QueryStructure {
     private final List<ResiduePairDescriptor> residuePairDescriptors;
     private final List<Integer> residueIndexSwaps;
 
-    AssamQueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
+    public AssamQueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {

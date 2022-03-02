@@ -1,8 +1,10 @@
 package org.rcsb.strucmotif.domain.query;
 
+import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -22,16 +24,18 @@ public class AssamSearchQuery implements SearchQuery<AssamParameters, AssamQuery
     private final Collection<String> blacklist;
     private final StructureDeterminationMethodology structureDeterminationMethodology;
 
-    AssamSearchQuery(String structureIdentifier,
-                     Structure structure,
-                     List<LabelSelection> labelSelections,
-                     List<Map<LabelAtomId, float[]>> residues,
-                     AssamParameters parameters,
-                     Map<LabelSelection, Set<ResidueType>> exchanges,
-                     Collection<String> whitelist,
-                     Collection<String> blacklist,
-                     StructureDeterminationMethodology structureDeterminationMethodology) {
-        List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(structure, labelSelections, residues);
+    public AssamSearchQuery(String structureIdentifier,
+                            Structure structure,
+                            List<LabelSelection> labelSelections,
+                            List<Map<LabelAtomId, float[]>> residues,
+                            AssamParameters parameters,
+                            Map<LabelSelection, Set<ResidueType>> exchanges,
+                            Collection<String> whitelist,
+                            Collection<String> blacklist,
+                            StructureDeterminationMethodology structureDeterminationMethodology,
+                            MotifSearchConfig motifSearchConfig) {
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig, true);
+        List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
         this.queryStructure = new AssamQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;
         this.exchanges = exchanges;

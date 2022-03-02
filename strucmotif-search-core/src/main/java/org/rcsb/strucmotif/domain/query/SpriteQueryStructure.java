@@ -10,7 +10,7 @@ public class SpriteQueryStructure implements QueryStructure {
     private final String structureIdentifier;
     private final Structure structure;
 
-    SpriteQueryStructure(String structureIdentifier, Structure structure) {
+    public SpriteQueryStructure(String structureIdentifier, Structure structure) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
     }

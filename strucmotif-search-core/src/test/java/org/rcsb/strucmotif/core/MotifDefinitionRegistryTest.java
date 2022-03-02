@@ -4,6 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,6 +30,12 @@ class MotifDefinitionRegistryTest {
         assertTrue(motifDefinitions.contains(MotifDefinition.KDEEH_EXCHANGES));
         assertTrue(motifDefinitions.stream().anyMatch(m -> m.getTitle().startsWith("NOS")), "NOS parsed from JSON missing");
         assertTrue(motifDefinitions.size() > 7);
+
+        assertTrue(motifDefinitions.stream()
+                .map(MotifDefinition::getLabelSelections)
+                .flatMap(Collection::stream)
+                .peek(System.out::println)
+                .allMatch(l -> l.getLabelAsymId() != null && l.getStructOperId() != null && l.getLabelSeqId() != 0), "Not all label-selections were parsed properly");
     }
 
     @Test

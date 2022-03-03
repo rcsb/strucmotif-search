@@ -5,17 +5,13 @@ import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.AssamSearchContext;
 import org.rcsb.strucmotif.domain.SpriteSearchContext;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
+import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.AssamParameters;
 import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
-import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
-import org.rcsb.strucmotif.domain.query.SpriteParameters;
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
-import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -25,13 +21,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -195,13 +186,11 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         SpriteMotifSearchResult result = context.getResult();
         List<SpriteHit> hits = result.getHits();
         for (EnrichedMotifDefinition motifDefinition : context.getQuery().getMotifDefinitions()) {
-            logger.info("Evaluating " + motifDefinition.getTitle());
+            AssamMotifSearchResult subresult = performSearch(context, motifDefinition);
+            List<AssamHit> subhits = subresult.getHits();
+            if (subhits.isEmpty()) continue;
 
-            AssamSearchContext subcontext = createSubContext(context, motifDefinition);
-            AssamMotifSearchResult subresult = subcontext.getResult();
-            // delegate to traditional route
-            performSearch(subcontext);
-
+            logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motifDefinition.getMotifIdentifier());
             // if there are hits: move them to parent
             for (AssamHit subhit : subresult.getHits()) {
                 hits.add(new SpriteHit(motifDefinition.getMotifIdentifier(),
@@ -213,41 +202,44 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
     }
 
-    private AssamSearchContext createSubContext(SpriteSearchContext parentContext, EnrichedMotifDefinition motifDefinition) {
-        SpriteParameters parentParameters = parentContext.getQuery().getParameters();
-        AssamParameters parameters = new AssamParameters(parentParameters.getBackboneDistanceTolerance(),
-                parentParameters.getSideChainDistanceTolerance(),
-                parentParameters.getAngleTolerance(),
-                parentParameters.getRmsdCutoff(),
-                parentParameters.getAtomPairingScheme(),
-                parentParameters.getMotifPruner(),
-                Integer.MAX_VALUE,
-                false);
+    private AssamMotifSearchResult performSearch(SpriteSearchContext context, EnrichedMotifDefinition motifDefinition) {
+        AssamSearchContext subcontext = context.createSubcontext(motifDefinition);
+        logger.info("[{}] Evaluating {} in subquery [{}]", context.getId(), motifDefinition.getMotifIdentifier(), subcontext.getId());
 
-        Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()
-                .stream()
-                .collect(Collectors.toMap(PositionSpecificExchange::getLabelSelection, PositionSpecificExchange::getResidueTypes));
-        AssamSearchQuery query = new AssamSearchQuery(motifDefinition.getStructureIdentifier(),
-                motifDefinition.getStructure(),
-                motifDefinition.getLabelSelections(),
-                motifDefinition.getResidues(),
-                parameters,
-                exchanges,
-                Collections.emptySet(),
-                Collections.emptySet(),
-                StructureDeterminationMethodology.ALL,
-                motifSearchConfig);
+        // delegate to traditional route
+        performSearch(subcontext);
 
-        return new AssamSearchContext(parentContext.getRuntime(),
-                parentContext.getConfig(),
-                parentContext.getInvertedIndex(),
-                parentContext.getStructureIndexProvider(),
-                parentContext.getStructureDataProvider(),
-                query);
+        return subcontext.getResult();
     }
 
     @Override
     public void performSearch(SpriteSearchContext context, Consumer<SpriteHit> consumer) {
-        // TODO impl
+        try {
+            for (EnrichedMotifDefinition motifDefinition : context.getQuery().getMotifDefinitions()) {
+                AssamMotifSearchResult subresult = performSearch(context, motifDefinition);
+                List<AssamHit> subhits = subresult.getHits();
+                if (subhits.isEmpty()) continue;
+
+                logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motifDefinition.getMotifIdentifier());
+                subhits.stream()
+                        .map(h -> createSpriteHit(motifDefinition, h))
+                        .forEach(consumer);
+            }
+        } catch (Exception e) {
+            // unwrap specific exceptions
+            Throwable t = unwrapException(e);
+            if (t instanceof IllegalQueryDefinitionException) {
+                throw (IllegalQueryDefinitionException) t;
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SpriteHit createSpriteHit(MotifDefinition motifDefinition, AssamHit assamHit) {
+        return new SpriteHit(motifDefinition.getMotifIdentifier(),
+                assamHit.getLabelSelections(),
+                assamHit.getResidueTypes(),
+                assamHit.getRootMeanSquareDeviation(),
+                assamHit.getTransformation());
     }
 }

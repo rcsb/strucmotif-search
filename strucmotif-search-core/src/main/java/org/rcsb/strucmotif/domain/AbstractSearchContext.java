@@ -5,7 +5,6 @@ import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.query.SearchQuery;
 import org.rcsb.strucmotif.domain.result.Hit;
 import org.rcsb.strucmotif.domain.result.SearchResult;
-import org.rcsb.strucmotif.io.StructureIndexProvider;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -21,14 +20,18 @@ import java.util.stream.Collectors;
 public abstract class AbstractSearchContext<Q extends SearchQuery<P, S>, P extends Parameters, S extends QueryStructure, R extends SearchResult<H>, H extends Hit> implements SearchContext<Q, P, S, R, H> {
     protected static final String COLUMN_DELIMITER = ",";
     protected static final String VALUE_DELIMITER = ";";
-    protected final int id;
+    protected final String id;
+
+    protected AbstractSearchContext(String id) {
+        this.id = id;
+    }
 
     protected AbstractSearchContext() {
-        this.id = hashCode();
+        this.id = String.valueOf(hashCode());
     }
 
     @Override
-    public int getId() {
+    public String getId() {
         return id;
     }
 

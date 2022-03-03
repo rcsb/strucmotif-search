@@ -25,7 +25,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @Service
-public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder.Mandatory2SpriteBuilder, SpriteSearchContext> {
+public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder.MandatorySpriteBuilder, SpriteSearchContext> {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -55,7 +55,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MandatorySpriteBuilder defineByPdbId(String structureIdentifier) {
+    public SpriteMotifRegistryBuilder defineByPdbId(String structureIdentifier) {
         Structure structure = structureDataProvider.readOriginal(structureIdentifier);
         return defineByStructure(structure);
     }
@@ -65,7 +65,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @param inputStream the data to ready - all components are considered the motif
      * @return mandatory parameter step
      */
-    public MandatorySpriteBuilder defineByFile(InputStream inputStream) {
+    public SpriteMotifRegistryBuilder defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         return defineByStructure(structure);
     }
@@ -77,7 +77,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MandatorySpriteBuilder defineByStructure(Structure structure) {
+    public SpriteMotifRegistryBuilder defineByStructure(Structure structure) {
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
 
         ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
@@ -85,17 +85,17 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         StructureIndexProvider structureIndexProvider = new SingleStructureIndexProvider(structure);
         StructureDataProvider structureDataProvider = new SingleStructureDataProvider(structure);
 
-        return new MandatorySpriteBuilder(structureIdentifier, structure, invertedIndex, structureIndexProvider, structureDataProvider);
+        return new SpriteMotifRegistryBuilder(structureIdentifier, structure, invertedIndex, structureIndexProvider, structureDataProvider);
     }
 
-    public class MandatorySpriteBuilder {
+    public class SpriteMotifRegistryBuilder {
         private final String structureIdentifier;
         private final Structure structure;
         private final InvertedIndex invertedIndex;
         private final StructureIndexProvider structureIndexProvider;
         private final StructureDataProvider structureDataProvider;
 
-        MandatorySpriteBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
+        SpriteMotifRegistryBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.invertedIndex = invertedIndex;
@@ -103,8 +103,8 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
             this.structureDataProvider = structureDataProvider;
         }
 
-        public Mandatory2SpriteBuilder andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
-            return new Mandatory2SpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
+        public MandatorySpriteBuilder andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
+            return new MandatorySpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
         }
     }
 
@@ -113,7 +113,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * default values will be used). But internally these values are strictly required. No input validation is performed
      * whatsoever.
      */
-    public class Mandatory2SpriteBuilder implements MandatoryBuilder<Mandatory2SpriteBuilder, SpriteSearchContext> {
+    public class MandatorySpriteBuilder implements MandatoryBuilder<MandatorySpriteBuilder, SpriteSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
@@ -127,7 +127,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
 
-        Mandatory2SpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
+        MandatorySpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;
@@ -149,7 +149,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder backboneDistanceTolerance(int backboneDistanceTolerance) {
+        public MandatorySpriteBuilder backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
@@ -160,7 +160,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder sideChainDistanceTolerance(int sideChainDistanceTolerance) {
+        public MandatorySpriteBuilder sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
@@ -171,7 +171,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder angleTolerance(int angleTolerance) {
+        public MandatorySpriteBuilder angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
@@ -182,7 +182,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder rmsdCutoff(double rmsdCutoff) {
+        public MandatorySpriteBuilder rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
@@ -193,7 +193,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
+        public MandatorySpriteBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
         }
@@ -204,7 +204,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder motifPruningStrategy(MotifPruner motifPruner) {
+        public MandatorySpriteBuilder motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
             return this;
         }
@@ -215,7 +215,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
          * @return this builder
          */
         @Override
-        public Mandatory2SpriteBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
+        public MandatorySpriteBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL:
                     this.motifPruner = SpriteContextBuilder.this.kruskalMotifPruner;

@@ -2,11 +2,18 @@ package org.rcsb.strucmotif.domain;
 
 import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
+import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
+import org.rcsb.strucmotif.domain.query.AssamParameters;
+import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.SpriteParameters;
 import org.rcsb.strucmotif.domain.query.SpriteQueryStructure;
 import org.rcsb.strucmotif.domain.query.SpriteSearchQuery;
+import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
@@ -14,8 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery, SpriteParameters, SpriteQueryStructure, SpriteMotifSearchResult, SpriteHit> {
     private static final Logger logger = LoggerFactory.getLogger(SpriteSearchContext.class);
@@ -128,5 +139,38 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     @Override
     public SpriteMotifSearchResult getResult() {
         return result;
+    }
+
+    public AssamSearchContext createSubcontext(EnrichedMotifDefinition motifDefinition) {
+        SpriteParameters parentParameters = query.getParameters();
+        AssamParameters parameters = new AssamParameters(parentParameters.getBackboneDistanceTolerance(),
+                parentParameters.getSideChainDistanceTolerance(),
+                parentParameters.getAngleTolerance(),
+                parentParameters.getRmsdCutoff(),
+                parentParameters.getAtomPairingScheme(),
+                parentParameters.getMotifPruner(),
+                Integer.MAX_VALUE,
+                false);
+
+        Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()
+                .stream()
+                .collect(Collectors.toMap(PositionSpecificExchange::getLabelSelection, PositionSpecificExchange::getResidueTypes));
+        AssamSearchQuery query = new AssamSearchQuery(motifDefinition.getStructureIdentifier(),
+                motifDefinition.getStructure(),
+                motifDefinition.getLabelSelections(),
+                motifDefinition.getResidues(),
+                parameters,
+                exchanges,
+                Collections.emptySet(),
+                Collections.emptySet(),
+                StructureDeterminationMethodology.ALL,
+                config);
+
+        return new AssamSearchContext(runtime,
+                config,
+                invertedIndex,
+                structureIndexProvider,
+                structureDataProvider,
+                query);
     }
 }

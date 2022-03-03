@@ -369,15 +369,7 @@ public class ResidueGraph {
      * @return the distance
      */
     public float getBackboneDistance(IndexSelection residue1, IndexSelection residue2) {
-        try {
-            return backboneDistances.get(residue1).get(residue2);
-        } catch (NullPointerException e1) {
-            try {
-                return backboneDistances.get(residue2).get(residue1);
-            } catch (NullPointerException e2) {
-                return Float.MAX_VALUE;
-            }
-        }
+        return tryGet(backboneDistances, residue1, residue2);
     }
 
     /**
@@ -387,15 +379,7 @@ public class ResidueGraph {
      * @return the distance
      */
     public float getSideChainDistance(IndexSelection residue1, IndexSelection residue2) {
-        try {
-            return sideChainDistances.get(residue1).get(residue2);
-        } catch (NullPointerException e1) {
-            try {
-                return sideChainDistances.get(residue2).get(residue1);
-            } catch (NullPointerException e2) {
-                return Float.MAX_VALUE;
-            }
-        }
+        return tryGet(sideChainDistances, residue1, residue2);
     }
 
     /**
@@ -405,15 +389,19 @@ public class ResidueGraph {
      * @return the angle
      */
     public float getAngle(IndexSelection residue1, IndexSelection residue2) {
-        try {
-            return angles.get(residue1).get(residue2);
-        } catch (NullPointerException e1) {
-            try {
-                return angles.get(residue2).get(residue1);
-            } catch (NullPointerException e2) {
-                return Float.MAX_VALUE;
-            }
+        return tryGet(angles, residue1, residue2);
+    }
+
+    private float tryGet(Map<IndexSelection, Map<IndexSelection, Float>> map, IndexSelection i1, IndexSelection i2) {
+        if (map.containsKey(i1)) {
+            Map<IndexSelection, Float> m = map.get(i1);
+            if (m.containsKey(i2)) return m.get(i2);
         }
+        if (map.containsKey(i2)) {
+            Map<IndexSelection, Float> m = map.get(i2);
+            if (m.containsKey(i1)) return m.get(i1);
+        }
+        return Float.MAX_VALUE;
     }
 
     /**

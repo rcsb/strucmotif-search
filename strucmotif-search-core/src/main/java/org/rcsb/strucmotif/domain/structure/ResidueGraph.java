@@ -15,11 +15,9 @@ import org.rcsb.strucmotif.math.Algebra;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -77,7 +75,6 @@ public class ResidueGraph {
      * @param labelSelections residue keys (maybe subset, maybe all)
      * @param residues residue coordinates (maybe subset, maybe all)
      * @param motifSearchConfig global config
-     * @param options options to apply
      */
     public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, MotifSearchConfig motifSearchConfig) {
         this.structure = structure;

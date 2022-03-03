@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
 
 public class MotifPrunerImplTest {
     private MotifSearchConfig config;
@@ -42,7 +43,7 @@ public class MotifPrunerImplTest {
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, config, true);
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, config);
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 
@@ -64,7 +65,7 @@ public class MotifPrunerImplTest {
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, config, true);
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, config);
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 

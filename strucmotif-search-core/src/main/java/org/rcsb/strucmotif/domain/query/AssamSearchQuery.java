@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
+
 /**
  * The immutable container for a structural motif query.
  */
@@ -34,7 +36,7 @@ public class AssamSearchQuery implements SearchQuery<AssamParameters, AssamQuery
                             Collection<String> blacklist,
                             StructureDeterminationMethodology structureDeterminationMethodology,
                             MotifSearchConfig motifSearchConfig) {
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig, true);
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig);
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
         this.queryStructure = new AssamQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;

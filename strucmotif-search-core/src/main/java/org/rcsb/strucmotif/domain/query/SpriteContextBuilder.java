@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.util.List;
 
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.assembly;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
+
 @Service
 public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder.MandatorySpriteBuilder, SpriteSearchContext> {
     private final StructureDataProvider structureDataProvider;
@@ -80,7 +83,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     public SpriteMotifRegistryBuilder defineByStructure(Structure structure, String assemblyIdentifier) {
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
 
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, true); // TODO impl
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, assembly(assemblyIdentifier));
         InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);
         StructureIndexProvider structureIndexProvider = new SingleStructureIndexProvider(structure);
         StructureDataProvider structureDataProvider = new SingleStructureDataProvider(structure);

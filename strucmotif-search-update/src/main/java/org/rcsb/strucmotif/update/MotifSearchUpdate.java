@@ -56,6 +56,8 @@ import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
+
 /**
  * Runs strucmotif updates from the command-line.
  */
@@ -315,7 +317,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         try {
-            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();

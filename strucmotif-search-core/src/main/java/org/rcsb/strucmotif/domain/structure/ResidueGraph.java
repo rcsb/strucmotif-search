@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.all;
 import static org.rcsb.strucmotif.math.Algebra.*;
 
 /**
@@ -37,15 +38,48 @@ public class ResidueGraph {
     private final int numberOfResidues;
     private final int numberOfPairings;
 
+    public enum ResidueGraphMode {
+        DEPOSITED,
+        DEPOSITED_AND_CONTACTS,
+        ASSEMBLY,
+        ALL
+    }
+
+    public static class ResidueGraphOptions {
+        final ResidueGraphMode mode;
+        final String assemblyIdentifier;
+
+        private ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier) {
+            this.mode = mode;
+            this.assemblyIdentifier = assemblyIdentifier;
+        }
+
+        public static ResidueGraphOptions deposited() {
+            return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED, null);
+        }
+
+        public static ResidueGraphOptions depositedAndContacts() {
+            return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED_AND_CONTACTS, null);
+        }
+
+        public static ResidueGraphOptions assembly(String assemblyIdentifier) {
+            return new ResidueGraphOptions(ResidueGraphMode.ASSEMBLY, assemblyIdentifier);
+        }
+
+        public static ResidueGraphOptions all() {
+            return new ResidueGraphOptions(ResidueGraphMode.ALL, null);
+        }
+    }
+
     /**
      * Construct a residue graph.
      * @param structure the context
      * @param labelSelections residue keys (maybe subset, maybe all)
      * @param residues residue coordinates (maybe subset, maybe all)
      * @param motifSearchConfig global config
-     * @param allowTransformed allow pairs between 2 transformed chains?
+     * @param options options to apply
      */
-    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, MotifSearchConfig motifSearchConfig, boolean allowTransformed) {
+    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, MotifSearchConfig motifSearchConfig) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -92,16 +126,16 @@ public class ResidueGraph {
         }
 
         this.numberOfResidues = backboneVectors.size();
-        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, motifSearchConfig.getSquaredDistanceCutoff(), allowTransformed, assemblyMap);
+        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, motifSearchConfig.getSquaredDistanceCutoff(), all(), assemblyMap);
     }
 
     /**
      * Construct a new residue graph from a full structure.
      * @param structure data
      * @param motifSearchConfig global config
-     * @param allowTransformed set to true during QueryStructure evaluation
+     * @param options options to apply
      */
-    public ResidueGraph(Structure structure, MotifSearchConfig motifSearchConfig, boolean allowTransformed) {
+    public ResidueGraph(Structure structure, MotifSearchConfig motifSearchConfig, ResidueGraphOptions options) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -182,31 +216,20 @@ public class ResidueGraph {
         }
 
         this.numberOfResidues = transformedBackboneVectors.size();
-        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, motifSearchConfig.getSquaredDistanceCutoff(), allowTransformed, assemblyMap);
+        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, motifSearchConfig.getSquaredDistanceCutoff(), options, assemblyMap);
     }
 
-    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, boolean allowTransformed, Map<String, String[]> assemblies) {
+    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, ResidueGraphOptions options, Map<String, String[]> assemblies) {
         // temporary ResidueGrid to efficient distance calculation
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
         Map<String, List<String>> assemblyMap = assemblies.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue())));
 
-        // if needed: check for first occurrence of chain (which may or may not be identity transform)
+        ResidueGraphMode mode = options.mode;
+        String requestAssemblyIdentifier = options.assemblyIdentifier;
+        List<String> requestChains = assemblyMap.get(requestAssemblyIdentifier);
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        Set<String> acceptedChains = new HashSet<>();
-        Set<String> acceptedOperators = new HashSet<>();
-        if (!allowTransformed) {
-            for (List<String> chainExprs : assemblyMap.values()) {
-                for (String chainExpr : chainExprs) {
-                    String chain = chainExpr.split("_")[0];
-                    if (!acceptedChains.contains(chain)) {
-                        acceptedChains.add(chain);
-                        acceptedOperators.add(chainExpr);
-                    }
-                }
-            }
-        }
 
         int size = 0;
         for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
@@ -217,14 +240,21 @@ public class ResidueGraph {
 
             IndexSelection residueKey1 = indexSelections.get(residueContact.getI());
             String chainExpr1 = labelSelections.get(residueKey1.getIndex()).getLabelAsymId() + "_" + residueKey1.getStructOperId();
-            // 'dominant' residue has to be original by contract
-            if (!allowTransformed && !acceptedOperators.contains(chainExpr1)) {
-                continue;
-            }
 
-            float distance = residueContact.getDistance();
             IndexSelection residueKey2 = indexSelections.get(residueContact.getJ());
             String chainExpr2 = labelSelections.get(residueKey2.getIndex()).getLabelAsymId() + "_" + residueKey2.getStructOperId();
+
+            switch (mode) {
+                case DEPOSITED:
+                    if (!residueKey1.getStructOperId().equals("1") || !residueKey2.getStructOperId().equals("1")) continue;
+                    break;
+                case DEPOSITED_AND_CONTACTS:
+                    if (!residueKey1.getStructOperId().equals("1")) continue;
+                    break;
+                case ASSEMBLY:
+                    if (!requestChains.contains(chainExpr1) || !requestChains.contains(chainExpr2)) continue;
+                    break;
+            }
 
             // ensure that both chainExpressions occur in the same assembly
             if (assemblyMap.values().stream().noneMatch(opers -> opers.contains(chainExpr1) && opers.contains(chainExpr2))) {
@@ -242,7 +272,7 @@ public class ResidueGraph {
             }
 
             Map<IndexSelection, Float> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerPolymerAnchorMap.put(residueKey2, distance);
+            innerPolymerAnchorMap.put(residueKey2, residueContact.getDistance());
 
             Map<IndexSelection, Float> innerInteractionCenterMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
             innerInteractionCenterMap.put(residueKey2, distance3d(sideChainCoordinates1, sideChainCoordinates2));

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.*;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.*;
 
 class ResidueGraphTest {
     @Test
@@ -52,7 +53,7 @@ class ResidueGraphTest {
         for (String perm : perms) {
             InputStream resource = getResource("cif/1acj-" + perm + ".cif");
             Structure structure = structureReader.readFromInputStream(resource);
-            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
             Set<String> descriptors = residueGraph.residuePairOccurrencesSequential()
                     .map(ResiduePairOccurrence::getResiduePairDescriptor)
                     .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
@@ -68,7 +69,7 @@ class ResidueGraphTest {
     public void whenReadingRenumbered3vvk_then6Valid() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
@@ -92,7 +93,7 @@ class ResidueGraphTest {
     public void whenReadingRenumbered1dsd_then8ValidInChainC() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
@@ -118,7 +119,7 @@ class ResidueGraphTest {
     public void whenReadingOriginal200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         assertEquals(5949, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -148,7 +149,7 @@ class ResidueGraphTest {
     public void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -178,7 +179,7 @@ class ResidueGraphTest {
     public void whenReadingRenumbered200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         assertEquals(5949,  residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -208,7 +209,7 @@ class ResidueGraphTest {
     public void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
@@ -237,14 +238,21 @@ class ResidueGraphTest {
     @Test
     public void whenHomo8mer_thenPairCountIncreased() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-        ResidueGraph residueGraphDeposited = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraphDeposited = new ResidueGraph(structure, motifSearchConfig, deposited());
         int pairingsDeposited = residueGraphDeposited.getNumberOfPairings();
 
-        ResidueGraph residueGraphAssembly = new ResidueGraph(structure, motifSearchConfig, true);
+        ResidueGraph residueGraphContacts = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
+        int pairingsContacts = residueGraphContacts.getNumberOfPairings();
+
+        ResidueGraph residueGraphAssembly = new ResidueGraph(structure, motifSearchConfig, assembly("1"));
         int pairingsAssembly = residueGraphAssembly.getNumberOfPairings();
 
-        // contacts must be at least 8x (plus all interface contacts on top of that)
-        assertTrue(pairingsDeposited * 8 < pairingsAssembly);
+        ResidueGraph residueGraphAll = new ResidueGraph(structure, motifSearchConfig, all());
+        int pairingsAll = residueGraphAll.getNumberOfPairings();
+
+        assertTrue(pairingsDeposited < pairingsContacts, "including interface pairs must increase number");
+        assertTrue(pairingsDeposited * 8 < pairingsAssembly, "contacts must be at least 8x (plus all interface contacts on top of that)");
+        assertEquals(pairingsAssembly, pairingsAll, "count in assembly 1 must match all contact count");
     }
 
     private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
@@ -257,7 +265,7 @@ class ResidueGraphTest {
     public void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
         List<ResiduePairDescriptor> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         List<ResiduePairIdentifier> identifiers = residueGraph.residuePairOccurrencesParallel()
                 .filter(wordOccurrence -> residuePairDescriptors.contains(wordOccurrence.getResiduePairDescriptor()))
@@ -273,7 +281,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingRNA_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         assertTrue(residueGraph.getNumberOfPairings() > 0);
     }
@@ -281,7 +289,7 @@ class ResidueGraphTest {
     @Test
     public void whenReadingStructureWithoutIdentityOper_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7a3x"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
 
         assertTrue(residueGraph.getNumberOfPairings() > 0);
     }

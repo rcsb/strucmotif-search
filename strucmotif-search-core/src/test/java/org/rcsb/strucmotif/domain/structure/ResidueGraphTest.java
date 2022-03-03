@@ -234,6 +234,19 @@ class ResidueGraphTest {
                 .count());
     }
 
+    @Test
+    public void whenHomo8mer_thenPairCountIncreased() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        ResidueGraph residueGraphDeposited = new ResidueGraph(structure, motifSearchConfig, false);
+        int pairingsDeposited = residueGraphDeposited.getNumberOfPairings();
+
+        ResidueGraph residueGraphAssembly = new ResidueGraph(structure, motifSearchConfig, true);
+        int pairingsAssembly = residueGraphAssembly.getNumberOfPairings();
+
+        // contacts must be at least 8x (plus all interface contacts on top of that)
+        assertTrue(pairingsDeposited * 8 < pairingsAssembly);
+    }
+
     private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
             ResidueType.ARGININE,
             DistanceType.D15,

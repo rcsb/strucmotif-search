@@ -8,6 +8,8 @@ import org.rcsb.strucmotif.domain.query.SpriteSearchQuery;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
 import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +22,17 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     private final MotifSearchRuntime runtime;
     private final MotifSearchConfig config;
     private final InvertedIndex invertedIndex;
+    private final StructureIndexProvider structureIndexProvider;
+    private final StructureDataProvider structureDataProvider;
     private final SpriteSearchQuery query;
     private final SpriteMotifSearchResult result;
 
-    public SpriteSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig config, InvertedIndex invertedIndex, SpriteSearchQuery query) {
+    public SpriteSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig config, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, SpriteSearchQuery query) {
         this.runtime = motifSearchRuntime;
         this.config = config;
         this.invertedIndex = invertedIndex;
+        this.structureIndexProvider = structureIndexProvider;
+        this.structureDataProvider = structureDataProvider;
         this.query = query;
         this.result = initializeResultContainer();
     }
@@ -61,6 +67,16 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     @Override
     public InvertedIndex getInvertedIndex() {
         return invertedIndex;
+    }
+
+    @Override
+    public StructureIndexProvider getStructureIndexProvider() {
+        return structureIndexProvider;
+    }
+
+    @Override
+    public StructureDataProvider getStructureDataProvider() {
+        return structureDataProvider;
     }
 
     @Override

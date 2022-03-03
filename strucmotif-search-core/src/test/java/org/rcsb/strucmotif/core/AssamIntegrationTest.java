@@ -92,8 +92,8 @@ public class AssamIntegrationTest {
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, motifSearchConfig);
-        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider);
-        this.queryBuilder = new AssamContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig, invertedIndex);
+        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, assemblyInformationProvider);
+        this.queryBuilder = new AssamContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig, invertedIndex);
     }
 
     @Test

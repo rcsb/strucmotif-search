@@ -91,4 +91,16 @@ public class AssamHit implements Hit {
     public Transformation getTransformation() {
         return transformation;
     }
+
+    @Override
+    public String toString() {
+        return "AssamHit{" +
+                "structureIdentifier='" + structureIdentifier + '\'' +
+                ", assemblyIdentifier='" + assemblyIdentifier + '\'' +
+                ", labelSelections=" + labelSelections +
+                ", residueTypes=" + residueTypes +
+                ", rmsd=" + rmsd +
+                ", transformation=" + transformation +
+                '}';
+    }
 }

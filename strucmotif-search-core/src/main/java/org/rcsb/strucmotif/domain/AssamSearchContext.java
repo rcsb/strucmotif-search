@@ -8,6 +8,8 @@ import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,13 +22,17 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     private final MotifSearchRuntime runtime;
     private final MotifSearchConfig config;
     private final InvertedIndex invertedIndex;
+    private final StructureIndexProvider structureIndexProvider;
+    private final StructureDataProvider structureDataProvider;
     private final AssamSearchQuery query;
     private final AssamMotifSearchResult result;
 
-    public AssamSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex, AssamSearchQuery query) {
+    public AssamSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, AssamSearchQuery query) {
         this.runtime = motifSearchRuntime;
         this.config = motifSearchConfig;
         this.invertedIndex = invertedIndex;
+        this.structureIndexProvider = structureIndexProvider;
+        this.structureDataProvider = structureDataProvider;
         this.query = query;
         this.result = initializeResultContainer();
     }
@@ -64,6 +70,16 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     @Override
     public InvertedIndex getInvertedIndex() {
         return invertedIndex;
+    }
+
+    @Override
+    public StructureIndexProvider getStructureIndexProvider() {
+        return structureIndexProvider;
+    }
+
+    @Override
+    public StructureDataProvider getStructureDataProvider() {
+        return structureDataProvider;
     }
 
     @Override

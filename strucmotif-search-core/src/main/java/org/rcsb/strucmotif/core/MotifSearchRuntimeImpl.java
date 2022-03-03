@@ -7,12 +7,15 @@ import org.rcsb.strucmotif.domain.SpriteSearchContext;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.query.AssamParameters;
 import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.SpriteParameters;
 import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.result.AssamHit;
 import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
 import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -26,7 +29,9 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -43,8 +48,6 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     private final ThreadPool threadPool;
     private final MotifSearchConfig motifSearchConfig;
     private final AlignmentService alignmentService;
-    private final StructureDataProvider structureDataProvider;
-    private final StructureIndexProvider structureIndexProvider;
     private final AssemblyInformationProvider assemblyInformationProvider;
 
     /**
@@ -53,26 +56,15 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
      * @param threadPool thread pool
      * @param motifSearchConfig app config
      * @param alignmentService alignment service
-     * @param structureDataProvider structure data provider
-     * @param structureIndexProvider maps from index to identifier
      * @param assemblyInformationProvider all known assemblies
      */
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, StructureDataProvider structureDataProvider, StructureIndexProvider structureIndexProvider, AssemblyInformationProvider assemblyInformationProvider) {
+    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, MotifSearchConfig motifSearchConfig, AlignmentService alignmentService, AssemblyInformationProvider assemblyInformationProvider) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.motifSearchConfig = motifSearchConfig;
         this.alignmentService = alignmentService;
-        this.structureDataProvider = structureDataProvider;
-        this.structureIndexProvider = structureIndexProvider;
         this.assemblyInformationProvider = assemblyInformationProvider;
-
-        // initialize structure cache (if active)
-        try {
-            structureDataProvider.initializeRenumberedStructureCache();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     @Override
@@ -184,6 +176,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         AssamSearchQuery query = context.getQuery();
         List<Integer> residueIndexSwaps = query.getQueryStructure().getResidueIndexSwaps();
         AssamParameters parameters = query.getParameters();
+        StructureIndexProvider structureIndexProvider = context.getStructureIndexProvider();
+        StructureDataProvider structureDataProvider = context.getStructureDataProvider();
 
         return context.getResult()
                 .getTargetStructures()
@@ -201,16 +195,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         SpriteMotifSearchResult result = context.getResult();
         List<SpriteHit> hits = result.getHits();
         for (EnrichedMotifDefinition motifDefinition : context.getQuery().getMotifDefinitions()) {
-            logger.info("Testing " + motifDefinition.getTitle());
+            logger.info("Evaluating " + motifDefinition.getTitle());
 
             AssamSearchContext subcontext = createSubContext(context, motifDefinition);
             AssamMotifSearchResult subresult = subcontext.getResult();
             // delegate to traditional route
             performSearch(subcontext);
 
-            if (subresult.getHits().isEmpty()) {
-                continue;
-            }
+            // if there are hits: move them to parent
             for (AssamHit subhit : subresult.getHits()) {
                 hits.add(new SpriteHit(motifDefinition.getMotifIdentifier(),
                         subhit.getLabelSelections(),
@@ -232,12 +224,15 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
                 Integer.MAX_VALUE,
                 false);
 
+        Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()
+                .stream()
+                .collect(Collectors.toMap(PositionSpecificExchange::getLabelSelection, PositionSpecificExchange::getResidueTypes));
         AssamSearchQuery query = new AssamSearchQuery(motifDefinition.getStructureIdentifier(),
                 motifDefinition.getStructure(),
                 motifDefinition.getLabelSelections(),
                 motifDefinition.getResidues(),
                 parameters,
-                Collections.emptyMap(),
+                exchanges,
                 Collections.emptySet(),
                 Collections.emptySet(),
                 StructureDeterminationMethodology.ALL,
@@ -246,6 +241,8 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         return new AssamSearchContext(parentContext.getRuntime(),
                 parentContext.getConfig(),
                 parentContext.getInvertedIndex(),
+                parentContext.getStructureIndexProvider(),
+                parentContext.getStructureDataProvider(),
                 query);
     }
 

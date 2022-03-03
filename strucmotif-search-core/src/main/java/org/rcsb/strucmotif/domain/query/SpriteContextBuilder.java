@@ -13,8 +13,11 @@ import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.InvertedIndex;
+import org.rcsb.strucmotif.io.SingleStructureDataProvider;
+import org.rcsb.strucmotif.io.SingleStructureIndexProvider;
 import org.rcsb.strucmotif.io.SingleStructureInvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,23 +82,29 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
 
         ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
         InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);
+        StructureIndexProvider structureIndexProvider = new SingleStructureIndexProvider(structure);
+        StructureDataProvider structureDataProvider = new SingleStructureDataProvider(structure);
 
-        return new MandatorySpriteBuilder(structureIdentifier, structure, invertedIndex);
+        return new MandatorySpriteBuilder(structureIdentifier, structure, invertedIndex, structureIndexProvider, structureDataProvider);
     }
 
     public class MandatorySpriteBuilder {
         private final String structureIdentifier;
         private final Structure structure;
         private final InvertedIndex invertedIndex;
+        private final StructureIndexProvider structureIndexProvider;
+        private final StructureDataProvider structureDataProvider;
 
-        MandatorySpriteBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex) {
+        MandatorySpriteBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.invertedIndex = invertedIndex;
+            this.structureIndexProvider = structureIndexProvider;
+            this.structureDataProvider = structureDataProvider;
         }
 
         public Mandatory2SpriteBuilder andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
-            return new Mandatory2SpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex);
+            return new Mandatory2SpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
         }
     }
 
@@ -109,6 +118,8 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
         private final InvertedIndex invertedIndex;
+        private final StructureIndexProvider structureIndexProvider;
+        private final StructureDataProvider structureDataProvider;
         private int backboneDistanceTolerance;
         private int sideChainDistanceTolerance;
         private int angleTolerance;
@@ -116,11 +127,13 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
 
-        Mandatory2SpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex) {
+        Mandatory2SpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;
             this.invertedIndex = invertedIndex;
+            this.structureIndexProvider = structureIndexProvider;
+            this.structureDataProvider = structureDataProvider;
             this.backboneDistanceTolerance = AssamParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
             this.sideChainDistanceTolerance = AssamParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
             this.angleTolerance = AssamParameters.DEFAULT_ANGLE_TOLERANCE;
@@ -228,7 +241,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner);
-            return new OptionalSpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, parameters);
+            return new OptionalSpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider, parameters);
         }
     }
 
@@ -240,13 +253,17 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
         private final InvertedIndex invertedIndex;
+        private final StructureIndexProvider structureIndexProvider;
+        private final StructureDataProvider structureDataProvider;
         private final SpriteParameters parameters;
 
-        OptionalSpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, SpriteParameters parameters) {
+        OptionalSpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, SpriteParameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;
             this.invertedIndex = invertedIndex;
+            this.structureIndexProvider = structureIndexProvider;
+            this.structureDataProvider = structureDataProvider;
             this.parameters = parameters;
         }
 
@@ -260,7 +277,7 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
                     structure,
                     motifDefinitions,
                     parameters);
-            return new SpriteSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, query);
+            return new SpriteSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }
     }
 }

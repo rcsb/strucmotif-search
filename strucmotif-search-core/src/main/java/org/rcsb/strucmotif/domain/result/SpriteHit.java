@@ -79,4 +79,15 @@ public class SpriteHit implements Hit {
     public Transformation getTransformation() {
         return transformation;
     }
+
+    @Override
+    public String toString() {
+        return "SpriteHit{" +
+                "motifIdentifier='" + motifIdentifier + '\'' +
+                ", labelSelections=" + labelSelections +
+                ", residueTypes=" + residueTypes +
+                ", rmsd=" + rmsd +
+                ", transformation=" + transformation +
+                '}';
+    }
 }

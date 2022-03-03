@@ -78,4 +78,9 @@ public class Transformation {
     public void transform(float[] out, float[] v) {
         Algebra.multiply4d(out, transformation, v);
     }
+
+    @Override
+    public String toString() {
+        return Arrays.deepToString(transformation);
+    }
 }

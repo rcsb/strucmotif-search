@@ -10,8 +10,10 @@ import org.rcsb.strucmotif.config.MotifSearchConfig;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.SpriteContextBuilder;
+import org.rcsb.strucmotif.domain.result.SpriteHit;
 import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -74,10 +77,11 @@ public class SpriteIntegrationTest {
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, motifSearchConfig);
-        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, structureDataProvider, structureIndexProvider, assemblyInformationProvider);
+        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, assemblyInformationProvider);
         this.motifs = new MotifDefinitionRegistryImpl()
                 .getMotifDefinitions()
                 .stream()
+                .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
                 .map(this::loadMotif)
                 .collect(Collectors.toList());
         this.queryBuilder = new SpriteContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
@@ -104,5 +108,13 @@ public class SpriteIntegrationTest {
                 .run();
 
         assertTrue(result.getHits().size() > 0);
+        SpriteHit actual = result.getHits().get(0);
+        MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
+        assertEquals(expected.getMotifIdentifier(), actual.getMotifIdentifier());
+        assertEquals(expected.getLabelSelections(), actual.getLabelSelections());
+        assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.getResidueTypes());
+        assertTrue(actual.getRootMeanSquareDeviation() < 0.001);
+
+        // TODO this should operate on the assembly
     }
 }

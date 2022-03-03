@@ -33,17 +33,17 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
 
         for (int i = 0; i < residuePairOccurrences.size(); i++) {
             ResiduePairIdentifier identifier = residuePairOccurrences.get(i).getResidueIdentifier();
-            positionData[i] = identifier.getIndex1();
-            positionData[i + 1] = identifier.getIndex2();
+            positionData[2 * i] = identifier.getIndex1();
+            positionData[2 * i + 1] = identifier.getIndex2();
 
             String structOperId1 = identifier.getStructOperId1();
             String structOperId2 = identifier.getStructOperId2();
             if (!structOperId1.equals(Bucket.DEFAULT_OPERATOR)) {
-                operatorIndicesList.add(i);
+                operatorIndicesList.add(2 * i);
                 operatorDataList.add(structOperId1);
             }
             if (!structOperId2.equals(Bucket.DEFAULT_OPERATOR)) {
-                operatorIndicesList.add(i + 1);
+                operatorIndicesList.add(2 * i + 1);
                 operatorDataList.add(structOperId2);
             }
         }

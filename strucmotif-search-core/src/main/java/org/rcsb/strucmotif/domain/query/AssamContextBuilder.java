@@ -16,6 +16,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
+import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
  */
 @Service
 public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.MandatoryAssamBuilder, AssamSearchContext> {
+    private final StructureIndexProvider structureIndexProvider;
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -44,7 +46,8 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
 
     /**
      * Construct a new query builder.
-     * @param structureDataProvider injectable structure provider
+     * @param structureIndexProvider injectable structure index provider
+     * @param structureDataProvider injectable structure data provider
      * @param kruskalMotifPruner injectable motif pruner
      * @param noOperationMotifPruner injectable nop motif pruner
      * @param motifSearchRuntime injectable runtime
@@ -52,7 +55,8 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
      * @param invertedIndex injectable inverted index
      */
     @Autowired
-    public AssamContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex) {
+    public AssamContextBuilder(StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex) {
+        this.structureIndexProvider = structureIndexProvider;
         this.structureDataProvider = structureDataProvider;
         this.kruskalMotifPruner = kruskalMotifPruner;
         this.noOperationMotifPruner = noOperationMotifPruner;
@@ -392,7 +396,7 @@ public class AssamContextBuilder implements ContextBuilder<AssamContextBuilder.M
                     blacklist,
                     structureDeterminationMethodology,
                     motifSearchConfig);
-            return new AssamSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, query);
+            return new AssamSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }
     }
 }

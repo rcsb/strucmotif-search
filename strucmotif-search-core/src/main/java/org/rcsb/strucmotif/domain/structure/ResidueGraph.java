@@ -15,9 +15,11 @@ import org.rcsb.strucmotif.math.Algebra;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -224,6 +226,22 @@ public class ResidueGraph {
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue())));
 
         ResidueGraphMode mode = options.mode;
+        // track the first occurrence of each chain and consider that 'deposited'
+        Set<String> acceptedChains = new HashSet<>();
+        Set<String> acceptedOperators = new HashSet<>();
+        if (mode == ResidueGraphMode.DEPOSITED || mode == ResidueGraphMode.DEPOSITED_AND_CONTACTS) {
+            for (List<String> chainExprs : assemblyMap.values()) {
+                for (String chainExpr : chainExprs) {
+                    String chain = chainExpr.split("_")[0];
+                    if (!acceptedChains.contains(chain)) {
+                        acceptedChains.add(chain);
+                        acceptedOperators.add(chainExpr);
+                    }
+                }
+            }
+        }
+
+        // a specific assembly was requested
         String requestAssemblyIdentifier = options.assemblyIdentifier;
         List<String> requestChains = assemblyMap.get(requestAssemblyIdentifier);
         List<LabelSelection> labelSelections = structure.getLabelSelections();
@@ -243,10 +261,10 @@ public class ResidueGraph {
 
             switch (mode) {
                 case DEPOSITED:
-                    if (!residueKey1.getStructOperId().equals("1") || !residueKey2.getStructOperId().equals("1")) continue;
+                    if (!acceptedOperators.contains(chainExpr1) || !acceptedOperators.contains(chainExpr2)) continue;
                     break;
                 case DEPOSITED_AND_CONTACTS:
-                    if (!residueKey1.getStructOperId().equals("1")) continue;
+                    if (!acceptedOperators.contains(chainExpr1)) continue;
                     break;
                 case ASSEMBLY:
                     if (!requestChains.contains(chainExpr1) || !requestChains.contains(chainExpr2)) continue;

@@ -55,9 +55,9 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public SpriteMotifRegistryBuilder defineByPdbId(String structureIdentifier) {
+    public SpriteMotifRegistryBuilder defineByPdbId(String structureIdentifier, String assemblyIdentifier) {
         Structure structure = structureDataProvider.readOriginal(structureIdentifier);
-        return defineByStructure(structure);
+        return defineByStructure(structure, assemblyIdentifier);
     }
 
     /**
@@ -65,9 +65,9 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @param inputStream the data to ready - all components are considered the motif
      * @return mandatory parameter step
      */
-    public SpriteMotifRegistryBuilder defineByFile(InputStream inputStream) {
+    public SpriteMotifRegistryBuilder defineByFile(InputStream inputStream, String assemblyIdentifier) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        return defineByStructure(structure);
+        return defineByStructure(structure, assemblyIdentifier);
     }
 
     /**
@@ -77,10 +77,10 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @return mandatory parameter step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public SpriteMotifRegistryBuilder defineByStructure(Structure structure) {
+    public SpriteMotifRegistryBuilder defineByStructure(Structure structure, String assemblyIdentifier) {
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
 
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, false);
+        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, true); // TODO impl
         InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);
         StructureIndexProvider structureIndexProvider = new SingleStructureIndexProvider(structure);
         StructureDataProvider structureDataProvider = new SingleStructureDataProvider(structure);

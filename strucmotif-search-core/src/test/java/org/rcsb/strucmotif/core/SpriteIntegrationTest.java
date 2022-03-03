@@ -98,9 +98,9 @@ public class SpriteIntegrationTest {
     }
 
     @Test
-    public void run() {
+    public void whenScreening2mnr_thenSuperfamilyMotifFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-        SpriteMotifSearchResult result = queryBuilder.defineByStructure(structure)
+        SpriteMotifSearchResult result = queryBuilder.defineByStructure(structure, "1")
                 // these must be 'enriched' with structure data outside
                 .andMotifs(motifs)
                 .buildParameters()

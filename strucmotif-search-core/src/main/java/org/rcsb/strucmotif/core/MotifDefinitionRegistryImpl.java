@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.core;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +16,8 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * An in-memory store of all known/registered motifs.
@@ -71,5 +74,12 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
     public void loadMotifDefinitions(InputStream inputStream) {
         List<MotifDefinition> motifs = GsonHolder.instance.fromJson(new InputStreamReader(inputStream, StandardCharsets.UTF_8), ListTypeHolder.instance);
         motifDefinitions.addAll(motifs);
+    }
+
+    @Override
+    public List<EnrichedMotifDefinition> getEnrichedMotifDefinitions(Function<MotifDefinition, EnrichedMotifDefinition> mapper) {
+        return motifDefinitions.stream()
+                .map(mapper)
+                .collect(Collectors.toList());
     }
 }

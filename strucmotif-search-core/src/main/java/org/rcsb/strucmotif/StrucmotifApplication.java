@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif;
 
+import org.rcsb.strucmotif.core.MotifDefinitionRegistry;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.query.MotifContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 public class StrucmotifApplication {
     static StructureContextBuilder structureContextBuilder;
     static MotifContextBuilder motifContextBuilder;
+    static MotifDefinitionRegistry motifDefinitionRegistry;
 
     /**
      * Default entry point.
@@ -30,10 +32,12 @@ public class StrucmotifApplication {
      * Constructor.
      * @param structureContextBuilder injectable context builder (1 motif -> n structures)
      * @param motifContextBuilder injectable context builder (1 structure -> n motifs)
+     * @param motifDefinitionRegistry injectable motif definition registry (tracks all known motifs)
      */
     @Autowired
-    public StrucmotifApplication(StructureContextBuilder structureContextBuilder, MotifContextBuilder motifContextBuilder) {
+    public StrucmotifApplication(StructureContextBuilder structureContextBuilder, MotifContextBuilder motifContextBuilder, MotifDefinitionRegistry motifDefinitionRegistry) {
         StrucmotifApplication.structureContextBuilder = structureContextBuilder;
         StrucmotifApplication.motifContextBuilder = motifContextBuilder;
+        StrucmotifApplication.motifDefinitionRegistry = motifDefinitionRegistry;
     }
 }

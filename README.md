@@ -60,28 +60,52 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 ## Getting Started by Cloning
 An alternative way to use the library is cloning this repository and building the corresponding Maven modules.
 
-## Search for Structural Motifs
-The `MotifSearch` class provides a fluent API to process structural motif queries.
+## Search for Similar Structures by A Single Motif
+The `Strucmotif` class provides a fluent API to process structural motif queries.
 
 ```java
-class Demo {
-    public static void main(String[] args) {
-        // the entry point for all things' motif search - #newQuery() starts building a new query
-        MotifSearch.newQuery()
-                // several ways can be used to define the query motif - e.g., specify an entry id
-                .defineByPdbIdAndSelection("4CHA",
-                        // and a collection of sequence positions to extract residues
-                        List.of(new LabelSelection("B", "1", 42), // HIS
-                               new LabelSelection("B", "1", 87), // ASP
-                               new LabelSelection("C", "1", 47))) // SER
-                // parameters are considered mandatory arguments
-                .buildParameters()
-                // retrieve container with complete query
-                .buildQuery()
-                // execute query
-                .run();
-    }
-}
+Strucmotif.searchForStructures()
+        // several ways can be used to define the query motif - e.g., specify a PDB entry id
+        .defineByPdbIdAndSelection("4cha",
+                // and a collection of sequence positions to extract residues to use as motif
+                List.of(new LabelSelection("B", "1", 42), // HIS
+                        new LabelSelection("B", "1", 87), // ASP
+                        new LabelSelection("C", "1", 47))) // SER
+        .rmsdCutoff(1.0)
+        .buildParameters()
+        .buildContext()
+        .run()
+        .getHits()
+        .stream()
+        .map(hit -> hit.getStructureIdentifier() + "_" + 
+                    hit.getAssemblyIdentifier() + " @ " + 
+                    hit.getLabelSelections() + " - RMSD: " +
+                    hit.getRootMeanSquareDeviation())
+        .forEach(System.out::println);
+```
+
+## Detect if a Structure Contains Motifs of Interest
+This process can also be reversed to detect whether a structure of unknown function contains characteristic motifs.
+
+```java
+// define a collection of motifs to screen for
+List<EnrichedMotifDefinition> motifs = loadMotifs();
+
+Strucmotif.detectMotifs()
+        // point to a structure of interest, like the first assembly of 2mnr
+        .defineByPdbId("2mnr", "1")
+        // and specify all motifs to consider
+        .andMotifs(motifs)
+        .rmsdCutoff(1.0)
+        .buildParameters()
+        .buildContext()
+        .run()
+        .getHits()
+        .stream()
+        .map(hit -> hit.getMotifIdentifier() + "_" +
+                    hit.getLabelSelections() + " - RMSD: " +
+                    hit.getRootMeanSquareDeviation())
+        .forEach(System.out::println);
 ```
 
 ## Configuration

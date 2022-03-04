@@ -157,27 +157,27 @@ public class ColferCodec implements BucketCodec {
     }
 
     private void encodeInternal(Bucket bucket, ByteArrayOutputStream out) throws IOException {
-        Bucket.BucketArrays bucketArrays = Bucket.toArrays(bucket);
+        Bucket.ArrayBucket arrayBucket = Bucket.toArrayBucket(bucket);
 
-        if (bucketArrays.getStructureIndices().length != 0) {
+        if (arrayBucket.getStructureIndices().length != 0) {
             out.write(0);
-            writeIntArray(out, bucketArrays.getStructureIndices());
+            writeIntArray(out, arrayBucket.getStructureIndices());
         }
-        if (bucketArrays.getPositionOffsets().length != 0) {
+        if (arrayBucket.getPositionOffsets().length != 0) {
             out.write(1);
-            writeIntArray(out, bucketArrays.getPositionOffsets());
+            writeIntArray(out, arrayBucket.getPositionOffsets());
         }
-        if (bucketArrays.getPositionData().length != 0) {
+        if (arrayBucket.getPositionData().length != 0) {
             out.write(2);
-            writeIntArray(out, bucketArrays.getPositionData());
+            writeIntArray(out, arrayBucket.getPositionData());
         }
-        if (bucketArrays.getOperatorIndices().length != 0) {
+        if (arrayBucket.getOperatorIndices().length != 0) {
             out.write(3);
-            writeIntArray(out, bucketArrays.getOperatorIndices());
+            writeIntArray(out, arrayBucket.getOperatorIndices());
         }
-        if (bucketArrays.getOperatorData().length != 0) {
+        if (arrayBucket.getOperatorData().length != 0) {
             out.write(4);
-            writeStringArray(out, bucketArrays.getOperatorData());
+            writeStringArray(out, arrayBucket.getOperatorData());
         }
 
         out.write(0x7f);

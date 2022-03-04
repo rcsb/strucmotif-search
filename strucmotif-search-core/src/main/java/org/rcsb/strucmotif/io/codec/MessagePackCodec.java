@@ -157,13 +157,13 @@ public class MessagePackCodec implements BucketCodec {
     }
 
     private void encodeInternal(Bucket bucket, DataOutputStream outputStream) throws IOException {
-        Bucket.BucketArrays bucketArrays = Bucket.toArrays(bucket);
+        Bucket.ArrayBucket arrayBucket = Bucket.toArrayBucket(bucket);
 
-        encodeIntArray(bucketArrays.getStructureIndices(), outputStream);
-        encodeIntArray(bucketArrays.getPositionOffsets(), outputStream);
-        encodeIntArray(bucketArrays.getPositionData(), outputStream);
-        encodeIntArray(bucketArrays.getOperatorIndices(), outputStream);
-        encodeStringArray(bucketArrays.getOperatorData(), outputStream);
+        encodeIntArray(arrayBucket.getStructureIndices(), outputStream);
+        encodeIntArray(arrayBucket.getPositionOffsets(), outputStream);
+        encodeIntArray(arrayBucket.getPositionData(), outputStream);
+        encodeIntArray(arrayBucket.getOperatorIndices(), outputStream);
+        encodeStringArray(arrayBucket.getOperatorData(), outputStream);
     }
 
     private void encodeIntArray(int[] value, DataOutputStream outputStream) throws IOException {

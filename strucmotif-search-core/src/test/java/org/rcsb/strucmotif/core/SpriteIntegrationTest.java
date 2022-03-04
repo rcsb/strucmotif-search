@@ -114,7 +114,5 @@ public class SpriteIntegrationTest {
         assertEquals(expected.getLabelSelections(), actual.getLabelSelections());
         assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.getResidueTypes());
         assertTrue(actual.getRootMeanSquareDeviation() < 0.001);
-
-        // TODO this should operate on the assembly
     }
 }

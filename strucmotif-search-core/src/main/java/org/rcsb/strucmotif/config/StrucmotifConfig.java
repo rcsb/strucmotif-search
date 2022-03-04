@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "strucmotif")
-public class MotifSearchConfig {
+public class StrucmotifConfig {
     /**
      * The maximum distance in Å between alpha carbon atoms of residue pairs. All pairs below will be added the inverted
      * index and can appear as search results. Lower values ease storage requirements and improve speed of update

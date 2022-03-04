@@ -9,9 +9,8 @@ import java.util.List;
 /**
  * The result of a structural motif search.
  */
-public class AssamHit implements Hit {
-    private final String structureIdentifier;
-    private final String assemblyIdentifier;
+public class MotifHit implements Hit {
+    private final String motifIdentifier;
     private final List<LabelSelection> labelSelections;
     private final List<ResidueType> residueTypes;
     private final float rmsd;
@@ -19,21 +18,18 @@ public class AssamHit implements Hit {
 
     /**
      * Construct a transformed hit (i.e., scored by an alignment).
-     * @param structureIdentifier the entry ID
-     * @param assemblyIdentifier the assembly ID
+     * @param motifIdentifier the motif ID
      * @param labelSelections selections for each matched residue
      * @param residueTypes mapped residue types
      * @param rmsd the alignment score
      * @param transformation the transformation determined by the alignment
      */
-    public AssamHit(String structureIdentifier,
-                    String assemblyIdentifier,
+    public MotifHit(String motifIdentifier,
                     List<LabelSelection> labelSelections,
                     List<ResidueType> residueTypes,
                     float rmsd,
                     Transformation transformation) {
-        this.structureIdentifier = structureIdentifier;
-        this.assemblyIdentifier = assemblyIdentifier;
+        this.motifIdentifier = motifIdentifier;
         this.labelSelections = labelSelections;
         this.residueTypes = residueTypes;
         this.rmsd = rmsd;
@@ -41,52 +37,28 @@ public class AssamHit implements Hit {
     }
 
     /**
-     * The structure identifier of this hit.
+     * The motif identifier of this hit.
      * @return a String
      */
-    public String getStructureIdentifier() {
-        return structureIdentifier;
+    public String getMotifIdentifier() {
+        return motifIdentifier;
     }
 
-    /**
-     * The assembly identifier of this hit.
-     * @return a String, '0' if no assembly information was present and undefined assemblies are allowed
-     */
-    public String getAssemblyIdentifier() {
-        return assemblyIdentifier;
-    }
-
-    /**
-     * Get all label selections of this hit.
-     * @return a collection of label selections
-     */
     @Override
     public List<LabelSelection> getLabelSelections() {
         return labelSelections;
     }
 
-    /**
-     * Returns residue types (label_comp_id) of this hit.
-     * @return an ordered set of residue types
-     */
     @Override
     public List<ResidueType> getResidueTypes() {
         return residueTypes;
     }
 
-    /**
-     * Returns the RMSD of this hit.
-     * @return a float
-     */
     @Override
     public float getRootMeanSquareDeviation() {
         return rmsd;
     }
 
-    /**
-     * Returns the transformation yielded by the underlying alignment.
-     * @return a transformation object
-     */
     @Override
     public Transformation getTransformation() {
         return transformation;
@@ -94,9 +66,8 @@ public class AssamHit implements Hit {
 
     @Override
     public String toString() {
-        return "AssamHit{" +
-                "structureIdentifier='" + structureIdentifier + '\'' +
-                ", assemblyIdentifier='" + assemblyIdentifier + '\'' +
+        return "SpriteHit{" +
+                "motifIdentifier='" + motifIdentifier + '\'' +
                 ", labelSelections=" + labelSelections +
                 ", residueTypes=" + residueTypes +
                 ", rmsd=" + rmsd +

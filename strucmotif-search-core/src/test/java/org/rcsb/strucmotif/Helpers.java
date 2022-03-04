@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -46,9 +46,9 @@ public class Helpers {
         Path projectRoot = Paths.get("/Users/sebastian/IdeaProjects/strucmotif-search/");
         Path resourcePath = projectRoot.resolve("strucmotif-search-core").resolve("src").resolve("test").resolve("resources");
 
-        Files.copy(dataRoot.resolve(MotifSearchConfig.STATE_KNOWN_LIST), resourcePath.resolve(MotifSearchConfig.STATE_KNOWN_LIST), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(dataRoot.resolve(StrucmotifConfig.STATE_KNOWN_LIST), resourcePath.resolve(StrucmotifConfig.STATE_KNOWN_LIST), StandardCopyOption.REPLACE_EXISTING);
 
-        Files.list(dataRoot.resolve(MotifSearchConfig.RENUMBERED_DIRECTORY))
+        Files.list(dataRoot.resolve(StrucmotifConfig.RENUMBERED_DIRECTORY))
                 .filter(p -> p.toFile().getName().endsWith(".bcif.gz"))
                 .forEach(source -> {
                     try {
@@ -66,7 +66,7 @@ public class Helpers {
                 .forEach(destination -> {
                     try {
                         String name = destination.toFile().getName();
-                        Path source = dataRoot.resolve(MotifSearchConfig.INDEX_DIRECTORY).resolve(name.substring(0, 2)).resolve(name);
+                        Path source = dataRoot.resolve(StrucmotifConfig.INDEX_DIRECTORY).resolve(name.substring(0, 2)).resolve(name);
                         System.out.println(source + " -> " + destination);
                         Files.copy(source, destination.getParent().resolve(name), StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {

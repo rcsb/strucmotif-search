@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -13,32 +13,43 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
-
 /**
  * The immutable container for a structural motif query.
  */
-public class AssamSearchQuery implements SearchQuery<AssamParameters, AssamQueryStructure> {
-    private final AssamQueryStructure queryStructure;
-    private final AssamParameters parameters;
+public class StructureQuery implements SearchQuery<StructureParameters, StructureQueryStructure> {
+    private final StructureQueryStructure queryStructure;
+    private final StructureParameters parameters;
     private final Map<LabelSelection, Set<ResidueType>> exchanges;
     private final Collection<String> whitelist;
     private final Collection<String> blacklist;
     private final StructureDeterminationMethodology structureDeterminationMethodology;
 
-    public AssamSearchQuery(String structureIdentifier,
-                            Structure structure,
-                            List<LabelSelection> labelSelections,
-                            List<Map<LabelAtomId, float[]>> residues,
-                            AssamParameters parameters,
-                            Map<LabelSelection, Set<ResidueType>> exchanges,
-                            Collection<String> whitelist,
-                            Collection<String> blacklist,
-                            StructureDeterminationMethodology structureDeterminationMethodology,
-                            MotifSearchConfig motifSearchConfig) {
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, motifSearchConfig);
+    /**
+     * Construct a structure query.
+     * @param structureIdentifier structure identifier
+     * @param structure structure data
+     * @param labelSelections referenced residues
+     * @param residues referenced residue data
+     * @param parameters query parameters
+     * @param exchanges optional exchanges
+     * @param whitelist which structure to include
+     * @param blacklist which structures to exclude
+     * @param structureDeterminationMethodology which provenance to allow
+     * @param strucmotifConfig the global config
+     */
+    public StructureQuery(String structureIdentifier,
+                          Structure structure,
+                          List<LabelSelection> labelSelections,
+                          List<Map<LabelAtomId, float[]>> residues,
+                          StructureParameters parameters,
+                          Map<LabelSelection, Set<ResidueType>> exchanges,
+                          Collection<String> whitelist,
+                          Collection<String> blacklist,
+                          StructureDeterminationMethodology structureDeterminationMethodology,
+                          StrucmotifConfig strucmotifConfig) {
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
-        this.queryStructure = new AssamQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
+        this.queryStructure = new StructureQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;
         this.exchanges = exchanges;
         this.whitelist = whitelist;
@@ -51,7 +62,7 @@ public class AssamSearchQuery implements SearchQuery<AssamParameters, AssamQuery
      * @return a dedicated implementation wrapping a structure instance
      */
     @Override
-    public AssamQueryStructure getQueryStructure() {
+    public StructureQueryStructure getQueryStructure() {
         return queryStructure;
     }
 
@@ -60,7 +71,7 @@ public class AssamSearchQuery implements SearchQuery<AssamParameters, AssamQuery
      * @return a parameter instance
      */
     @Override
-    public AssamParameters getParameters() {
+    public StructureParameters getParameters() {
         return parameters;
     }
 

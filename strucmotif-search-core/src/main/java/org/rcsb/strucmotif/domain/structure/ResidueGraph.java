@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.domain.structure;
 
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.AngleType;
@@ -38,13 +38,32 @@ public class ResidueGraph {
     private final int numberOfResidues;
     private final int numberOfPairings;
 
+    /**
+     * Different modes of how the residue graph can operate.
+     */
     public enum ResidueGraphMode {
+        /**
+         * Only report contacts of deposited coordinates.
+         */
         DEPOSITED,
+        /**
+         * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         */
         DEPOSITED_AND_CONTACTS,
+        /**
+         * Report contacts within a specific assembly.
+         */
         ASSEMBLY,
+        /**
+         * Report all contacts, regardless of assembly or applied transformation. This makes only sense when the graph
+         * is computed on a substructure, defined by a number of {@link LabelSelection}.
+         */
         ALL
     }
 
+    /**
+     * Modulate behavior of the residue graph.
+     */
     public static class ResidueGraphOptions {
         final ResidueGraphMode mode;
         final String assemblyIdentifier;
@@ -54,18 +73,36 @@ public class ResidueGraph {
             this.assemblyIdentifier = assemblyIdentifier;
         }
 
+        /**
+         * Only report contacts of deposited coordinates.
+         * @return the corresponding options
+         */
         public static ResidueGraphOptions deposited() {
             return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED, null);
         }
 
+        /**
+         * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * @return the corresponding options
+         */
         public static ResidueGraphOptions depositedAndContacts() {
             return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED_AND_CONTACTS, null);
         }
 
+        /**
+         * Only report contacts of deposited coordinates.
+         * @param assemblyIdentifier which assembly to consider?
+         * @return the corresponding options
+         */
         public static ResidueGraphOptions assembly(String assemblyIdentifier) {
             return new ResidueGraphOptions(ResidueGraphMode.ASSEMBLY, assemblyIdentifier);
         }
 
+        /**
+         * Report all contacts, regardless of assembly or applied transformation. This makes only sense when the graph
+         * is computed on a substructure, defined by a number of {@link LabelSelection}.
+         * @return the corresponding options
+         */
         public static ResidueGraphOptions all() {
             return new ResidueGraphOptions(ResidueGraphMode.ALL, null);
         }
@@ -76,9 +113,9 @@ public class ResidueGraph {
      * @param structure the context
      * @param labelSelections residue keys (maybe subset, maybe all)
      * @param residues residue coordinates (maybe subset, maybe all)
-     * @param motifSearchConfig global config
+     * @param strucmotifConfig global config
      */
-    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, MotifSearchConfig motifSearchConfig) {
+    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, StrucmotifConfig strucmotifConfig) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -115,8 +152,8 @@ public class ResidueGraph {
 
         Map<String, String[]> assemblyMap = structure.getAssemblies();
         // handle case where undefined assemblies are allowed and no assembly info is present
-        if (motifSearchConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
-            assemblyMap.put(motifSearchConfig.getUndefinedAssemblyIdentifier(), structure.getLabelSelections()
+        if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
+            assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), structure.getLabelSelections()
                     .stream()
                     .map(LabelSelection::getLabelAsymId)
                     .distinct()
@@ -125,16 +162,16 @@ public class ResidueGraph {
         }
 
         this.numberOfResidues = backboneVectors.size();
-        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, motifSearchConfig.getSquaredDistanceCutoff(), all(), assemblyMap);
+        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, strucmotifConfig.getSquaredDistanceCutoff(), all(), assemblyMap);
     }
 
     /**
      * Construct a new residue graph from a full structure.
      * @param structure data
-     * @param motifSearchConfig global config
+     * @param strucmotifConfig global config
      * @param options options to apply
      */
-    public ResidueGraph(Structure structure, MotifSearchConfig motifSearchConfig, ResidueGraphOptions options) {
+    public ResidueGraph(Structure structure, StrucmotifConfig strucmotifConfig, ResidueGraphOptions options) {
         this.structure = structure;
         this.backboneDistances = new HashMap<>();
         this.sideChainDistances = new HashMap<>();
@@ -149,8 +186,8 @@ public class ResidueGraph {
         Map<String, String[]> assemblyMap = structure.getAssemblies();
 
         // handle case where undefined assemblies are allowed and no assembly info is present
-        if (motifSearchConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
-            assemblyMap.put(motifSearchConfig.getUndefinedAssemblyIdentifier(), chainMap.keySet()
+        if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
+            assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), chainMap.keySet()
                     .stream()
                     .map(c -> c + "_1")
                     .toArray(String[]::new));
@@ -215,7 +252,7 @@ public class ResidueGraph {
         }
 
         this.numberOfResidues = transformedBackboneVectors.size();
-        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, motifSearchConfig.getSquaredDistanceCutoff(), options, assemblyMap);
+        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, strucmotifConfig.getSquaredDistanceCutoff(), options, assemblyMap);
     }
 
     private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, ResidueGraphOptions options, Map<String, String[]> assemblies) {
@@ -496,6 +533,10 @@ public class ResidueGraph {
         }
     }
 
+    /**
+     * Number of residues referenced by this graph.
+     * @return an int
+     */
     public int getNumberOfResidues() {
         return numberOfResidues;
     }

@@ -1,13 +1,13 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.config.MotifPruningStrategy;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
-import org.rcsb.strucmotif.domain.SpriteSearchContext;
+import org.rcsb.strucmotif.domain.MotifSearchContext;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
@@ -25,15 +25,17 @@ import java.io.InputStream;
 import java.util.List;
 
 import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.assembly;
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
 
+/**
+ * The entry point to create {@link MotifSearchContext} instances.
+ */
 @Service
-public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder.MandatorySpriteBuilder, SpriteSearchContext> {
+public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.MandatorySpriteBuilder, MotifSearchContext> {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
     private final MotifSearchRuntime motifSearchRuntime;
-    private final MotifSearchConfig motifSearchConfig;
+    private final StrucmotifConfig strucmotifConfig;
 
     /**
      * Construct a new query builder.
@@ -41,24 +43,25 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * @param kruskalMotifPruner injectable motif pruner
      * @param noOperationMotifPruner injectable nop motif pruner
      * @param motifSearchRuntime injectable runtime
-     * @param motifSearchConfig injectable config
+     * @param strucmotifConfig injectable config
      */
     @Autowired
-    public SpriteContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig) {
+    public MotifContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, StrucmotifConfig strucmotifConfig) {
         this.structureDataProvider = structureDataProvider;
         this.kruskalMotifPruner = kruskalMotifPruner;
         this.noOperationMotifPruner = noOperationMotifPruner;
         this.motifSearchRuntime = motifSearchRuntime;
-        this.motifSearchConfig = motifSearchConfig;
+        this.strucmotifConfig = strucmotifConfig;
     }
 
     /**
      * Define a motif based on the id of the reference structure and a selection of components.
      * @param structureIdentifier the id to acquire
-     * @return mandatory parameter step
+     * @param assemblyIdentifier which assembly to operate on
+     * @return mandatory registry step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public SpriteMotifRegistryBuilder defineByPdbId(String structureIdentifier, String assemblyIdentifier) {
+    public MotifRegistryBuilder defineByPdbId(String structureIdentifier, String assemblyIdentifier) {
         Structure structure = structureDataProvider.readOriginal(structureIdentifier);
         return defineByStructure(structure, assemblyIdentifier);
     }
@@ -66,9 +69,10 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     /**
      * Routine if stream of structure data contains extracted motif.
      * @param inputStream the data to ready - all components are considered the motif
-     * @return mandatory parameter step
+     * @param assemblyIdentifier which assembly to operate on
+     * @return mandatory registry step
      */
-    public SpriteMotifRegistryBuilder defineByFile(InputStream inputStream, String assemblyIdentifier) {
+    public MotifRegistryBuilder defineByFile(InputStream inputStream, String assemblyIdentifier) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         return defineByStructure(structure, assemblyIdentifier);
     }
@@ -77,28 +81,32 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
      * Routine if structure files contains extracted motif. Checks that the structure contains a reasonable number of
      * components to rule out erroneous arguments.
      * @param structure the file to ready - all components are considered the motif
-     * @return mandatory parameter step
+     * @param assemblyIdentifier which assembly to operate on
+     * @return mandatory registry step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public SpriteMotifRegistryBuilder defineByStructure(Structure structure, String assemblyIdentifier) {
+    public MotifRegistryBuilder defineByStructure(Structure structure, String assemblyIdentifier) {
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
 
-        ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, assembly(assemblyIdentifier));
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, assembly(assemblyIdentifier));
         InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);
         StructureIndexProvider structureIndexProvider = new SingleStructureIndexProvider(structure);
         StructureDataProvider structureDataProvider = new SingleStructureDataProvider(structure);
 
-        return new SpriteMotifRegistryBuilder(structureIdentifier, structure, invertedIndex, structureIndexProvider, structureDataProvider);
+        return new MotifRegistryBuilder(structureIdentifier, structure, invertedIndex, structureIndexProvider, structureDataProvider);
     }
 
-    public class SpriteMotifRegistryBuilder {
+    /**
+     * 2nd mandatory step that defines the collection of motifs to screen for.
+     */
+    public class MotifRegistryBuilder {
         private final String structureIdentifier;
         private final Structure structure;
         private final InvertedIndex invertedIndex;
         private final StructureIndexProvider structureIndexProvider;
         private final StructureDataProvider structureDataProvider;
 
-        SpriteMotifRegistryBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
+        MotifRegistryBuilder(String structureIdentifier, Structure structure, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.invertedIndex = invertedIndex;
@@ -106,17 +114,23 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
             this.structureDataProvider = structureDataProvider;
         }
 
+        /**
+         * Provide the collection of motifs to screen for. Must be {@link EnrichedMotifDefinition}, which are like
+         * normal {@link org.rcsb.strucmotif.domain.motif.MotifDefinition} instances but they also capture the actual
+         * {@link Structure} as well as all relevant residues. Make sure to create enriched motifs once outside and then
+         * pass them in, potentially reusing them indefinitely.
+         * @param motifDefinitions all motifs to consider
+         * @return the next step
+         */
         public MandatorySpriteBuilder andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
             return new MandatorySpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
         }
     }
 
     /**
-     * Parameters are considered mandatory arguments (in the sense that some value has to be given - nonetheless,
-     * default values will be used). But internally these values are strictly required. No input validation is performed
-     * whatsoever.
+     * Builder for everything that must be set (but might fall back to default values).
      */
-    public class MandatorySpriteBuilder implements MandatoryBuilder<MandatorySpriteBuilder, SpriteSearchContext> {
+    public class MandatorySpriteBuilder implements MandatoryBuilder<MandatorySpriteBuilder, MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
@@ -137,94 +151,59 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
             this.invertedIndex = invertedIndex;
             this.structureIndexProvider = structureIndexProvider;
             this.structureDataProvider = structureDataProvider;
-            this.backboneDistanceTolerance = AssamParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
-            this.sideChainDistanceTolerance = AssamParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
-            this.angleTolerance = AssamParameters.DEFAULT_ANGLE_TOLERANCE;
+            this.backboneDistanceTolerance = StructureParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
+            this.sideChainDistanceTolerance = StructureParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
+            this.angleTolerance = StructureParameters.DEFAULT_ANGLE_TOLERANCE;
             this.rmsdCutoff = Float.MAX_VALUE;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
-            this.motifPruner = SpriteContextBuilder.this.kruskalMotifPruner;
+            this.motifPruner = MotifContextBuilder.this.kruskalMotifPruner;
         }
 
-        /**
-         * Specify the backbone distance tolerance (default: 1).
-         * @param backboneDistanceTolerance the tolerance to use
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the side-chain distance tolerance (default: 1).
-         * @param sideChainDistanceTolerance the tolerance to use
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the angle tolerance (default: 1).
-         * @param angleTolerance the tolerance to use
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
 
-        /**
-         * Filter hits based on RMSD. Only relevant when scoring strategy involves alignment.
-         * @param rmsdCutoff the RMSD cutoff above which hits are filtered
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 
-        /**
-         * Controls which atoms will be considered for alignment. Only relevant when scoring scheme is alignment-based.
-         * @param atomPairingScheme how to pair atoms for alignment routine
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
         }
 
-        /**
-         * Specify the motif pruning strategy.
-         * @param motifPruner the implementation to prune motifs
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
             return this;
         }
 
-        /**
-         * Specify the motif pruning strategy.
-         * @param motifPruningStrategy the strategy to prune motifs
-         * @return this builder
-         */
         @Override
         public MandatorySpriteBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL:
-                    this.motifPruner = SpriteContextBuilder.this.kruskalMotifPruner;
+                    this.motifPruner = MotifContextBuilder.this.kruskalMotifPruner;
                     break;
                 case NONE:
-                    this.motifPruner = SpriteContextBuilder.this.noOperationMotifPruner;
+                    this.motifPruner = MotifContextBuilder.this.noOperationMotifPruner;
                     break;
                 default:
                     throw new UnsupportedOperationException("Unhandled case: " + motifPruningStrategy);
@@ -232,13 +211,9 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
             return this;
         }
 
-        /**
-         * Creates a {@link AssamParameters} instance based on all values. Proceeds to the next step.
-         * @return the optional argument step
-         */
         @Override
         public OptionalSpriteBuilder buildParameters() {
-            SpriteParameters parameters = new SpriteParameters(backboneDistanceTolerance,
+            MotifParameters parameters = new MotifParameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
                     rmsdCutoff,
@@ -251,16 +226,16 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
     /**
      * Optional parameters of the algorithm.
      */
-    public class OptionalSpriteBuilder implements OptionalBuilder<SpriteSearchContext> {
+    public class OptionalSpriteBuilder implements OptionalBuilder<MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
         private final InvertedIndex invertedIndex;
         private final StructureIndexProvider structureIndexProvider;
         private final StructureDataProvider structureDataProvider;
-        private final SpriteParameters parameters;
+        private final MotifParameters parameters;
 
-        OptionalSpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, SpriteParameters parameters) {
+        OptionalSpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifParameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;
@@ -270,17 +245,13 @@ public class SpriteContextBuilder implements ContextBuilder<SpriteContextBuilder
             this.parameters = parameters;
         }
 
-        /**
-         * Build the actual container.
-         * @return the immutable instance of all query parameters
-         */
         @Override
-        public SpriteSearchContext buildContext() {
-            SpriteSearchQuery query = new SpriteSearchQuery(structureIdentifier,
+        public MotifSearchContext buildContext() {
+            MotifSearchQuery query = new MotifSearchQuery(structureIdentifier,
                     structure,
                     motifDefinitions,
                     parameters);
-            return new SpriteSearchContext(motifSearchRuntime, motifSearchConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
+            return new MotifSearchContext(motifSearchRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }
     }
 }

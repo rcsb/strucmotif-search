@@ -19,10 +19,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * A query structure wraps a {@link Structure} and provides additional functionality needed to employ it as motif
- * definition during a structural motif query job.
+ * A query structure when searching for other structures.
  */
-public class AssamQueryStructure implements QueryStructure {
+public class StructureQueryStructure implements QueryStructure {
     private final String structureIdentifier;
     private final Structure structure;
     private final List<IndexSelection> indexSelections;
@@ -32,7 +31,16 @@ public class AssamQueryStructure implements QueryStructure {
     private final List<ResiduePairDescriptor> residuePairDescriptors;
     private final List<Integer> residueIndexSwaps;
 
-    public AssamQueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
+    /**
+     * Construct a structure query structure.
+     * @param structureIdentifier the identifier
+     * @param structure the structure
+     * @param originalLabelSelections residues to select
+     * @param originalResidues coordinates of residues
+     * @param residuePairOccurrences contacts between residues
+     * @param exchanges optional exchanges
+     */
+    public StructureQueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {
@@ -139,19 +147,11 @@ public class AssamQueryStructure implements QueryStructure {
                 sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection2());
     }
 
-    /**
-     * Get the identifier of this query structure.
-     * @return a String
-     */
     @Override
     public String getStructureIdentifier() {
         return structureIdentifier;
     }
 
-    /**
-     * Delegate to wrapped structure.
-     * @return the structure instance
-     */
     @Override
     public Structure getStructure() {
         return structure;

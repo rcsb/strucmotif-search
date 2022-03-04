@@ -46,6 +46,14 @@ public class InvertedIndexBucket implements Bucket {
 
     private final Map<Integer, String> operators;
 
+    /**
+     * Construct a inverted index bucket from source array.
+     * @param structureIndices structure identifiers
+     * @param positionOffsets positional offsets, same length as structureIndices
+     * @param positionData positional data
+     * @param operatorIndices sparse operator indices
+     * @param operatorData sparse operator data, same length as operatorIndices
+     */
     public InvertedIndexBucket(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
         this.structureIndices = structureIndices;
         this.positionOffsets = positionOffsets;
@@ -111,6 +119,11 @@ public class InvertedIndexBucket implements Bucket {
         }
     }
 
+    /**
+     * Get the current occurrence positions (for the current structure). This creates new array entirely, don't call if
+     * not truly needed.
+     * @return an int[]
+     */
     public int[] getOccurrencePositions() {
         int start = positionOffsets[structurePointer];
         int end = lastPosition;
@@ -126,6 +139,11 @@ public class InvertedIndexBucket implements Bucket {
         return structureIndices[structurePointer];
     }
 
+    /**
+     * Direct access by index to the structure index.
+     * @param i the position
+     * @return an int
+     */
     public int getStructureIndex(int i) {
         return structureIndices[i];
     }
@@ -135,6 +153,11 @@ public class InvertedIndexBucket implements Bucket {
         return positionData[positionPointer];
     }
 
+    /**
+     * Direct access by index to the index (in the atom[] of a structure).
+     * @param i the position
+     * @return an int
+     */
     public int getIndex(int i) {
         return positionData[i];
     }
@@ -149,6 +172,11 @@ public class InvertedIndexBucket implements Bucket {
         return operators.getOrDefault(positionPointer, DEFAULT_OPERATOR);
     }
 
+    /**
+     * Direct access by index to struct_oper_id.
+     * @param i the position
+     * @return a String
+     */
     public String getStructOperId(int i) {
         return operators.getOrDefault(i, DEFAULT_OPERATOR);
     }

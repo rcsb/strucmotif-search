@@ -14,6 +14,9 @@ import java.util.Set;
  * occurrences of the corresponding descriptor.
  */
 public interface Bucket {
+    /**
+     * The default operator if no assembly information is defined explicitly.
+     */
     String DEFAULT_OPERATOR = "1";
 
     /**

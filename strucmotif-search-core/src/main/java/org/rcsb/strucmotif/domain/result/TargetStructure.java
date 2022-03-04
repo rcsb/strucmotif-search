@@ -125,11 +125,11 @@ public class TargetStructure {
      * @param undefinedAssemblies allow hits without assembly?
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<AssamHit> paths(List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+    public Stream<StructureHit> paths(List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
         return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, structureIdentifier, hitScorer, rmsdCutoff, assemblyInformationProvider, undefinedAssemblies));
     }
 
-    private Stream<AssamHit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
+    private Stream<StructureHit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
         List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = indexSelections.stream()
                 .map(indexSelection -> {
@@ -181,7 +181,7 @@ public class TargetStructure {
                         return null;
                     }
 
-                    return new AssamHit(structureIdentifier,
+                    return new StructureHit(structureIdentifier,
                             entry.getKey(),
                             labelSelections,
                             Arrays.asList(residueTypes),

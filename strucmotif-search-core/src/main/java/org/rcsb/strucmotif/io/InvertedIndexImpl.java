@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
@@ -52,12 +52,12 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     /**
      * Construct an inverted index instance.
-     * @param motifSearchConfig the config
+     * @param strucmotifConfig the config
      */
-    public InvertedIndexImpl(MotifSearchConfig motifSearchConfig) {
-        this.basePath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.INDEX_DIRECTORY);
-        this.gzipped = motifSearchConfig.isInvertedIndexGzip();
-        InvertedIndexBackend backend = motifSearchConfig.getInvertedIndexBackend();
+    public InvertedIndexImpl(StrucmotifConfig strucmotifConfig) {
+        this.basePath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX_DIRECTORY);
+        this.gzipped = strucmotifConfig.isInvertedIndexGzip();
+        InvertedIndexBackend backend = strucmotifConfig.getInvertedIndexBackend();
         this.bucketCodec = backend.getBucketCodec();
         this.extension = backend.getExtension() + (gzipped ? ".gz" : "");
         logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);

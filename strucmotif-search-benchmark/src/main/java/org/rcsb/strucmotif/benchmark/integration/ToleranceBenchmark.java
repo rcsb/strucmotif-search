@@ -15,8 +15,8 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
-import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
-import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
+import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -28,6 +28,9 @@ import java.util.Set;
  */
 @State(Scope.Benchmark)
 public class ToleranceBenchmark {
+    /**
+     * Tolerance values to evaluate.
+     */
     @Param({"1", "2", "3"})
     public int tolerance;
 
@@ -91,9 +94,9 @@ public class ToleranceBenchmark {
         blackhole.consume(run(MotifDefinition.GGGG, tolerance, state));
     }
 
-    private AssamMotifSearchResult run(MotifDefinition motif, int tolerance, MyState state) {
+    private StructureSearchResult run(MotifDefinition motif, int tolerance, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        AssamContextBuilder.OptionalAssamBuilder builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+        StructureContextBuilder.OptionalBuilderStep builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
                 .backboneDistanceTolerance(tolerance)

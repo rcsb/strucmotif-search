@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.update.extractor;
 
+/**
+ * Fallback strategy of extracting keys: use file name.
+ */
 public class GenericKeyExtractor implements KeyExtractor {
     private static final String NAMESPACE = "";
 

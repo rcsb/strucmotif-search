@@ -21,6 +21,7 @@ public class AssemblyInformation {
     /**
      * Construct assembly information instance from source file.
      * @param mmCifFile source file
+     * @return a map, keys are assembly identifiers, values are associated label_asym_id + struct_oper_id
      */
     public static Map<String, String[]> of(MmCifFile mmCifFile) {
         /*

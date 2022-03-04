@@ -5,7 +5,7 @@ import java.net.URL;
 /**
  * One piece of the update. Usually just references a PDB entry.<p>
  * Can also point to external resources or local files via a URL. In that case, you must make sure to provide a unique,
- * yet compact structureIdentifier.<p>
+ * yet compact structureIdentifier.
  */
 public class UpdateItem {
     private final String structureIdentifier;

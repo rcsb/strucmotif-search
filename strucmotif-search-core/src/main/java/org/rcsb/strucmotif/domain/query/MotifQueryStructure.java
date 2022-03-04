@@ -3,14 +3,18 @@ package org.rcsb.strucmotif.domain.query;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 /**
- * A query structure wraps a {@link Structure} and provides additional functionality needed to employ it as motif
- * definition during a structural motif query job.
+ * A query structure when searching for motifs.
  */
-public class SpriteQueryStructure implements QueryStructure {
+public class MotifQueryStructure implements QueryStructure {
     private final String structureIdentifier;
     private final Structure structure;
 
-    public SpriteQueryStructure(String structureIdentifier, Structure structure) {
+    /**
+     * Construct a motif query structure.
+     * @param structureIdentifier the identifier
+     * @param structure the structure
+     */
+    public MotifQueryStructure(String structureIdentifier, Structure structure) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
     }

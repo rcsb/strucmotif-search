@@ -3,29 +3,28 @@ package org.rcsb.strucmotif.domain.result;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpriteMotifSearchResult implements SearchResult<SpriteHit> {
+/**
+ * The results of a motif search run.
+ */
+public class MotifSearchResult implements SearchResult<MotifHit> {
     private final Timings timings;
-    private final List<SpriteHit> hits;
+    private final List<MotifHit> hits;
 
     /**
      * Construct a result container.
      */
-    public SpriteMotifSearchResult() {
+    public MotifSearchResult() {
         this.timings = new Timings();
         this.hits = new ArrayList<>();
     }
 
-    /**
-     * Associated timings.
-     * @return timings object
-     */
     @Override
     public Timings getTimings() {
         return timings;
     }
 
     @Override
-    public List<SpriteHit> getHits() {
+    public List<MotifHit> getHits() {
         return hits;
     }
 }

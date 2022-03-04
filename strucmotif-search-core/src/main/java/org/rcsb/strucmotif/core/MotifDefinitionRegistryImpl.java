@@ -16,6 +16,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An in-memory store of all known/registered motifs.
+ */
 @Service
 public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
     private static final Logger logger = LoggerFactory.getLogger(MotifDefinitionRegistryImpl.class);
@@ -30,6 +33,10 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
         static final Type instance = new TypeToken<ArrayList<MotifDefinition>>(){}.getType();
     }
 
+    /**
+     * Constructs a registry. Will auto-register all hard-coded motifs from {@link MotifDefinition} and also read
+     * `motifs.json` on the classpath and parse all motifs from it.
+     */
     public MotifDefinitionRegistryImpl() {
         this.motifDefinitions = new ArrayList<>();
         init();

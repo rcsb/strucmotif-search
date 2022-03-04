@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,11 +17,11 @@ public class ThreadPoolImpl implements ThreadPool {
 
     /**
      * Constructor.
-     * @param motifSearchConfig injectable configuration
+     * @param strucmotifConfig injectable configuration
      */
     @Autowired
-    public ThreadPoolImpl(MotifSearchConfig motifSearchConfig) {
-        this.pool = new ForkJoinPool(motifSearchConfig.getNumberThreads());
+    public ThreadPoolImpl(StrucmotifConfig strucmotifConfig) {
+        this.pool = new ForkJoinPool(strucmotifConfig.getNumberThreads());
     }
 
     @Override

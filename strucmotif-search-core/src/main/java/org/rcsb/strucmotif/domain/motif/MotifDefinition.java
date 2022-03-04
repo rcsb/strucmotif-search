@@ -13,6 +13,9 @@ import java.util.Set;
  * Identifier-based representation of motifs.
  */
 public class MotifDefinition {
+    /**
+     * The HDS motif.
+     */
     public static final MotifDefinition HDS = new MotifDefinition("HDS",
             "4cha",
             "catalytic triad",
@@ -21,6 +24,9 @@ public class MotifDefinition {
                     new LabelSelection("B", "1", 87), // D
                     new LabelSelection("C", "1", 47))); // S
 
+    /**
+     * The KDDDE motif.
+     */
     public static final MotifDefinition KDDDE = new MotifDefinition("KDDDE",
             "1lap",
             "aminopeptidase",
@@ -31,6 +37,9 @@ public class MotifDefinition {
                     new LabelSelection("A", "1", 332), // D
                     new LabelSelection("A", "1", 334))); // E
 
+    /**
+     * The CHH motif.
+     */
     public static final MotifDefinition CHH = new MotifDefinition("CHH",
             "1g2f",
             "simplified zinc finger",
@@ -39,6 +48,9 @@ public class MotifDefinition {
                     new LabelSelection("F", "1", 25), // H
                     new LabelSelection("F", "1", 29))); // H
 
+    /**
+     * The CHCH motif.
+     */
     public static final MotifDefinition CHCH = new MotifDefinition("CHCH",
             "1g2f",
             "original zinc finger",
@@ -48,6 +60,9 @@ public class MotifDefinition {
                     new LabelSelection("F", "1", 25), // H
                     new LabelSelection("F", "1", 29))); // H
 
+    /**
+     * The KDEEH motif.
+     */
     public static final MotifDefinition KDEEH = new MotifDefinition("KDEEH",
             "2mnr",
             "enolase superfamily",
@@ -58,6 +73,9 @@ public class MotifDefinition {
                     new LabelSelection("A", "1", 245), // E
                     new LabelSelection("A", "1", 295))); // H
 
+    /**
+     * The KDEEH_EXCHANGES motif.
+     */
     public static final MotifDefinition KDEEH_EXCHANGES = new MotifDefinition("KDEEH_EXCHANGES",
             "2mnr",
             "enolase superfamily with exchanges",
@@ -71,6 +89,9 @@ public class MotifDefinition {
                     new PositionSpecificExchange(new LabelSelection("A", "1", 245), ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE),
                     new PositionSpecificExchange(new LabelSelection("A", "1", 295), ResidueType.HISTIDINE, ResidueType.LYSINE)));
 
+    /**
+     * The GGGG motif.
+     */
     public static final MotifDefinition GGGG = new MotifDefinition("GGGG",
             "3ibk",
             "RNA G-tetrad",
@@ -87,10 +108,27 @@ public class MotifDefinition {
     private final List<LabelSelection> labelSelections;
     private final Set<PositionSpecificExchange> positionSpecificExchanges;
 
+    /**
+     * Construct a motif.
+     * @param motifIdentifier a unique identifier
+     * @param structureIdentifier referenced structure
+     * @param title title
+     * @param description longer description
+     * @param labelSelections referenced residues
+     */
     public MotifDefinition(String motifIdentifier, String structureIdentifier, String title, String description, List<LabelSelection> labelSelections) {
         this(motifIdentifier, structureIdentifier, title, description, labelSelections, Collections.emptySet());
     }
 
+    /**
+     * Construct a motif.
+     * @param motifIdentifier a unique identifier
+     * @param structureIdentifier referenced structure
+     * @param title title
+     * @param description longer description
+     * @param labelSelections referenced residues
+     * @param positionSpecificExchanges additional exchanges
+     */
     public MotifDefinition(String motifIdentifier, String structureIdentifier, String title, String description, List<LabelSelection> labelSelections, Set<PositionSpecificExchange> positionSpecificExchanges) {
         this.motifIdentifier = motifIdentifier;
         this.structureIdentifier = structureIdentifier;
@@ -140,6 +178,10 @@ public class MotifDefinition {
         return positionSpecificExchanges;
     }
 
+    /**
+     * A unique identifier.
+     * @return a String
+     */
     public String getMotifIdentifier() {
         return motifIdentifier;
     }

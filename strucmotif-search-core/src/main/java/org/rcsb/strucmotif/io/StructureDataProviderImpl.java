@@ -2,7 +2,7 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.math.Partition;
@@ -33,7 +33,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private static final Logger logger = LoggerFactory.getLogger(StructureDataProviderImpl.class);
     private final StructureReader structureReader;
     private final StructureWriter renumberedStructureWriter;
-    private final MotifSearchConfig motifSearchConfig;
+    private final StrucmotifConfig strucmotifConfig;
     private final String dataSource;
     private final Path renumberedPath;
     private final String extension;
@@ -46,24 +46,24 @@ public class StructureDataProviderImpl implements StructureDataProvider {
      * Construct a structure provider.
      * @param structureReader the reader
      * @param structureWriter the writer
-     * @param motifSearchConfig the config
+     * @param strucmotifConfig the config
      */
     @Autowired
     public StructureDataProviderImpl(StructureReader structureReader,
                                      StructureWriter structureWriter,
-                                     MotifSearchConfig motifSearchConfig) {
+                                     StrucmotifConfig strucmotifConfig) {
         this.structureReader = structureReader;
         this.renumberedStructureWriter = structureWriter;
-        this.motifSearchConfig = motifSearchConfig;
-        this.dataSource = motifSearchConfig.getDataSource();
-        this.renumberedPath = Paths.get(motifSearchConfig.getRootPath()).resolve(MotifSearchConfig.RENUMBERED_DIRECTORY);
-        this.extension = motifSearchConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
+        this.strucmotifConfig = strucmotifConfig;
+        this.dataSource = strucmotifConfig.getDataSource();
+        this.renumberedPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED_DIRECTORY);
+        this.extension = strucmotifConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
 
         logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {} - gzipping: {}",
-                motifSearchConfig.getDataSource(),
-                motifSearchConfig.getCifFetchUrl(),
-                motifSearchConfig.getRenumberedCoordinatePrecision(),
-                motifSearchConfig.isRenumberedGzip());
+                strucmotifConfig.getDataSource(),
+                strucmotifConfig.getCifFetchUrl(),
+                strucmotifConfig.getRenumberedCoordinatePrecision(),
+                strucmotifConfig.isRenumberedGzip());
 
         this.paths = false;
         this.caching = false;
@@ -77,6 +77,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         }
     }
 
+    @SuppressWarnings("Duplicates")
     private String prepareUri(String raw, String structureIdentifier) {
         String pdbId = structureIdentifier.toLowerCase();
         String PDBID = pdbId.toUpperCase();
@@ -90,7 +91,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     private URL getCifFetchUrl(String structureIdentifier) {
         try {
-            return new URL(prepareUri(motifSearchConfig.getCifFetchUrl(), structureIdentifier));
+            return new URL(prepareUri(strucmotifConfig.getCifFetchUrl(), structureIdentifier));
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
         }
@@ -114,7 +115,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     @PostConstruct
     public void initializeRenumberedStructureCache() throws IOException {
-        InMemoryStrategy strategy = motifSearchConfig.getInMemoryStrategy();
+        InMemoryStrategy strategy = strucmotifConfig.getInMemoryStrategy();
         if (strategy == InMemoryStrategy.OFF) {
             logger.info("Structure data will be read from file-system");
             return;
@@ -131,7 +132,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             long start = System.nanoTime();
             this.structureCache = new HashMap<>();
 
-            int loadingChunkSize = motifSearchConfig.getLoadingChunkSize();
+            int loadingChunkSize = strucmotifConfig.getLoadingChunkSize();
             Partition<Path> partitions = new Partition<>(paths, loadingChunkSize);
             logger.info("Formed {} partitions of {} structures",
                     partitions.size(),

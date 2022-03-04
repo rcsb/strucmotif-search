@@ -4,7 +4,7 @@ import org.rcsb.cif.CifIO;
 import org.rcsb.cif.ParsingException;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifFile;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -64,8 +64,8 @@ import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOpti
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @ComponentScan({"org.rcsb.strucmotif"})
 @EntityScan("org.rcsb.strucmotif")
-public class MotifSearchUpdate implements CommandLineRunner {
-    private static final Logger logger = LoggerFactory.getLogger(MotifSearchUpdate.class);
+public class StrucmotifUpdate implements CommandLineRunner {
+    private static final Logger logger = LoggerFactory.getLogger(StrucmotifUpdate.class);
     private static final Set<String> STRUCTURE_EXTENSIONS = Set.of(".cif", ".cif.gz", ".bcif", ".bcif.gz");
 
     /**
@@ -73,13 +73,13 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param args command-line arguments
      */
     public static void main(String[] args) {
-        SpringApplication.run(MotifSearchUpdate.class, args);
+        SpringApplication.run(StrucmotifUpdate.class, args);
     }
 
     private final StateRepository stateRepository;
     private final StructureDataProvider structureDataProvider;
     private final InvertedIndex invertedIndex;
-    private final MotifSearchConfig motifSearchConfig;
+    private final StrucmotifConfig strucmotifConfig;
     private final ThreadPool threadPool;
     private final StructureIndexProvider structureIndexProvider;
 
@@ -88,15 +88,16 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @param stateRepository the state repo
      * @param structureDataProvider data provider
      * @param invertedIndex inverted index
-     * @param motifSearchConfig configs
+     * @param strucmotifConfig configs
      * @param threadPool thread pool
+     * @param structureIndexProvider index provider
      */
     @Autowired
-    public MotifSearchUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, MotifSearchConfig motifSearchConfig, ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
+    public StrucmotifUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, StrucmotifConfig strucmotifConfig, ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
         this.stateRepository = stateRepository;
         this.structureDataProvider = structureDataProvider;
         this.invertedIndex = invertedIndex;
-        this.motifSearchConfig = motifSearchConfig;
+        this.strucmotifConfig = strucmotifConfig;
         this.threadPool = threadPool;
         this.structureIndexProvider = structureIndexProvider;
     }
@@ -210,10 +211,10 @@ public class MotifSearchUpdate implements CommandLineRunner {
         long target = items.size();
         logger.info("{} files to process in total", target);
 
-        Partition<UpdateItem> partitions = new Partition<>(items, motifSearchConfig.getUpdateChunkSize());
+        Partition<UpdateItem> partitions = new Partition<>(items, strucmotifConfig.getUpdateChunkSize());
         logger.info("Formed {} partitions of {} structures",
                 partitions.size(),
-                motifSearchConfig.getUpdateChunkSize());
+                strucmotifConfig.getUpdateChunkSize());
 
         Set<String> known = stateRepository.selectKnown()
                 .stream()
@@ -247,7 +248,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {
-        int maxRetries = motifSearchConfig.getDownloadTries();
+        int maxRetries = strucmotifConfig.getDownloadTries();
         for (int i = 1; i <= maxRetries; i++) {
             try {
                 handleUpdateItemInternal(item, context);
@@ -260,7 +261,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
 
                 int count = context.structureCounter.get();
                 String source = item.getUrl() != null ? item.getUrl().toString() : item.getStructureIdentifier();
-                String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + source;
+                String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + source;
                 logger.warn("[{}] [{}] [try: {} / {}] Failed to download source file - {}",
                         context.partitionContext,
                         structureContext,
@@ -296,7 +297,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + motifSearchConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
+        String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
 
         // fails when file is missing (should not happen) or does not contain valid polymer chain
         Structure structure;
@@ -309,7 +310,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
             return;
         }
 
-        if (!motifSearchConfig.isUndefinedAssemblies() && structure.getAssemblies().isEmpty()) {
+        if (!strucmotifConfig.isUndefinedAssemblies() && structure.getAssemblies().isEmpty()) {
             logger.warn("[{}] [{}] No assembly information - Configured to skip",
                     context.partitionContext,
                     structureContext);
@@ -317,7 +318,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
         }
 
         try {
-            ResidueGraph residueGraph = new ResidueGraph(structure, motifSearchConfig, depositedAndContacts());
+            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
@@ -352,6 +353,7 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * Acquire an input stream for the requested item. Simple case is a 4-character PDB-ID. Might also be a URL.
      * @param item request
      * @param context context for logging purposes
+     * @throws IOException when reading fails
      * @return an InputStream
      */
     protected InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
@@ -432,9 +434,9 @@ public class MotifSearchUpdate implements CommandLineRunner {
      * @throws IOException connection failure
      */
     public List<UpdateItem> getAllIdentifiers() throws IOException {
-        logger.info("Retrieving current entry list from {}", MotifSearchConfig.RCSB_ENTRY_LIST);
+        logger.info("Retrieving current entry list from {}", StrucmotifConfig.RCSB_ENTRY_LIST);
         String response;
-        try (InputStream inputStream = new URL(MotifSearchConfig.RCSB_ENTRY_LIST).openStream()) {
+        try (InputStream inputStream = new URL(StrucmotifConfig.RCSB_ENTRY_LIST).openStream()) {
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 response = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
             }

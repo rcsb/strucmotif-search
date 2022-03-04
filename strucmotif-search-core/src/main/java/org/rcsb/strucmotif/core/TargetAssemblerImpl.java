@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.domain.AssamSearchContext;
+import org.rcsb.strucmotif.domain.StructureSearchContext;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
@@ -8,11 +8,11 @@ import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
-import org.rcsb.strucmotif.domain.query.AssamParameters;
-import org.rcsb.strucmotif.domain.query.AssamQueryStructure;
+import org.rcsb.strucmotif.domain.query.StructureQuery;
+import org.rcsb.strucmotif.domain.query.StructureParameters;
+import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
 import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
-import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -52,12 +52,12 @@ public class TargetAssemblerImpl implements TargetAssembler {
     }
 
     @Override
-    public void assemble(AssamSearchContext context) throws ExecutionException, InterruptedException {
-        AssamSearchQuery query = context.getQuery();
-        AssamQueryStructure queryStructure = query.getQueryStructure();
-        AssamParameters parameters = query.getParameters();
+    public void assemble(StructureSearchContext context) throws ExecutionException, InterruptedException {
+        StructureQuery query = context.getQuery();
+        StructureQueryStructure queryStructure = query.getQueryStructure();
+        StructureParameters parameters = query.getParameters();
         InvertedIndex invertedIndex = context.getInvertedIndex();
-        AssamMotifSearchResult result = context.getResult();
+        StructureSearchResult result = context.getResult();
         int backboneDistanceTolerance = parameters.getBackboneDistanceTolerance();
         int sideChainDistanceTolerance = parameters.getSideChainDistanceTolerance();
         int angleTolerance = parameters.getAngleTolerance();
@@ -184,11 +184,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
         }
     }
 
-    private void consume(AssamSearchContext context, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
-        AssamSearchQuery query = context.getQuery();
-        AssamMotifSearchResult result = context.getResult();
+    private void consume(StructureSearchContext context, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
+        StructureQuery query = context.getQuery();
+        StructureSearchResult result = context.getResult();
         Map<Integer, TargetStructure> targetStructures = result.getTargetStructures();
-        AssamQueryStructure queryStructure = query.getQueryStructure();
+        StructureQueryStructure queryStructure = query.getQueryStructure();
 
         if (targetStructures == null) {
             // first generation: all the paths are valid

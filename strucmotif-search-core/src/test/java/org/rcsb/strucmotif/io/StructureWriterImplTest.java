@@ -8,7 +8,7 @@ import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.AtomSite;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.Helpers;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.config.ResidueQualityStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +37,9 @@ class StructureWriterImplTest {
 
     @Test
     public void whenWriting1exr_thenContractHonored() throws IOException {
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        motifSearchConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
-        StructureWriter structureWriter = new StructureWriterImpl(motifSearchConfig);
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
 
         String id = "1exr";
         InputStream inputStream = Helpers.getOriginalBcif(id);
@@ -56,10 +56,10 @@ class StructureWriterImplTest {
 
     @Test
     public void whenWritingAF_A0A0R0FWM3_F1_thenContractHonored() throws IOException {
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        motifSearchConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
-        motifSearchConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
-        StructureWriter structureWriter = new StructureWriterImpl(motifSearchConfig);
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
+        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
         InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");
@@ -76,11 +76,11 @@ class StructureWriterImplTest {
 
     @Test
     public void whenWriting1exrFilteredByBFactor_thenAtomCountDecreased() throws IOException {
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        motifSearchConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
-        motifSearchConfig.setResidueQualityStrategy(ResidueQualityStrategy.BFACTOR_BELOW_CUTOFF);
-        motifSearchConfig.setResidueQualityCutoff(50);
-        StructureWriter structureWriter = new StructureWriterImpl(motifSearchConfig);
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.BFACTOR_BELOW_CUTOFF);
+        strucmotifConfig.setResidueQualityCutoff(50);
+        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
 
         String id = "1exr";
         InputStream inputStream = Helpers.getOriginalBcif(id);
@@ -97,11 +97,11 @@ class StructureWriterImplTest {
 
     @Test
     public void whenWritingAF_A0A0R0FWM3_F1_FilteredByMetric_thenAtomCountDecreased() throws IOException {
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        motifSearchConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
-        motifSearchConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);
-        motifSearchConfig.setResidueQualityCutoff(70);
-        StructureWriter structureWriter = new StructureWriterImpl(motifSearchConfig);
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);
+        strucmotifConfig.setResidueQualityCutoff(70);
+        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
         InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");

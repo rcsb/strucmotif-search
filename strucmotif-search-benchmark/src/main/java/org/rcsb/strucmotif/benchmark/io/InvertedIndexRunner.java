@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.benchmark.io;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
@@ -9,13 +9,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Reads bins of the inverted index to gauge performance.
+ */
 public class InvertedIndexRunner {
     private static final int BINS_READ = 100;
 
+    /**
+     * Entry point.
+     * @param args nothing
+     */
     public static void main(String[] args) {
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
 
-        InvertedIndex invertedIndex = new InvertedIndexImpl(motifSearchConfig);
+        InvertedIndex invertedIndex = new InvertedIndexImpl(strucmotifConfig);
         List<ResiduePairDescriptor> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());
         List<Long> times = new ArrayList<>();
 

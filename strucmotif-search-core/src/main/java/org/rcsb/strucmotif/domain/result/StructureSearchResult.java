@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The state and results of a motif search run.
+ * The results of a structure search run.
  */
-public class AssamMotifSearchResult implements SearchResult<AssamHit> {
+public class StructureSearchResult implements SearchResult<StructureHit> {
     private final Timings timings;
 
     /**
@@ -16,14 +16,14 @@ public class AssamMotifSearchResult implements SearchResult<AssamHit> {
     private int pathGeneration;
     private Map<Integer, TargetStructure> targetStructures;
 
-    private List<AssamHit> hits;
+    private List<StructureHit> hits;
     private int numberOfPaths;
     private int numberOfTargetStructures;
 
     /**
      * Construct a result container.
      */
-    public AssamMotifSearchResult() {
+    public StructureSearchResult() {
         this.timings = new Timings();
         this.pathGeneration = 0;
         this.hits = new ArrayList<>();
@@ -58,7 +58,7 @@ public class AssamMotifSearchResult implements SearchResult<AssamHit> {
      * Update the collection of currently valid hits.
      * @param hits a collection of hits
      */
-    public void setHits(List<AssamHit> hits) {
+    public void setHits(List<StructureHit> hits) {
         this.hits = hits;
     }
 
@@ -67,7 +67,7 @@ public class AssamMotifSearchResult implements SearchResult<AssamHit> {
      * @return a collection of hits
      */
     @Override
-    public List<AssamHit> getHits() {
+    public List<StructureHit> getHits() {
         return hits;
     }
 

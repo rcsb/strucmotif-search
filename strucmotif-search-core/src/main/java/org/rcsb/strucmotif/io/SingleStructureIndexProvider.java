@@ -5,10 +5,18 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.Set;
 
+/**
+ * An implementation of a {@link StructureIndexProvider} that only deals with a single structure. Used in the
+ * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}.
+ */
 public class SingleStructureIndexProvider implements StructureIndexProvider {
     private final int structureIndex;
     private final String structureIdentifier;
 
+    /**
+     * Create an index provider for this structure.
+     * @param structure the content
+     */
     public SingleStructureIndexProvider(Structure structure) {
         this.structureIndex = -1;
         this.structureIdentifier = structure.getStructureIdentifier();

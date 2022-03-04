@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.domain.AssamSearchContext;
+import org.rcsb.strucmotif.domain.StructureSearchContext;
 
 import java.util.concurrent.ExecutionException;
 
@@ -19,5 +19,5 @@ public interface TargetAssembler {
      * @throws ExecutionException thrown by multi-threading impl
      * @throws InterruptedException thrown by multi-threading impl
      */
-    void assemble(AssamSearchContext context) throws ExecutionException, InterruptedException;
+    void assemble(StructureSearchContext context) throws ExecutionException, InterruptedException;
 }

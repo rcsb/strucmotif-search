@@ -2,11 +2,11 @@ package org.rcsb.strucmotif.benchmark.integration;
 
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
-import org.rcsb.strucmotif.MotifSearch;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.Strucmotif;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
-import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
+import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
  */
 @State(Scope.Benchmark)
 public class MyState {
-    private final MotifSearchConfig config = new MotifSearchConfig();
+    private final StrucmotifConfig config = new StrucmotifConfig();
     private final StructureReaderImpl structureReader = new StructureReaderImpl();
-    public final AssamContextBuilder queryBuilder = MotifSearch.assam();
-    public final Map<MotifDefinition, Pair<Structure, List<LabelSelection>>> structureMap;
+    final StructureContextBuilder queryBuilder = Strucmotif.searchForStructures();
+    final Map<MotifDefinition, Pair<Structure, List<LabelSelection>>> structureMap;
 
     /**
      * Create state.

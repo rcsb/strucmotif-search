@@ -2,7 +2,7 @@ package org.rcsb.strucmotif.core;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -20,16 +20,15 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
 
 public class MotifPrunerImplTest {
-    private MotifSearchConfig config;
+    private StrucmotifConfig config;
     private StructureReader structureReader;
     private MotifPruner motifPruner;
 
     @BeforeEach
     public void init() {
-        this.config = new MotifSearchConfig();
+        this.config = new StrucmotifConfig();
         this.structureReader = new StructureReaderImpl();
         this.motifPruner = new KruskalMotifPruner();
     }

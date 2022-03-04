@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif;
 
-import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
-import org.rcsb.strucmotif.domain.query.SpriteContextBuilder;
+import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
+import org.rcsb.strucmotif.domain.query.MotifContextBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,26 +14,26 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
  */
 @SpringBootApplication(exclude = { MongoAutoConfiguration.class, MongoDataAutoConfiguration.class })
 @EntityScan("org.rcsb.strucmotif")
-public class MotifSearchApplication {
-    static AssamContextBuilder assamQueryBuilder;
-    static SpriteContextBuilder spriteQueryBuilder;
+public class StrucmotifApplication {
+    static StructureContextBuilder structureContextBuilder;
+    static MotifContextBuilder motifContextBuilder;
 
     /**
      * Default entry point.
      * @param args arguments
      */
     public static void main(String[] args) {
-        SpringApplication.run(MotifSearchApplication.class, args);
+        SpringApplication.run(StrucmotifApplication.class, args);
     }
 
     /**
      * Constructor.
-     * @param assamQueryBuilder injectable query builder (1 motif -> n structures)
-     * @param spriteQueryBuilder injectable query builder (1 structure -> n motifs)
+     * @param structureContextBuilder injectable context builder (1 motif -> n structures)
+     * @param motifContextBuilder injectable context builder (1 structure -> n motifs)
      */
     @Autowired
-    public MotifSearchApplication(AssamContextBuilder assamQueryBuilder, SpriteContextBuilder spriteQueryBuilder) {
-        MotifSearchApplication.assamQueryBuilder = assamQueryBuilder;
-        MotifSearchApplication.spriteQueryBuilder = spriteQueryBuilder;
+    public StrucmotifApplication(StructureContextBuilder structureContextBuilder, MotifContextBuilder motifContextBuilder) {
+        StrucmotifApplication.structureContextBuilder = structureContextBuilder;
+        StrucmotifApplication.motifContextBuilder = motifContextBuilder;
     }
 }

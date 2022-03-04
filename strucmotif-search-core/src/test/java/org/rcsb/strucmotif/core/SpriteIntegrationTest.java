@@ -6,12 +6,12 @@ import org.mockito.Mockito;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
-import org.rcsb.strucmotif.domain.query.SpriteContextBuilder;
-import org.rcsb.strucmotif.domain.result.SpriteHit;
-import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
+import org.rcsb.strucmotif.domain.query.MotifContextBuilder;
+import org.rcsb.strucmotif.domain.result.MotifHit;
+import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -44,12 +44,12 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 public class SpriteIntegrationTest {
     private StructureReader structureReader;
     private List<EnrichedMotifDefinition> motifs;
-    private SpriteContextBuilder queryBuilder;
+    private MotifContextBuilder queryBuilder;
 
     @BeforeEach
     public void init() {
-        MotifSearchConfig motifSearchConfig = new MotifSearchConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(motifSearchConfig);
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
         this.structureReader = new StructureReaderImpl();
@@ -62,7 +62,7 @@ public class SpriteIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepository stateRepository = new StateRepositoryImpl(motifSearchConfig) {
+        StateRepository stateRepository = new StateRepositoryImpl(strucmotifConfig) {
             @Override
             public Collection<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -76,15 +76,15 @@ public class SpriteIntegrationTest {
 
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, motifSearchConfig);
-        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, motifSearchConfig, alignmentService, assemblyInformationProvider);
+        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
+        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
         this.motifs = new MotifDefinitionRegistryImpl()
                 .getMotifDefinitions()
                 .stream()
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
                 .map(this::loadMotif)
                 .collect(Collectors.toList());
-        this.queryBuilder = new SpriteContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, motifSearchConfig);
+        this.queryBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig);
     }
 
     private EnrichedMotifDefinition loadMotif(MotifDefinition motifDefinition) {
@@ -100,7 +100,7 @@ public class SpriteIntegrationTest {
     @Test
     public void whenScreening2mnr_thenSuperfamilyMotifFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-        SpriteMotifSearchResult result = queryBuilder.defineByStructure(structure, "1")
+        MotifSearchResult result = queryBuilder.defineByStructure(structure, "1")
                 // these must be 'enriched' with structure data outside
                 .andMotifs(motifs)
                 .buildParameters()
@@ -108,7 +108,7 @@ public class SpriteIntegrationTest {
                 .run();
 
         assertTrue(result.getHits().size() > 0);
-        SpriteHit actual = result.getHits().get(0);
+        MotifHit actual = result.getHits().get(0);
         MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
         assertEquals(expected.getMotifIdentifier(), actual.getMotifIdentifier());
         assertEquals(expected.getLabelSelections(), actual.getLabelSelections());

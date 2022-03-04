@@ -1,17 +1,17 @@
 package org.rcsb.strucmotif.domain;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
-import org.rcsb.strucmotif.domain.query.AssamParameters;
-import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
+import org.rcsb.strucmotif.domain.query.StructureParameters;
+import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
-import org.rcsb.strucmotif.domain.query.SpriteParameters;
-import org.rcsb.strucmotif.domain.query.SpriteQueryStructure;
-import org.rcsb.strucmotif.domain.query.SpriteSearchQuery;
+import org.rcsb.strucmotif.domain.query.MotifParameters;
+import org.rcsb.strucmotif.domain.query.MotifQueryStructure;
+import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
 import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
-import org.rcsb.strucmotif.domain.result.SpriteHit;
-import org.rcsb.strucmotif.domain.result.SpriteMotifSearchResult;
+import org.rcsb.strucmotif.domain.result.MotifHit;
+import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.InvertedIndex;
@@ -28,19 +28,31 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery, SpriteParameters, SpriteQueryStructure, SpriteMotifSearchResult, SpriteHit> {
-    private static final Logger logger = LoggerFactory.getLogger(SpriteSearchContext.class);
+/**
+ * The context when in 'detect-motif' mode.
+ */
+public class MotifSearchContext extends AbstractSearchContext<MotifSearchQuery, MotifParameters, MotifQueryStructure, MotifSearchResult, MotifHit> {
+    private static final Logger logger = LoggerFactory.getLogger(MotifSearchContext.class);
     private final MotifSearchRuntime runtime;
-    private final MotifSearchConfig config;
+    private final StrucmotifConfig config;
     private final InvertedIndex invertedIndex;
     private final StructureIndexProvider structureIndexProvider;
     private final StructureDataProvider structureDataProvider;
-    private final SpriteSearchQuery query;
-    private final SpriteMotifSearchResult result;
+    private final MotifSearchQuery query;
+    private final MotifSearchResult result;
 
-    public SpriteSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig config, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, SpriteSearchQuery query) {
+    /**
+     * Create a context.
+     * @param motifSearchRuntime runtime
+     * @param strucmotifConfig config
+     * @param invertedIndex index
+     * @param structureIndexProvider index provider
+     * @param structureDataProvider data provider
+     * @param query the actual query
+     */
+    public MotifSearchContext(MotifSearchRuntime motifSearchRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifSearchQuery query) {
         this.runtime = motifSearchRuntime;
-        this.config = config;
+        this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;
         this.structureIndexProvider = structureIndexProvider;
         this.structureDataProvider = structureDataProvider;
@@ -48,9 +60,9 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
         this.result = initializeResultContainer();
     }
 
-    private SpriteMotifSearchResult initializeResultContainer() {
-        SpriteQueryStructure queryStructure = query.getQueryStructure();
-        SpriteParameters parameters = query.getParameters();
+    private MotifSearchResult initializeResultContainer() {
+        MotifQueryStructure queryStructure = query.getQueryStructure();
+        MotifParameters parameters = query.getParameters();
         logger.info("[{}] Query: {}",
                 id,
                 queryStructure.getStructureIdentifier());
@@ -62,7 +74,7 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
                 parameters.getAtomPairingScheme(),
                 parameters.getRmsdCutoff());
 
-        return new SpriteMotifSearchResult();
+        return new MotifSearchResult();
     }
 
     @Override
@@ -71,7 +83,7 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     }
 
     @Override
-    public MotifSearchConfig getConfig() {
+    public StrucmotifConfig getConfig() {
         return config;
     }
 
@@ -91,24 +103,18 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     }
 
     @Override
-    public SpriteSearchQuery getQuery() {
+    public MotifSearchQuery getQuery() {
         return query;
     }
 
-    /**
-     * Dispatch this query and perform the corresponding search.
-     * @return the result container
-     */
-    public SpriteMotifSearchResult run() {
+    @Override
+    public MotifSearchResult run() {
         runtime.performSearch(this);
         return this.getResult();
     }
 
-    /**
-     * Dispatch this query and consume each accepted hit on-the-fly. This doesn't keep hits in memory.
-     * @param hitConsumer terminal operation to perform on accepted hits
-     */
-    public void runAndConsume(Consumer<SpriteHit> hitConsumer) {
+    @Override
+    public void runAndConsume(Consumer<MotifHit> hitConsumer) {
         getRuntime().performSearch(this, hitConsumer);
     }
 
@@ -122,7 +128,7 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     }
 
     @Override
-    protected String composeOutput(SpriteHit hit) {
+    protected String composeOutput(MotifHit hit) {
         float[] original = hit.getTransformation().getFlattenedTransformation();
         List<Float> matrix = new ArrayList<>();
         for (float v : original) {
@@ -137,13 +143,18 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
     }
 
     @Override
-    public SpriteMotifSearchResult getResult() {
+    public MotifSearchResult getResult() {
         return result;
     }
 
-    public AssamSearchContext createSubcontext(EnrichedMotifDefinition motifDefinition) {
-        SpriteParameters parentParameters = query.getParameters();
-        AssamParameters parameters = new AssamParameters(parentParameters.getBackboneDistanceTolerance(),
+    /**
+     * Create a subcontext to detect individual motifs in the referenced structure.
+     * @param motifDefinition the motif to screen for
+     * @return a child context
+     */
+    public StructureSearchContext createSubcontext(EnrichedMotifDefinition motifDefinition) {
+        MotifParameters parentParameters = query.getParameters();
+        StructureParameters parameters = new StructureParameters(parentParameters.getBackboneDistanceTolerance(),
                 parentParameters.getSideChainDistanceTolerance(),
                 parentParameters.getAngleTolerance(),
                 parentParameters.getRmsdCutoff(),
@@ -155,7 +166,7 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
         Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()
                 .stream()
                 .collect(Collectors.toMap(PositionSpecificExchange::getLabelSelection, PositionSpecificExchange::getResidueTypes));
-        AssamSearchQuery query = new AssamSearchQuery(motifDefinition.getStructureIdentifier(),
+        StructureQuery query = new StructureQuery(motifDefinition.getStructureIdentifier(),
                 motifDefinition.getStructure(),
                 motifDefinition.getLabelSelections(),
                 motifDefinition.getResidues(),
@@ -166,7 +177,7 @@ public class SpriteSearchContext extends AbstractSearchContext<SpriteSearchQuery
                 StructureDeterminationMethodology.ALL,
                 config);
 
-        return new AssamSearchContext(runtime,
+        return new StructureSearchContext(runtime,
                 config,
                 invertedIndex,
                 structureIndexProvider,

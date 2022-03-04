@@ -18,6 +18,10 @@ public class ResiduePairIdentifierBucket implements Bucket {
     private Iterator<ResiduePairIdentifier> identifierIterator;
     private ResiduePairIdentifier currentIdentifier;
 
+    /**
+     * Delegate to the underlying map while implementing the bucket contract.
+     * @param data actual data
+     */
     public ResiduePairIdentifierBucket(Map<Integer, Collection<ResiduePairIdentifier>> data) {
         this.data = data;
         this.structureIterator = data.entrySet().iterator();

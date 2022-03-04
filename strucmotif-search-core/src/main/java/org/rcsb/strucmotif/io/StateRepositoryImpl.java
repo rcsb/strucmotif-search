@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
@@ -33,12 +33,12 @@ public class StateRepositoryImpl implements StateRepository {
 
     /**
      * Construct a state repository instance.
-     * @param motifSearchConfig the config
+     * @param strucmotifConfig the config
      */
-    public StateRepositoryImpl(MotifSearchConfig motifSearchConfig) {
-        Path rootPath = Paths.get(motifSearchConfig.getRootPath());
-        this.knownPath = rootPath.resolve(MotifSearchConfig.STATE_KNOWN_LIST);
-        this.dirtyPath = rootPath.resolve(MotifSearchConfig.STATE_DIRTY_LIST);
+    public StateRepositoryImpl(StrucmotifConfig strucmotifConfig) {
+        Path rootPath = Paths.get(strucmotifConfig.getRootPath());
+        this.knownPath = rootPath.resolve(StrucmotifConfig.STATE_KNOWN_LIST);
+        this.dirtyPath = rootPath.resolve(StrucmotifConfig.STATE_DIRTY_LIST);
     }
 
     @Override

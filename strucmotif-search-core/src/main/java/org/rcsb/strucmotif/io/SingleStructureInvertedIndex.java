@@ -14,15 +14,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * An implementation of a {@link InvertedIndex} that only deals with a single structure. Used in the
+ * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}.
+ */
 public class SingleStructureInvertedIndex implements InvertedIndex {
     private final Map<ResiduePairDescriptor, InvertedIndexBucket> index;
 
+    /**
+     * Create an inverted index based on this graph.
+     * @param residueGraph the content
+     */
     public SingleStructureInvertedIndex(ResidueGraph residueGraph) {
          index = residueGraph.residuePairOccurrencesParallel()
                  .collect(Collectors.groupingBy(ResiduePairOccurrence::getResiduePairDescriptor, Collectors.collectingAndThen(Collectors.toList(), this::toBucket)));
     }
 
-    @SuppressWarnings("Duplicates")
     private InvertedIndexBucket toBucket(List<ResiduePairOccurrence> residuePairOccurrences) {
         // TODO factor out all the bucket mapping logic
         int[] structureIndices = new int[] { 0 };

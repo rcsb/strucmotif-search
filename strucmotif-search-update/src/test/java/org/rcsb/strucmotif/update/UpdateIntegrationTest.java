@@ -3,7 +3,7 @@ package org.rcsb.strucmotif.update;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.core.ThreadPoolImpl;
 import org.rcsb.strucmotif.io.InvertedIndex;
@@ -38,17 +38,17 @@ public class UpdateIntegrationTest {
     private static final List<TestCases> UPDATE_2 = List.of(TestCases.PDB_4TUT, TestCases.PDB_5XES, TestCases.PDB_6FCE);
     private static final List<TestCases> UPDATE_3 = List.of(TestCases.AF_A0A0R0FWM3, TestCases.AF_Q8SY76);
     private static final List<TestCases> UPDATE_OVERLAP = List.of(TestCases.PDB_2RLL, TestCases.PDB_4TUT);
-    private MotifSearchConfig config;
+    private StrucmotifConfig config;
     private Path path;
     private Path renumberedPath;
     private StateRepository state;
     private StructureDataProvider data;
     private InvertedIndex index;
-    private MotifSearchUpdate update;
+    private StrucmotifUpdate update;
 
     @BeforeEach
     public void setup() throws IOException {
-        this.config = new MotifSearchConfig();
+        this.config = new StrucmotifConfig();
         config.setUndefinedAssemblies(true);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
         Path indexPath = path.resolve("index");
@@ -72,7 +72,7 @@ public class UpdateIntegrationTest {
     private void init() {
         ThreadPool pool = new ThreadPoolImpl(config);
         StructureIndexProvider keys = new StructureIndexProviderImpl(state);
-        this.update = new MotifSearchUpdate(state, data, index, config, pool, keys) {
+        this.update = new StrucmotifUpdate(state, data, index, config, pool, keys) {
             @Override
             protected InputStream handleInputStream(UpdateItem item, Context context) {
                 return TestCases.getInputStream(item.getStructureIdentifier());

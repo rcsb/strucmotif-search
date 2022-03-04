@@ -7,20 +7,38 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Enriched motif definitions wrap a {@link MotifDefinition} and provide additionally access to the underlying
+ * {@link Structure} as well as referenced residues.
+ */
 public class EnrichedMotifDefinition extends MotifDefinition {
     private final Structure structure;
     private final List<Map<LabelAtomId, float[]>> residues;
 
+    /**
+     * Construct a enriched motif.
+     * @param motifDefinition original definition
+     * @param structure underlying structure
+     * @param residues all relevant residues
+     */
     public EnrichedMotifDefinition(MotifDefinition motifDefinition, Structure structure, List<Map<LabelAtomId, float[]>> residues) {
         super(motifDefinition.getMotifIdentifier(), motifDefinition.getStructureIdentifier(), motifDefinition.getTitle(), motifDefinition.getDescription(), motifDefinition.getLabelSelections(), motifDefinition.getPositionSpecificExchanges());
         this.structure = structure;
         this.residues = residues;
     }
 
+    /**
+     * Access to the structure object.
+     * @return a {@link Structure}
+     */
     public Structure getStructure() {
         return structure;
     }
 
+    /**
+     * All relevant residues.
+     * @return a collection of maps from atom names to 3D vectors
+     */
     public List<Map<LabelAtomId, float[]>> getResidues() {
         return residues;
     }
@@ -37,10 +55,5 @@ public class EnrichedMotifDefinition extends MotifDefinition {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), structure, residues);
-    }
-
-    @Override
-    public String toString() {
-        return super.toString();
     }
 }

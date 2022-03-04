@@ -18,7 +18,7 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.MmCifFileBuilder;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.config.ResidueQualityStrategy;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
@@ -65,18 +65,19 @@ public class StructureWriterImpl implements StructureWriter {
 
     /**
      * Construct a writer.
+     * @param strucmotifConfig the global config
      */
-    public StructureWriterImpl(MotifSearchConfig motifSearchConfig) {
-        int precision = motifSearchConfig.getRenumberedCoordinatePrecision();
-        boolean gzipped = motifSearchConfig.isRenumberedGzip();
+    public StructureWriterImpl(StrucmotifConfig strucmotifConfig) {
+        int precision = strucmotifConfig.getRenumberedCoordinatePrecision();
+        boolean gzipped = strucmotifConfig.isRenumberedGzip();
         this.options = CifOptions.builder()
                 .encodingStrategyHint("atom_site", "Cartn_x", "delta", precision)
                 .encodingStrategyHint("atom_site", "Cartn_y", "delta", precision)
                 .encodingStrategyHint("atom_site", "Cartn_z", "delta", precision)
                 .gzip(gzipped)
                 .build();
-        this.residueQualityStrategy = motifSearchConfig.getResidueQualityStrategy();
-        this.residueQualityCutoff = motifSearchConfig.getResidueQualityCutoff();
+        this.residueQualityStrategy = strucmotifConfig.getResidueQualityStrategy();
+        this.residueQualityCutoff = strucmotifConfig.getResidueQualityCutoff();
         if (residueQualityStrategy == ResidueQualityStrategy.NONE) {
             logger.info("All valid residues be indexed");
         } else {

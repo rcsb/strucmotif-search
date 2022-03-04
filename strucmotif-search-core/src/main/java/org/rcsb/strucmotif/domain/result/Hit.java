@@ -6,14 +6,31 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.util.List;
 
+/**
+ * One accepted hit.
+ */
 public interface Hit {
-    // TODO generic identifier?
-
+    /**
+     * Referenced residues.
+     * @return a collection of {@link LabelSelection}
+     */
     List<LabelSelection> getLabelSelections();
 
+    /**
+     * Referenced residue types.
+     * @return an ordered list of {@link ResidueType}
+     */
     List<ResidueType> getResidueTypes();
 
+    /**
+     * The observed RMSD.
+     * @return a float
+     */
     float getRootMeanSquareDeviation();
 
+    /**
+     * The corresponding transformation.
+     * @return a {@link Transformation} object
+     */
     Transformation getTransformation();
 }

@@ -12,8 +12,8 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
-import org.rcsb.strucmotif.domain.query.AssamContextBuilder;
-import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
+import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -23,7 +23,7 @@ import java.util.Set;
 /**
  * Generic benchmark via JMH.
  */
-public class MotifSearchBenchmark {
+public class StructureSearchBenchmark {
     /**
      * A benchmark.
      * @param blackhole consume results (avoid dead-code elimination)
@@ -89,9 +89,9 @@ public class MotifSearchBenchmark {
         blackhole.consume(run(MotifDefinition.GGGG, state));
     }
 
-    private AssamMotifSearchResult run(MotifDefinition motif, MyState state) {
+    private StructureSearchResult run(MotifDefinition motif, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        AssamContextBuilder.OptionalAssamBuilder builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+        StructureContextBuilder.OptionalBuilderStep builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
                 .buildParameters();
@@ -132,9 +132,15 @@ public class MotifSearchBenchmark {
     MotifSearchBenchmark.searchForSuperfamilyTemplate           avgt   10  0.336 ± 0.007   s/op
     MotifSearchBenchmark.searchForSuperfamilyTemplateExchanges  avgt   10  1.236 ± 0.194   s/op
      */
+
+    /**
+     * Entry point.
+     * @param args nothing
+     * @throws RunnerException benchmark failed
+     */
     public static void main(String[] args) throws RunnerException {
         Options options = new OptionsBuilder()
-                .include(MotifSearchBenchmark.class.getSimpleName())
+                .include(StructureSearchBenchmark.class.getSimpleName())
                 .warmupIterations(5)
                 .measurementIterations(10)
                 .timeout(TimeValue.days(1))

@@ -138,6 +138,11 @@ public class Structure {
         return index;
     }
 
+    /**
+     * Retrieve the {@link LabelSelection} of a single residue, identified by its index.
+     * @param residueIndex the position
+     * @return a {@link LabelSelection}
+     */
     public LabelSelection getLabelSelection(int residueIndex) {
         int chainIndex = -1;
         for (int i = 0; i < chainIds.length; i++) {

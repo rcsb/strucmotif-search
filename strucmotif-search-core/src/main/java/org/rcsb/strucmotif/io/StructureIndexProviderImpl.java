@@ -4,6 +4,7 @@ import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayDeque;
@@ -13,6 +14,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Map-based impl of a structure index provider.
+ */
 @Service
 public class StructureIndexProviderImpl implements StructureIndexProvider {
     private static final Logger logger = LoggerFactory.getLogger(StructureIndexProviderImpl.class);
@@ -23,6 +27,11 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     private final Set<Integer> experimental;
     private final Set<Integer> computational;
 
+    /**
+     * Construct a new instance.
+     * @param stateRepository data source
+     */
+    @Autowired
     public StructureIndexProviderImpl(StateRepository stateRepository) {
         this.reuse = new ArrayDeque<>();
         this.forward = new HashMap<>();

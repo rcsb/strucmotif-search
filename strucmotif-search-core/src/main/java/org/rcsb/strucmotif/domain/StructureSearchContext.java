@@ -1,12 +1,12 @@
 package org.rcsb.strucmotif.domain;
 
-import org.rcsb.strucmotif.config.MotifSearchConfig;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.MotifSearchRuntime;
-import org.rcsb.strucmotif.domain.query.AssamParameters;
-import org.rcsb.strucmotif.domain.query.AssamQueryStructure;
-import org.rcsb.strucmotif.domain.query.AssamSearchQuery;
-import org.rcsb.strucmotif.domain.result.AssamHit;
-import org.rcsb.strucmotif.domain.result.AssamMotifSearchResult;
+import org.rcsb.strucmotif.domain.query.StructureParameters;
+import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
+import org.rcsb.strucmotif.domain.query.StructureQuery;
+import org.rcsb.strucmotif.domain.result.StructureHit;
+import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
@@ -17,19 +17,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, AssamParameters, AssamQueryStructure, AssamMotifSearchResult, AssamHit> {
-    private static final Logger logger = LoggerFactory.getLogger(AssamSearchContext.class);
+/**
+ * The context when in 'search-for-structures' mode.
+ */
+public class StructureSearchContext extends AbstractSearchContext<StructureQuery, StructureParameters, StructureQueryStructure, StructureSearchResult, StructureHit> {
+    private static final Logger logger = LoggerFactory.getLogger(StructureSearchContext.class);
     private final MotifSearchRuntime runtime;
-    private final MotifSearchConfig config;
+    private final StrucmotifConfig config;
     private final InvertedIndex invertedIndex;
     private final StructureIndexProvider structureIndexProvider;
     private final StructureDataProvider structureDataProvider;
-    private final AssamSearchQuery query;
-    private final AssamMotifSearchResult result;
+    private final StructureQuery query;
+    private final StructureSearchResult result;
 
-    public AssamSearchContext(MotifSearchRuntime motifSearchRuntime, MotifSearchConfig motifSearchConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, AssamSearchQuery query) {
+    /**
+     * Create a context.
+     * @param motifSearchRuntime runtime
+     * @param strucmotifConfig config
+     * @param invertedIndex index
+     * @param structureIndexProvider index provider
+     * @param structureDataProvider data provider
+     * @param query the actual query
+     */
+    public StructureSearchContext(MotifSearchRuntime motifSearchRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, StructureQuery query) {
         this.runtime = motifSearchRuntime;
-        this.config = motifSearchConfig;
+        this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;
         this.structureIndexProvider = structureIndexProvider;
         this.structureDataProvider = structureDataProvider;
@@ -37,9 +49,9 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
         this.result = initializeResultContainer();
     }
 
-    private AssamMotifSearchResult initializeResultContainer() {
-        AssamQueryStructure queryStructure = query.getQueryStructure();
-        AssamParameters parameters = query.getParameters();
+    private StructureSearchResult initializeResultContainer() {
+        StructureQueryStructure queryStructure = query.getQueryStructure();
+        StructureParameters parameters = query.getParameters();
         logger.info("[{}] Query: {} with {}",
                 id,
                 queryStructure.getStructureIdentifier(),
@@ -54,7 +66,7 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
                 parameters.getRmsdCutoff(),
                 parameters.getLimit());
 
-        return new AssamMotifSearchResult();
+        return new StructureSearchResult();
     }
 
     @Override
@@ -63,7 +75,7 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     }
 
     @Override
-    public MotifSearchConfig getConfig() {
+    public StrucmotifConfig getConfig() {
         return config;
     }
 
@@ -83,24 +95,18 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     }
 
     @Override
-    public AssamSearchQuery getQuery() {
+    public StructureQuery getQuery() {
         return query;
     }
 
-    /**
-     * Dispatch this query and perform the corresponding search.
-     * @return the result container
-     */
-    public AssamMotifSearchResult run() {
+    @Override
+    public StructureSearchResult run() {
         runtime.performSearch(this);
         return this.getResult();
     }
 
-    /**
-     * Dispatch this query and consume each accepted hit on-the-fly. This doesn't keep hits in memory.
-     * @param hitConsumer terminal operation to perform on accepted hits
-     */
-    public void runAndConsume(Consumer<AssamHit> hitConsumer) {
+    @Override
+    public void runAndConsume(Consumer<StructureHit> hitConsumer) {
         getRuntime().performSearch(this, hitConsumer);
     }
 
@@ -115,7 +121,7 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     }
 
     @Override
-    protected String composeOutput(AssamHit hit) {
+    protected String composeOutput(StructureHit hit) {
         float[] original = hit.getTransformation().getFlattenedTransformation();
         List<Float> matrix = new ArrayList<>();
         for (float v : original) {
@@ -131,7 +137,7 @@ public class AssamSearchContext extends AbstractSearchContext<AssamSearchQuery, 
     }
 
     @Override
-    public AssamMotifSearchResult getResult() {
+    public StructureSearchResult getResult() {
         return result;
     }
 }

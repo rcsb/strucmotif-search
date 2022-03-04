@@ -3,6 +3,9 @@ package org.rcsb.strucmotif.io;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Access to assembly information of each structure.
+ */
 public interface AssemblyInformationProvider {
     /**
      * Provides assembly information.

@@ -41,10 +41,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class SpriteIntegrationTest {
+public class MotifIntegrationTest {
     private StructureReader structureReader;
     private List<EnrichedMotifDefinition> motifs;
-    private MotifContextBuilder queryBuilder;
+    private MotifContextBuilder contextBuilder;
 
     @BeforeEach
     public void init() {
@@ -84,7 +84,7 @@ public class SpriteIntegrationTest {
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
                 .map(this::loadMotif)
                 .collect(Collectors.toList());
-        this.queryBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig);
+        this.contextBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig);
     }
 
     private EnrichedMotifDefinition loadMotif(MotifDefinition motifDefinition) {
@@ -100,7 +100,7 @@ public class SpriteIntegrationTest {
     @Test
     public void whenScreening2mnr_thenSuperfamilyMotifFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-        MotifSearchResult result = queryBuilder.defineByStructure(structure, "1")
+        MotifSearchResult result = contextBuilder.defineByStructure(structure, "1")
                 // these must be 'enriched' with structure data outside
                 .andMotifs(motifs)
                 .buildParameters()

@@ -44,9 +44,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class AssamIntegrationTest {
+public class StructureIntegrationTest {
     private StructureReader structureReader;
-    private StructureContextBuilder queryBuilder;
+    private StructureContextBuilder contextBuilder;
 
     @BeforeEach
     public void init() {
@@ -93,7 +93,7 @@ public class AssamIntegrationTest {
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
         MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
-        this.queryBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig, invertedIndex);
+        this.contextBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig, invertedIndex);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AssamIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", -62),
                     new LabelSelection("A", "1", -245),
                     new LabelSelection("A", "1", -295));
-            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
+            contextBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
         });
     }
 
@@ -114,7 +114,7 @@ public class AssamIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 1062),
                     new LabelSelection("A", "1", 10245),
                     new LabelSelection("A", "1", 10295));
-            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
+            contextBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
         });
     }
 
@@ -126,7 +126,7 @@ public class AssamIntegrationTest {
             List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 62), // K
                             new LabelSelection("A", "1", 245), // E
                             new LabelSelection("A", "1", 295)); // H
-            queryBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
+            contextBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
         });
     }
 
@@ -143,7 +143,7 @@ public class AssamIntegrationTest {
                         new LabelSelection("A", "1", 245), // E
                         new LabelSelection("A", "1", 295)); // H
 
-        StructureContextBuilder.OptionalBuilderStep buildParameters = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        StructureContextBuilder.OptionalBuilderStep buildParameters = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
@@ -203,7 +203,7 @@ public class AssamIntegrationTest {
                         new LabelSelection("C", "2", 45),
                         new LabelSelection("C", "2", 49));
 
-        StructureQuery motifSearchQuery = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        StructureQuery motifSearchQuery = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .buildContext()
                 .getQuery();
@@ -222,7 +222,7 @@ public class AssamIntegrationTest {
                 new LabelSelection("A", "1", 245), // E
                 new LabelSelection("A", "1", 295)); // H
 
-        int fullQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        int fullQueryCount = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .structureDeterminationMethodology(StructureDeterminationMethodology.ALL)
                 .buildContext()
@@ -231,7 +231,7 @@ public class AssamIntegrationTest {
                 .size();
         assertTrue(fullQueryCount > 0);
 
-        int modelQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        int modelQueryCount = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .structureDeterminationMethodology(StructureDeterminationMethodology.COMPUTATIONAL)
                 .buildContext()
@@ -240,7 +240,7 @@ public class AssamIntegrationTest {
                 .size();
         assertEquals(0, modelQueryCount);
 
-        int pdbQueryCount = queryBuilder.defineByStructureAndSelection(structure, labelSelections)
+        int pdbQueryCount = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .structureDeterminationMethodology(StructureDeterminationMethodology.EXPERIMENTAL)
                 .buildContext()

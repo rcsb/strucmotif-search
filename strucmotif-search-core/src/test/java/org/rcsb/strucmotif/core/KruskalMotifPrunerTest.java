@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class MotifPrunerImplTest {
+public class KruskalMotifPrunerTest {
     private StrucmotifConfig config;
     private StructureReader structureReader;
     private MotifPruner motifPruner;

@@ -222,7 +222,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
                 logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motifDefinition.getMotifIdentifier());
                 subhits.stream()
-                        .map(h -> createSpriteHit(motifDefinition, h))
+                        .map(h -> createSubhit(motifDefinition, h))
                         .forEach(consumer);
             }
         } catch (Exception e) {
@@ -235,7 +235,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
         }
     }
 
-    private MotifHit createSpriteHit(MotifDefinition motifDefinition, StructureHit structureHit) {
+    private MotifHit createSubhit(MotifDefinition motifDefinition, StructureHit structureHit) {
         return new MotifHit(motifDefinition.getMotifIdentifier(),
                 structureHit.getLabelSelections(),
                 structureHit.getResidueTypes(),

@@ -30,7 +30,7 @@ import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOpti
  * The entry point to create {@link MotifSearchContext} instances.
  */
 @Service
-public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.MandatorySpriteBuilder, MotifSearchContext> {
+public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.MandatoryBuilderStep, MotifSearchContext> {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -122,15 +122,15 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
          * @param motifDefinitions all motifs to consider
          * @return the next step
          */
-        public MandatorySpriteBuilder andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
-            return new MandatorySpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
+        public MandatoryBuilderStep andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
+            return new MandatoryBuilderStep(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
         }
     }
 
     /**
      * Builder for everything that must be set (but might fall back to default values).
      */
-    public class MandatorySpriteBuilder implements MandatoryBuilder<MandatorySpriteBuilder, MotifSearchContext> {
+    public class MandatoryBuilderStep implements MandatoryBuilder<MandatoryBuilderStep, MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
@@ -144,7 +144,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
 
-        MandatorySpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
+        MandatoryBuilderStep(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;
@@ -161,43 +161,43 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
         }
 
         @Override
-        public MandatorySpriteBuilder backboneDistanceTolerance(int backboneDistanceTolerance) {
+        public MandatoryBuilderStep backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
 
         @Override
-        public MandatorySpriteBuilder sideChainDistanceTolerance(int sideChainDistanceTolerance) {
+        public MandatoryBuilderStep sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
 
         @Override
-        public MandatorySpriteBuilder angleTolerance(int angleTolerance) {
+        public MandatoryBuilderStep angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
 
         @Override
-        public MandatorySpriteBuilder rmsdCutoff(double rmsdCutoff) {
+        public MandatoryBuilderStep rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 
         @Override
-        public MandatorySpriteBuilder atomPairingScheme(AtomPairingScheme atomPairingScheme) {
+        public MandatoryBuilderStep atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
         }
 
         @Override
-        public MandatorySpriteBuilder motifPruningStrategy(MotifPruner motifPruner) {
+        public MandatoryBuilderStep motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
             return this;
         }
 
         @Override
-        public MandatorySpriteBuilder motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
+        public MandatoryBuilderStep motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL:
                     this.motifPruner = MotifContextBuilder.this.kruskalMotifPruner;
@@ -212,21 +212,21 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
         }
 
         @Override
-        public OptionalSpriteBuilder buildParameters() {
+        public OptionalBuilderStep buildParameters() {
             MotifParameters parameters = new MotifParameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner);
-            return new OptionalSpriteBuilder(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider, parameters);
+            return new OptionalBuilderStep(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider, parameters);
         }
     }
 
     /**
      * Optional parameters of the algorithm.
      */
-    public class OptionalSpriteBuilder implements OptionalBuilder<MotifSearchContext> {
+    public class OptionalBuilderStep implements OptionalBuilder<MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<EnrichedMotifDefinition> motifDefinitions;
@@ -235,7 +235,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
         private final StructureDataProvider structureDataProvider;
         private final MotifParameters parameters;
 
-        OptionalSpriteBuilder(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifParameters parameters) {
+        OptionalBuilderStep(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifParameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;

@@ -60,6 +60,7 @@ information, thus the count for the RNA G-Quadruplex motif increased despite Alp
 - position-specific exchanges
 - modified residues
 - support for computed structure models, like from AlphaFold
+- detect motifs in a structure of interest
 
 ## Getting Started with a Dependency
 strucmotif-search is distributed by maven and supports Java 11+. To get started, append your `pom.xml` by:

@@ -148,6 +148,9 @@ public interface Bucket {
         return new ResiduePairIdentifierBucket(map);
     }
 
+    /**
+     * Encapsulate all arrays used by a bucket.
+     */
     class ArrayBucket {
         private final int[] structureIndices;
         private final int[] positionOffsets;
@@ -155,7 +158,7 @@ public interface Bucket {
         private final int[] operatorIndices;
         private final String[] operatorData;
 
-        ArrayBucket(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
+        private ArrayBucket(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
             this.structureIndices = structureIndices;
             this.positionOffsets = positionOffsets;
             this.positionData = positionData;
@@ -163,27 +166,52 @@ public interface Bucket {
             this.operatorData = operatorData;
         }
 
+        /**
+         * Access to the structure indices.
+         * @return an int[]
+         */
         public int[] getStructureIndices() {
             return structureIndices;
         }
 
+        /**
+         * Access to the position offsets.
+         * @return an int[]
+         */
         public int[] getPositionOffsets() {
             return positionOffsets;
         }
 
+        /**
+         * Access to the position data.
+         * @return an int[]
+         */
         public int[] getPositionData() {
             return positionData;
         }
 
+        /**
+         * Access to the operator indices.
+         * @return an int[]
+         */
         public int[] getOperatorIndices() {
             return operatorIndices;
         }
 
+        /**
+         * Access to the operator data.
+         * @return a String[]
+         */
         public String[] getOperatorData() {
             return operatorData;
         }
     }
 
+    /**
+     * Convert a bucket to a group of arrays.
+     * @param bucket the source
+     * @return a bunch of arrays without the methods of the Bucket interface
+     */
     static ArrayBucket toArrayBucket(Bucket bucket) {
         int structureCount = bucket.getStructureCount();
         int[] structureIndices = new int[structureCount];
@@ -227,6 +255,11 @@ public interface Bucket {
         return new ArrayBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
     }
 
+    /**
+     * Convert a collection of {@link ResiduePairOccurrence} instances to an {@link InvertedIndexBucket}.
+     * @param residuePairOccurrences source data
+     * @return an {@link InvertedIndexBucket}
+     */
     static InvertedIndexBucket toInvertedIndexBucket(List<ResiduePairOccurrence> residuePairOccurrences) {
         int[] structureIndices = new int[] { 0 };
         int[] positionOffsets = new int[] { 0 };

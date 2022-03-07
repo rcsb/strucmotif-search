@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -14,12 +14,12 @@ class MotifDefinitionRegistryTest {
 
     @BeforeEach
     public void init() {
-        this.registry = new MotifDefinitionRegistryImpl();
+        this.registry = new MotifDefinitionRegistryImpl(null);
     }
 
     @Test
     public void afterRegistryInitialized_thenHardCodedAndDynamicMotifsAvailable() {
-        List<MotifDefinition> motifDefinitions = registry.getMotifDefinitions();
+        Set<MotifDefinition> motifDefinitions = registry.getMotifDefinitions();
         assertTrue(motifDefinitions.contains(MotifDefinition.CHCH));
         assertTrue(motifDefinitions.contains(MotifDefinition.CHH));
         assertTrue(motifDefinitions.contains(MotifDefinition.GGGG));

@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Set;
 
 import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.assembly;
 
@@ -116,13 +116,13 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
 
         /**
          * Provide the collection of motifs to screen for. Must be {@link EnrichedMotifDefinition}, which are like
-         * normal {@link org.rcsb.strucmotif.domain.motif.MotifDefinition} instances but they also capture the actual
+         * normal {@link org.rcsb.strucmotif.domain.motif.MotifDefinition} instances, but they also capture the actual
          * {@link Structure} as well as all relevant residues. Make sure to create enriched motifs once outside and then
          * pass them in, potentially reusing them indefinitely.
          * @param motifDefinitions all motifs to consider
          * @return the next step
          */
-        public MandatoryBuilderStep andMotifs(List<EnrichedMotifDefinition> motifDefinitions) {
+        public MandatoryBuilderStep withMotifs(Set<EnrichedMotifDefinition> motifDefinitions) {
             return new MandatoryBuilderStep(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider);
         }
     }
@@ -133,7 +133,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
     public class MandatoryBuilderStep implements MandatoryBuilder<MandatoryBuilderStep, MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
-        private final List<EnrichedMotifDefinition> motifDefinitions;
+        private final Set<EnrichedMotifDefinition> motifDefinitions;
         private final InvertedIndex invertedIndex;
         private final StructureIndexProvider structureIndexProvider;
         private final StructureDataProvider structureDataProvider;
@@ -144,7 +144,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
 
-        MandatoryBuilderStep(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
+        MandatoryBuilderStep(String structureIdentifier, Structure structure, Set<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;
@@ -229,13 +229,13 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
     public class OptionalBuilderStep implements OptionalBuilder<MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
-        private final List<EnrichedMotifDefinition> motifDefinitions;
+        private final Set<EnrichedMotifDefinition> motifDefinitions;
         private final InvertedIndex invertedIndex;
         private final StructureIndexProvider structureIndexProvider;
         private final StructureDataProvider structureDataProvider;
         private final MotifParameters parameters;
 
-        OptionalBuilderStep(String structureIdentifier, Structure structure, List<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifParameters parameters) {
+        OptionalBuilderStep(String structureIdentifier, Structure structure, Set<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifParameters parameters) {
             this.structureIdentifier = structureIdentifier;
             this.structure = structure;
             this.motifDefinitions = motifDefinitions;

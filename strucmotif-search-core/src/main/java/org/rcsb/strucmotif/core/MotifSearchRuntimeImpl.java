@@ -183,22 +183,37 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
 
     @Override
     public void performSearch(MotifSearchContext context) {
-        MotifSearchResult result = context.getResult();
-        List<MotifHit> hits = result.getHits();
-        for (EnrichedMotifDefinition motifDefinition : context.getQuery().getMotifDefinitions()) {
-            StructureSearchResult subresult = performSearch(context, motifDefinition);
-            List<StructureHit> subhits = subresult.getHits();
-            if (subhits.isEmpty()) continue;
+        try {
+            MotifSearchResult result = context.getResult();
+            List<MotifHit> hits = threadPool.submit(() -> context.getQuery()
+                    .getMotifDefinitions()
+                    .parallelStream()
+                    .flatMap(motif -> {
+                        StructureSearchResult subresult = performSearch(context, motif);
+                        List<StructureHit> subhits = subresult.getHits();
+                        if (subhits.isEmpty()) return Stream.empty();
 
-            logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motifDefinition.getMotifIdentifier());
-            // if there are hits: move them to parent
-            for (StructureHit subhit : subresult.getHits()) {
-                hits.add(new MotifHit(motifDefinition.getMotifIdentifier(),
-                        subhit.getLabelSelections(),
-                        subhit.getResidueTypes(),
-                        subhit.getRootMeanSquareDeviation(),
-                        subhit.getTransformation()));
+                        logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motif.getMotifIdentifier());
+                        // if there are hits: move them to parent
+                        return subresult.getHits()
+                                .stream()
+                                .map(h -> createSubhit(motif, h));
+                    })
+                    .collect(Collectors.toList())).get();
+            result.setHits(hits);
+            result.getTimings().queryStop();
+
+            logger.info("[{}] Accepted {} hits in {} ms",
+                    context.getId(),
+                    hits.size(),
+                    result.getTimings().getQueryTime());
+        } catch (Exception e) {
+            // unwrap specific exceptions
+            Throwable t = unwrapException(e);
+            if (t instanceof IllegalQueryDefinitionException) {
+                throw (IllegalQueryDefinitionException) t;
             }
+            throw new RuntimeException(e);
         }
     }
 
@@ -215,16 +230,14 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
     @Override
     public void performSearch(MotifSearchContext context, Consumer<MotifHit> consumer) {
         try {
-            for (EnrichedMotifDefinition motifDefinition : context.getQuery().getMotifDefinitions()) {
-                StructureSearchResult subresult = performSearch(context, motifDefinition);
-                List<StructureHit> subhits = subresult.getHits();
-                if (subhits.isEmpty()) continue;
+            MotifSearchResult result = context.getResult();
 
-                logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motifDefinition.getMotifIdentifier());
-                subhits.stream()
-                        .map(h -> createSubhit(motifDefinition, h))
-                        .forEach(consumer);
-            }
+            int hits = consumeHits(context, consumer);
+
+            logger.info("[{}] Accepted {} hits in {} ms",
+                    context.getId(),
+                    hits,
+                    result.getTimings().getQueryTime());
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -233,6 +246,35 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
             }
             throw new RuntimeException(e);
         }
+    }
+
+    private int consumeHits(MotifSearchContext context, Consumer<MotifHit> consumer) throws ExecutionException, InterruptedException {
+        MotifSearchResult result = context.getResult();
+        AtomicInteger hits = new AtomicInteger();
+
+        threadPool.submit(() -> {
+            context.getQuery()
+                    .getMotifDefinitions()
+                    .parallelStream()
+                    .forEach(motif -> {
+                        StructureSearchResult subresult = performSearch(context, motif);
+                        List<StructureHit> subhits = subresult.getHits();
+                        if (subhits.isEmpty()) return;
+
+                        int subhitCount = subhits.size();
+                        logger.info("[{}] {} occurrences of {} found", context.getId(), subhitCount, motif.getMotifIdentifier());
+                        hits.addAndGet(subhitCount);
+                        // if there are hits: move them to parent
+                        subresult.getHits()
+                                .stream()
+                                .map(h -> createSubhit(motif, h))
+                                .forEach(consumer);
+                    });
+            return null;
+        }).get();
+
+        result.getTimings().queryStop();
+        return hits.get();
     }
 
     private MotifHit createSubhit(MotifDefinition motifDefinition, StructureHit structureHit) {

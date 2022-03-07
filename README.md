@@ -103,21 +103,19 @@ Strucmotif.searchForStructures()
 This process can also be reversed to detect whether a structure of unknown function contains characteristic motifs.
 
 ```java
-// define a collection of motifs to screen for
-List<EnrichedMotifDefinition> motifs = loadMotifs();
+// acquire a collection of motifs to screen for
+Set<EnrichedMotifDefinition> motifs = Strucmotif.getMotifDefinitionRegistry().getEnrichedMotifDefinitions();
 
 Strucmotif.detectMotifs()
-        // point to a structure of interest, like the first assembly of 2mnr
         .defineByPdbId("2mnr", "1")
-        // and specify all motifs to consider
-        .andMotifs(motifs)
+        .withMotifs(motifs)
         .rmsdCutoff(1.0)
         .buildParameters()
         .buildContext()
         .run()
         .getHits()
         .stream()
-        .map(hit -> hit.getMotifIdentifier() + "_" +
+        .map(hit -> hit.getMotifIdentifier() + " @ " +
                     hit.getLabelSelections() + " - RMSD: " +
                     hit.getRootMeanSquareDeviation())
         .forEach(System.out::println);

@@ -33,6 +33,7 @@ import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,7 +44,7 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
 public class MotifIntegrationTest {
     private StructureReader structureReader;
-    private List<EnrichedMotifDefinition> motifs;
+    private Set<EnrichedMotifDefinition> motifs;
     private MotifContextBuilder contextBuilder;
 
     @BeforeEach
@@ -78,12 +79,11 @@ public class MotifIntegrationTest {
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
         MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
-        this.motifs = new MotifDefinitionRegistryImpl()
-                .getMotifDefinitions()
+        this.motifs = new MotifDefinitionRegistryImpl(structureDataProvider)
+                .enrichMotifDefinitions(this::loadMotif)
                 .stream()
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
-                .map(this::loadMotif)
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
         this.contextBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig);
     }
 
@@ -102,7 +102,7 @@ public class MotifIntegrationTest {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
         MotifSearchResult result = contextBuilder.defineByStructure(structure, "1")
                 // these must be 'enriched' with structure data outside
-                .andMotifs(motifs)
+                .withMotifs(motifs)
                 .buildParameters()
                 .buildContext()
                 .run();

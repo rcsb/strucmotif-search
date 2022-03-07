@@ -69,7 +69,7 @@ public interface ContextBuilder<B extends ContextBuilder.MandatoryBuilder<?, C>,
         B motifPruningStrategy(MotifPruningStrategy motifPruningStrategy);
 
         /**
-         * Create the and move on to the optional step.
+         * Create the parameter object and move on to the optional step.
          * @return the optional builder instance
          */
         OptionalBuilder<C> buildParameters();

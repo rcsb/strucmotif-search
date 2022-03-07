@@ -3,14 +3,14 @@ package org.rcsb.strucmotif.domain.query;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
-import java.util.List;
+import java.util.Set;
 
 /**
  * The immutable container for a structural motif query.
  */
 public class MotifSearchQuery implements SearchQuery<MotifParameters, MotifQueryStructure> {
     private final MotifQueryStructure queryStructure;
-    private final List<EnrichedMotifDefinition> motifDefinitions;
+    private final Set<EnrichedMotifDefinition> motifDefinitions;
     private final MotifParameters parameters;
 
     /**
@@ -22,7 +22,7 @@ public class MotifSearchQuery implements SearchQuery<MotifParameters, MotifQuery
      */
     public MotifSearchQuery(String structureIdentifier,
                             Structure structure,
-                            List<EnrichedMotifDefinition> motifDefinitions,
+                            Set<EnrichedMotifDefinition> motifDefinitions,
                             MotifParameters parameters) {
         this.queryStructure = new MotifQueryStructure(structureIdentifier, structure);
         this.motifDefinitions = motifDefinitions;
@@ -42,7 +42,7 @@ public class MotifSearchQuery implements SearchQuery<MotifParameters, MotifQuery
      * All associated motif definitions.
      * @return a collection of motifs
      */
-    public List<EnrichedMotifDefinition> getMotifDefinitions() {
+    public Set<EnrichedMotifDefinition> getMotifDefinitions() {
         return motifDefinitions;
     }
 

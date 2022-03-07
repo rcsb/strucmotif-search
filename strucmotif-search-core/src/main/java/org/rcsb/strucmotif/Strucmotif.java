@@ -37,8 +37,8 @@ public class Strucmotif {
     }
 
     /**
-     *
-     * @return
+     * Instance of the registry that keeps track of all supported motifs.
+     * @return the registry of known motifs
      */
     public static MotifDefinitionRegistry getMotifDefinitionRegistry() {
         return INSTANCE.motifDefinitionRegistry;

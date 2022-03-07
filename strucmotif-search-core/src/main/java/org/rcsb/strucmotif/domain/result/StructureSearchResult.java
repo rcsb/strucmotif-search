@@ -8,7 +8,7 @@ import java.util.Map;
  * The results of a structure search run.
  */
 public class StructureSearchResult implements SearchResult<StructureHit> {
-    private final Timings timings;
+    private final StructureTimings timings;
 
     /**
      * Keep track of the generation we are currently in, i.e. how many words of the query have been consumed.
@@ -24,7 +24,7 @@ public class StructureSearchResult implements SearchResult<StructureHit> {
      * Construct a result container.
      */
     public StructureSearchResult() {
-        this.timings = new Timings();
+        this.timings = new StructureTimings();
         this.pathGeneration = 0;
         this.hits = new ArrayList<>();
     }
@@ -34,7 +34,7 @@ public class StructureSearchResult implements SearchResult<StructureHit> {
      * @return timings object
      */
     @Override
-    public Timings getTimings() {
+    public StructureTimings getTimings() {
         return timings;
     }
 

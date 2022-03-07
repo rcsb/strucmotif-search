@@ -7,20 +7,28 @@ import java.util.List;
  * The results of a motif search run.
  */
 public class MotifSearchResult implements SearchResult<MotifHit> {
-    private final Timings timings;
-    private final List<MotifHit> hits;
+    private final MotifTimings timings;
+    private List<MotifHit> hits;
 
     /**
      * Construct a result container.
      */
     public MotifSearchResult() {
-        this.timings = new Timings();
+        this.timings = new MotifTimings();
         this.hits = new ArrayList<>();
     }
 
     @Override
-    public Timings getTimings() {
+    public MotifTimings getTimings() {
         return timings;
+    }
+
+    /**
+     * Update the collection of accepted hits.
+     * @param hits a collection of hits
+     */
+    public void setHits(List<MotifHit> hits) {
+        this.hits = hits;
     }
 
     @Override

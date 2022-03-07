@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 public class Timer {
     private long start;
     private long time;
+    private boolean stopped;
 
     /**
      * Start the time.
@@ -35,6 +36,7 @@ public class Timer {
         }
 
         this.time = System.nanoTime() - start;
+        this.stopped = true;
     }
 
     /**
@@ -51,6 +53,7 @@ public class Timer {
      * @return a long of the desired granularity
      */
     public long getMeasuredTime(TimeUnit timeUnit) {
+        if (!stopped) throw new IllegalStateException("timer was never stopped");
         return timeUnit.convert(time, TimeUnit.NANOSECONDS);
     }
 }

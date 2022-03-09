@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 /**
  * The context when in 'search-for-structures' mode.
  */
-public class StructureSearchContext extends AbstractSearchContext<StructureQuery, StructureParameters, StructureQueryStructure, StructureSearchResult, StructureHit> {
+public class StructureSearchContext extends AbstractSearchContext<StructureParameters, StructureQueryStructure, StructureHit> {
     private static final Logger logger = LoggerFactory.getLogger(StructureSearchContext.class);
     private final MotifSearchRuntime runtime;
     private final StrucmotifConfig config;

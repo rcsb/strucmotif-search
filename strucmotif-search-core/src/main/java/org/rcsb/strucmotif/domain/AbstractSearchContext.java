@@ -19,13 +19,11 @@ import java.util.stream.Collectors;
 
 /**
  * Shared properties of a {@link SearchContext}.
- * @param <Q> the query type
  * @param <P> the parameter type
  * @param <S> the structure definition type
- * @param <R> the result type
  * @param <H> the result hit type
  */
-public abstract class AbstractSearchContext<Q extends SearchQuery<P, S>, P extends Parameters, S extends QueryStructure, R extends SearchResult<H>, H extends Hit> implements SearchContext<Q, P, S, R, H> {
+public abstract class AbstractSearchContext<P extends Parameters, S extends QueryStructure, H extends Hit> implements SearchContext<P, S, H> {
     /**
      * The delimiter between columns.
      */

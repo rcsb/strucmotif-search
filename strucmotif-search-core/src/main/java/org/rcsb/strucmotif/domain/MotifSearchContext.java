@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 /**
  * The context when in 'detect-motif' mode.
  */
-public class MotifSearchContext extends AbstractSearchContext<MotifSearchQuery, MotifParameters, MotifQueryStructure, MotifSearchResult, MotifHit> {
+public class MotifSearchContext extends AbstractSearchContext<MotifParameters, MotifQueryStructure, MotifHit> {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchContext.class);
     private final MotifSearchRuntime runtime;
     private final StrucmotifConfig config;

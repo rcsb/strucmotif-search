@@ -16,13 +16,11 @@ import java.util.function.Consumer;
 
 /**
  * A search context captures all properties and dependencies of a search request.
- * @param <Q> the query type
  * @param <P> the parameter type
  * @param <S> the structure definition type
- * @param <R> the result type
  * @param <H> the result hit type
  */
-public interface SearchContext<Q extends SearchQuery<P, S>, P extends Parameters, S extends QueryStructure, R extends SearchResult<H>, H extends Hit> {
+public interface SearchContext<P extends Parameters, S extends QueryStructure, H extends Hit> {
     /**
      * An identifier for this context. Useful for logging in multi-threaded environments.
      * @return a String identifier
@@ -45,13 +43,13 @@ public interface SearchContext<Q extends SearchQuery<P, S>, P extends Parameters
      * Summarizes the query that is defined by this context.
      * @return the query container
      */
-    Q getQuery();
+    SearchQuery<P, S> getQuery();
 
     /**
      * Execute this query by dispatching it to the runtime.
      * @return the result container
      */
-    R run();
+    SearchResult<H> run();
 
     /**
      * Execute this query but don't return individual hits, rather consume them immediately. Useful for large result
@@ -70,7 +68,7 @@ public interface SearchContext<Q extends SearchQuery<P, S>, P extends Parameters
      * Access to the result container. Will be empty if the search didn't {@link SearchContext#run()} yet.
      * @return the result container
      */
-    R getResult();
+    SearchResult<H> getResult();
 
     /**
      * Access to the {@link StructureIndexProvider} associated with this context. Will be the global singleton in

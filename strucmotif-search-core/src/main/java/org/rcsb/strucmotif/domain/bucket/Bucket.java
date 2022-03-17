@@ -103,52 +103,6 @@ public interface Bucket {
     void reset();
 
     /**
-     * Merge two buckets. Doesn't allow duplicates.
-     * @param bucket1 source1
-     * @param bucket2 source2
-     * @return a new bucket that contains the combined results of both
-     */
-    static ResiduePairIdentifierBucket merge(Bucket bucket1, Bucket bucket2) {
-        Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
-        addAll(map, bucket1, false, null);
-        addAll(map, bucket2, true, null);
-        return new ResiduePairIdentifierBucket(map);
-    }
-
-    private static void addAll(Map<Integer, Collection<ResiduePairIdentifier>> map, Bucket bucket, boolean noDuplicates, Collection<Integer> ignore) {
-        while (bucket.hasNextStructure()) {
-            bucket.moveStructure();
-            int key = bucket.getStructureIndex();
-            if (ignore != null && ignore.contains(key)) {
-                continue;
-            }
-            if (noDuplicates && map.containsKey(key)) {
-                throw new IllegalStateException("Duplicate key: " + key);
-            }
-            Collection<ResiduePairIdentifier> identifiers = map.computeIfAbsent(key, e -> new ArrayList<>());
-
-            while (bucket.hasNextOccurrence()) {
-                bucket.moveOccurrence();
-
-                ResiduePairIdentifier residuePairIdentifier = bucket.getResiduePairIdentifier();
-                identifiers.add(residuePairIdentifier);
-            }
-        }
-    }
-
-    /**
-     * Remove a collection of values from a bucket. Doesn't manipulate the original bucket.
-     * @param bucket the source
-     * @param removals what to remove
-     * @return a new bucket that doesn't contain any of the removals
-     */
-    static ResiduePairIdentifierBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
-        Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
-        addAll(map, bucket, true, removals);
-        return new ResiduePairIdentifierBucket(map);
-    }
-
-    /**
      * Encapsulate all arrays used by a bucket.
      */
     class ArrayBucket {

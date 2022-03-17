@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
@@ -24,7 +25,9 @@ import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +76,7 @@ public class InvertedIndexImpl implements InvertedIndex {
 
         try {
             Path path = getPath(residuePairDescriptor);
-            ResiduePairIdentifierBucket merged = Bucket.merge(getBucket(residuePairDescriptor), bucket);
+            ResiduePairIdentifierBucket merged = merge(getBucket(residuePairDescriptor), bucket);
 
             try (ByteArrayOutputStream outputStream = bucketCodec.encode(merged)) {
                 write(path, outputStream);
@@ -173,7 +176,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             }
 
             // remove all occurrences of structure identifiers
-            ResiduePairIdentifierBucket filteredBucket = Bucket.removeByKey(bucket, removals);
+            ResiduePairIdentifierBucket filteredBucket = removeByKey(bucket, removals);
 
             // serialize message
             try (ByteArrayOutputStream outputStream = bucketCodec.encode(filteredBucket)) {
@@ -248,5 +251,52 @@ public class InvertedIndexImpl implements InvertedIndex {
                 .parallel()
                 // ignore directories
                 .filter(p -> !Files.isDirectory(p) && p.getFileName().toString().contains(extension));
+    }
+
+
+    /**
+     * Merge two buckets. Doesn't allow duplicates.
+     * @param bucket1 source1
+     * @param bucket2 source2
+     * @return a new bucket that contains the combined results of both
+     */
+    private ResiduePairIdentifierBucket merge(Bucket bucket1, Bucket bucket2) {
+        Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
+        addAll(map, bucket1, false, null);
+        addAll(map, bucket2, true, null);
+        return new ResiduePairIdentifierBucket(map);
+    }
+
+    private void addAll(Map<Integer, Collection<ResiduePairIdentifier>> map, Bucket bucket, boolean noDuplicates, Collection<Integer> ignore) {
+        while (bucket.hasNextStructure()) {
+            bucket.moveStructure();
+            int key = bucket.getStructureIndex();
+            if (ignore != null && ignore.contains(key)) {
+                continue;
+            }
+            if (noDuplicates && map.containsKey(key)) {
+                throw new IllegalStateException("Duplicate key: " + key);
+            }
+            Collection<ResiduePairIdentifier> identifiers = map.computeIfAbsent(key, e -> new ArrayList<>());
+
+            while (bucket.hasNextOccurrence()) {
+                bucket.moveOccurrence();
+
+                ResiduePairIdentifier residuePairIdentifier = bucket.getResiduePairIdentifier();
+                identifiers.add(residuePairIdentifier);
+            }
+        }
+    }
+
+    /**
+     * Remove a collection of values from a bucket. Doesn't manipulate the original bucket.
+     * @param bucket the source
+     * @param removals what to remove
+     * @return a new bucket that doesn't contain any of the removals
+     */
+    private ResiduePairIdentifierBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
+        Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
+        addAll(map, bucket, true, removals);
+        return new ResiduePairIdentifierBucket(map);
     }
 }

@@ -10,7 +10,8 @@ unreleased
 ### Breaking changes
 - refactored for consistent naming:
   - top-level class: `MotifSearch` -> `Strucmotif`
-  - config: `MotifSearchConfig` -> `StrucmotifConfig`
+  - entry point refactored from `MotifSearch#newQuery` -> `Strucmotif#searchForStructures`
+  - corresponding query, parameter, result & hit objects are now more abstract to allow motif search support (`Strucmotif#detectMotifs`)
 - `Motifs` replaced by more flexible `MotifDefinitionRegistry`
 - query: `whitelist` & `blacklist` renamed to `allowedStructures` & `excludedStructures`
 

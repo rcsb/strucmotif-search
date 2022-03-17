@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 /**
  * Performs motif search queries and returns the corresponding result object.
  */
-public interface MotifSearchRuntime {
+public interface StrucmotifRuntime {
     /**
      * Perform a structure search.
      * @param context a structure context

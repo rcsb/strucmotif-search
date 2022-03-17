@@ -78,13 +78,13 @@ public class MotifIntegrationTest {
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
-        MotifSearchRuntime motifSearchRuntime = new MotifSearchRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
+        StrucmotifRuntime strucmotifRuntime = new StrucmotifRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
         this.motifs = new MotifDefinitionRegistryImpl(structureDataProvider)
                 .enrichMotifDefinitions(this::loadMotif)
                 .stream()
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
                 .collect(Collectors.toSet());
-        this.contextBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, motifSearchRuntime, strucmotifConfig);
+        this.contextBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig);
     }
 
     private EnrichedMotifDefinition loadMotif(MotifDefinition motifDefinition) {

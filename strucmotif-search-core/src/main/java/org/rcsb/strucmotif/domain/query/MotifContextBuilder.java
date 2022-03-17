@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
-import org.rcsb.strucmotif.core.MotifSearchRuntime;
+import org.rcsb.strucmotif.core.StrucmotifRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
 import org.rcsb.strucmotif.domain.MotifSearchContext;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
@@ -34,7 +34,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
-    private final MotifSearchRuntime motifSearchRuntime;
+    private final StrucmotifRuntime strucmotifRuntime;
     private final StrucmotifConfig strucmotifConfig;
 
     /**
@@ -42,15 +42,15 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
      * @param structureDataProvider injectable structure provider
      * @param kruskalMotifPruner injectable motif pruner
      * @param noOperationMotifPruner injectable nop motif pruner
-     * @param motifSearchRuntime injectable runtime
+     * @param strucmotifRuntime injectable runtime
      * @param strucmotifConfig injectable config
      */
     @Autowired
-    public MotifContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, StrucmotifConfig strucmotifConfig) {
+    public MotifContextBuilder(StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig) {
         this.structureDataProvider = structureDataProvider;
         this.kruskalMotifPruner = kruskalMotifPruner;
         this.noOperationMotifPruner = noOperationMotifPruner;
-        this.motifSearchRuntime = motifSearchRuntime;
+        this.strucmotifRuntime = strucmotifRuntime;
         this.strucmotifConfig = strucmotifConfig;
     }
 
@@ -251,7 +251,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
                     structure,
                     motifDefinitions,
                     parameters);
-            return new MotifSearchContext(motifSearchRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
+            return new MotifSearchContext(strucmotifRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }
     }
 }

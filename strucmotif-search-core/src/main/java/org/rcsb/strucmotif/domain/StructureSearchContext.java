@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.domain;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.MotifSearchRuntime;
+import org.rcsb.strucmotif.core.StrucmotifRuntime;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
 import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  */
 public class StructureSearchContext extends AbstractSearchContext<StructureParameters, StructureQueryStructure, StructureHit> {
     private static final Logger logger = LoggerFactory.getLogger(StructureSearchContext.class);
-    private final MotifSearchRuntime runtime;
+    private final StrucmotifRuntime runtime;
     private final StrucmotifConfig config;
     private final InvertedIndex invertedIndex;
     private final StructureIndexProvider structureIndexProvider;
@@ -32,15 +32,15 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
 
     /**
      * Create a context.
-     * @param motifSearchRuntime runtime
+     * @param strucmotifRuntime runtime
      * @param strucmotifConfig config
      * @param invertedIndex index
      * @param structureIndexProvider index provider
      * @param structureDataProvider data provider
      * @param query the actual query
      */
-    public StructureSearchContext(MotifSearchRuntime motifSearchRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, StructureQuery query) {
-        this.runtime = motifSearchRuntime;
+    public StructureSearchContext(StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, StructureQuery query) {
+        this.runtime = strucmotifRuntime;
         this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;
         this.structureIndexProvider = structureIndexProvider;
@@ -70,7 +70,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
     }
 
     @Override
-    public MotifSearchRuntime getRuntime() {
+    public StrucmotifRuntime getRuntime() {
         return runtime;
     }
 

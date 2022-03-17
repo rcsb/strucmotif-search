@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.domain;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.MotifSearchRuntime;
+import org.rcsb.strucmotif.core.StrucmotifRuntime;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.query.SearchQuery;
@@ -28,10 +28,10 @@ public interface SearchContext<P extends Parameters, S extends QueryStructure, H
     String getId();
 
     /**
-     * Access to the global {@link MotifSearchRuntime}.
+     * Access to the global {@link StrucmotifRuntime}.
      * @return the runtime
      */
-    MotifSearchRuntime getRuntime();
+    StrucmotifRuntime getRuntime();
 
     /**
      * Access to the global {@link StrucmotifConfig}.

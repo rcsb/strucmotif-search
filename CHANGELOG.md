@@ -5,10 +5,14 @@ unreleased
 -------------
 ### Added
 - make default assembly identifier in residue graph configurable
-- add motif definitions, registry & search support
+- add motif definitions, registry & search support (`MotifSearch...`)
 
 ### Breaking changes
-- Motifs replaced by more flexible MotifDefinitionRegistry
+- refactored for consistent naming:
+  - top-level class: `MotifSearch` -> `Strucmotif`
+  - config: `MotifSearchConfig` -> `StrucmotifConfig`
+- `Motifs` replaced by more flexible `MotifDefinitionRegistry`
+- query: `whitelist` & `blacklist` renamed to `allowedStructures` & `excludedStructures`
 
 strucmotif-search 0.13.6
 -------------

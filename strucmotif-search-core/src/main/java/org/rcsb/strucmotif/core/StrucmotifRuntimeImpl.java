@@ -33,8 +33,8 @@ import java.util.stream.Stream;
  * The default strucmotif-search runtime.
  */
 @Service
-public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
-    private static final Logger logger = LoggerFactory.getLogger(MotifSearchRuntimeImpl.class);
+public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
+    private static final Logger logger = LoggerFactory.getLogger(StrucmotifRuntimeImpl.class);
     private final TargetAssembler targetAssembler;
     private final ThreadPool threadPool;
     private final StrucmotifConfig strucmotifConfig;
@@ -50,7 +50,7 @@ public class MotifSearchRuntimeImpl implements MotifSearchRuntime {
      * @param assemblyInformationProvider all known assemblies
      */
     @Autowired
-    public MotifSearchRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, StrucmotifConfig strucmotifConfig, AlignmentService alignmentService, AssemblyInformationProvider assemblyInformationProvider) {
+    public StrucmotifRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, StrucmotifConfig strucmotifConfig, AlignmentService alignmentService, AssemblyInformationProvider assemblyInformationProvider) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.strucmotifConfig = strucmotifConfig;

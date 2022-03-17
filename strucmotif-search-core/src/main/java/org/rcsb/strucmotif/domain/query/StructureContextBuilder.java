@@ -5,7 +5,7 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.core.KruskalMotifPruner;
 import org.rcsb.strucmotif.core.MotifPruner;
-import org.rcsb.strucmotif.core.MotifSearchRuntime;
+import org.rcsb.strucmotif.core.StrucmotifRuntime;
 import org.rcsb.strucmotif.core.NoOperationMotifPruner;
 import org.rcsb.strucmotif.domain.StructureSearchContext;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
@@ -40,7 +40,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
-    private final MotifSearchRuntime motifSearchRuntime;
+    private final StrucmotifRuntime strucmotifRuntime;
     private final StrucmotifConfig strucmotifConfig;
     private final InvertedIndex invertedIndex;
 
@@ -50,17 +50,17 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
      * @param structureDataProvider injectable structure data provider
      * @param kruskalMotifPruner injectable motif pruner
      * @param noOperationMotifPruner injectable nop motif pruner
-     * @param motifSearchRuntime injectable runtime
+     * @param strucmotifRuntime injectable runtime
      * @param strucmotifConfig injectable config
      * @param invertedIndex injectable inverted index
      */
     @Autowired
-    public StructureContextBuilder(StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, MotifSearchRuntime motifSearchRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex) {
+    public StructureContextBuilder(StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, KruskalMotifPruner kruskalMotifPruner, NoOperationMotifPruner noOperationMotifPruner, StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex) {
         this.structureIndexProvider = structureIndexProvider;
         this.structureDataProvider = structureDataProvider;
         this.kruskalMotifPruner = kruskalMotifPruner;
         this.noOperationMotifPruner = noOperationMotifPruner;
-        this.motifSearchRuntime = motifSearchRuntime;
+        this.strucmotifRuntime = strucmotifRuntime;
         this.strucmotifConfig = strucmotifConfig;
         this.invertedIndex = invertedIndex;
     }
@@ -351,7 +351,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
                     excludedStructures,
                     structureDeterminationMethodology,
                     strucmotifConfig);
-            return new StructureSearchContext(motifSearchRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
+            return new StructureSearchContext(strucmotifRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }
     }
 }

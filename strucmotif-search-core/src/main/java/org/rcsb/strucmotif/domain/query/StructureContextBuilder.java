@@ -276,8 +276,8 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
         private final List<Map<LabelAtomId, float[]>> residues;
         private final StructureParameters parameters;
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
-        private final Set<String> whitelist;
-        private final Set<String> blacklist;
+        private final Set<String> allowedStructures;
+        private final Set<String> excludedStructures;
         private StructureDeterminationMethodology structureDeterminationMethodology;
 
         OptionalBuilderStep(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, StructureParameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
@@ -287,8 +287,8 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
             this.residues = residues;
             this.parameters = parameters;
             this.exchanges = upstreamExchanges == null || upstreamExchanges.isEmpty() ? new HashMap<>() : explodeExchanges(upstreamExchanges);
-            this.whitelist = new HashSet<>();
-            this.blacklist = new HashSet<>();
+            this.allowedStructures = new HashSet<>();
+            this.excludedStructures = new HashSet<>();
             this.structureDeterminationMethodology = StructureDeterminationMethodology.ALL;
         }
 
@@ -314,8 +314,8 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
          * @param structureIdentifiers a collection of structure identifiers
          * @return this builder
          */
-        public OptionalBuilderStep whitelist(Collection<String> structureIdentifiers) {
-            this.whitelist.addAll(structureIdentifiers);
+        public OptionalBuilderStep allowedStructures(Collection<String> structureIdentifiers) {
+            this.allowedStructures.addAll(structureIdentifiers);
             return this;
         }
 
@@ -324,8 +324,8 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
          * @param structureIdentifiers a collection of structure identifiers
          * @return this builder
          */
-        public OptionalBuilderStep blacklist(Collection<String> structureIdentifiers) {
-            this.blacklist.addAll(structureIdentifiers);
+        public OptionalBuilderStep excludedStructures(Collection<String> structureIdentifiers) {
+            this.excludedStructures.addAll(structureIdentifiers);
             return this;
         }
 
@@ -347,8 +347,8 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
                     residues,
                     parameters,
                     exchanges,
-                    whitelist,
-                    blacklist,
+                    allowedStructures,
+                    excludedStructures,
                     structureDeterminationMethodology,
                     strucmotifConfig);
             return new StructureSearchContext(motifSearchRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);

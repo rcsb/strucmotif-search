@@ -20,8 +20,8 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
     private final StructureQueryStructure queryStructure;
     private final StructureParameters parameters;
     private final Map<LabelSelection, Set<ResidueType>> exchanges;
-    private final Collection<String> whitelist;
-    private final Collection<String> blacklist;
+    private final Collection<String> allowedStructures;
+    private final Collection<String> excludedStructures;
     private final StructureDeterminationMethodology structureDeterminationMethodology;
 
     /**
@@ -32,8 +32,8 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
      * @param residues referenced residue data
      * @param parameters query parameters
      * @param exchanges optional exchanges
-     * @param whitelist which structure to include
-     * @param blacklist which structures to exclude
+     * @param allowedStructures which structure to include
+     * @param excludedStructures which structures to exclude
      * @param structureDeterminationMethodology which provenance to allow
      * @param strucmotifConfig the global config
      */
@@ -43,8 +43,8 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
                           List<Map<LabelAtomId, float[]>> residues,
                           StructureParameters parameters,
                           Map<LabelSelection, Set<ResidueType>> exchanges,
-                          Collection<String> whitelist,
-                          Collection<String> blacklist,
+                          Collection<String> allowedStructures,
+                          Collection<String> excludedStructures,
                           StructureDeterminationMethodology structureDeterminationMethodology,
                           StrucmotifConfig strucmotifConfig) {
         ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
@@ -52,8 +52,8 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
         this.queryStructure = new StructureQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;
         this.exchanges = exchanges;
-        this.whitelist = whitelist;
-        this.blacklist = blacklist;
+        this.allowedStructures = allowedStructures;
+        this.excludedStructures = excludedStructures;
         this.structureDeterminationMethodology = structureDeterminationMethodology;
     }
 
@@ -87,16 +87,16 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
      * Returns the specified search space - no restrictions apply if empty.
      * @return a collection of the search space
      */
-    public Collection<String> getWhitelist() {
-        return whitelist;
+    public Collection<String> getAllowedStructures() {
+        return allowedStructures;
     }
 
     /**
      * Returns disallowed entries of the search space.
      * @return a collection of entries that will be ignored
      */
-    public Collection<String> getBlacklist() {
-        return blacklist;
+    public Collection<String> getExcludedStructures() {
+        return excludedStructures;
     }
 
     /**

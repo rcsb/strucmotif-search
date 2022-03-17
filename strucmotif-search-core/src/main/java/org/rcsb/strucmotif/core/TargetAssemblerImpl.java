@@ -73,11 +73,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
         StructureDeterminationMethodology structureDeterminationMethodologyValue = query.getStructureDeterminationMethodology();
         Set<Integer> searchSpace = structureDeterminationMethodologyValue == StructureDeterminationMethodology.ALL ? null : structureIndexProvider.selectBySearchSpace(structureDeterminationMethodologyValue);
-        Set<Integer> allowed = query.getWhitelist()
+        Set<Integer> allowed = query.getAllowedStructures()
                 .stream()
                 .map(structureIndexProvider::selectStructureIndex)
                 .collect(Collectors.toSet());
-        Set<Integer> ignored = query.getBlacklist()
+        Set<Integer> ignored = query.getExcludedStructures()
                 .stream()
                 .map(structureIndexProvider::selectStructureIndex)
                 .collect(Collectors.toSet());

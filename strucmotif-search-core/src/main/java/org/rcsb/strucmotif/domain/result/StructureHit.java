@@ -56,22 +56,34 @@ public class StructureHit implements Hit {
         return assemblyIdentifier;
     }
 
-    @Override
+    /**
+     * Referenced residues.
+     * @return a collection of {@link LabelSelection}
+     */
     public List<LabelSelection> getLabelSelections() {
         return labelSelections;
     }
 
-    @Override
+    /**
+     * Referenced residue types.
+     * @return an ordered list of {@link ResidueType}
+     */
     public List<ResidueType> getResidueTypes() {
         return residueTypes;
     }
 
-    @Override
+    /**
+     * The observed RMSD.
+     * @return a float
+     */
     public float getRootMeanSquareDeviation() {
         return rmsd;
     }
 
-    @Override
+    /**
+     * The corresponding transformation.
+     * @return a {@link Transformation} object
+     */
     public Transformation getTransformation() {
         return transformation;
     }

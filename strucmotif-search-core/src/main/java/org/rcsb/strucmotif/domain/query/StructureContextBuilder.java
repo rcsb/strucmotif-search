@@ -172,43 +172,71 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
             this.undefinedAssemblies = false;
         }
 
-        @Override
+        /**
+         * Specify the backbone distance tolerance (default: 1).
+         * @param backboneDistanceTolerance an int
+         * @return this builder
+         */
         public MandatoryBuilderStep backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
 
-        @Override
+        /**
+         * Specify the side-chain distance tolerance (default: 1).
+         * @param sideChainDistanceTolerance an int
+         * @return this builder
+         */
         public MandatoryBuilderStep sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
 
-        @Override
+        /**
+         * Specify the angle tolerance (default: 1).
+         * @param angleTolerance an int
+         * @return this builder
+         */
         public MandatoryBuilderStep angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
 
-        @Override
+        /**
+         * Filter hits based on RMSD. Only relevant when scoring strategy involves alignment.
+         * @param rmsdCutoff the RMSD cutoff above which hits are filtered
+         * @return this builder
+         */
         public MandatoryBuilderStep rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 
-        @Override
+        /**
+         * Controls which atoms will be considered for alignment. Only relevant when scoring scheme is alignment-based.
+         * @param atomPairingScheme how to pair atoms for alignment routine
+         * @return this builder
+         */
         public MandatoryBuilderStep atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
         }
 
-        @Override
+        /**
+         * Specify the motif pruning strategy.
+         * @param motifPruner the implementation to prune motifs
+         * @return this builder
+         */
         public MandatoryBuilderStep motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
             return this;
         }
 
-        @Override
+        /**
+         * Specify the motif pruning strategy.
+         * @param motifPruningStrategy the strategy to prune motifs
+         * @return this builder
+         */
         public MandatoryBuilderStep motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL:

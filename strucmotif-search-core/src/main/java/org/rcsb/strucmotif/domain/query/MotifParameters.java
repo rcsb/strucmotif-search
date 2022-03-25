@@ -32,37 +32,58 @@ public class MotifParameters implements Parameters {
         this.motifPruner = motifPruner;
     }
 
-    @Override
+    /**
+     * Employed backbone distance tolerance.
+     * @return an int
+     */
     public int getBackboneDistanceTolerance() {
         return backboneDistanceTolerance;
     }
 
-    @Override
+    /**
+     * Employed side-chain distance tolerance.
+     * @return an int
+     */
     public int getSideChainDistanceTolerance() {
         return sideChainDistanceTolerance;
     }
 
-    @Override
+    /**
+     * Employed angle tolerance.
+     * @return an int
+     */
     public int getAngleTolerance() {
         return angleTolerance;
     }
 
-    @Override
+    /**
+     * Maximum RMSD up to which hits will be accepted, can be 'infinite'.
+     * @return a float
+     */
     public float getRmsdCutoff() {
         return rmsdCutoff;
     }
 
-    @Override
+    /**
+     * If filtering by RMSD will happen.
+     * @return true if there's a cutoff
+     */
     public boolean hasRmsdCutoff() {
         return rmsdCutoff != Float.MAX_VALUE;
     }
 
-    @Override
+    /**
+     * Which atoms will get aligned.
+     * @return an {@link AtomPairingScheme}
+     */
     public AtomPairingScheme getAtomPairingScheme() {
         return atomPairingScheme;
     }
 
-    @Override
+    /**
+     * The associated motif pruning strategy.
+     * @return a {@link MotifPruner}
+     */
     public MotifPruner getMotifPruner() {
         return motifPruner;
     }

@@ -30,7 +30,7 @@ import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOpti
  * The entry point to create {@link MotifSearchContext} instances.
  */
 @Service
-public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.MandatoryBuilderStep, MotifSearchContext> {
+public class MotifContextBuilder implements ContextBuilder<MotifSearchContext> {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -130,7 +130,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifContextBuilder.M
     /**
      * Builder for everything that must be set (but might fall back to default values).
      */
-    public class MandatoryBuilderStep implements MandatoryBuilder<MandatoryBuilderStep, MotifSearchContext> {
+    public class MandatoryBuilderStep implements MandatoryBuilder<MotifSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final Set<EnrichedMotifDefinition> motifDefinitions;

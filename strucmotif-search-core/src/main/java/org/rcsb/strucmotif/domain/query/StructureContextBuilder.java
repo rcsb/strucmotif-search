@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * The entry point to create {@link StructureSearchContext} instances.
  */
 @Service
-public class StructureContextBuilder implements ContextBuilder<StructureContextBuilder.MandatoryBuilderStep, StructureSearchContext> {
+public class StructureContextBuilder implements ContextBuilder<StructureSearchContext> {
     private final StructureIndexProvider structureIndexProvider;
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
@@ -141,7 +141,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureContextB
     /**
      * Builder for everything that must be set (but might fall back to default values).
      */
-    public class MandatoryBuilderStep implements ContextBuilder.MandatoryBuilder<MandatoryBuilderStep, StructureSearchContext> {
+    public class MandatoryBuilderStep implements ContextBuilder.MandatoryBuilder<StructureSearchContext> {
         private final String structureIdentifier;
         private final Structure structure;
         private final List<LabelSelection> labelSelections;

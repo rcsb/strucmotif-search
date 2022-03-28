@@ -166,7 +166,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 logger.warn("Update state is dirty - Problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
                 logger.info("Recovering from dirty state");
-                recover(stateRepository.selectDirty());
+                recover(dirtyStructureIdentifiers);
             }
         }
 
@@ -493,8 +493,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 .collect(Collectors.toSet());
     }
 
-    private void recover(Collection<String> ditry) {
-        remove(ditry);
+    private void recover(Collection<String> dirty) {
+        remove(dirty);
 
         // this will happen when writing to the inverted index fails: then bins can be corrupted and filled with structure indices that point nowhere
         logger.info("Screening for lingering structures in the index");

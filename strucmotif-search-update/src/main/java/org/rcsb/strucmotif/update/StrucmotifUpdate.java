@@ -403,6 +403,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @param identifiers set of identifiers to remove
      */
     public void remove(Collection<String> identifiers) {
+        // mark everything that will be touched as dirty in case this operation fails
+        stateRepository.insertDirty(identifiers);
+
         AtomicInteger counter = new AtomicInteger();
         for (String structureIdentifier : identifiers) {
             logger.info("[{}] Removing renumbered structure for entry: {}",
@@ -420,9 +423,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
             if (mapped.size() > 0) {
                 invertedIndex.delete(mapped);
             }
-            stateRepository.deleteKnown(identifiers);
-            stateRepository.deleteDirty(identifiers);
         }
+
+        stateRepository.deleteKnown(identifiers);
+        stateRepository.deleteDirty(identifiers);
         logger.info("Finished removal operation");
     }
 

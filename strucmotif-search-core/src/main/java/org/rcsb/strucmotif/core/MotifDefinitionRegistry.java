@@ -87,7 +87,7 @@ public interface MotifDefinitionRegistry {
     /**
      * The default enricher that attaches structure data to motif definitions. This is done by loading local or remote
      * structure data. For structure without structure data in the usual places use
-     * {@link this#enrichMotifDefinitions} and provide an appropriate implementation.
+     * {@link #enrichMotifDefinitions(Function) enrichMotifDefinitions} and provide an appropriate implementation.
      * @return the default enricher
      */
     Function<MotifDefinition, EnrichedMotifDefinition> getDefaultEnricher();

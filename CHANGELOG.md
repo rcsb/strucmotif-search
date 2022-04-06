@@ -1,11 +1,11 @@
 Strucmotif-search Changelog
 =============
 
-unreleased
+strucmotif-search 0.14.0
 -------------
 ### Added
-- make default assembly identifier in residue graph configurable
 - add motif definitions, registry & search support (`MotifSearch...`)
+- make default assembly identifier of residue graph configurable
 
 ### Breaking changes
 - refactored for consistent naming:

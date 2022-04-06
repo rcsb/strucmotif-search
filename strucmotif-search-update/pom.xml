@@ -3,7 +3,7 @@
     <parent>
         <artifactId>strucmotif-search</artifactId>
         <groupId>org.rcsb</groupId>
-        <version>0.14.1</version>
+        <version>0.14.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>org.rcsb</groupId>
             <artifactId>strucmotif-search-core</artifactId>
-            <version>0.14.1</version>
+            <version>0.14.2-SNAPSHOT</version>
         </dependency>
 
         <!-- TODO better solution? these are needed when JAR is used directly but should not be propagated if module is used as dependency -->

@@ -18,6 +18,7 @@ public interface MotifDefinitionRegistry {
     /**
      * Parse motif definitions from a file/string/URL.
      * @param inputStream stream of a JSON file
+     * @return  if content changed
      */
     boolean parseAndAddMotifDefinitions(InputStream inputStream);
 
@@ -72,19 +73,21 @@ public interface MotifDefinitionRegistry {
      * Access to all 'enriched' representation (i.e. with all necessary structure data) of all known motifs. Defaults to
      * loading data from local or public resources. Use {@link #enrichMotifDefinitions(Function mapper)} for motifs
      * from non-archived structures.
+     * @return collection of motifs with resolved structure data
      */
     Set<EnrichedMotifDefinition> getEnrichedMotifDefinitions();
 
     /**
      * Specify how 'enriched' representation (i.e. with all necessary structure data) are created.
      * @param mapper the function to obtain structure data
+     * @return colleciton motif motifs with resolved structure data
      */
     Set<EnrichedMotifDefinition> enrichMotifDefinitions(Function<MotifDefinition, EnrichedMotifDefinition> mapper);
 
     /**
      * The default enricher that attaches structure data to motif definitions. This is done by loading local or remote
      * structure data. For structure without structure data in the usual places use
-     * {@link this#enrichMotifDefinitions(Function)} and provide an appropriate implementation.
+     * {@link this#enrichMotifDefinitions} and provide an appropriate implementation.
      * @return the default enricher
      */
     Function<MotifDefinition, EnrichedMotifDefinition> getDefaultEnricher();

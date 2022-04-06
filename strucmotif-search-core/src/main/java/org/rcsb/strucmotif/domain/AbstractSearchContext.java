@@ -2,9 +2,7 @@ package org.rcsb.strucmotif.domain;
 
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
-import org.rcsb.strucmotif.domain.query.SearchQuery;
 import org.rcsb.strucmotif.domain.result.Hit;
-import org.rcsb.strucmotif.domain.result.SearchResult;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

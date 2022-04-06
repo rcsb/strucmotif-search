@@ -107,7 +107,7 @@ This process can also be reversed to detect whether a structure of unknown funct
 Set<EnrichedMotifDefinition> motifs = Strucmotif.getMotifDefinitionRegistry().getEnrichedMotifDefinitions();
 
 Strucmotif.detectMotifs()
-        .defineByPdbId("2mnr", "1")
+        .defineByPdbIdAndAssemblyId("2mnr", "1")
         .withMotifs(motifs)
         .rmsdCutoff(1.0)
         .buildParameters()

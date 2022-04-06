@@ -61,9 +61,9 @@ public class MotifContextBuilder implements ContextBuilder<MotifSearchContext> {
      * @return mandatory registry step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MotifRegistryBuilder defineByPdbId(String structureIdentifier, String assemblyIdentifier) {
+    public MotifRegistryBuilder defineByPdbIdAndAssemblyId(String structureIdentifier, String assemblyIdentifier) {
         Structure structure = structureDataProvider.readOriginal(structureIdentifier);
-        return defineByStructure(structure, assemblyIdentifier);
+        return defineByStructureAndAssemblyId(structure, assemblyIdentifier);
     }
 
     /**
@@ -72,9 +72,9 @@ public class MotifContextBuilder implements ContextBuilder<MotifSearchContext> {
      * @param assemblyIdentifier which assembly to operate on
      * @return mandatory registry step
      */
-    public MotifRegistryBuilder defineByFile(InputStream inputStream, String assemblyIdentifier) {
+    public MotifRegistryBuilder defineByFileAndAssemblyId(InputStream inputStream, String assemblyIdentifier) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        return defineByStructure(structure, assemblyIdentifier);
+        return defineByStructureAndAssemblyId(structure, assemblyIdentifier);
     }
 
     /**
@@ -85,7 +85,7 @@ public class MotifContextBuilder implements ContextBuilder<MotifSearchContext> {
      * @return mandatory registry step
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
-    public MotifRegistryBuilder defineByStructure(Structure structure, String assemblyIdentifier) {
+    public MotifRegistryBuilder defineByStructureAndAssemblyId(Structure structure, String assemblyIdentifier) {
         String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
 
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, assembly(assemblyIdentifier));

@@ -31,7 +31,7 @@ public class Demo {
         // use a single structure to detect all motifs that occur therein
         Set<EnrichedMotifDefinition> motifs = Strucmotif.getMotifDefinitionRegistry().getEnrichedMotifDefinitions();
         Strucmotif.detectMotifs()
-                .defineByPdbId("2mnr", "1")
+                .defineByPdbIdAndAssemblyId("2mnr", "1")
                 .withMotifs(motifs)
                 .rmsdCutoff(1.0)
                 .buildParameters()

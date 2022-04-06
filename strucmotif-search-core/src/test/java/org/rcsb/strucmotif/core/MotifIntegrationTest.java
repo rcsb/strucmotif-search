@@ -100,7 +100,7 @@ public class MotifIntegrationTest {
     @Test
     public void whenScreening2mnr_thenSuperfamilyMotifFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-        MotifSearchResult result = contextBuilder.defineByStructure(structure, "1")
+        MotifSearchResult result = contextBuilder.defineByStructureAndAssemblyId(structure, "1")
                 // these must be 'enriched' with structure data outside
                 .withMotifs(motifs)
                 .buildParameters()

@@ -6,7 +6,7 @@ import java.util.function.Predicate;
  * Controls the set of allowed targets, effectively providing high-level control to find exclusively PDB structures, or
  * exclusively computed structure models.
  */
-public enum ContentType implements Predicate<String> {
+public enum ResultsContentType implements Predicate<String> {
     /**
      * Return only PDB-entries.
      */
@@ -22,7 +22,7 @@ public enum ContentType implements Predicate<String> {
 
     private final Predicate<String> condition;
 
-    ContentType(Predicate<String> condition) {
+    ResultsContentType(Predicate<String> condition) {
         this.condition = condition;
     }
 

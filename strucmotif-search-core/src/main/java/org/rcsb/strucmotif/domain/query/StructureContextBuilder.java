@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -296,7 +295,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
         }
     }
 
-    private static final Collection<ContentType> DEFAULT_CONTENT_TYPES = EnumSet.of(ContentType.EXPERIMENTAL, ContentType.COMPUTATIONAL);
+    private static final Collection<ResultsContentType> DEFAULT_CONTENT_TYPES = EnumSet.of(ResultsContentType.EXPERIMENTAL, ResultsContentType.COMPUTATIONAL);
     /**
      * Optional parameters of the algorithm.
      */
@@ -309,7 +308,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<String> allowedStructures;
         private final Set<String> excludedStructures;
-        private Collection<ContentType> contentTypes;
+        private Collection<ResultsContentType> resultsContentType;
 
         OptionalBuilderStep(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, StructureParameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
             this.structureIdentifier = structureIdentifier;
@@ -320,7 +319,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
             this.exchanges = upstreamExchanges == null || upstreamExchanges.isEmpty() ? new HashMap<>() : explodeExchanges(upstreamExchanges);
             this.allowedStructures = new HashSet<>();
             this.excludedStructures = new HashSet<>();
-            this.contentTypes = DEFAULT_CONTENT_TYPES;
+            this.resultsContentType = DEFAULT_CONTENT_TYPES;
         }
 
         private Map<LabelSelection, Set<ResidueType>> explodeExchanges(Set<PositionSpecificExchange> exchanges) {
@@ -362,15 +361,15 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
 
         /**
          * Narrow down a search to a specific target set.
-         * @param contentTypes collection of contentTypes to consider
+         * @param resultsContentType collection of contentTypes to consider
          * @return this builder
          */
-        public OptionalBuilderStep contentTypes(Collection<ContentType> contentTypes) {
-            if (contentTypes.isEmpty()) {
-                throw new IllegalArgumentException("Content types cannot be empty!");
+        public OptionalBuilderStep resultsContentType(Collection<ResultsContentType> resultsContentType) {
+            if (resultsContentType.isEmpty()) {
+                throw new IllegalArgumentException("Results content types cannot be empty!");
             }
 
-            this.contentTypes = contentTypes;
+            this.resultsContentType = resultsContentType;
             return this;
         }
 
@@ -380,8 +379,8 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
          * @param rest additional search spaces to consider
          * @return this builder
          */
-        public OptionalBuilderStep contentTypes(ContentType first, ContentType... rest) {
-            this.contentTypes = EnumSet.of(first, rest);
+        public OptionalBuilderStep resultsContentType(ResultsContentType first, ResultsContentType... rest) {
+            this.resultsContentType = EnumSet.of(first, rest);
             return this;
         }
 
@@ -395,7 +394,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
                     exchanges,
                     allowedStructures,
                     excludedStructures,
-                    contentTypes,
+                    resultsContentType,
                     strucmotifConfig);
             return new StructureSearchContext(strucmotifRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }

@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.ContentType;
+import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
             backward.put(structureIdentifier, structureIndex);
 
             // keep track whether indices are PDB or model
-            if (ContentType.EXPERIMENTAL.test(structureIdentifier)) {
+            if (ResultsContentType.EXPERIMENTAL.test(structureIdentifier)) {
                 experimental.add(structureIndex);
             } else {
                 computational.add(structureIndex);
@@ -132,17 +132,17 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     }
 
     @Override
-    public Set<Integer> selectByContentTypes(Collection<ContentType> contentTypes) {
-        if (contentTypes.contains(ContentType.EXPERIMENTAL) && contentTypes.contains(ContentType.COMPUTATIONAL)) {
+    public Set<Integer> selectByResultsContentType(Collection<ResultsContentType> resultsContentType) {
+        if (resultsContentType.contains(ResultsContentType.EXPERIMENTAL) && resultsContentType.contains(ResultsContentType.COMPUTATIONAL)) {
             return forward.keySet();
         }
-        if (contentTypes.contains(ContentType.EXPERIMENTAL)) {
+        if (resultsContentType.contains(ResultsContentType.EXPERIMENTAL)) {
             return experimental;
         }
-        if (contentTypes.contains(ContentType.COMPUTATIONAL)) {
+        if (resultsContentType.contains(ResultsContentType.COMPUTATIONAL)) {
             return computational;
         }
 
-        throw new UnsupportedOperationException(contentTypes + " isn't handled");
+        throw new UnsupportedOperationException(resultsContentType + " isn't handled");
     }
 }

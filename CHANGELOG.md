@@ -1,8 +1,14 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.15.2
+-------------
+### Added
+- more parameter name tweaking
+
 strucmotif-search 0.15.1
 -------------
+### Added
 - add overloaded `contentTypes` method
 
 strucmotif-search 0.15.0

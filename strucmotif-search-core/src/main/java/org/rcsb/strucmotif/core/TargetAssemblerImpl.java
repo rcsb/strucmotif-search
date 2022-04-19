@@ -70,7 +70,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
 
-        Set<Integer> searchSpace = structureIndexProvider.selectByContentTypes(query.getContentTypes());
+        Set<Integer> searchSpace = structureIndexProvider.selectByResultsContentType(query.getResultsContentType());
         Set<Integer> allowed = query.getAllowedStructures()
                 .stream()
                 .map(structureIndexProvider::selectStructureIndex)

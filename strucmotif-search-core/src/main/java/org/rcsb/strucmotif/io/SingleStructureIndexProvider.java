@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.ContentType;
+import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.Collection;
@@ -54,7 +54,7 @@ public class SingleStructureIndexProvider implements StructureIndexProvider {
     }
 
     @Override
-    public Set<Integer> selectByContentTypes(Collection<ContentType> contentTypes) {
+    public Set<Integer> selectByResultsContentType(Collection<ResultsContentType> resultsContentType) {
         return Set.of(structureIndex);
     }
 }

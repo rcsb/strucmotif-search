@@ -3,13 +3,13 @@ package org.rcsb.strucmotif.domain;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.StrucmotifRuntime;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
+import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.MotifParameters;
 import org.rcsb.strucmotif.domain.query.MotifQueryStructure;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-import org.rcsb.strucmotif.domain.query.ContentType;
 import org.rcsb.strucmotif.domain.result.MotifHit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class MotifSearchContext extends AbstractSearchContext<MotifParameters, MotifQueryStructure, MotifHit> {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchContext.class);
-    private static final Collection<ContentType> DEFAULT_CONTENT_TYPES = EnumSet.of(ContentType.EXPERIMENTAL, ContentType.COMPUTATIONAL);
+    private static final Collection<ResultsContentType> DEFAULT_CONTENT_TYPES = EnumSet.of(ResultsContentType.EXPERIMENTAL, ResultsContentType.COMPUTATIONAL);
     private final StrucmotifRuntime runtime;
     private final StrucmotifConfig config;
     private final InvertedIndex invertedIndex;

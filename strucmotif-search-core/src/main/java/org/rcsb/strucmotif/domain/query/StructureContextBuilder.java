@@ -362,6 +362,20 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
 
         /**
          * Narrow down a search to a specific target set.
+         * @param contentTypes collection of contentTypes to consider
+         * @return this builder
+         */
+        public OptionalBuilderStep contentTypes(Collection<ContentType> contentTypes) {
+            if (contentTypes.isEmpty()) {
+                throw new IllegalArgumentException("Content types cannot be empty!");
+            }
+
+            this.contentTypes = contentTypes;
+            return this;
+        }
+
+        /**
+         * Narrow down a search to a specific target set.
          * @param first the search space of choice
          * @param rest additional search spaces to consider
          * @return this builder

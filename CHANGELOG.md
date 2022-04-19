@@ -1,6 +1,10 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.15.1
+-------------
+- add overloaded `contentTypes` method
+
 strucmotif-search 0.15.0
 -------------
 ### Breaking changes

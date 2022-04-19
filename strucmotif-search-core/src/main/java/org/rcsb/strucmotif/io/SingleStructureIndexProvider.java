@@ -1,8 +1,9 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
+import org.rcsb.strucmotif.domain.query.ContentType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -53,7 +54,7 @@ public class SingleStructureIndexProvider implements StructureIndexProvider {
     }
 
     @Override
-    public Set<Integer> selectBySearchSpace(StructureDeterminationMethodology structureDeterminationMethodology) {
+    public Set<Integer> selectByContentTypes(Collection<ContentType> contentTypes) {
         return Set.of(structureIndex);
     }
 }

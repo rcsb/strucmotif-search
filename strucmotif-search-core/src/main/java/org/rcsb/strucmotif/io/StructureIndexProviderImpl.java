@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
+import org.rcsb.strucmotif.domain.query.ContentType;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayDeque;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
             backward.put(structureIdentifier, structureIndex);
 
             // keep track whether indices are PDB or model
-            if (StructureDeterminationMethodology.EXPERIMENTAL.test(structureIdentifier)) {
+            if (ContentType.EXPERIMENTAL.test(structureIdentifier)) {
                 experimental.add(structureIndex);
             } else {
                 computational.add(structureIndex);
@@ -131,16 +132,17 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
     }
 
     @Override
-    public Set<Integer> selectBySearchSpace(StructureDeterminationMethodology structureDeterminationMethodology) {
-        switch (structureDeterminationMethodology) {
-            case EXPERIMENTAL:
-                return experimental;
-            case COMPUTATIONAL:
-                return computational;
-            case ALL:
-                return forward.keySet();
-            default:
-                throw new UnsupportedOperationException(structureDeterminationMethodology + " isn't handled");
+    public Set<Integer> selectByContentTypes(Collection<ContentType> contentTypes) {
+        if (contentTypes.contains(ContentType.EXPERIMENTAL) && contentTypes.contains(ContentType.COMPUTATIONAL)) {
+            return forward.keySet();
         }
+        if (contentTypes.contains(ContentType.EXPERIMENTAL)) {
+            return experimental;
+        }
+        if (contentTypes.contains(ContentType.COMPUTATIONAL)) {
+            return computational;
+        }
+
+        throw new UnsupportedOperationException(contentTypes + " isn't handled");
     }
 }

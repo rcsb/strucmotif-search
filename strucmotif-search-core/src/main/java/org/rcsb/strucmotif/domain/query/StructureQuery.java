@@ -22,7 +22,7 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
     private final Map<LabelSelection, Set<ResidueType>> exchanges;
     private final Collection<String> allowedStructures;
     private final Collection<String> excludedStructures;
-    private final StructureDeterminationMethodology structureDeterminationMethodology;
+    private final Collection<ContentType> contentTypes;
 
     /**
      * Construct a structure query.
@@ -34,7 +34,7 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
      * @param exchanges optional exchanges
      * @param allowedStructures which structure to include
      * @param excludedStructures which structures to exclude
-     * @param structureDeterminationMethodology which provenance to allow
+     * @param contentTypes which provenance to allow
      * @param strucmotifConfig the global config
      */
     public StructureQuery(String structureIdentifier,
@@ -45,7 +45,7 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
                           Map<LabelSelection, Set<ResidueType>> exchanges,
                           Collection<String> allowedStructures,
                           Collection<String> excludedStructures,
-                          StructureDeterminationMethodology structureDeterminationMethodology,
+                          Collection<ContentType> contentTypes,
                           StrucmotifConfig strucmotifConfig) {
         ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
@@ -54,7 +54,7 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
         this.exchanges = exchanges;
         this.allowedStructures = allowedStructures;
         this.excludedStructures = excludedStructures;
-        this.structureDeterminationMethodology = structureDeterminationMethodology;
+        this.contentTypes = contentTypes;
     }
 
     /**
@@ -101,9 +101,9 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
 
     /**
      * Access to the applied search space.
-     * @return ALL, PDB, or MODELS
+     * @return a collection containing any combination of EXPERIMENTAL, COMPUTATIONAL
      */
-    public StructureDeterminationMethodology getStructureDeterminationMethodology() {
-        return structureDeterminationMethodology;
+    public Collection<ContentType> getContentTypes() {
+        return contentTypes;
     }
 }

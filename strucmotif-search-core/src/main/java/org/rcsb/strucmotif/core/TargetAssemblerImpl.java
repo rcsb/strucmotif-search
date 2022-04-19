@@ -11,7 +11,6 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
 import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
 import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
 import org.rcsb.strucmotif.domain.structure.IndexSelection;
@@ -71,8 +70,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                     return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
                 }, Map.Entry::getValue));
 
-        StructureDeterminationMethodology structureDeterminationMethodologyValue = query.getStructureDeterminationMethodology();
-        Set<Integer> searchSpace = structureDeterminationMethodologyValue == StructureDeterminationMethodology.ALL ? null : structureIndexProvider.selectBySearchSpace(structureDeterminationMethodologyValue);
+        Set<Integer> searchSpace = structureIndexProvider.selectByContentTypes(query.getContentTypes());
         Set<Integer> allowed = query.getAllowedStructures()
                 .stream()
                 .map(structureIndexProvider::selectStructureIndex)

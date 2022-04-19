@@ -12,21 +12,21 @@ class SearchSpaceTest {
     @Test
     public void whenHandlingPdbIds_thenArchiveEntriesRetained() {
         assertEquals(3, TEST_CASES.stream()
-                .filter(StructureDeterminationMethodology.EXPERIMENTAL)
+                .filter(ContentType.EXPERIMENTAL)
                 .count());
     }
 
     @Test
     public void whenHandlingModelIds_thenArchiveEntriesIgnored() {
         assertEquals(2, TEST_CASES.stream()
-                .filter(StructureDeterminationMethodology.COMPUTATIONAL)
+                .filter(ContentType.COMPUTATIONAL)
                 .count());
     }
 
     @Test
     public void whenAllSearchSpace_thenNoOperation() {
         assertEquals(TEST_CASES.size(), TEST_CASES.stream()
-                .filter(StructureDeterminationMethodology.ALL)
+                .filter(ContentType.EXPERIMENTAL.or(ContentType.COMPUTATIONAL))
                 .count());
     }
 }

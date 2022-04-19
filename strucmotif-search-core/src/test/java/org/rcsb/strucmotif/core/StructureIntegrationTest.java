@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
+import org.rcsb.strucmotif.domain.query.ContentType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
@@ -224,7 +224,7 @@ public class StructureIntegrationTest {
 
         int fullQueryCount = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .structureDeterminationMethodology(StructureDeterminationMethodology.ALL)
+                .contentTypes(ContentType.EXPERIMENTAL, ContentType.COMPUTATIONAL)
                 .buildContext()
                 .run()
                 .getHits()
@@ -233,7 +233,7 @@ public class StructureIntegrationTest {
 
         int modelQueryCount = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .structureDeterminationMethodology(StructureDeterminationMethodology.COMPUTATIONAL)
+                .contentTypes(ContentType.COMPUTATIONAL)
                 .buildContext()
                 .run()
                 .getHits()
@@ -242,7 +242,7 @@ public class StructureIntegrationTest {
 
         int pdbQueryCount = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
-                .structureDeterminationMethodology(StructureDeterminationMethodology.EXPERIMENTAL)
+                .contentTypes(ContentType.EXPERIMENTAL)
                 .buildContext()
                 .run()
                 .getHits()

@@ -9,7 +9,7 @@ import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.MotifParameters;
 import org.rcsb.strucmotif.domain.query.MotifQueryStructure;
 import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
+import org.rcsb.strucmotif.domain.query.ContentType;
 import org.rcsb.strucmotif.domain.result.MotifHit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -21,7 +21,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
  */
 public class MotifSearchContext extends AbstractSearchContext<MotifParameters, MotifQueryStructure, MotifHit> {
     private static final Logger logger = LoggerFactory.getLogger(MotifSearchContext.class);
+    private static final Collection<ContentType> DEFAULT_CONTENT_TYPES = EnumSet.of(ContentType.EXPERIMENTAL, ContentType.COMPUTATIONAL);
     private final StrucmotifRuntime runtime;
     private final StrucmotifConfig config;
     private final InvertedIndex invertedIndex;
@@ -174,7 +177,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
                 exchanges,
                 Collections.emptySet(),
                 Collections.emptySet(),
-                StructureDeterminationMethodology.ALL,
+                DEFAULT_CONTENT_TYPES,
                 config);
 
         return new StructureSearchContext(runtime,

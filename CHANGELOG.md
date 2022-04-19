@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.15.0
+-------------
+### Breaking changes
+- rename `StructureDeterminationMethodology` to `ContentType`, now use `builder.contentTypes(ContentType.EXPERIMENTAL, ContentType.COMPUTATIONAL)` to specify structures to consider
+
 strucmotif-search 0.14.1
 -------------
 ### Bug fix

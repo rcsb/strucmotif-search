@@ -1,7 +1,8 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.query.StructureDeterminationMethodology;
+import org.rcsb.strucmotif.domain.query.ContentType;
 
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -52,8 +53,8 @@ public interface StructureIndexProvider {
 
     /**
      * Get all registered indices of a particular type.
-     * @param structureDeterminationMethodology search space identifier (PDB entries, computed structure models, everything)
+     * @param contentTypes search space identifier (PDB entries, computed structure models, everything)
      * @return a collection of all relevant structure indices
      */
-    Set<Integer> selectBySearchSpace(StructureDeterminationMethodology structureDeterminationMethodology);
+    Set<Integer> selectByContentTypes(Collection<ContentType> contentTypes);
 }

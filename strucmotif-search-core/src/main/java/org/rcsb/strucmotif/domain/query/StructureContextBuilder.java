@@ -21,7 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -294,6 +296,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
         }
     }
 
+    private static final Collection<ContentType> DEFAULT_CONTENT_TYPES = EnumSet.of(ContentType.EXPERIMENTAL, ContentType.COMPUTATIONAL);
     /**
      * Optional parameters of the algorithm.
      */
@@ -306,7 +309,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
         private final Map<LabelSelection, Set<ResidueType>> exchanges;
         private final Set<String> allowedStructures;
         private final Set<String> excludedStructures;
-        private StructureDeterminationMethodology structureDeterminationMethodology;
+        private Collection<ContentType> contentTypes;
 
         OptionalBuilderStep(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, StructureParameters parameters, Set<PositionSpecificExchange> upstreamExchanges) {
             this.structureIdentifier = structureIdentifier;
@@ -317,7 +320,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
             this.exchanges = upstreamExchanges == null || upstreamExchanges.isEmpty() ? new HashMap<>() : explodeExchanges(upstreamExchanges);
             this.allowedStructures = new HashSet<>();
             this.excludedStructures = new HashSet<>();
-            this.structureDeterminationMethodology = StructureDeterminationMethodology.ALL;
+            this.contentTypes = DEFAULT_CONTENT_TYPES;
         }
 
         private Map<LabelSelection, Set<ResidueType>> explodeExchanges(Set<PositionSpecificExchange> exchanges) {
@@ -359,11 +362,12 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
 
         /**
          * Narrow down a search to a specific target set.
-         * @param structureDeterminationMethodology the search space of choice
+         * @param first the search space of choice
+         * @param rest additional search spaces to consider
          * @return this builder
          */
-        public OptionalBuilderStep structureDeterminationMethodology(StructureDeterminationMethodology structureDeterminationMethodology) {
-            this.structureDeterminationMethodology = structureDeterminationMethodology;
+        public OptionalBuilderStep contentTypes(ContentType first, ContentType... rest) {
+            this.contentTypes = EnumSet.of(first, rest);
             return this;
         }
 
@@ -377,7 +381,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
                     exchanges,
                     allowedStructures,
                     excludedStructures,
-                    structureDeterminationMethodology,
+                    contentTypes,
                     strucmotifConfig);
             return new StructureSearchContext(strucmotifRuntime, strucmotifConfig, invertedIndex, structureIndexProvider, structureDataProvider, query);
         }

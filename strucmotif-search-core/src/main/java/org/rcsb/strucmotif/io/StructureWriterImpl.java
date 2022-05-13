@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.cif.CifBuilder;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.CifOptions;
-import org.rcsb.cif.model.CifFile;
 import org.rcsb.cif.model.FloatColumnBuilder;
 import org.rcsb.cif.model.IntColumnBuilder;
 import org.rcsb.cif.model.StrColumnBuilder;
@@ -20,6 +19,8 @@ import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.config.ResidueQualityStrategy;
+import org.rcsb.strucmotif.domain.Transformation;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -31,8 +32,8 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -62,12 +63,13 @@ public class StructureWriterImpl implements StructureWriter {
     private final CifOptions options;
     private final ResidueQualityStrategy residueQualityStrategy;
     private final double residueQualityCutoff;
+    private final ResidueTypeResolver residueTypeResolver;
 
     /**
      * Construct a writer.
      * @param strucmotifConfig the global config
      */
-    public StructureWriterImpl(StrucmotifConfig strucmotifConfig) {
+    public StructureWriterImpl(ResidueTypeResolver residueTypeResolver, StrucmotifConfig strucmotifConfig) {
         int precision = strucmotifConfig.getRenumberedCoordinatePrecision();
         boolean gzipped = strucmotifConfig.isRenumberedGzip();
         this.options = CifOptions.builder()
@@ -83,6 +85,7 @@ public class StructureWriterImpl implements StructureWriter {
         } else {
             logger.info("Residues will be filtered by {} with a cutoff of {}", residueQualityStrategy, residueQualityCutoff);
         }
+        this.residueTypeResolver = residueTypeResolver;
     }
 
     @Override
@@ -119,8 +122,8 @@ public class StructureWriterImpl implements StructureWriter {
         // keep track of alt locs
         String lastAcceptedLabelAsymId = "";
         int lastAcceptedLabelSeqId = Integer.MIN_VALUE;
-        String lastAcceptedAtomLabelId = "";
-        Set<String> currentlyAcceptedLabelAtomIds = new HashSet<>();
+        LabelAtomId lastAcceptedAtomLabelId = LabelAtomId.UNKNOWN_ATOM;
+        Set<LabelAtomId> currentlyAcceptedLabelAtomIds = EnumSet.noneOf(LabelAtomId.class);
 
         for (int row = 0; row < atomSite.getRowCount(); row++) {
             // ignore all models but the 1st
@@ -141,18 +144,22 @@ public class StructureWriterImpl implements StructureWriter {
 
             String currentLabelAsymId = atomSite.getLabelAsymId().get(row);
             int currentLabelSeqId = atomSite.getLabelSeqId().get(row);
-            String currentLabelAtomId = atomSite.getLabelAtomId().get(row);
+            LabelAtomId currentLabelAtomId = LabelAtomId.ofLabelAtomId(atomSite.getLabelAtomId().get(row));
             String currentLabelAltId = atomSite.getLabelAltId().get(row);
             String currentLabelCompId = atomSite.getLabelCompId().get(row);
 
+            if (currentLabelAtomId == LabelAtomId.UNKNOWN_ATOM) {
+                continue;
+            }
+
             // skip atoms that will be ambiguous during alignment
-            ResidueType residueType = ResidueType.ofThreeLetterCode(currentLabelCompId);
+            ResidueType residueType = residueTypeResolver.selectResidueType(currentLabelCompId);
             if (ambiguousAtom(residueType, currentLabelAtomId)) {
                 continue;
             }
 
             // skip residues without CA or CB (or equivalent)
-            if (!validResidues.contains(new LabelSelection(currentLabelAsymId, "1", currentLabelSeqId))) {
+            if (!validResidues.contains(new LabelSelection(currentLabelAsymId, Transformation.DEFAULT_OPERATOR, currentLabelSeqId))) {
                 continue;
             }
 
@@ -181,7 +188,7 @@ public class StructureWriterImpl implements StructureWriter {
             lastAcceptedLabelSeqId = currentLabelSeqId;
             lastAcceptedLabelAsymId = currentLabelAsymId;
 
-            labelAtomId.add(currentLabelAtomId);
+            labelAtomId.add(currentLabelAtomId.getLabelAtomId());
             labelCompId.add(currentLabelCompId);
             labelAsymId.add(currentLabelAsymId);
             labelSeqId.add(currentLabelSeqId);
@@ -190,10 +197,10 @@ public class StructureWriterImpl implements StructureWriter {
             cartnZ.add(atomSite.getCartnZ().get(row));
         }
         atomSiteBuilder.leaveCategory();
-        CifFile outputFile = outputBuilder.leaveBlock().leaveFile();
+        MmCifFile outputFile = outputBuilder.leaveBlock().leaveFile();
 
         // skip empty files
-        if (outputFile.getBlocks().get(0).getCategory("atom_site").getRowCount() == 0) {
+        if (outputFile.getBlocks().get(0).getAtomSite().getRowCount() == 0) {
             return;
         }
 
@@ -207,7 +214,7 @@ public class StructureWriterImpl implements StructureWriter {
     private List<LabelSelection> determineValidResidues(MmCifBlock block) {
         AtomSite atomSite = block.getAtomSite();
         Map<LabelSelection, ResidueType> residueTypes = new HashMap<>();
-        Map<LabelSelection, Set<String>> presentAtoms = new HashMap<>();
+        Map<LabelSelection, Set<LabelAtomId>> presentAtoms = new HashMap<>();
         for (int row = 0; row < atomSite.getRowCount(); row++) {
             if (atomSite.getLabelSeqId().getValueKind(row) != ValueKind.PRESENT) {
                 continue;
@@ -238,28 +245,34 @@ public class StructureWriterImpl implements StructureWriter {
                 }
             }
 
-            LabelSelection labelSelection = new LabelSelection(labelAsymId, "1", labelSeqId);
-            residueTypes.put(labelSelection, ResidueType.ofThreeLetterCode(atomSite.getLabelCompId().get(row)));
-            Set<String> atoms = presentAtoms.computeIfAbsent(labelSelection, e -> new HashSet<>());
-            atoms.add(atomSite.getLabelAtomId().get(row));
+            LabelSelection labelSelection = new LabelSelection(labelAsymId, Transformation.DEFAULT_OPERATOR, labelSeqId);
+            ResidueType residueType = residueTypeResolver.selectResidueType(atomSite.getLabelCompId().get(row));
+            // don't write/index any unknown components
+            if (residueType == ResidueType.UNKNOWN_COMPONENT) {
+                continue;
+            }
+
+            residueTypes.put(labelSelection, residueType);
+            Set<LabelAtomId> atoms = presentAtoms.computeIfAbsent(labelSelection, e -> EnumSet.noneOf(LabelAtomId.class));
+            atoms.add(LabelAtomId.ofLabelAtomId(atomSite.getLabelAtomId().get(row)));
         }
         List<LabelSelection> validResidues = new ArrayList<>();
         for (Map.Entry<LabelSelection, ResidueType> entry : residueTypes.entrySet()) {
             LabelSelection labelSelection = entry.getKey();
-            ResidueType residueType = residueTypes.get(labelSelection);
-            Set<String> atoms = presentAtoms.get(labelSelection);
+            ResidueType residueType = entry.getValue();
+            Set<LabelAtomId> atoms = presentAtoms.get(labelSelection);
             if (residueType.getPolymerType() == PolymerType.AMINO_ACID) {
                 if (residueType != ResidueType.GLYCINE) {
-                    if (atoms.contains("CA") && atoms.contains("CB")) {
+                    if (atoms.contains(LabelAtomId.CA) && atoms.contains(LabelAtomId.CB)) {
                         validResidues.add(labelSelection);
                     }
                 } else {
-                    if (atoms.contains("N") && atoms.contains("CA") && atoms.contains("C")) {
+                    if (atoms.contains(LabelAtomId.N) && atoms.contains(LabelAtomId.CA) && atoms.contains(LabelAtomId.C)) {
                         validResidues.add(labelSelection);
                     }
                 }
             } else {
-                if (atoms.contains("C4'") && atoms.contains("C1'")) {
+                if (atoms.contains(LabelAtomId.C4_PRIME) && atoms.contains(LabelAtomId.C1_PRIME)) {
                     validResidues.add(labelSelection);
                 }
             }
@@ -274,32 +287,32 @@ public class StructureWriterImpl implements StructureWriter {
      * @param labelAtomId the atom name to process
      * @return true if this atom is useless for RMSD calculations
      */
-    private static boolean ambiguousAtom(ResidueType residueType, String labelAtomId) {
+    private static boolean ambiguousAtom(ResidueType residueType, LabelAtomId labelAtomId) {
         // see Coutsias, 2019
         switch (residueType) {
             case ARGININE:
-                if (labelAtomId.equals("NH1") || labelAtomId.equals("NH2")) {
+                if (labelAtomId == LabelAtomId.NH1 || labelAtomId == LabelAtomId.NH2) {
                     return true;
                 }
             case ASPARTIC_ACID:
-                if (labelAtomId.equals("OD1") || labelAtomId.equals("OD2")) {
+                if (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2) {
                     return true;
                 }
             case GLUTAMIC_ACID:
-                if (labelAtomId.equals("OE1") || labelAtomId.equals("OE2")) {
+                if (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2) {
                     return true;
                 }
             case LEUCINE:
-                if (labelAtomId.equals("OD1") || labelAtomId.equals("OD2")) {
+                if (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2) {
                     return true;
                 }
             case PHENYLALANINE: case TYROSINE:
-                if (labelAtomId.equals("CD1") || labelAtomId.equals("CD2") || labelAtomId.equals("CE1") ||
-                        labelAtomId.equals("CE2")) {
+                if (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
+                        || labelAtomId == LabelAtomId.CE2) {
                     return true;
                 }
             case  VALINE:
-                if (labelAtomId.equals("OG1") || labelAtomId.equals("OG2")) {
+                if (labelAtomId == LabelAtomId.CG1 || labelAtomId == LabelAtomId.CG2) {
                     return true;
                 }
             default:

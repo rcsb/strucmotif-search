@@ -254,7 +254,7 @@ public class Structure {
      * @return a residue
      */
     public Map<LabelAtomId, float[]> manifestResidue(int residueIndex) {
-        return manifestResidue(residueIndex, "1");
+        return manifestResidue(residueIndex, Transformation.DEFAULT_OPERATOR);
     }
 
     /**

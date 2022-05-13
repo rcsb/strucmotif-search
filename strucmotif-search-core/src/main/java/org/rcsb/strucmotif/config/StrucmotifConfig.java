@@ -107,6 +107,10 @@ public class StrucmotifConfig {
      */
     private String undefinedAssemblyIdentifier = "0";
     /**
+     * How to index modified residues.
+     */
+    private ModifiedResidueStrategy modifiedResidueStrategy = ModifiedResidueStrategy.INTERNAL;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -161,7 +165,7 @@ public class StrucmotifConfig {
 
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
-     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
+     * not valid, corresponding data will be fetched from <code>cif-fetch-url</code>. <code>{id}</code> refers to the
      * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
      * @return a path
      */
@@ -171,7 +175,7 @@ public class StrucmotifConfig {
 
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
-     * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
+     * not valid, corresponding data will be fetched from <code>cif-fetch-url</code>. <code>{id}</code> refers to the
      * PDB-ID, <code>{middle}</code> can be used to represent the middle hash of an ID (e.g. 'ab' for '1abc').
      * @param dataSource a path
      */
@@ -476,5 +480,21 @@ public class StrucmotifConfig {
      */
     public void setUndefinedAssemblyIdentifier(String undefinedAssemblyIdentifier) {
         this.undefinedAssemblyIdentifier = undefinedAssemblyIdentifier;
+    }
+
+    /**
+     * How are modified residues handled?
+     * @return the corresponding strategy
+     */
+    public ModifiedResidueStrategy getModifiedResidueStrategy() {
+        return modifiedResidueStrategy;
+    }
+
+    /**
+     * Update how modified residues are handled.
+     * @param modifiedResidueStrategy new strategy
+     */
+    public void setModifiedResidueStrategy(ModifiedResidueStrategy modifiedResidueStrategy) {
+        this.modifiedResidueStrategy = modifiedResidueStrategy;
     }
 }

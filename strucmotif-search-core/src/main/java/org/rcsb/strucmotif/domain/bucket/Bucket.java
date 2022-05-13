@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.bucket;
 
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 
@@ -12,11 +13,6 @@ import java.util.Set;
  * occurrences of the corresponding descriptor.
  */
 public interface Bucket {
-    /**
-     * The default operator if no assembly information is defined explicitly.
-     */
-    String DEFAULT_OPERATOR = "1";
-
     /**
      * All structures that contain occurrences of this descriptor.
      * @return a collection of structure indices
@@ -185,11 +181,11 @@ public interface Bucket {
 
                 String structOperId1 = bucket.getStructOperId1();
                 String structOperId2 = bucket.getStructOperId2();
-                if (!structOperId1.equals(Bucket.DEFAULT_OPERATOR)) {
+                if (!structOperId1.equals(Transformation.DEFAULT_OPERATOR)) {
                     operatorIndicesList.add(positionPointer);
                     operatorDataList.add(structOperId1);
                 }
-                if (!structOperId2.equals(Bucket.DEFAULT_OPERATOR)) {
+                if (!structOperId2.equals(Transformation.DEFAULT_OPERATOR)) {
                     operatorIndicesList.add(positionPointer + 1);
                     operatorDataList.add(structOperId2);
                 }
@@ -225,11 +221,11 @@ public interface Bucket {
 
             String structOperId1 = identifier.getStructOperId1();
             String structOperId2 = identifier.getStructOperId2();
-            if (!structOperId1.equals(Bucket.DEFAULT_OPERATOR)) {
+            if (!structOperId1.equals(Transformation.DEFAULT_OPERATOR)) {
                 operatorIndicesList.add(2 * i);
                 operatorDataList.add(structOperId1);
             }
-            if (!structOperId2.equals(Bucket.DEFAULT_OPERATOR)) {
+            if (!structOperId2.equals(Transformation.DEFAULT_OPERATOR)) {
                 operatorIndicesList.add(2 * i + 1);
                 operatorDataList.add(structOperId2);
             }

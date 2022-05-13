@@ -9,6 +9,8 @@ import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.io.IOException;
@@ -25,8 +27,8 @@ import java.util.stream.Collectors;
  */
 @State(Scope.Benchmark)
 public class MyState {
-    private final StrucmotifConfig config = new StrucmotifConfig();
-    private final StructureReaderImpl structureReader = new StructureReaderImpl();
+    private final StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+    private final StructureReader structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
     final StructureContextBuilder queryBuilder = Strucmotif.searchForStructures();
     final Map<MotifDefinition, Pair<Structure, List<LabelSelection>>> structureMap;
 
@@ -47,7 +49,7 @@ public class MyState {
 
     private Pair<Structure, List<LabelSelection>> createStructure(MotifDefinition motif) {
         try {
-            URL url = new URL(prepareUri(config.getCifFetchUrl(), motif.getStructureIdentifier()));
+            URL url = new URL(prepareUri(strucmotifConfig.getCifFetchUrl(), motif.getStructureIdentifier()));
             InputStream inputStream = url.openStream();
             return new Pair<>(structureReader.readFromInputStream(inputStream), motif.getLabelSelections());
         } catch (IOException e) {

@@ -132,6 +132,7 @@ Strucmotif.detectMotifs()
 | `loading-chunk-size` | Batch size when holding structure data in memory | `12800` |
 | `max-results` | Maximum number of results that will be returned | `50000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
+| `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
 | `number-threads` | Number of worker threads | available processors |
 | `root-path` | Path where data files are read from | `/opt/data/` |
 | `undefined-assembly-identifier` | If allowed: What's the identifier of undefined assemblies? | `0` |

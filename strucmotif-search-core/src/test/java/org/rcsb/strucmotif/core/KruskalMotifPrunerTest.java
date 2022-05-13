@@ -10,6 +10,8 @@ import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.ResidueTypeResolver;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
@@ -22,14 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
 public class KruskalMotifPrunerTest {
-    private StrucmotifConfig config;
+    private StrucmotifConfig strucmotifConfig;
     private StructureReader structureReader;
     private MotifPruner motifPruner;
 
     @BeforeEach
     public void init() {
-        this.config = new StrucmotifConfig();
-        this.structureReader = new StructureReaderImpl();
+        this.strucmotifConfig = new StrucmotifConfig();
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        this.structureReader = new StructureReaderImpl(residueTypeResolver);
         this.motifPruner = new KruskalMotifPruner();
     }
 
@@ -42,7 +45,7 @@ public class KruskalMotifPrunerTest {
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, config);
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 
@@ -64,7 +67,7 @@ public class KruskalMotifPrunerTest {
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::manifestResidue)
                 .collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, config);
+        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 

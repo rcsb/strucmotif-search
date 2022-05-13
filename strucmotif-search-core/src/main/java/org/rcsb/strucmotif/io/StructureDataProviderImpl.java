@@ -113,6 +113,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         }
     }
 
+    @Override
     @PostConstruct
     public void initializeRenumberedStructureCache() throws IOException {
         InMemoryStrategy strategy = strucmotifConfig.getInMemoryStrategy();
@@ -121,6 +122,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             return;
         }
 
+        // TODO add off-heap strategy
         if (strategy == InMemoryStrategy.HEAP) {
             logger.info("Structure data will be kept in memory - start loading...");
 

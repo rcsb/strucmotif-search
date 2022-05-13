@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.bucket;
 
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 
@@ -169,7 +170,7 @@ public class InvertedIndexBucket implements Bucket {
 
     @Override
     public String getStructOperId1() {
-        return operators.getOrDefault(positionPointer, DEFAULT_OPERATOR);
+        return operators.getOrDefault(positionPointer, Transformation.DEFAULT_OPERATOR);
     }
 
     /**
@@ -178,12 +179,12 @@ public class InvertedIndexBucket implements Bucket {
      * @return a String
      */
     public String getStructOperId(int i) {
-        return operators.getOrDefault(i, DEFAULT_OPERATOR);
+        return operators.getOrDefault(i, Transformation.DEFAULT_OPERATOR);
     }
 
     @Override
     public String getStructOperId2() {
-        return operators.getOrDefault(positionPointer + 1, DEFAULT_OPERATOR);
+        return operators.getOrDefault(positionPointer + 1, Transformation.DEFAULT_OPERATOR);
     }
 
     @Override

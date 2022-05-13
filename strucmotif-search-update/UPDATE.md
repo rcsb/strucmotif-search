@@ -68,6 +68,7 @@ might require a full load.
 | `download-tries` | Number of tries to download structure data during update | `1` |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
 | `inverted-index-gzip` | Gzip index files? | `false` |
+| `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
 | `number-threads` | Number of worker threads | available processors |
 | `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
 | `renumbered-gzip` | Gzip BinaryCIF files? | `true` |

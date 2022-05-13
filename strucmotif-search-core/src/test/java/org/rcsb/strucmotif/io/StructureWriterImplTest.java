@@ -39,7 +39,8 @@ class StructureWriterImplTest {
     public void whenWriting1exr_thenContractHonored() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
-        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
 
         String id = "1exr";
         InputStream inputStream = Helpers.getOriginalBcif(id);
@@ -51,7 +52,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(1002, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(988, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     @Test
@@ -59,7 +60,8 @@ class StructureWriterImplTest {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
-        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
         InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");
@@ -71,7 +73,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(781, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(777, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     @Test
@@ -80,7 +82,8 @@ class StructureWriterImplTest {
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.BFACTOR_BELOW_CUTOFF);
         strucmotifConfig.setResidueQualityCutoff(50);
-        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
 
         String id = "1exr";
         InputStream inputStream = Helpers.getOriginalBcif(id);
@@ -92,7 +95,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(980, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(966, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     @Test
@@ -101,7 +104,8 @@ class StructureWriterImplTest {
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);
         strucmotifConfig.setResidueQualityCutoff(70);
-        StructureWriter structureWriter = new StructureWriterImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
         InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");

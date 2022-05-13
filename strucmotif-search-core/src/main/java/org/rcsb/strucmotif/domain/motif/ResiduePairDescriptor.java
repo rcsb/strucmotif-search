@@ -29,7 +29,7 @@ public class ResiduePairDescriptor {
                                  DistanceType sideChainDistance,
                                  AngleType angle) {
         // determine if descriptor needs to be flip implicitly
-        this.flipped = residueType1.getOneLetterCode().compareTo(residueType2.getOneLetterCode()) > 0;
+        this.flipped = residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0;
         this.residueType1 = flipped ? residueType2 : residueType1;
         this.residueType2 = flipped ? residueType1 : residueType2;
         this.backboneDistance = backboneDistance;
@@ -97,8 +97,8 @@ public class ResiduePairDescriptor {
 
     @Override
     public String toString() {
-        return residueType1.getOneLetterCode() +
-                residueType2.getOneLetterCode() + "-" +
+        return residueType1.getInternalCode() +
+                residueType2.getInternalCode() + "-" +
                 backboneDistance.getIntRepresentation() + "-" +
                 sideChainDistance.getIntRepresentation() + "-" +
                 angle.ordinal();

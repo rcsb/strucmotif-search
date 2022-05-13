@@ -3,12 +3,15 @@ package org.rcsb.strucmotif.align;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.ResidueTypeResolver;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
@@ -29,7 +32,8 @@ public class QuaternionAlignmentServiceTest {
     @BeforeEach
     public void init() {
         alignmentService = new QuaternionAlignmentService();
-        structureReader = new StructureReaderImpl();
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(new StrucmotifConfig());
+        structureReader = new StructureReaderImpl(residueTypeResolver);
     }
 
     @Test

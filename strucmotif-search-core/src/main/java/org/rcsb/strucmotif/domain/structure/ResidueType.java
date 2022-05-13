@@ -1,10 +1,5 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 /**
  * Registry of known residues. Provides mapping between enum representation and one- and three-letter codes as well as
  * polymer type.
@@ -60,17 +55,21 @@ public enum ResidueType {
      */
     ASPARAGINE("ASN", "N", PolymerType.AMINO_ACID),
     /**
+     * Pyrrolysine
+     */
+    PYRROLYSINE("PYL", "O", PolymerType.AMINO_ACID),
+    /**
      * Proline
      */
     PROLINE("PRO", "P", PolymerType.AMINO_ACID),
     /**
      * Glutamine
      */
-    GLUTAMINE("GLN", "Q", PolymerType.AMINO_ACID),
+    GLUTAMINE("GLN", "Q", PolymerType.AMINO_ACID), // 15
     /**
      * Arginine
      */
-    ARGININE("ARG", "R", PolymerType.AMINO_ACID), // 15
+    ARGININE("ARG", "R", PolymerType.AMINO_ACID),
     /**
      * Serine
      */
@@ -80,9 +79,13 @@ public enum ResidueType {
      */
     THREONINE("THR", "T", PolymerType.AMINO_ACID),
     /**
+     * Selenocysteine
+     */
+    SELENOCYSTEINE("SEC", "U", PolymerType.AMINO_ACID),
+    /**
      * Valine
      */
-    VALINE("VAL", "V", PolymerType.AMINO_ACID),
+    VALINE("VAL", "V", PolymerType.AMINO_ACID), // 20
     /**
      * Tryptophan
      */
@@ -90,67 +93,82 @@ public enum ResidueType {
     /**
      * Tyrosine
      */
-    TYROSINE("TYR", "Y", PolymerType.AMINO_ACID), // 20
+    TYROSINE("TYR", "Y", PolymerType.AMINO_ACID), // 22
 
-    // nucleotides
+    // DNA
     /**
-     * Adenosine
+     * 2'-Deoxyadenosine-5'-monophosphate
      */
-    ADENOSINE("A", "0", PolymerType.NUCLEOTIDE),
+    DEOXYADENOSINE("DA", "0", PolymerType.NUCLEOTIDE),
     /**
-     * Cytidine
+     * 2'-Deoxycytidine-5'-monophosphate
      */
-    CYTIDINE("C", "1", PolymerType.NUCLEOTIDE),
+    DEOXYCYTIDINE("DC", "1", PolymerType.NUCLEOTIDE),
     /**
-     * Deoxyadenosine
+     * 2'-Deoxyguanosine-5'-monophosphate
      */
-    DEOXYADENOSINE("DA", "2", PolymerType.NUCLEOTIDE),
+    DEOXYGUANOSINE("DG", "2", PolymerType.NUCLEOTIDE), // 25
     /**
-     * Deoxycytidine
+     * 2'-Deoxyinosine-5'-monophosphate
      */
-    DEOXYCYTIDINE("DC", "3", PolymerType.NUCLEOTIDE),
+    DEOXYINOSINE("DI", "8", PolymerType.NUCLEOTIDE),
     /**
-     * Deoxyguanosine
+     * 2'-Deoxythymidine-5'-monophosphate
      */
-    DEOXYGUANOSINE("DG", "4", PolymerType.NUCLEOTIDE), // 25
+    DEOXYTHYMIDINE("DT", "3", PolymerType.NUCLEOTIDE),
     /**
-     * Guanosine
+     * 2'-Deoxyuridine-5'-monophosphate
      */
-    GUANOSINE("G", "5", PolymerType.NUCLEOTIDE),
-    /**
-     * Thymidine
-     */
-    THYMIDINE("T", "6", PolymerType.NUCLEOTIDE),
-    /**
-     * Uridine
-     */
-    URIDINE("U", "7", PolymerType.NUCLEOTIDE),
+    DEOXYURIDINE("DU", "B", PolymerType.NUCLEOTIDE),
 
-    // joker categories
-//    LIGAND("LIG", "l"),
+    // RNA
+    /**
+     * Adenosine-5'-monophosphate
+     */
+    ADENOSINE("A", "4", PolymerType.NUCLEOTIDE),
+    /*
+     * Cytidine-5'-monophosphate
+     */
+    CYTIDINE("C", "5", PolymerType.NUCLEOTIDE), // 30
+    /**
+     * Guanosine-5'-monophosphate
+     */
+    GUANOSINE("G", "6", PolymerType.NUCLEOTIDE),
+    /**
+     * Inosinic acid
+     */
+    INOSINIC_ACID("I", "9", PolymerType.NUCLEOTIDE),
+    /**
+     * Thymidine-5'-monophosphate
+     */
+    THYMIDINE("T", "J", PolymerType.NUCLEOTIDE),
+    /**
+     * Uridine-5'-monophosphate
+     */
+    URIDINE("U", "7", PolymerType.NUCLEOTIDE), // 34
 
     /**
      * Some unknown amino acid.
      */
-    UNKNOWN_AMINO_ACID("UNK", "X", null),
+    UNKNOWN_AMINO_ACID("UNK", "X", PolymerType.AMINO_ACID),
     /**
      * Some unknown nucleotide.
      */
-    UNKNOWN_NUCLEOTIDE("N", "Z", null),
+    UNKNOWN_NUCLEOTIDE("N", "Z", PolymerType.NUCLEOTIDE),
     /**
      * Some unknown, yet polymeric component.
      */
-    UNKNOWN_COMPONENT("?", "U", null);
+    UNKNOWN_COMPONENT("?", "_", PolymerType.UNKNOWN_POLYMER); // 37
 
     // used to retrieve the correct entity from the label_comp_id field
     private final String threeLetterCode;
     // used to write human-readable files
-    private final String oneLetterCode;
+    private final String internalCode;
     private final PolymerType polymerType;
 
-    ResidueType(String threeLetterCode, String oneLetterCode, PolymerType polymerType) {
+    ResidueType(String threeLetterCode, String internalCode, PolymerType polymerType) {
         this.threeLetterCode = threeLetterCode;
-        this.oneLetterCode = oneLetterCode;
+        this.internalCode = internalCode;
         this.polymerType = polymerType;
     }
 
@@ -163,11 +181,12 @@ public enum ResidueType {
     }
 
     /**
-     * The one-letter code of this residue. May be 'artificial'/nonstandard. Used e.g. to name inverted index files.
+     * The internal single-character code of this residue. May be 'artificial'/nonstandard. Used e.g. to name inverted
+     * index files.
      * @return a String
      */
-    public String getOneLetterCode() {
-        return oneLetterCode;
+    public String getInternalCode() {
+        return internalCode;
     }
 
     /**
@@ -176,29 +195,5 @@ public enum ResidueType {
      */
     public PolymerType getPolymerType() {
         return polymerType;
-    }
-
-    private static final Map<String, ResidueType> TLC_MAPPING = Arrays.stream(ResidueType.values())
-            .collect(Collectors.toMap(ResidueType::getThreeLetterCode, Function.identity()));
-    /**
-     * Maps labelCompId values to the correct {@link ResidueType}.
-     * @param labelCompId three-letter code to process
-     * @return the matching type - if argument is null or fail to find: return UNKNOWN_AMINO_ACID
-     */
-    public static ResidueType ofThreeLetterCode(String labelCompId) {
-        ResidueType residueType = TLC_MAPPING.get(labelCompId);
-        return residueType != null ? residueType : ResidueType.UNKNOWN_COMPONENT;
-    }
-
-    private static final Map<String, ResidueType> OLC_MAPPING = Arrays.stream(ResidueType.values())
-            .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
-    /**
-     * Resolve a one-letter-code.
-     * @param oneLetterCode the one-letter-code (as defined in this implementation)
-     * @return a residue type or null
-     */
-    public static ResidueType ofOneLetterCode(String oneLetterCode) {
-        ResidueType residueType = OLC_MAPPING.get(oneLetterCode);
-        return residueType != null ? residueType : ResidueType.UNKNOWN_COMPONENT;
     }
 }

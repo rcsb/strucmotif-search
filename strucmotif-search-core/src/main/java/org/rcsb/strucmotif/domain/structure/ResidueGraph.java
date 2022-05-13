@@ -189,7 +189,7 @@ public class ResidueGraph {
         if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
             assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), chainMap.keySet()
                     .stream()
-                    .map(c -> c + "_1")
+                    .map(c -> c + "_" + Transformation.DEFAULT_OPERATOR)
                     .toArray(String[]::new));
         }
 
@@ -496,7 +496,7 @@ public class ResidueGraph {
         ResidueType residueType2 = structure.getResidueType(indexSelection2.getIndex());
 
         // first residue must have lower one-letter code - if not: flip
-        if (residueType1.getOneLetterCode().compareTo(residueType2.getOneLetterCode()) > 0) {
+        if (residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0) {
             return createMotifOccurrence(new Pair<>(indexSelection2, indexSelection1));
         }
 

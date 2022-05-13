@@ -20,6 +20,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
@@ -54,7 +55,7 @@ public class StructureIntegrationTest {
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
-        this.structureReader = new StructureReaderImpl();
+        this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
         InvertedIndexImpl invertedIndex = new InvertedIndexImpl(strucmotifConfig) {
@@ -159,7 +160,7 @@ public class StructureIntegrationTest {
         List<String> observedExchanges = response.getHits()
                 .stream()
                 .map(StructureHit::getResidueTypes)
-                .map(a -> a.stream().map(ResidueType::getOneLetterCode).collect(Collectors.joining("")))
+                .map(a -> a.stream().map(ResidueType::getInternalCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
                 .collect(Collectors.toList());
 

@@ -28,7 +28,7 @@ public enum LabelAtomId {
     /**
      * C3' atom.
      */
-    C3_PRIME("C3'"),
+    C3_PRIME("C3'"), // 5
     /**
      * C4 atom.
      */
@@ -48,7 +48,7 @@ public enum LabelAtomId {
     /**
      * C6 atom.
      */
-    C6("C6"),
+    C6("C6"), // 10
     /**
      * C8 atom.
      */
@@ -68,7 +68,7 @@ public enum LabelAtomId {
     /**
      * CD1 atom.
      */
-    CD1("CD1"),
+    CD1("CD1"), // 15
     /**
      * CD2 atom.
      */
@@ -88,7 +88,7 @@ public enum LabelAtomId {
     /**
      * CE3 atom.
      */
-    CE3("CE3"),
+    CE3("CE3"), // 20
     /**
      * CG atom.
      */
@@ -108,7 +108,7 @@ public enum LabelAtomId {
     /**
      * CZ atom.
      */
-    CZ("CZ"),
+    CZ("CZ"), // 25
     /**
      * CZ2 atom.
      */
@@ -128,7 +128,7 @@ public enum LabelAtomId {
     /**
      * N2 atom.
      */
-    N2("N2"),
+    N2("N2"), // 30
     /**
      * N3 atom.
      */
@@ -148,7 +148,7 @@ public enum LabelAtomId {
     /**
      * N9 atom.
      */
-    N9("N9"),
+    N9("N9"), // 35
     /**
      * ND1 atom.
      */
@@ -168,7 +168,7 @@ public enum LabelAtomId {
     /**
      * NE2 atom.
      */
-    NE2("NE2"),
+    NE2("NE2"), // 40
     /**
      * NH1 atom.
      */
@@ -188,7 +188,7 @@ public enum LabelAtomId {
     /**
      * O1P atom.
      */
-    O1P("O1P"),
+    O1P("O1P"), // 45
     /**
      * O2 atom.
      */
@@ -208,7 +208,7 @@ public enum LabelAtomId {
     /**
      * O4 atom.
      */
-    O4("O4"),
+    O4("O4"), // 50
     /**
      * O4' atom.
      */
@@ -228,7 +228,7 @@ public enum LabelAtomId {
     /**
      * OD2 atom.
      */
-    OD2("OD2"),
+    OD2("OD2"), // 55
     /**
      * OE1 atom.
      */
@@ -248,7 +248,7 @@ public enum LabelAtomId {
     /**
      * OH atom.
      */
-    OH("OH"),
+    OH("OH"), // 60
     /**
      * OP1 atom.
      */
@@ -268,7 +268,7 @@ public enum LabelAtomId {
     /**
      * P atom.
      */
-    P("P"),
+    P("P"), // 65
     /**
      * SD atom.
      */
@@ -281,7 +281,7 @@ public enum LabelAtomId {
      * Unknown atom.
      */
     UNKNOWN_ATOM("?");
-    
+
     private final String labelAtomId;
 
     LabelAtomId(String labelAtomId) {

@@ -9,6 +9,10 @@ import java.util.Arrays;
  */
 public class Transformation {
     /**
+     * The default/fallback 'struct_oper_id'.
+     */
+    public static final String DEFAULT_OPERATOR = "1";
+    /**
      * Neutral/identity transformation.
      */
     public static final float[][] IDENTITY_MATRIX_4D = new float[][] {

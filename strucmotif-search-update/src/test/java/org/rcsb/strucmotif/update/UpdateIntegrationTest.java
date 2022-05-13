@@ -8,6 +8,8 @@ import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.core.ThreadPoolImpl;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
+import org.rcsb.strucmotif.io.ResidueTypeResolver;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StateRepositoryImpl;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -38,7 +40,7 @@ public class UpdateIntegrationTest {
     private static final List<TestCases> UPDATE_2 = List.of(TestCases.PDB_4TUT, TestCases.PDB_5XES, TestCases.PDB_6FCE);
     private static final List<TestCases> UPDATE_3 = List.of(TestCases.AF_A0A0R0FWM3, TestCases.AF_Q8SY76);
     private static final List<TestCases> UPDATE_OVERLAP = List.of(TestCases.PDB_2RLL, TestCases.PDB_4TUT);
-    private StrucmotifConfig config;
+    private StrucmotifConfig strucmotifConfig;
     private Path path;
     private Path renumberedPath;
     private StateRepository state;
@@ -48,20 +50,21 @@ public class UpdateIntegrationTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        this.config = new StrucmotifConfig();
-        config.setUndefinedAssemblies(true);
+        this.strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setUndefinedAssemblies(true);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
         Path indexPath = path.resolve("index");
         Files.createDirectories(indexPath);
         this.renumberedPath = path.resolve("renumbered");
         Files.createDirectories(renumberedPath);
 
-        config.setRootPath(path.toFile().getAbsolutePath());
-        this.state = new StateRepositoryImpl(config);
-        StructureReader reader = new StructureReaderImpl();
-        StructureWriter writer = new StructureWriterImpl(config);
-        this.data = new StructureDataProviderImpl(reader, writer, config);
-        this.index = new InvertedIndexImpl(config);
+        strucmotifConfig.setRootPath(path.toFile().getAbsolutePath());
+        this.state = new StateRepositoryImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        StructureReader reader = new StructureReaderImpl(residueTypeResolver);
+        StructureWriter writer = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
+        this.data = new StructureDataProviderImpl(reader, writer, strucmotifConfig);
+        this.index = new InvertedIndexImpl(strucmotifConfig);
 
         init();
     }
@@ -70,9 +73,9 @@ public class UpdateIntegrationTest {
      * Some operations may need to rerun to update application state.
      */
     private void init() {
-        ThreadPool pool = new ThreadPoolImpl(config);
+        ThreadPool pool = new ThreadPoolImpl(strucmotifConfig);
         StructureIndexProvider keys = new StructureIndexProviderImpl(state);
-        this.update = new StrucmotifUpdate(state, data, index, config, pool, keys) {
+        this.update = new StrucmotifUpdate(state, data, index, strucmotifConfig, pool, keys) {
             @Override
             protected InputStream handleInputStream(UpdateItem item, Context context) {
                 return TestCases.getInputStream(item.getStructureIdentifier());

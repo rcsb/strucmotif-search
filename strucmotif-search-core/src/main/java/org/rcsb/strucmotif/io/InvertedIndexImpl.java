@@ -45,7 +45,7 @@ import java.util.zip.GZIPOutputStream;
 public class InvertedIndexImpl implements InvertedIndex {
     private static final Logger logger = LoggerFactory.getLogger(InvertedIndexImpl.class);
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
-            .collect(Collectors.toMap(ResidueType::getOneLetterCode, Function.identity()));
+            .collect(Collectors.toMap(ResidueType::getInternalCode, Function.identity()));
     private static final int BUFFER_SIZE = 65536;
     private final Path basePath;
     private final boolean gzipped;
@@ -191,7 +191,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     private void ensureDirectoriesExist() {
         try {
             List<String> oneLetterCodes = Stream.of(ResidueType.values())
-                    .map(ResidueType::getOneLetterCode)
+                    .map(ResidueType::getInternalCode)
                     // has to be sorted to honor the implicit contract on when identifiers are flipped
                     .sorted()
                     .collect(Collectors.toList());
@@ -252,7 +252,6 @@ public class InvertedIndexImpl implements InvertedIndex {
                 // ignore directories
                 .filter(p -> !Files.isDirectory(p) && p.getFileName().toString().contains(extension));
     }
-
 
     /**
      * Merge two buckets. Doesn't allow duplicates.

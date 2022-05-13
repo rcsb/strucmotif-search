@@ -32,6 +32,15 @@ import java.util.stream.Stream;
  */
 @Service
 public class StructureReaderImpl implements StructureReader {
+    private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
+    private static final Pattern COMMA_PATTERN = Pattern.compile(",");
+    private static final Pattern RANGE_PATTERN = Pattern.compile("-");
+    private final ResidueTypeResolver residueTypeResolver;
+
+    public StructureReaderImpl(ResidueTypeResolver residueTypeResolver) {
+        this.residueTypeResolver = residueTypeResolver;
+    }
+
     @Override
     public Structure readFromInputStream(InputStream inputStream) {
         try {
@@ -42,7 +51,7 @@ public class StructureReaderImpl implements StructureReader {
         }
     }
 
-    static class StructureReaderState {
+    class StructureReaderState {
         private final MmCifFile mmCifFile;
 
         // all relevant categories
@@ -158,7 +167,7 @@ public class StructureReaderImpl implements StructureReader {
                     lastLabelSeqId = labelSeqId;
                     labelSeqIdCollapsed.add(labelSeqId);
                     residueOffsets.add(row);
-                    residueTypes.add(ResidueType.ofThreeLetterCode(labelCompId[row]));
+                    residueTypes.add(residueTypeResolver.selectResidueType(labelCompId[row]));
                     residueIndex++;
                 }
             }
@@ -182,7 +191,6 @@ public class StructureReaderImpl implements StructureReader {
                     transformations.values().toArray(Transformation[]::new));
         }
 
-        private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
         private Map<String, Transformation> getTransformations(Map<String, float[][]> transformations, String operations) {
             Map<String, Transformation> composedTransformations = new HashMap<>();
 
@@ -205,7 +213,6 @@ public class StructureReaderImpl implements StructureReader {
             return composedTransformations;
         }
 
-        private static final Pattern COMMA_PATTERN = Pattern.compile(",");
         private List<String> extractTransformationIds(String rawOperation) {
             String prepared = rawOperation.replace("(", "")
                     .replace(")", "")
@@ -216,7 +223,6 @@ public class StructureReaderImpl implements StructureReader {
                     .collect(Collectors.toList());
         }
 
-        private static final Pattern RANGE_PATTERN = Pattern.compile("-");
         private Stream<String> extractTransformationRanges(String raw) {
             String[] s = RANGE_PATTERN.split(raw);
             if (s.length == 1) {
@@ -253,7 +259,7 @@ public class StructureReaderImpl implements StructureReader {
                 }
             } else {
                 // nothing defined explicitly
-                transformations.put("1", Transformation.IDENTITY_TRANSFORMATION);
+                transformations.put(Transformation.DEFAULT_OPERATOR, Transformation.IDENTITY_TRANSFORMATION);
             }
 
             return transformations;

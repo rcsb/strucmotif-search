@@ -18,6 +18,8 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.ResidueTypeResolver;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StateRepositoryImpl;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -53,7 +55,8 @@ public class MotifIntegrationTest {
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
-        this.structureReader = new StructureReaderImpl();
+        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        this.structureReader = new StructureReaderImpl(residueTypeResolver);
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
         StructureDataProvider structureDataProvider = Mockito.mock(StructureDataProvider.class);

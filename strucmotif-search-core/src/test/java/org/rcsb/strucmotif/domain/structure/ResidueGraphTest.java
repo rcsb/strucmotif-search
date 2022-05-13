@@ -3,11 +3,13 @@ package org.rcsb.strucmotif.domain.structure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 import org.rcsb.strucmotif.math.Algebra;
@@ -40,10 +42,10 @@ class ResidueGraphTest {
 
     @BeforeEach
     public void init() {
-        structureReader = new StructureReaderImpl();
         strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
         strucmotifConfig.setUndefinedAssemblies(false);
+        structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
     }
 
     @Test
@@ -95,7 +97,7 @@ class ResidueGraphTest {
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
-        long c = residueGraph.residuePairOccurrencesSequential()
+        List<String> o = residueGraph.residuePairOccurrencesSequential()
                 .map(ResiduePairOccurrence::getResidueIdentifier)
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .distinct()
@@ -108,11 +110,13 @@ class ResidueGraphTest {
                 // map back to unique groups
                 .map(labelSelection -> structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId()))
                 .map(index -> index + " " + structure.getResidueType(index))
-                .count();
+                .collect(Collectors.toList());
 
         // sequence is T DVA P SAR MVA PXZ T DVA P SAR MVA
-        // SAR and PXZ don't contain CA and/or CB - only 8 valid
-        assertEquals(8, c);
+        // PXZ at pos 21 doesn't map to parent (also doesn't contain CA and/or CB)
+        assertFalse(o.stream().anyMatch(l -> l.startsWith("21 ")));
+        // SAR doesn't contain CB but parent component is GLY - so it'll use a virtual CB
+        assertEquals(10, o.size());
     }
 
     @Test
@@ -275,7 +279,7 @@ class ResidueGraphTest {
         assertTrue(identifiers.stream()
                 .flatMap(ResiduePairIdentifier::indexSelections)
                 .map(IndexSelection::getStructOperId)
-                .anyMatch(id -> !id.equals("1")));
+                .anyMatch(id -> !id.equals(Transformation.DEFAULT_OPERATOR)));
     }
 
     @Test

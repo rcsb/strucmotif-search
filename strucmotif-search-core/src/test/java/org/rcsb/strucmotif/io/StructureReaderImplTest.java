@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -23,7 +24,7 @@ class StructureReaderImplTest {
 
     @BeforeEach
     public void init() {
-        this.structureReader = new StructureReaderImpl();
+        this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(new StrucmotifConfig()));
     }
 
     @Test

@@ -26,4 +26,16 @@ public interface BucketCodec {
      * @throws IOException writing failed
      */
     ByteArrayOutputStream encode(Bucket bucket) throws IOException;
+
+    /**
+     * Serialize raw arrays as binary stream.
+     * @param structureIndices index array
+     * @param positionOffsets offset array
+     * @param positionData data array
+     * @param operatorIndices sparse operator indices
+     * @param operatorData sparse operator data
+     * @return the encoded data stream
+     * @throws IOException writing failed
+     */
+    ByteArrayOutputStream encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException;
 }

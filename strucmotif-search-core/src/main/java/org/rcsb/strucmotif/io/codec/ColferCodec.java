@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.codec;
 
-import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +12,7 @@ import java.util.InputMismatchException;
 /**
  * Serializes and deserializes buckets with a custom colfer implementation. See https://github.com/pascaldekloe/colfer.
  */
-public class ColferCodec implements BucketCodec {
+public class ColferCodec extends AbstractBucketCodec {
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
@@ -149,35 +148,26 @@ public class ColferCodec implements BucketCodec {
         return new InvertedIndexBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
     }
 
-    @Override
-    public ByteArrayOutputStream encode(Bucket bucket) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        encodeInternal(bucket, outputStream);
-        return outputStream;
-    }
-
-    private void encodeInternal(Bucket bucket, ByteArrayOutputStream out) throws IOException {
-        Bucket.ArrayBucket arrayBucket = bucket.toArrays();
-
-        if (arrayBucket.getStructureIndices().length != 0) {
+    private void encodeInternal(ByteArrayOutputStream out, int[] structureIndices, int[] positionOffset, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException {
+        if (structureIndices.length != 0) {
             out.write(0);
-            writeIntArray(out, arrayBucket.getStructureIndices());
+            writeIntArray(out, structureIndices);
         }
-        if (arrayBucket.getPositionOffsets().length != 0) {
+        if (positionOffset.length != 0) {
             out.write(1);
-            writeIntArray(out, arrayBucket.getPositionOffsets());
+            writeIntArray(out, positionOffset);
         }
-        if (arrayBucket.getPositionData().length != 0) {
+        if (positionData.length != 0) {
             out.write(2);
-            writeIntArray(out, arrayBucket.getPositionData());
+            writeIntArray(out, positionData);
         }
-        if (arrayBucket.getOperatorIndices().length != 0) {
+        if (operatorIndices.length != 0) {
             out.write(3);
-            writeIntArray(out, arrayBucket.getOperatorIndices());
+            writeIntArray(out, operatorIndices);
         }
-        if (arrayBucket.getOperatorData().length != 0) {
+        if (operatorData.length != 0) {
             out.write(4);
-            writeStringArray(out, arrayBucket.getOperatorData());
+            writeStringArray(out, operatorData);
         }
 
         out.write(0x7f);
@@ -233,5 +223,12 @@ public class ColferCodec implements BucketCodec {
                 }
             }
         }
+    }
+
+    @Override
+    public ByteArrayOutputStream encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        encodeInternal(outputStream, structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
+        return outputStream;
     }
 }

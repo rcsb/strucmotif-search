@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.codec;
 
-import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Serializes and deserializes buckets with a custom MessagePack encoding.
  */
-public class MessagePackCodec implements BucketCodec {
+public class MessagePackCodec extends AbstractBucketCodec {
     /**
      * Read the content of a {@link InvertedIndexBucket} from a stream.
      * @param inputStream source data
@@ -140,32 +139,6 @@ public class MessagePackCodec implements BucketCodec {
         return (int) (inputStream.readInt() & 0xFFFFFFFFL);
     }
 
-    /**
-     * Encode a bucket as stream of bytes in MessagePack format.
-     * @param bucket the source
-     * @return the corresponding byte stream
-     * @throws IOException if writing/encoding fails
-     */
-    @Override
-    public ByteArrayOutputStream encode(Bucket bucket) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-        encodeInternal(bucket, dataOutputStream);
-        dataOutputStream.flush();
-        dataOutputStream.close();
-        return byteArrayOutputStream;
-    }
-
-    private void encodeInternal(Bucket bucket, DataOutputStream outputStream) throws IOException {
-        Bucket.ArrayBucket arrayBucket = bucket.toArrays();
-
-        encodeIntArray(arrayBucket.getStructureIndices(), outputStream);
-        encodeIntArray(arrayBucket.getPositionOffsets(), outputStream);
-        encodeIntArray(arrayBucket.getPositionData(), outputStream);
-        encodeIntArray(arrayBucket.getOperatorIndices(), outputStream);
-        encodeStringArray(arrayBucket.getOperatorData(), outputStream);
-    }
-
     private void encodeIntArray(int[] value, DataOutputStream outputStream) throws IOException {
         writeArrayLength(value.length, outputStream);
         for (int v : value) {
@@ -250,5 +223,21 @@ public class MessagePackCodec implements BucketCodec {
             outputStream.writeInt(length);
         }
         outputStream.write(value.getBytes(StandardCharsets.US_ASCII));
+    }
+
+    @Override
+    public ByteArrayOutputStream encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+
+        encodeIntArray(structureIndices, dataOutputStream);
+        encodeIntArray(positionOffsets, dataOutputStream);
+        encodeIntArray(positionData, dataOutputStream);
+        encodeIntArray(operatorIndices, dataOutputStream);
+        encodeStringArray(operatorData, dataOutputStream);
+
+        dataOutputStream.flush();
+        dataOutputStream.close();
+        return byteArrayOutputStream;
     }
 }

@@ -157,7 +157,7 @@ public class MessagePackCodec implements BucketCodec {
     }
 
     private void encodeInternal(Bucket bucket, DataOutputStream outputStream) throws IOException {
-        Bucket.ArrayBucket arrayBucket = Bucket.toArrayBucket(bucket);
+        Bucket.ArrayBucket arrayBucket = bucket.toArrays();
 
         encodeIntArray(arrayBucket.getStructureIndices(), outputStream);
         encodeIntArray(arrayBucket.getPositionOffsets(), outputStream);

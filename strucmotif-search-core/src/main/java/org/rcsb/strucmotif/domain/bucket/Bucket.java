@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.domain.bucket;
 
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -156,31 +155,30 @@ public interface Bucket {
 
     /**
      * Convert a bucket to a group of arrays.
-     * @param bucket the source
      * @return a bunch of arrays without the methods of the Bucket interface
      */
-    static ArrayBucket toArrayBucket(Bucket bucket) {
-        int structureCount = bucket.getStructureCount();
+    default ArrayBucket toArrays() {
+        int structureCount = getStructureCount();
         int[] structureIndices = new int[structureCount];
         int[] positionOffsets = new int[structureCount];
-        int[] positionData = new int[bucket.getResiduePairCount() * 2];
+        int[] positionData = new int[getResiduePairCount() * 2];
         List<Integer> operatorIndicesList = new ArrayList<>();
         List<String> operatorDataList = new ArrayList<>();
 
         int structurePointer = 0;
         int positionPointer = 0;
-        while (bucket.hasNextStructure()) {
-            bucket.moveStructure();
-            structureIndices[structurePointer] = bucket.getStructureIndex();
+        while (hasNextStructure()) {
+            moveStructure();
+            structureIndices[structurePointer] = getStructureIndex();
             positionOffsets[structurePointer] = positionPointer;
 
-            while (bucket.hasNextOccurrence()) {
-                bucket.moveOccurrence();
-                positionData[positionPointer] = bucket.getIndex1();
-                positionData[positionPointer + 1] = bucket.getIndex2();
+            while (hasNextOccurrence()) {
+                moveOccurrence();
+                positionData[positionPointer] = getIndex1();
+                positionData[positionPointer + 1] = getIndex2();
 
-                String structOperId1 = bucket.getStructOperId1();
-                String structOperId2 = bucket.getStructOperId2();
+                String structOperId1 = getStructOperId1();
+                String structOperId2 = getStructOperId2();
                 if (!structOperId1.equals(Transformation.DEFAULT_OPERATOR)) {
                     operatorIndicesList.add(positionPointer);
                     operatorDataList.add(structOperId1);
@@ -200,39 +198,5 @@ public interface Bucket {
         String[] operatorData = operatorDataList.toArray(String[]::new);
 
         return new ArrayBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
-    }
-
-    /**
-     * Convert a collection of {@link ResiduePairOccurrence} instances to an {@link InvertedIndexBucket}.
-     * @param residuePairOccurrences source data
-     * @return an {@link InvertedIndexBucket}
-     */
-    static InvertedIndexBucket toInvertedIndexBucket(List<ResiduePairOccurrence> residuePairOccurrences) {
-        int[] structureIndices = new int[] { 0 };
-        int[] positionOffsets = new int[] { 0 };
-        int[] positionData = new int[residuePairOccurrences.size() * 2];
-        List<Integer> operatorIndicesList = new ArrayList<>();
-        List<String> operatorDataList = new ArrayList<>();
-
-        for (int i = 0; i < residuePairOccurrences.size(); i++) {
-            ResiduePairIdentifier identifier = residuePairOccurrences.get(i).getResidueIdentifier();
-            positionData[2 * i] = identifier.getIndex1();
-            positionData[2 * i + 1] = identifier.getIndex2();
-
-            String structOperId1 = identifier.getStructOperId1();
-            String structOperId2 = identifier.getStructOperId2();
-            if (!structOperId1.equals(Transformation.DEFAULT_OPERATOR)) {
-                operatorIndicesList.add(2 * i);
-                operatorDataList.add(structOperId1);
-            }
-            if (!structOperId2.equals(Transformation.DEFAULT_OPERATOR)) {
-                operatorIndicesList.add(2 * i + 1);
-                operatorDataList.add(structOperId2);
-            }
-        }
-
-        int[] operatorIndices = operatorIndicesList.stream().mapToInt(Integer::intValue).toArray();
-        String[] operatorData = operatorDataList.toArray(String[]::new);
-        return new InvertedIndexBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
     }
 }

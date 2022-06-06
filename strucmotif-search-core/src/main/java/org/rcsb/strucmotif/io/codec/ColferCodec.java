@@ -157,7 +157,7 @@ public class ColferCodec implements BucketCodec {
     }
 
     private void encodeInternal(Bucket bucket, ByteArrayOutputStream out) throws IOException {
-        Bucket.ArrayBucket arrayBucket = Bucket.toArrayBucket(bucket);
+        Bucket.ArrayBucket arrayBucket = bucket.toArrays();
 
         if (arrayBucket.getStructureIndices().length != 0) {
             out.write(0);

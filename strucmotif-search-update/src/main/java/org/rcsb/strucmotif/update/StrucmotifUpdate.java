@@ -207,7 +207,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // processed contains all StructureIdentifiers + corresponding revision
         stateRepository.insertKnown(context.processed);
-        stateRepository.deleteDirty(dirty);
+        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {

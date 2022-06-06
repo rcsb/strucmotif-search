@@ -93,6 +93,7 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     @Override
     public void commit() {
+        logger.info("Committing temporary files to index");
         try {
             Map<Path, Set<Path>> toMerge = new ConcurrentHashMap<>();
             try (Stream<Path> paths = temporaryFiles()) {

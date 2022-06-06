@@ -22,6 +22,16 @@ public interface InvertedIndex {
     void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences, int batchId);
 
     /**
+     * Process all temporary files and make them available via {@link #select(ResiduePairDescriptor)}.
+     */
+    void commit();
+
+    /**
+     * Remove all temporary files (e.g., from a failed update operation).
+     */
+    void clearTemporaryFiles();
+
+    /**
      * Perform lookup for a particular bin.
      * @param residuePairDescriptor the bin for which occurrences should the lookup be performed
      * @return a {@link Stream} of all occurrences, grouped by their structure identifier

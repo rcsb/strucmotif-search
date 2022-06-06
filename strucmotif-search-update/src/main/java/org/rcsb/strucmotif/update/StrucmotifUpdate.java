@@ -199,6 +199,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             stateRepository.insertDirty(dirty); // TODO
             persist(context);
         }
+
+        // TODO dirty?
+        invertedIndex.commit();
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {

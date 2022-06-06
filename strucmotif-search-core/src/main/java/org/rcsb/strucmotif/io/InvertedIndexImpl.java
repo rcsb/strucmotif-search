@@ -27,12 +27,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
@@ -51,6 +55,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     private final boolean gzipped;
     private final String extension;
     private final BucketCodec bucketCodec;
+    private final Pattern tempExtension;
     private boolean paths;
 
     /**
@@ -64,6 +69,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.bucketCodec = backend.getBucketCodec();
         this.extension = backend.getExtension() + (gzipped ? ".gz" : "");
         logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);
+        this.tempExtension = Pattern.compile(".*" + extension.replace(".", "\\.") + "\\.[0-9]+$");
         this.paths = false;
     }
 
@@ -79,6 +85,74 @@ public class InvertedIndexImpl implements InvertedIndex {
             Path tmpPath = getPath(residuePairDescriptor, batchId);
             try (ByteArrayOutputStream outputStream = bucketCodec.encode(bucket)) {
                 write(tmpPath, outputStream);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public void commit() {
+        try {
+            Map<Path, Set<Path>> toMerge = new ConcurrentHashMap<>();
+            try (Stream<Path> paths = temporaryFiles()) {
+                paths.forEach(p -> {
+                    String filename = p.getFileName().toString();
+                    Path persistentPath = p.resolveSibling(filename.substring(0, filename.lastIndexOf(".")));
+                    Set<Path> bin = toMerge.computeIfAbsent(persistentPath, e -> Collections.synchronizedSet(new HashSet<>()));
+                    bin.add(persistentPath.resolveSibling(p));
+                });
+            }
+
+            logger.info("Merging {} bins", toMerge.size());
+
+            toMerge.entrySet()
+                    .parallelStream()
+                    .forEach(entry -> {
+                        Path destination = entry.getKey();
+                        Set<Path> sources = entry.getValue();
+
+                        try {
+                            Map<Integer, Collection<ResiduePairIdentifier>> merged = new HashMap<>();
+                            // populate with persistent data
+                            if (Files.exists(destination)) {
+                                addAll(merged, bucketCodec.decode(getInputStream(destination)),  null);
+                            }
+
+                            // merge all new, temporary data
+                            for (Path p : sources) {
+                                addAll(merged, bucketCodec.decode(getInputStream(p)), null);
+                            }
+                            ByteArrayOutputStream outputStream = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
+                            write(destination, outputStream);
+
+                            for (Path source : sources) {
+                                Files.delete(source);
+                            }
+                            logger.debug("Merged {} into {}", sources, destination);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public void clearTemporaryFiles() {
+        try {
+            logger.info("Collecting all temporary index files at {}", basePath);
+            AtomicInteger counter = new AtomicInteger();
+            try (Stream<Path> paths = temporaryFiles()) {
+                paths.peek(p -> progress(counter, 10000, "{} files deleted"))
+                        .forEach(p -> {
+                            try {
+                                Files.delete(p);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
+                            }
+                        });
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -111,7 +185,10 @@ public class InvertedIndexImpl implements InvertedIndex {
      * @throws IOException reading failed
      */
     protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
-        Path path = getPath(residuePairDescriptor);
+        return getInputStream(getPath(residuePairDescriptor));
+    }
+
+    private InputStream getInputStream(Path path) throws IOException {
         InputStream inputStream = Files.newInputStream(path);
         return gzipped ? new GZIPInputStream(inputStream, BUFFER_SIZE) : new BufferedInputStream(inputStream, BUFFER_SIZE);
     }
@@ -247,37 +324,35 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     private Stream<Path> indexFiles() throws IOException {
+        return files().filter(p -> p.getFileName().toString().endsWith(extension));
+    }
+
+    private Stream<Path> temporaryFiles() throws IOException {
+        return files().filter(p -> tempExtension.matcher(p.getFileName().toString()).matches());
+    }
+
+    private Stream<Path> allFiles() throws IOException {
+        return files().filter(p -> p.getFileName().toString().contains(extension));
+    }
+
+    private Stream<Path> files() throws IOException {
         if (!Files.exists(basePath)) {
             return Stream.empty();
         }
 
         return Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
                 .parallel()
-                // ignore directories
-                .filter(p -> !Files.isDirectory(p) && p.getFileName().toString().contains(extension));
+                .filter(Files::isRegularFile);
     }
 
-    /**
-     * Merge two buckets. Doesn't allow duplicates.
-     * @param bucket1 source1
-     * @param bucket2 source2
-     * @return a new bucket that contains the combined results of both
-     */
-    private ResiduePairIdentifierBucket merge(Bucket bucket1, Bucket bucket2) {
-        Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
-        addAll(map, bucket1, false, null);
-        addAll(map, bucket2, true, null);
-        return new ResiduePairIdentifierBucket(map);
-    }
-
-    private void addAll(Map<Integer, Collection<ResiduePairIdentifier>> map, Bucket bucket, boolean noDuplicates, Collection<Integer> ignore) {
+    private void addAll(Map<Integer, Collection<ResiduePairIdentifier>> map, Bucket bucket, Collection<Integer> ignore) {
         while (bucket.hasNextStructure()) {
             bucket.moveStructure();
             int key = bucket.getStructureIndex();
             if (ignore != null && ignore.contains(key)) {
                 continue;
             }
-            if (noDuplicates && map.containsKey(key)) {
+            if (map.containsKey(key)) {
                 throw new IllegalStateException("Duplicate key: " + key);
             }
             Collection<ResiduePairIdentifier> identifiers = map.computeIfAbsent(key, e -> new ArrayList<>());
@@ -299,7 +374,7 @@ public class InvertedIndexImpl implements InvertedIndex {
      */
     private ResiduePairIdentifierBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
         Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
-        addAll(map, bucket, true, removals);
+        addAll(map, bucket, removals);
         return new ResiduePairIdentifierBucket(map);
     }
 }

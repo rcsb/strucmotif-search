@@ -52,6 +52,8 @@ public class UpdateIntegrationTest {
     public void setup() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setUndefinedAssemblies(true);
+        // ensure merging and side-by-side temporary files happen
+        strucmotifConfig.setUpdateChunkSize(1);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
         Path indexPath = path.resolve("index");
         Files.createDirectories(indexPath);

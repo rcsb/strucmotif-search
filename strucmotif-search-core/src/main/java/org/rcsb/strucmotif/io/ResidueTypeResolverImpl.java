@@ -62,7 +62,7 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
             Map.entry("DNE", ResidueType.LEUCINE));
     private final Map<String, ResidueType> mapping;
 
-    private static final String MAPPING_FILE_PATH = "strucmotif-search-core/src/main/resources" + MAPPING_FILE;
+    private static final String MAPPING_FILE_PATH = "strucmotif-search-core/src/main/resources/" + MAPPING_FILE;
     // updates the residue-type-mapping.json file
     public static void main(String[] args) throws IOException {
         updateResidueTypeMappingFile();

@@ -68,18 +68,17 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket bucket) {
+    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket bucket, int batchId) {
         if (!paths) {
             ensureDirectoriesExist();
             this.paths = true;
         }
 
         try {
-            Path path = getPath(residuePairDescriptor);
-            ResiduePairIdentifierBucket merged = merge(getBucket(residuePairDescriptor), bucket);
-
-            try (ByteArrayOutputStream outputStream = bucketCodec.encode(merged)) {
-                write(path, outputStream);
+            // write a temporary file (appended by the batchId)
+            Path tmpPath = getPath(residuePairDescriptor, batchId);
+            try (ByteArrayOutputStream outputStream = bucketCodec.encode(bucket)) {
+                write(tmpPath, outputStream);
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
@@ -121,6 +120,11 @@ public class InvertedIndexImpl implements InvertedIndex {
         String bin = residuePairDescriptor.toString();
         String uberbin = bin.substring(0, 2);
         return basePath.resolve(uberbin).resolve(bin + extension);
+    }
+
+    private Path getPath(ResiduePairDescriptor residuePairDescriptor, int batchId) {
+        Path actual = getPath(residuePairDescriptor);
+        return actual.resolveSibling(actual.getFileName().toString() + "." + batchId);
     }
 
     private InvertedIndexBucket getBucket(ResiduePairDescriptor residuePairDescriptor) {

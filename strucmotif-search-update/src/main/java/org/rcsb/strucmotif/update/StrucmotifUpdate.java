@@ -115,10 +115,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = parseOperation(args);
-        AtomicInteger batchId = parseBatchId(args);
         List<UpdateItem> requested = parseUpdateList(operation, args);
 
-        // check for sanity of internal state
+        // check for sanity of internal state TODO
         if (operation != Operation.RECOVER) {
             Collection<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
             if (dirtyStructureIdentifiers.size() > 0) {
@@ -139,7 +138,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         switch (operation) {
             case ADD:
-                add(new Context(getDeltaPlusIdentifiers(requested), batchId));
+                add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId(args)));
                 break;
             case REMOVE:
                 remove(getDeltaMinusIdentifiers(requested));
@@ -191,15 +190,14 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 return null;
             }).get();
 
-            // mark as dirty only around index update
+            // mark as dirty only around index update TODO
             Set<String> dirty = context.processed.stream()
                     .map(StructureInformation::getStructureIdentifier)
                     // ignore items detected as known after reading entry.id (happens when processing URLs)
                     .filter(id -> !known.contains(id))
                     .collect(Collectors.toSet());
-            stateRepository.insertDirty(dirty);
+            stateRepository.insertDirty(dirty); // TODO
             persist(context);
-            context.batchId.incrementAndGet();
         }
     }
 
@@ -323,7 +321,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
     }
 
     private void persist(Context context) throws ExecutionException, InterruptedException {
-        logger.info("[{}] Persisting {} unique residue pair descriptors",
+        logger.info("[{}] Writing temporary files for {} residue pair descriptors",
                 context.partitionContext,
                 context.buffer.size());
 
@@ -341,7 +339,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                             bufferTotal);
                 }
 
-                invertedIndex.insert(key, output);
+                invertedIndex.insert(key, output, context.batchId.get());
             });
             return null;
         }).get();
@@ -352,6 +350,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
         stateRepository.insertKnown(context.processed);
         stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
         context.processed.clear();
+
+        // increment tmp file counter
+        context.batchId.incrementAndGet();
     }
 
     /**

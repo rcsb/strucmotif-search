@@ -61,7 +61,7 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences) {
+    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences, int batchId) {
         immutable();
     }
 

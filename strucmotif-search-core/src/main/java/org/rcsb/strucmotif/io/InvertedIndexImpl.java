@@ -116,15 +116,28 @@ public class InvertedIndexImpl implements InvertedIndex {
                             Map<Integer, Collection<ResiduePairIdentifier>> merged = new HashMap<>();
                             // populate with persistent data
                             if (Files.exists(destination)) {
-                                addAll(merged, bucketCodec.decode(getInputStream(destination)),  null);
+                                try (InputStream inputStream = getInputStream(destination)) {
+                                    addAll(merged, bucketCodec.decode(inputStream),  null);
+                                }
+                            } else {
+                                // there's only a single file and the destination exists not yet (aka no merging to be done)
+                                if (sources.size() == 1) {
+                                    Path source = sources.stream().findFirst().orElseThrow();
+                                    Files.move(source, destination);
+                                    logger.debug("Moved {} to {}", source, destination);
+                                    return;
+                                }
                             }
 
                             // merge all new, temporary data
                             for (Path p : sources) {
-                                addAll(merged, bucketCodec.decode(getInputStream(p)), null);
+                                try (InputStream inputStream = getInputStream(p)) {
+                                    addAll(merged, bucketCodec.decode(inputStream), null);
+                                }
                             }
                             ByteArrayOutputStream outputStream = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
                             write(destination, outputStream);
+                            outputStream.close();
 
                             for (Path source : sources) {
                                 Files.delete(source);

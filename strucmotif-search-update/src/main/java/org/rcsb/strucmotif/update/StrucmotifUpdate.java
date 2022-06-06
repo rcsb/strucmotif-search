@@ -109,55 +109,14 @@ public class StrucmotifUpdate implements CommandLineRunner {
      */
     public void run(String[] args) throws Exception {
         if (args.length < 1) {
-            System.out.println("Too few arguments");
-            System.out.println();
-            System.out.println("Usage: java -Xmx12G -jar update.jar operation ...");
-            System.out.println("Valid operation values: " + Arrays.toString(Operation.values()));
-            System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
-            System.out.println("If you want to update entries you have to explicitly remove them first");
-            System.out.println();
-            System.out.println("Example: java -Xmx12G -jar update.jar ADD 1acj 1exr 4hhb");
-            System.out.println("Example: java -Xmx12G -jar update.jar ADD path /opt/data/pdb/");
-            System.out.println();
-            System.out.println("You can also provide URLs to index non-archived CIF files, in that case you must provide a unique, preferably namespaced identifier which will be used to index this item");
-            System.out.println("Example: java -Xmx12G -jar update.jar ADD AF-Q76EI6-F1,https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif MA-9Z55Z,file:///path/to/ma-9z55z.cif");
+            printUsage();
             return;
         }
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
-        Operation operation = Operation.resolve(args[0]);
-        String[] ids = new String[args.length - 1];
-        List<UpdateItem> requested;
-        System.arraycopy(args, 1, ids, 0, ids.length);
-        if (ids.length == 1 && ids[0].equalsIgnoreCase("full")) {
-            requested = getAllIdentifiers();
-        } else if (ids.length == 2 && ids[0].equalsIgnoreCase("path")) {
-            requested = Files.walk(Paths.get(ids[1]))
-                    .filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))
-                    .map(this::mapFile)
-                    .collect(Collectors.toList());
-        } else {
-            requested = Arrays.stream(ids)
-                    // upper-case PDB-IDs, leave URLs be
-                    .map(id -> {
-                        String[] split = id.split(",");
-                        if (id.length() == 4) {
-                            return new UpdateItem(id.toUpperCase());
-                        } else if (split.length == 2) {
-                            try {
-                                String key = split[0].toUpperCase();
-                                URL url = new URL(split[1]);
-                                return new UpdateItem(key, url);
-                            } catch (MalformedURLException e) {
-                                throw new IllegalArgumentException("Cannot parse line: '" + id + "' - not a valid URL");
-                            }
-                        } else {
-                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-digit-entryId}' or '${identifier},${url}'");
-                        }
-                    })
-                    .collect(Collectors.toList());
-        }
-        Collections.shuffle(requested);
+        Operation operation = parseOperation(args);
+        AtomicInteger batchId = parseBatchId(args);
+        List<UpdateItem> requested = parseUpdateList(operation, args);
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {
@@ -180,7 +139,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         switch (operation) {
             case ADD:
-                add(getDeltaPlusIdentifiers(requested));
+                add(new Context(getDeltaPlusIdentifiers(requested), batchId));
                 break;
             case REMOVE:
                 remove(getDeltaMinusIdentifiers(requested));
@@ -203,24 +162,20 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
     /**
      * The 'ADD' operation.
-     * @param items set of UpdateItems to add
+     * @param context the set of UpdateItems to add
      * @throws ExecutionException update failure
      * @throws InterruptedException update failure
      */
-    public void add(Collection<UpdateItem> items) throws ExecutionException, InterruptedException {
-        long target = items.size();
+    public void add(Context context) throws ExecutionException, InterruptedException {
+        long target = context.updateItems.size();
         logger.info("{} files to process in total", target);
 
-        Partition<UpdateItem> partitions = new Partition<>(items, strucmotifConfig.getUpdateChunkSize());
+        Partition<UpdateItem> partitions = new Partition<>(context.updateItems, strucmotifConfig.getUpdateChunkSize());
         logger.info("Formed {} partitions of {} structures",
                 partitions.size(),
                 strucmotifConfig.getUpdateChunkSize());
 
-        Set<String> known = stateRepository.selectKnown()
-                .stream()
-                .map(StructureInformation::getStructureIdentifier)
-                .collect(Collectors.toSet());
-        Context context = new Context();
+        Collection<String> known = getKnown();
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
@@ -244,6 +199,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     .collect(Collectors.toSet());
             stateRepository.insertDirty(dirty);
             persist(context);
+            context.batchId.incrementAndGet();
         }
     }
 
@@ -511,5 +467,66 @@ public class StrucmotifUpdate implements CommandLineRunner {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }
+    }
+
+    private void printUsage() {
+        System.out.println("Too few arguments");
+        System.out.println();
+        System.out.println("Usage: java -Xmx12G -jar update.jar operation ...");
+        System.out.println("Valid operation values: " + Arrays.toString(Operation.values()));
+        System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
+        System.out.println("If you want to update entries you have to explicitly remove them first");
+        System.out.println();
+        System.out.println("Example: java -Xmx12G -jar update.jar ADD 1acj 1exr 4hhb");
+        System.out.println("Example: java -Xmx12G -jar update.jar ADD path /opt/data/pdb/");
+        System.out.println();
+        System.out.println("You can also provide URLs to index non-archived CIF files, in that case you must provide a unique, preferably namespaced identifier which will be used to index this item");
+        System.out.println("Example: java -Xmx12G -jar update.jar ADD AF-Q76EI6-F1,https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif MA-9Z55Z,file:///path/to/ma-9z55z.cif");
+    }
+
+    private Operation parseOperation(String[] args) {
+        return Operation.resolve(args[0]);
+    }
+
+    private AtomicInteger parseBatchId(String[] args) {
+        return new AtomicInteger();
+    }
+
+    private List<UpdateItem> parseUpdateList(Operation operation, String[] args) throws IOException {
+        int offset = 1;
+        String[] ids = new String[args.length - offset];
+        List<UpdateItem> requested;
+        System.arraycopy(args, offset, ids, 0, ids.length);
+        if (ids.length == offset && ids[0].equalsIgnoreCase("full")) {
+            requested = getAllIdentifiers();
+        } else if (ids.length == offset + 1 && ids[0].equalsIgnoreCase("path")) {
+            requested = Files.walk(Paths.get(ids[offset]))
+                    .filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))
+                    .map(this::mapFile)
+                    .collect(Collectors.toList());
+        } else {
+            requested = Arrays.stream(ids)
+                    // upper-case PDB-IDs, leave URLs be
+                    .map(id -> {
+                        String[] split = id.split(",");
+                        if (id.length() == 4) {
+                            return new UpdateItem(id.toUpperCase());
+                        } else if (split.length == 2) {
+                            try {
+                                String key = split[0].toUpperCase();
+                                URL url = new URL(split[1]);
+                                return new UpdateItem(key, url);
+                            } catch (MalformedURLException e) {
+                                throw new IllegalArgumentException("Cannot parse line: '" + id + "' - not a valid URL");
+                            }
+                        } else {
+                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-digit-entryId}' or '${identifier},${url}'");
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+        Collections.shuffle(requested);
+
+        return requested;
     }
 }

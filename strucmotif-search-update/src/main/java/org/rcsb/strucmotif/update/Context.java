@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Captures global state of the update process.
  */
 public class Context {
+    final Collection<UpdateItem> updateItems;
+    final AtomicInteger batchId;
     final Set<StructureInformation> processed;
     String partitionContext;
     Map<ResiduePairDescriptor, Map<Integer, Collection<ResiduePairIdentifier>>> buffer;
@@ -23,7 +25,9 @@ public class Context {
     /**
      * Construct a new update context.
      */
-    public Context() {
+    public Context(Collection<UpdateItem> updateItems, AtomicInteger batchId) {
+        this.updateItems = updateItems;
+        this.batchId = batchId;
         this.processed = Collections.synchronizedSet(new HashSet<>());
     }
 }

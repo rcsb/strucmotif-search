@@ -48,7 +48,7 @@ public class InvertedIndexBucket implements Bucket {
     private final Map<Integer, String> operators;
 
     /**
-     * Construct a inverted index bucket from source array.
+     * Construct an inverted index bucket from source array.
      * @param structureIndices structure identifiers
      * @param positionOffsets positional offsets, same length as structureIndices
      * @param positionData positional data

@@ -7,7 +7,7 @@ import java.io.InputStream;
 
 /**
  * An implementation of a {@link StructureDataProvider} that only deals with a single structure. Used in the
- * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}.
+ * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}).
  */
 public class SingleStructureDataProvider implements StructureDataProvider {
     private final Structure structure;

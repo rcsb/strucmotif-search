@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * An implementation of a {@link StructureIndexProvider} that only deals with a single structure. Used in the
- * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}.
+ * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}).
  */
 public class SingleStructureIndexProvider implements StructureIndexProvider {
     private final int structureIndex;

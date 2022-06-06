@@ -1,10 +1,7 @@
 package org.rcsb.strucmotif.domain.bucket;
 
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**

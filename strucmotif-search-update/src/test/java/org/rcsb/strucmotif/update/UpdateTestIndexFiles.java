@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Update the test resouces in the core-module. Only updates known.list and index files. Renumbered structures remain
+ * Update the test resources in the core-module. Only updates known.list and index files. Renumbered structures remain
  * the same.
  */
 public class UpdateTestIndexFiles {

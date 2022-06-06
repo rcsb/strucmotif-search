@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Captures global state of the update process.
  */
 public class Context {
-    final Set<String> known;
     final Set<StructureInformation> processed;
     String partitionContext;
     Map<ResiduePairDescriptor, Map<Integer, Collection<ResiduePairIdentifier>>> buffer;
@@ -23,10 +22,8 @@ public class Context {
 
     /**
      * Construct a new update context.
-     * @param known set of registered structures
      */
-    public Context(Set<String> known) {
-        this.known = known;
+    public Context() {
         this.processed = Collections.synchronizedSet(new HashSet<>());
     }
 }

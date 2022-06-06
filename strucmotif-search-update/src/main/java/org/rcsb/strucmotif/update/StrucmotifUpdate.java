@@ -220,7 +220,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 .stream()
                 .map(StructureInformation::getStructureIdentifier)
                 .collect(Collectors.toSet());
-        Context context = new Context(known);
+        Context context = new Context();
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {

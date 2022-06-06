@@ -1,6 +1,15 @@
 Strucmotif-search Changelog
 =============
 
+Unreleased
+-------------
+### Added
+- support for modified residues
+- support for pyrrolysine, selenocysteine, inosinic acid & 2'-deoxyuridine-5'-monophosphate
+
+### Bug fix
+- add 2'-Deoxythymidine-5'-monophosphate as `DT`
+
 strucmotif-search 0.15.2
 -------------
 ### Added

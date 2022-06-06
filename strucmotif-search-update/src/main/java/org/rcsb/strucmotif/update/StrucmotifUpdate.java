@@ -117,7 +117,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         Operation operation = parseOperation(args);
         List<UpdateItem> requested = parseUpdateList(operation, args);
 
-        // check for sanity of internal state TODO
+        // check for sanity of internal state
         if (operation != Operation.RECOVER) {
             Collection<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
             if (dirtyStructureIdentifiers.size() > 0) {
@@ -126,6 +126,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 logger.info("Recovering from dirty state");
                 recover(dirtyStructureIdentifiers);
             }
+
+            logger.info("Making sure that no temporary files linger");
+            invertedIndex.clearTemporaryFiles();
         }
 
         logger.info("Starting update - Operation: {}, {} ids ({})",
@@ -190,18 +193,21 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 return null;
             }).get();
 
-            // mark as dirty only around index update TODO
-            Set<String> dirty = context.processed.stream()
-                    .map(StructureInformation::getStructureIdentifier)
-                    // ignore items detected as known after reading entry.id (happens when processing URLs)
-                    .filter(id -> !known.contains(id))
-                    .collect(Collectors.toSet());
-            stateRepository.insertDirty(dirty); // TODO
-            persist(context);
+            writeTemporaryFiles(context);
         }
 
-        // TODO dirty?
+        // mark as dirty before index update
+        Set<String> dirty = context.processed.stream()
+                .map(StructureInformation::getStructureIdentifier)
+                // ignore items detected as known after reading entry.id (happens when processing URLs)
+                .filter(id -> !known.contains(id))
+                .collect(Collectors.toSet());
+        stateRepository.insertDirty(dirty);
         invertedIndex.commit();
+
+        // processed contains all StructureIdentifiers + corresponding revision
+        stateRepository.insertKnown(context.processed);
+        stateRepository.deleteDirty(dirty);
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {
@@ -323,7 +329,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         return structureDataProvider.getOriginalInputStream(item.getStructureIdentifier());
     }
 
-    private void persist(Context context) throws ExecutionException, InterruptedException {
+    private void writeTemporaryFiles(Context context) throws ExecutionException, InterruptedException {
         logger.info("[{}] Writing temporary files for {} residue pair descriptors",
                 context.partitionContext,
                 context.buffer.size());
@@ -348,11 +354,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }).get();
 
         context.buffer.clear();
-
-        // processed contains all StructureIdentifiers + corresponding revision
-        stateRepository.insertKnown(context.processed);
-        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
-        context.processed.clear();
 
         // increment tmp file counter
         context.batchId.incrementAndGet();
@@ -471,6 +472,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }
+
+        logger.info("Making sure that no temporary files linger");
+        invertedIndex.clearTemporaryFiles();
     }
 
     private void printUsage() {

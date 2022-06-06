@@ -28,27 +28,28 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Update the test resources in the core-module. Only updates known.list and index files. Renumbered structures remain
- * the same.
+ * Update the test resources in the core-module.
  */
 public class UpdateTestIndexFiles {
     /**
      * Update index files used for testing.
-     * @param args first: path to known.list, second: path to resources/index directory
+     * @param args absolute poth to test resource directory of core module
      * @throws Exception update failed
      */
     public static void main(String[] args) throws Exception {
-        Path knownSource = Paths.get(args[0]);
+        Path knownSource = Paths.get(args[0], "known.list");
         List<String> cmd = new BufferedReader(new InputStreamReader(Files.newInputStream(knownSource)))
                 .lines()
                 .map(l -> l.split(",")[0])
                 .collect(Collectors.toList());
         cmd.add(0, "ADD");
 
-        Path indexSource = Paths.get(args[1]);
+        Path indexSource = Paths.get(args[0], "index");
         List<Path> indexFiles = Files.list(indexSource)
                 .filter(p -> p.getFileName().toString().contains(".colf"))
                 .collect(Collectors.toList());
+
+        Path renumberedSource = Paths.get(args[0], "renum");
 
         Path updatePath = Files.createTempDirectory("strucmotif-test-resources");
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
@@ -69,6 +70,9 @@ public class UpdateTestIndexFiles {
         for (Path p : indexFiles) {
             String bin = p.getFileName().toString().substring(0, 2);
             Files.move(updatePath.resolve("index").resolve(bin).resolve(p.getFileName()), p, StandardCopyOption.REPLACE_EXISTING);
+        }
+        for (Path p : Files.list(updatePath.resolve("renumbered")).collect(Collectors.toList())) {
+            Files.move(p, renumberedSource.resolve(p.getFileName()), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 }

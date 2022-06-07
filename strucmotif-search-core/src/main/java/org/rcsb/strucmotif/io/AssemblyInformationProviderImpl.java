@@ -26,7 +26,7 @@ public class AssemblyInformationProviderImpl implements AssemblyInformationProvi
     private final StrucmotifConfig strucmotifConfig;
 
     /**
-     * Construct a assembly info provider.
+     * Construct an assembly info provider.
      * @param stateRepository the state provider
      * @param strucmotifConfig the config
      */

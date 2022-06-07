@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 /**
  * An implementation of a {@link InvertedIndex} that only deals with a single structure. Used in the
- * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}.
+ * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}).
  */
 public class SingleStructureInvertedIndex implements InvertedIndex {
     private final Map<ResiduePairDescriptor, InvertedIndexBucket> index;
@@ -61,7 +61,17 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences) {
+    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences, int batchId) {
+        immutable();
+    }
+
+    @Override
+    public void commit() {
+        immutable();
+    }
+
+    @Override
+    public void clearTemporaryFiles() {
         immutable();
     }
 

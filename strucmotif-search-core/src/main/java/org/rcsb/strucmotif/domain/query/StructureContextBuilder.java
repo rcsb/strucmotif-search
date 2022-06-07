@@ -273,7 +273,7 @@ public class StructureContextBuilder implements ContextBuilder<StructureSearchCo
         }
 
         /**
-         * Allow to set downstream exchanges via upstream definition.
+         * Allow setting downstream exchanges via upstream definition.
          * @param upstreamExchanges exchanges from a motif definition
          * @return this builder
          */

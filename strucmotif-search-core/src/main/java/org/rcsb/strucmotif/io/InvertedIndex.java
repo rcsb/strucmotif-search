@@ -17,8 +17,19 @@ public interface InvertedIndex {
      * Insert operation for new data.
      * @param residuePairDescriptor the bin for which new data should be written
      * @param residuePairOccurrences the data to append to this bin - keys are pdbIds, values are all words of this descriptor
+     * @param batchId extension of the temporary file to be written
      */
-    void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences);
+    void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences, int batchId);
+
+    /**
+     * Process all temporary files and make them available via {@link #select(ResiduePairDescriptor)}.
+     */
+    void commit();
+
+    /**
+     * Remove all temporary files (e.g., from a failed update operation).
+     */
+    void clearTemporaryFiles();
 
     /**
      * Perform lookup for a particular bin.

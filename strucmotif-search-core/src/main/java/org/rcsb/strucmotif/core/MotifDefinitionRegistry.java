@@ -80,7 +80,7 @@ public interface MotifDefinitionRegistry {
     /**
      * Specify how 'enriched' representation (i.e. with all necessary structure data) are created.
      * @param mapper the function to obtain structure data
-     * @return colleciton motif motifs with resolved structure data
+     * @return collection motif motifs with resolved structure data
      */
     Set<EnrichedMotifDefinition> enrichMotifDefinitions(Function<MotifDefinition, EnrichedMotifDefinition> mapper);
 

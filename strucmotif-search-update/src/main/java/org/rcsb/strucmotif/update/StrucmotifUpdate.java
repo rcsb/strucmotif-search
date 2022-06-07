@@ -115,7 +115,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = parseOperation(args);
-        AtomicInteger batchId = parseBatchId(args);
         List<UpdateItem> requested = parseUpdateList(operation, args);
 
         // check for sanity of internal state
@@ -127,6 +126,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 logger.info("Recovering from dirty state");
                 recover(dirtyStructureIdentifiers);
             }
+
+            logger.info("Making sure that no temporary files linger");
+            invertedIndex.clearTemporaryFiles();
         }
 
         logger.info("Starting update - Operation: {}, {} ids ({})",
@@ -139,7 +141,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         switch (operation) {
             case ADD:
-                add(new Context(getDeltaPlusIdentifiers(requested), batchId));
+                add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId(args)));
                 break;
             case REMOVE:
                 remove(getDeltaMinusIdentifiers(requested));
@@ -191,16 +193,21 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 return null;
             }).get();
 
-            // mark as dirty only around index update
-            Set<String> dirty = context.processed.stream()
-                    .map(StructureInformation::getStructureIdentifier)
-                    // ignore items detected as known after reading entry.id (happens when processing URLs)
-                    .filter(id -> !known.contains(id))
-                    .collect(Collectors.toSet());
-            stateRepository.insertDirty(dirty);
-            persist(context);
-            context.batchId.incrementAndGet();
+            writeTemporaryFiles(context);
         }
+
+        // mark as dirty before index update
+        Set<String> dirty = context.processed.stream()
+                .map(StructureInformation::getStructureIdentifier)
+                // ignore items detected as known after reading entry.id (happens when processing URLs)
+                .filter(id -> !known.contains(id))
+                .collect(Collectors.toSet());
+        stateRepository.insertDirty(dirty);
+        invertedIndex.commit();
+
+        // processed contains all StructureIdentifiers + corresponding revision
+        stateRepository.insertKnown(context.processed);
+        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {
@@ -209,7 +216,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             try {
                 handleUpdateItemInternal(item, context);
                 break;
-            } catch (UncheckedIOException e) {
+            } catch (UncheckedIOException | ParsingException e) {
                 if (i >= maxRetries) {
                     // max retries exceeded
                     throw e;
@@ -218,7 +225,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 int count = context.structureCounter.get();
                 String source = item.getUrl() != null ? item.getUrl().toString() : item.getStructureIdentifier();
                 String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + source;
-                logger.warn("[{}] [{}] [try: {} / {}] Failed to download source file - {}",
+                logger.warn("[{}] [{}] [try: {} / {}] Failed to download or parse source file - {}",
                         context.partitionContext,
                         structureContext,
                         i,
@@ -322,8 +329,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
         return structureDataProvider.getOriginalInputStream(item.getStructureIdentifier());
     }
 
-    private void persist(Context context) throws ExecutionException, InterruptedException {
-        logger.info("[{}] Persisting {} unique residue pair descriptors",
+    private void writeTemporaryFiles(Context context) throws ExecutionException, InterruptedException {
+        logger.info("[{}] Writing temporary files for {} residue pair descriptors",
                 context.partitionContext,
                 context.buffer.size());
 
@@ -341,17 +348,15 @@ public class StrucmotifUpdate implements CommandLineRunner {
                             bufferTotal);
                 }
 
-                invertedIndex.insert(key, output);
+                invertedIndex.insert(key, output, context.batchId.get());
             });
             return null;
         }).get();
 
         context.buffer.clear();
 
-        // processed contains all StructureIdentifiers + corresponding revision
-        stateRepository.insertKnown(context.processed);
-        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
-        context.processed.clear();
+        // increment tmp file counter
+        context.batchId.incrementAndGet();
     }
 
     /**
@@ -467,6 +472,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }
+
+        logger.info("Making sure that no temporary files linger");
+        invertedIndex.clearTemporaryFiles();
     }
 
     private void printUsage() {

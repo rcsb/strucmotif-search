@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Default implementation of a structure data provider.
@@ -127,10 +128,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             logger.info("Structure data will be kept in memory - start loading...");
 
             this.caching = true;
-            List<Path> paths = Files.walk(renumberedPath)
-                    .parallel()
-                    .filter(path -> !Files.isDirectory(path))
-                    .collect(Collectors.toList());
+            List<Path> paths;
+            try (Stream<Path> p = Files.walk(renumberedPath)) {
+                paths = p.parallel()
+                        .filter(path -> !Files.isDirectory(path))
+                        .collect(Collectors.toList());
+            }
             long start = System.nanoTime();
             this.structureCache = new HashMap<>();
 

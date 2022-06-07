@@ -55,6 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
 
@@ -508,10 +509,11 @@ public class StrucmotifUpdate implements CommandLineRunner {
         if (ids.length == offset && ids[0].equalsIgnoreCase("full")) {
             requested = getAllIdentifiers();
         } else if (ids.length == offset + 1 && ids[0].equalsIgnoreCase("path")) {
-            requested = Files.walk(Paths.get(ids[offset]))
-                    .filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))
-                    .map(this::mapFile)
-                    .collect(Collectors.toList());
+            try (Stream<Path> paths = Files.walk(Paths.get(ids[offset]))) {
+                requested = paths.filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))
+                        .map(this::mapFile)
+                        .collect(Collectors.toList());
+            }
         } else {
             requested = Arrays.stream(ids)
                     // upper-case PDB-IDs, leave URLs be

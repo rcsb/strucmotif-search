@@ -4,6 +4,7 @@ import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
@@ -287,6 +288,8 @@ public class InvertedIndexImpl implements InvertedIndex {
     private void ensureDirectoriesExist() {
         try {
             List<String> oneLetterCodes = Stream.of(ResidueType.values())
+                    // ignore unknown component
+                    .filter(residueType -> residueType.getPolymerType() != PolymerType.UNKNOWN_POLYMER)
                     .map(ResidueType::getInternalCode)
                     // has to be sorted to honor the implicit contract on when identifiers are flipped
                     .sorted()

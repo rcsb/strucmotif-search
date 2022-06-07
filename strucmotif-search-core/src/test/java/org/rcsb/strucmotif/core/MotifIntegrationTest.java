@@ -44,7 +44,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class MotifIntegrationTest {
+class MotifIntegrationTest {
     private StructureReader structureReader;
     private Set<EnrichedMotifDefinition> motifs;
     private MotifContextBuilder contextBuilder;
@@ -101,7 +101,7 @@ public class MotifIntegrationTest {
     }
 
     @Test
-    public void whenScreening2mnr_thenSuperfamilyMotifFound() {
+    void whenScreening2mnr_thenSuperfamilyMotifFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
         MotifSearchResult result = contextBuilder.defineByStructureAndAssemblyId(structure, "1")
                 // these must be 'enriched' with structure data outside

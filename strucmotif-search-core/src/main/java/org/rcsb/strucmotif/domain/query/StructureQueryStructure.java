@@ -111,7 +111,7 @@ public class StructureQueryStructure implements QueryStructure {
         // assign 'random' word as start
         sparse.add(sorted.remove(0));
 
-        while (sorted.size() > 0) {
+        while (!sorted.isEmpty()) {
             for (int i = 0; i < sorted.size(); i++) {
                 ResiduePairOccurrence candidateResiduePair = sorted.get(i);
                 ResiduePairIdentifier candidateIdentifier = candidateResiduePair.getResidueIdentifier();

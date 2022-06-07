@@ -306,6 +306,8 @@ public class ResidueGraph {
                 case ASSEMBLY:
                     if (!requestChains.contains(chainExpr1) || !requestChains.contains(chainExpr2)) continue;
                     break;
+                case ALL:
+                    // let everything else pass
             }
 
             // ensure that both chainExpressions occur in the same assembly

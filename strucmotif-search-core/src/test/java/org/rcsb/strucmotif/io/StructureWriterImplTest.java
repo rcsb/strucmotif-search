@@ -36,7 +36,7 @@ class StructureWriterImplTest {
     }
 
     @Test
-    public void whenWriting1exr_thenContractHonored() throws IOException {
+    void whenWriting1exr_thenContractHonored() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
@@ -56,7 +56,7 @@ class StructureWriterImplTest {
     }
 
     @Test
-    public void whenWritingAF_A0A0R0FWM3_F1_thenContractHonored() throws IOException {
+    void whenWritingAF_A0A0R0FWM3_F1_thenContractHonored() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
@@ -77,7 +77,7 @@ class StructureWriterImplTest {
     }
 
     @Test
-    public void whenWriting1exrFilteredByBFactor_thenAtomCountDecreased() throws IOException {
+    void whenWriting1exrFilteredByBFactor_thenAtomCountDecreased() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.BFACTOR_BELOW_CUTOFF);
@@ -99,7 +99,7 @@ class StructureWriterImplTest {
     }
 
     @Test
-    public void whenWritingAF_A0A0R0FWM3_F1_FilteredByMetric_thenAtomCountDecreased() throws IOException {
+    void whenWritingAF_A0A0R0FWM3_F1_FilteredByMetric_thenAtomCountDecreased() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);

@@ -15,7 +15,7 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class InvertedIndexImplTest {
+class InvertedIndexImplTest {
     private InvertedIndex invertedIndex;
 
     @BeforeEach
@@ -41,7 +41,7 @@ public class InvertedIndexImplTest {
             AngleType.A80);
 
     @Test
-    public void whenAccessingSpecificBin_thenObserveAssemblies() {
+    void whenAccessingSpecificBin_thenObserveAssemblies() {
         InvertedIndexBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);
         int structures = 0;
         int occurrences = 0;

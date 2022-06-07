@@ -30,7 +30,7 @@ import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOpti
  * The entry point to create {@link MotifSearchContext} instances.
  */
 @Service
-public class MotifContextBuilder implements ContextBuilder<MotifSearchContext> {
+public class MotifContextBuilder implements ContextBuilder {
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;
     private final NoOperationMotifPruner noOperationMotifPruner;
@@ -151,9 +151,9 @@ public class MotifContextBuilder implements ContextBuilder<MotifSearchContext> {
             this.invertedIndex = invertedIndex;
             this.structureIndexProvider = structureIndexProvider;
             this.structureDataProvider = structureDataProvider;
-            this.backboneDistanceTolerance = StructureParameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
-            this.sideChainDistanceTolerance = StructureParameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
-            this.angleTolerance = StructureParameters.DEFAULT_ANGLE_TOLERANCE;
+            this.backboneDistanceTolerance = Parameters.DEFAULT_BACKBONE_DISTANCE_TOLERANCE;
+            this.sideChainDistanceTolerance = Parameters.DEFAULT_SIDE_CHAIN_DISTANCE_TOLERANCE;
+            this.angleTolerance = Parameters.DEFAULT_ANGLE_TOLERANCE;
             this.rmsdCutoff = Float.MAX_VALUE;
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy

@@ -45,7 +45,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class StructureIntegrationTest {
+class StructureIntegrationTest {
     private StructureReader structureReader;
     private StructureContextBuilder contextBuilder;
 
@@ -98,37 +98,34 @@ public class StructureIntegrationTest {
     }
 
     @Test
-    public void whenResidueSelectionOutOfBounds1_thenThrowIllegalQueryException() {
-        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> {
-            Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-            List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", -62),
-                    new LabelSelection("A", "1", -245),
-                    new LabelSelection("A", "1", -295));
-            contextBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
-        });
+    void whenResidueSelectionOutOfBounds1_thenThrowIllegalQueryException() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", -62),
+                new LabelSelection("A", "1", -245),
+                new LabelSelection("A", "1", -295));
+        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> contextBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters().buildContext().run());
     }
 
     @Test
-    public void whenResidueSelectionOutOfBounds2_thenThrowIllegalQueryException() {
-        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> {
-            Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-            List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 1062),
-                    new LabelSelection("A", "1", 10245),
-                    new LabelSelection("A", "1", 10295));
-            contextBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
-        });
+    void whenResidueSelectionOutOfBounds2_thenThrowIllegalQueryException() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 1062),
+                new LabelSelection("A", "1", 10245),
+                new LabelSelection("A", "1", 10295));
+        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> contextBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters().buildContext().run());
     }
 
     @Test
-    public void whenFailLateWithMalformedQuery_thenThrowIllegalQueryException() {
-        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> {
-            // this will pass initial checks and fail later in the computation
-            Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
-            List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 62), // K
-                            new LabelSelection("A", "1", 245), // E
-                            new LabelSelection("A", "1", 295)); // H
-            contextBuilder.defineByStructureAndSelection(structure, labelSelections).buildParameters().buildContext().run();
-        });
+    void whenFailLateWithMalformedQuery_thenThrowIllegalQueryException() {
+        // this will pass initial checks and fail later in the computation
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 62), // K
+                new LabelSelection("A", "1", 245), // E
+                new LabelSelection("A", "1", 295)); // H
+        Assertions.assertThrows(IllegalQueryDefinitionException.class, () -> contextBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters().buildContext().run());
     }
 
     /**
@@ -136,7 +133,7 @@ public class StructureIntegrationTest {
      * exchanges.
      */
     @Test
-    public void whenSearchingForEnolaseSuperfamily_thenFindExchanges() {
+    void whenSearchingForEnolaseSuperfamily_thenFindExchanges() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
         List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 162), // K
                         new LabelSelection("A", "1", 193), // D
@@ -195,7 +192,7 @@ public class StructureIntegrationTest {
      * A query defined by non-identity struct_oper_ids.
      */
     @Test
-    public void whenAssemblyAndAllowingTransforms_thenReturnFullResidueGraph() {
+    void whenAssemblyAndAllowingTransforms_thenReturnFullResidueGraph() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4oog"));
         List<LabelSelection> labelSelections = List.of(new LabelSelection("C", "1", 42),
                         new LabelSelection("C", "1", 45),
@@ -215,7 +212,7 @@ public class StructureIntegrationTest {
      * Test subset queries for PDB entries, models, or both.
      */
     @Test
-    public void whenSearchingForSubset_thenCriteriaHonored() {
+    void whenSearchingForSubset_thenCriteriaHonored() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
         List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 162), // K
                 new LabelSelection("A", "1", 193), // D

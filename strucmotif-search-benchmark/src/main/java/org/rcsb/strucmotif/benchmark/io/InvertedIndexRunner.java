@@ -4,6 +4,8 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +15,7 @@ import java.util.List;
  * Reads bins of the inverted index to gauge performance.
  */
 public class InvertedIndexRunner {
+    private static final Logger logger = LoggerFactory.getLogger(InvertedIndexRunner.class);
     private static final int BINS_READ = 100;
 
     /**
@@ -38,12 +41,12 @@ public class InvertedIndexRunner {
             }
             long time = (System.nanoTime() - start) / 1000 / 1000;
             times.add(time);
-            System.out.println("Read " + c + " elements in " + time + " ms");
+            logger.info("Read {} elements in {}} ms", c, time);
         }
 
-        System.out.println();
-        System.out.println("Average time:");
-        System.out.println(times.stream().mapToLong(l -> l).average().orElseThrow());
+        logger.info("");
+        logger.info("Average time:");
+        logger.info(Double.toString(times.stream().mapToLong(l -> l).average().orElseThrow()));
 
         //2021-10-27 14:39:15.286 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will not be gzipped - extension: .msg
         //Read 616421 elements in 216 ms

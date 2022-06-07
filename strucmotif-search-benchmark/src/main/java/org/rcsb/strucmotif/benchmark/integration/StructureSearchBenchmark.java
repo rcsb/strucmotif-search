@@ -97,7 +97,7 @@ public class StructureSearchBenchmark {
                 .buildParameters();
 
         Set<PositionSpecificExchange> exchanges = motif.getPositionSpecificExchanges();
-        if (exchanges.size() > 0) {
+        if (!exchanges.isEmpty()) {
             for (PositionSpecificExchange exchange : exchanges) {
                 builder.addPositionSpecificExchange(exchange.getLabelSelection(), exchange.getResidueTypes());
             }

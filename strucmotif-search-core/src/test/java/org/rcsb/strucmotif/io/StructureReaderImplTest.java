@@ -28,7 +28,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenReadingRNA_thenAssembliesParsedCorrectly() {
+    void whenReadingRNA_thenAssembliesParsedCorrectly() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
         assertEquals(2, structure.getAssemblies()
                 .values()
@@ -40,7 +40,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenAssemblySelection_thenReturnNoDuplicates() {
+    void whenAssemblySelection_thenReturnNoDuplicates() {
         // e.g. for 3vk6 (A_2-61, A_1-80, A_1-85) will return 6 residues
         Collection<LabelSelection> selection = List.of(new LabelSelection("A", "1", 61), new LabelSelection("A", "1", 80), new LabelSelection("A", "1", 85));
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vk6"));
@@ -52,7 +52,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenMicroheterogeneityAtSequenceLevelInRenumberedFile_thenReportCorrectResidueType() {
+    void whenMicroheterogeneityAtSequenceLevelInRenumberedFile_thenReportCorrectResidueType() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1eta"));
         int aIndex = structure.getResidueIndex("A",30);
         int bIndex = structure.getResidueIndex("B", 30);
@@ -64,28 +64,25 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenNoModel1InRenumberedFile_thenThrowUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> {
-            // multiple NMR models distributed over multiple structures - file will start with model nr 18
-            Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1ezc"));
-            assertEquals(0, structure.getResidueCount());
-        });
+    void whenNoModel1InRenumberedFile_thenThrowUnsupportedOperationException() {
+        // multiple NMR models distributed over multiple structures - file will start with model nr 18
+        assertThrows(UnsupportedOperationException.class, () -> structureReader.readFromInputStream(getRenumberedBcif("1ezc")));
     }
 
     @Test
-    public void whenProcessing4chaInRenumberedFile_thenChainCountMatches() {
+    void whenProcessing4chaInRenumberedFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4cha"));
         assertEquals(6, chainCount(structure));
     }
 
     @Test
-    public void whenDuplicatedChainsAndIdentityOperationsInRenumberedFile_thenChainCountMatches() {
+    void whenDuplicatedChainsAndIdentityOperationsInRenumberedFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3uud"));
         assertEquals(4, chainCount(structure));
     }
 
     @Test
-    public void whenMicroheterogeneityInRenumberedFile_thenAtomCountMatches() {
+    void whenMicroheterogeneityInRenumberedFile_thenAtomCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("2bwx"));
         // group contains alt locs and microheterogeneity
         Map<LabelAtomId, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
@@ -94,7 +91,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenProcessing1exrInRenumberedFile_thenCountsMatch() {
+    void whenProcessing1exrInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1exr"));
         assertEquals(1, chainCount(structure));
         assertEquals(146, residueCount(structure));
@@ -127,7 +124,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenProcessingStructureWithSymmetryInRenumberedFile_thenCountsMatch() {
+    void whenProcessingStructureWithSymmetryInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
         int multiplier = structure.getTransformations().size();
         assertEquals(2, multiplier * chainCount(structure));
@@ -136,7 +133,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenProcessingStructureWithAssemblyInRenumberedFile_thenCountsMatch() {
+    void whenProcessingStructureWithAssemblyInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1m4x"));
         int multiplier = structure.getTransformations().size();
         assertEquals(5208, multiplier * chainCount(structure));
@@ -145,7 +142,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenMicroheterogeneityAtSequenceLevelInOriginalFile_thenReportCorrectResidueType() {
+    void whenMicroheterogeneityAtSequenceLevelInOriginalFile_thenReportCorrectResidueType() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1eta"));
         int aIndex = structure.getResidueIndex("A",  30);
         int bIndex = structure.getResidueIndex("B", 30);
@@ -157,14 +154,14 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenNoModel1InOriginalFile_thenIgnoreModelInfoAndReturnChains() {
+    void whenNoModel1InOriginalFile_thenIgnoreModelInfoAndReturnChains() {
         // multiple NMR models distributed over multiple structures - file will start with model nr 18
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1ezc"));
         assertEquals(1, chainCount(structure));
     }
 
     @Test
-    public void whenProcessing4chaInOriginalFile_thenChainCountMatches() {
+    void whenProcessing4chaInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"));
 
         assertEquals(11, chainCount(structure));
@@ -173,7 +170,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenDuplicatedChainsAndIdentityOperationsInOriginalFile_thenChainCountMatches() {
+    void whenDuplicatedChainsAndIdentityOperationsInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("3uud"));
 
         assertEquals(14, chainCount(structure));
@@ -182,7 +179,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenMicroheterogeneityInOriginalFile_thenAtomCountMatches() {
+    void whenMicroheterogeneityInOriginalFile_thenAtomCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2bwx"));
         // group contains alt locs and microheterogeneity
         Map<LabelAtomId, float[]> residue = structure.manifestResidue(new LabelSelection("A", "1", 249));
@@ -191,7 +188,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenProcessing1exrInOriginalFile_thenCountsMatch() {
+    void whenProcessing1exrInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1exr"));
 
         assertEquals(7, chainCount(structure));
@@ -200,7 +197,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenProcessingStructureWithSymmetryInOriginalFile_thenCountsMatch() {
+    void whenProcessingStructureWithSymmetryInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
         int multiplier = structure.getTransformations().size();
 
@@ -210,7 +207,7 @@ class StructureReaderImplTest {
     }
 
     @Test
-    public void whenProcessingStructureWithAssemblyInOriginalFile_thenCountsMatch() {
+    void whenProcessingStructureWithAssemblyInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1m4x"));
         int multiplier = structure.getTransformations().size();
 

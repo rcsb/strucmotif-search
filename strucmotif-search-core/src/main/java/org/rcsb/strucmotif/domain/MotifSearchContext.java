@@ -169,7 +169,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
         Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()
                 .stream()
                 .collect(Collectors.toMap(PositionSpecificExchange::getLabelSelection, PositionSpecificExchange::getResidueTypes));
-        StructureQuery query = new StructureQuery(motifDefinition.getStructureIdentifier(),
+        StructureQuery structureQuery = new StructureQuery(motifDefinition.getStructureIdentifier(),
                 motifDefinition.getStructure(),
                 motifDefinition.getLabelSelections(),
                 motifDefinition.getResidues(),
@@ -185,6 +185,6 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
                 invertedIndex,
                 structureIndexProvider,
                 structureDataProvider,
-                query);
+                structureQuery);
     }
 }

@@ -77,9 +77,9 @@ public class MessagePackCodec extends AbstractBucketCodec {
             // int32
             case 0xD2:
                 return inputStream.readInt();
+            default:
+                throw new IllegalArgumentException("Unknown MessagePack type 0x" + Integer.toHexString(type) + ", expected a int here!");
         }
-
-        throw new IllegalArgumentException("Unknown MessagePack type 0x" + Integer.toHexString(type) + ", expected a int here!");
     }
 
     private String[] decodeStringArray(DataInputStream inputStream) throws IOException {
@@ -115,9 +115,9 @@ public class MessagePackCodec extends AbstractBucketCodec {
             // str32
             case 0xDB:
                 return readUnsignedInt(inputStream);
+            default:
+                throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected a StringArray here!");
         }
-
-        throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected a StringArray here!");
     }
 
     private int readArrayLength(DataInputStream inputStream) throws IOException {

@@ -37,7 +37,7 @@ public class KruskalMotifPruner implements MotifPruner {
         // sort all edges by weight
         residuePairOccurrences.sort(Comparator.comparingInt(mo -> mo.getResiduePairDescriptor().getBackboneDistance().ordinal()));
 
-        while (residuePairOccurrences.size() > 0) {
+        while (!residuePairOccurrences.isEmpty()) {
             ResiduePairOccurrence best = residuePairOccurrences.remove(0);
             IndexSelection id1 = best.getResidueIdentifier().getIndexSelection1();
             IndexSelection id2 = best.getResidueIdentifier().getIndexSelection2();

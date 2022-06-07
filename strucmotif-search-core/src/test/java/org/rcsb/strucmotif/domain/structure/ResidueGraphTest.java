@@ -26,7 +26,7 @@ import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOpti
 
 class ResidueGraphTest {
     @Test
-    public void whenGlycine_thenCreateVirtualBetaCarbon() {
+    void whenGlycine_thenCreateVirtualBetaCarbon() {
         Map<LabelAtomId, float[]> residue = Map.of(LabelAtomId.N, new float[] { -0.966f, 0.493f, 1.500f },
                 LabelAtomId.CA, new float[] { 0.257f, 0.418f, 0.692f },
                 LabelAtomId.C, new float[] { -0.094f, 0.017f, -0.716f },
@@ -49,7 +49,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenResidueOrderSwapped_thenDescriptorSame() {
+    void whenResidueOrderSwapped_thenDescriptorSame() {
         List<String> perms = List.of("456", "465", "546", "564", "645", "654");
         Set<String> expectedDescriptors = Set.of("5-7-8", "4-5-7", "4-5-2");
         for (String perm : perms) {
@@ -68,7 +68,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingRenumbered3vvk_then6Valid() {
+    void whenReadingRenumbered3vvk_then6Valid() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -92,7 +92,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingRenumbered1dsd_then8ValidInChainC() {
+    void whenReadingRenumbered1dsd_then8ValidInChainC() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -120,7 +120,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingOriginal200l_thenCountsMatch() {
+    void whenReadingOriginal200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -150,7 +150,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
+    void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -180,7 +180,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingRenumbered200l_thenCountsMatch() {
+    void whenReadingRenumbered200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -210,7 +210,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
+    void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
         List<LabelSelection> labelSelections = structure.getLabelSelections();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -240,7 +240,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenHomo8mer_thenPairCountIncreased() {
+    void whenHomo8mer_thenPairCountIncreased() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
         ResidueGraph residueGraphDeposited = new ResidueGraph(structure, strucmotifConfig, deposited());
         int pairingsDeposited = residueGraphDeposited.getNumberOfPairings();
@@ -266,7 +266,7 @@ class ResidueGraphTest {
             AngleType.A80);
 
     @Test
-    public void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
+    void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
         List<ResiduePairDescriptor> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toList());
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
@@ -283,7 +283,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingRNA_thenContactsFound() {
+    void whenReadingRNA_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
@@ -291,7 +291,7 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenReadingStructureWithoutIdentityOper_thenContactsFound() {
+    void whenReadingStructureWithoutIdentityOper_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7a3x"));
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
@@ -299,35 +299,35 @@ class ResidueGraphTest {
     }
 
     @Test
-    public void whenFlippedDirectory_thenAngle180() {
+    void whenFlippedDirectory_thenAngle180() {
         // pointing away
         float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { -1, 0, 0 });
         assertEquals(180, angle, 0.001);
     }
 
     @Test
-    public void whenIdentical_thenAngle0() {
+    void whenIdentical_thenAngle0() {
         // same
         float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { 1, 0, 0 });
         assertEquals(0, angle, 0.001);
     }
 
     @Test
-    public void whenOrthogonalInXy_thenAngle90() {
+    void whenOrthogonalInXy_thenAngle90() {
         // right 1
         float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { 0, 1, 0 });
         assertEquals(90, angle, 0.001);
     }
 
     @Test
-    public void whenOrthogonalInXz_thenAngle90() {
+    void whenOrthogonalInXz_thenAngle90() {
         // right 2
         float angle = ResidueGraph.angle(new float[] { 1, 0, 0 }, new float[] { 0, 0, 1 });
         assertEquals(90, angle, 0.001);
     }
 
     @Test
-    public void whenOrderSwapped_thenAngleSame() {
+    void whenOrderSwapped_thenAngleSame() {
         for (int i = 0; i < 10; i++) {
             float[] v1 = new float[] {(float) Math.random(), (float) Math.random(), (float) Math.random()};
             Algebra.normalize3d(v1, v1);

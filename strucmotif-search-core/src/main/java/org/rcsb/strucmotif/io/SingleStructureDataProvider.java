@@ -22,7 +22,7 @@ public class SingleStructureDataProvider implements StructureDataProvider {
 
     @Override
     public void initializeRenumberedStructureCache() {
-
+        // no need to do anything
     }
 
     @Override

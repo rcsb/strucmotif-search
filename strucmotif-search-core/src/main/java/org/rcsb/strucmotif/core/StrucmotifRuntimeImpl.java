@@ -67,10 +67,7 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
             targetAssembler.assemble(context);
 
             List<StructureHit> hits = scoreHits(context);
-            logger.info("[{}] Accepted {} hits in {} ms",
-                    context.getId(),
-                    hits.size(),
-                    result.getTimings().getScoreHitsTime());
+            logHitTimings(context.getId(), hits.size(), result.getTimings().getScoreHitsTime());
 
             // dereference target structure map
             result.getTargetStructures().clear();
@@ -88,6 +85,10 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
         }
     }
 
+    private void logHitTimings(String ctx, int count, long time) {
+        logger.info("[{}] Accepted {} hits in {} ms", ctx, count, time);
+    }
+
     @Override
     public void performSearch(StructureSearchContext context, Consumer<StructureHit> consumer) {
         try {
@@ -97,10 +98,7 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
             targetAssembler.assemble(context);
 
             int hits = consumeHits(context, consumer);
-            logger.info("[{}] Accepted {} hits in {} ms",
-                    context.getId(),
-                    hits,
-                    result.getTimings().getScoreHitsTime());
+            logHitTimings(context.getId(), hits, result.getTimings().getScoreHitsTime());
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -203,10 +201,7 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
             result.setHits(hits);
             result.getTimings().queryStop();
 
-            logger.info("[{}] Accepted {} hits in {} ms",
-                    context.getId(),
-                    hits.size(),
-                    result.getTimings().getQueryTime());
+            logHitTimings(context.getId(), hits.size(), result.getTimings().getQueryTime());
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -234,10 +229,7 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
 
             int hits = consumeHits(context, consumer);
 
-            logger.info("[{}] Accepted {} hits in {} ms",
-                    context.getId(),
-                    hits,
-                    result.getTimings().getQueryTime());
+            logHitTimings(context.getId(), hits, result.getTimings().getQueryTime());
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);

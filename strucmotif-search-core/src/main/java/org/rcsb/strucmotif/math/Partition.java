@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Partitions a collection into (roughly) equal-sized chunks. Will shuffle the original collection.
@@ -43,5 +44,19 @@ public class Partition<T> extends AbstractList<List<T>> {
     @Override
     public int size() {
         return (int) Math.ceil((double) list.size() / (double) chunkSize);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        Partition<?> partition = (Partition<?>) o;
+        return chunkSize == partition.chunkSize && Objects.equals(list, partition.list);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), list, chunkSize);
     }
 }

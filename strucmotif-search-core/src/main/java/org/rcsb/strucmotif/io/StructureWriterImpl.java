@@ -233,7 +233,7 @@ public class StructureWriterImpl implements StructureWriter {
                                 continue;
                             }
                         }
-                        // filter by qa-metric
+                    // filter by qa-metric
                     case QA_METRIC_LOCAL_ABOVE_CUTOFF: case QA_METRIC_LOCAL_BELOW_CUTOFF:
                         MaQaMetricLocal category = block.getMaQaMetricLocal();
                         if (category.isDefined()) {
@@ -242,6 +242,8 @@ public class StructureWriterImpl implements StructureWriter {
                                 continue;
                             }
                         }
+                    case NONE:
+                        // everything else is allowed to pass
                 }
             }
 
@@ -291,30 +293,18 @@ public class StructureWriterImpl implements StructureWriter {
         // see Coutsias, 2019
         switch (residueType) {
             case ARGININE:
-                if (labelAtomId == LabelAtomId.NH1 || labelAtomId == LabelAtomId.NH2) {
-                    return true;
-                }
+                return (labelAtomId == LabelAtomId.NH1 || labelAtomId == LabelAtomId.NH2);
             case ASPARTIC_ACID:
-                if (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2) {
-                    return true;
-                }
+                return (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2);
             case GLUTAMIC_ACID:
-                if (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2) {
-                    return true;
-                }
+                return (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2);
             case LEUCINE:
-                if (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2) {
-                    return true;
-                }
+                return (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2);
             case PHENYLALANINE: case TYROSINE:
-                if (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
-                        || labelAtomId == LabelAtomId.CE2) {
-                    return true;
-                }
+                return (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
+                        || labelAtomId == LabelAtomId.CE2);
             case  VALINE:
-                if (labelAtomId == LabelAtomId.CG1 || labelAtomId == LabelAtomId.CG2) {
-                    return true;
-                }
+                return (labelAtomId == LabelAtomId.CG1 || labelAtomId == LabelAtomId.CG2);
             default:
                 return false;
         }

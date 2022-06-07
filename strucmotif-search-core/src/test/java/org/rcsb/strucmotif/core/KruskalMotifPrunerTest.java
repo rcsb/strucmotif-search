@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class KruskalMotifPrunerTest {
+class KruskalMotifPrunerTest {
     private StrucmotifConfig strucmotifConfig;
     private StructureReader structureReader;
     private MotifPruner motifPruner;
@@ -37,7 +37,7 @@ public class KruskalMotifPrunerTest {
     }
 
     @Test
-    public void whenHds_thenPerformNoOperation() {
+    void whenHds_thenPerformNoOperation() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"));
         List<LabelSelection> labelSelections = List.of(new LabelSelection("B", "1", 42), // H
                 new LabelSelection("B", "1", 87), // D
@@ -58,7 +58,7 @@ public class KruskalMotifPrunerTest {
     }
 
     @Test
-    public void whenEqir_thenPruneOnePairing() {
+    void whenEqir_thenPruneOnePairing() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1ec6"));
         List<LabelSelection> labelSelections = List.of(new LabelSelection("D", "1", 11), // E, D14
                         new LabelSelection("D", "1", 37), // Q, D40

@@ -34,7 +34,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class UpdateIntegrationTest {
+class UpdateIntegrationTest {
     private static final Logger logger = LoggerFactory.getLogger(UpdateIntegrationTest.class);
     private static final List<TestCases> UPDATE_1 = List.of(TestCases.PDB_2RLL, TestCases.PDB_3ULN, TestCases.PDB_3UM4);
     private static final List<TestCases> UPDATE_2 = List.of(TestCases.PDB_4TUT, TestCases.PDB_5XES, TestCases.PDB_6FCE);
@@ -100,7 +100,7 @@ public class UpdateIntegrationTest {
     }
 
     @Test
-    public void whenAdding_thenCountsIncrease() throws Exception {
+    void whenAdding_thenCountsIncrease() throws Exception {
         assertStateCounts(0, 0, 0);
 
         update.run(toArgs(Operation.ADD, UPDATE_1));
@@ -131,7 +131,7 @@ public class UpdateIntegrationTest {
     }
 
     @Test
-    public void whenRemoving_thenNoOperation() throws Exception {
+    void whenRemoving_thenNoOperation() throws Exception {
         assertStateCounts(0, 0, 0);
 
         update.run(toArgs(Operation.REMOVE, UPDATE_1));
@@ -148,7 +148,7 @@ public class UpdateIntegrationTest {
     }
 
     @Test
-    public void whenAddingAndRemoving_thenCountsIncrease() throws Exception {
+    void whenAddingAndRemoving_thenCountsIncrease() throws Exception {
         assertStateCounts(0, 0, 0);
 
         update.run(toArgs(Operation.ADD, UPDATE_1));

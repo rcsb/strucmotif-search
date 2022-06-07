@@ -18,7 +18,7 @@ class MotifDefinitionRegistryTest {
     }
 
     @Test
-    public void afterRegistryInitialized_thenHardCodedAndDynamicMotifsAvailable() {
+    void afterRegistryInitialized_thenHardCodedAndDynamicMotifsAvailable() {
         Set<MotifDefinition> motifDefinitions = registry.getMotifDefinitions();
         assertTrue(motifDefinitions.contains(MotifDefinition.CHCH));
         assertTrue(motifDefinitions.contains(MotifDefinition.CHH));
@@ -37,7 +37,7 @@ class MotifDefinitionRegistryTest {
     }
 
     @Test
-    public void whenRegistryCleared_thenIsEmpty() {
+    void whenRegistryCleared_thenIsEmpty() {
         registry.getMotifDefinitions().clear();
         assertTrue(registry.getMotifDefinitions().isEmpty());
     }

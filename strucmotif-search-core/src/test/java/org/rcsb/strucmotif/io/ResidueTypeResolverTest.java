@@ -24,7 +24,7 @@ class ResidueTypeResolverTest {
     }
 
     @Test
-    public void whenReadingModifiedResidues_thenStrategyHonored() {
+    void whenReadingModifiedResidues_thenStrategyHonored() {
         String test1 = "CSO";
         assertEquals(ResidueType.UNKNOWN_COMPONENT, noneResolver.selectResidueType(test1), "should report unknown component with NONE strategy");
         assertEquals(ResidueType.CYSTEINE, internalResolver.selectResidueType(test1), "should report unknown amino acid with INTERNAL strategy");

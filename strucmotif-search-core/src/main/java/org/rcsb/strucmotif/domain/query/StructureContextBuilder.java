@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
  * The entry point to create {@link StructureSearchContext} instances.
  */
 @Service
-public class StructureContextBuilder implements ContextBuilder<StructureSearchContext> {
+public class StructureContextBuilder implements ContextBuilder {
     private final StructureIndexProvider structureIndexProvider;
     private final StructureDataProvider structureDataProvider;
     private final KruskalMotifPruner kruskalMotifPruner;

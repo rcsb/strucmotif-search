@@ -60,12 +60,12 @@ public class MyState {
     @SuppressWarnings("Duplicates")
     private String prepareUri(String raw, String structureIdentifier) {
         String pdbId = structureIdentifier.toLowerCase();
-        String PDBID = pdbId.toUpperCase();
+        String pdbIdUc = pdbId.toUpperCase();
         String middle = pdbId.substring(1, 3);
-        String MIDDLE = middle.toUpperCase();
+        String middleUc = middle.toUpperCase();
         return raw.replace("{middle}", middle)
-                .replace("{MIDDLE}", MIDDLE)
+                .replace("{MIDDLE}", middleUc)
                 .replace("{id}", pdbId)
-                .replace("{ID}", PDBID);
+                .replace("{ID}", pdbIdUc);
     }
 }

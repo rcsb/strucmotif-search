@@ -4,16 +4,15 @@ import org.rcsb.strucmotif.domain.SearchContext;
 
 /**
  * Step-wise builder of the search context.
- * @param <C> type of the context to create
  */
-public interface ContextBuilder<C extends SearchContext<?, ?, ?>> {
+public interface ContextBuilder {
     /**
      * Parameters are considered mandatory arguments (in the sense that some value has to be given - nonetheless,
      * default values will be used). But internally these values are strictly required. No input validation is performed
      * whatsoever.
      * @param <C> type of the context to create
      */
-    interface MandatoryBuilder<C> {
+    interface MandatoryBuilder<C extends SearchContext<?, ?, ?>> {
         /**
          * Create the parameter object and move on to the optional step.
          * @return the optional builder instance
@@ -25,7 +24,7 @@ public interface ContextBuilder<C extends SearchContext<?, ?, ?>> {
      * Optional values.
      * @param <C> type of the context to create
      */
-    interface OptionalBuilder<C> {
+    interface OptionalBuilder<C extends SearchContext<?, ?, ?>> {
         /**
          * Create the context.
          * @return a context

@@ -39,7 +39,6 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
     private final StructureDataProvider structureDataProvider;
     private final Set<MotifDefinition> motifDefinitions;
     private final AtomicBoolean dirty; // true if motifs & enriched motifs are out-of-sync
-    private final Function<MotifDefinition, EnrichedMotifDefinition> DEFAULT_ENRICHER = this::defaultMapping;
     private Set<EnrichedMotifDefinition> enrichedMotifDefinitions;
 
     // Lazy initialization if no JSON is desired
@@ -151,7 +150,7 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
 
     @Override
     public Set<EnrichedMotifDefinition> getEnrichedMotifDefinitions() {
-        if (dirty.get()) sync(DEFAULT_ENRICHER);
+        if (dirty.get()) sync(this::defaultMapping);
         return enrichedMotifDefinitions;
     }
 
@@ -164,7 +163,7 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
 
     @Override
     public Function<MotifDefinition, EnrichedMotifDefinition> getDefaultEnricher() {
-        return DEFAULT_ENRICHER;
+        return this::defaultMapping;
     }
 
     private synchronized void sync(Function<MotifDefinition, EnrichedMotifDefinition> mapper) {

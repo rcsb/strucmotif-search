@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
-public class QuaternionAlignmentServiceTest {
+class QuaternionAlignmentServiceTest {
     private AlignmentService alignmentService;
     private StructureReader structureReader;
 
@@ -37,7 +37,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenOriginalExample_thenRmsdMatches() {
+    void whenOriginalExample_thenRmsdMatches() {
         // https://theobald.brandeis.edu/qcp/main.c
         Structure structure1 = new Structure("1tst",
                 new String[] {"A" },
@@ -77,7 +77,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenSelfAlign_thenRmsdIsZeroAndTransformationIsIdentity() {
+    void whenSelfAlign_thenRmsdIsZeroAndTransformationIsIdentity() {
         Structure structure = new Structure("1tst",
                 new String[] {"A" },
                 new int[] { 0, 2 },
@@ -107,7 +107,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenAlign1And2_thenRmsdAndTransformationMatches() {
+    void whenAlign1And2_thenRmsdAndTransformationMatches() {
         Structure structure1 = new Structure("1tst",
                 new String[] {"A" },
                 new int[] { 0, 2 },
@@ -152,7 +152,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenAlign3And4_thenRmsdAndTransformationMatches() {
+    void whenAlign3And4_thenRmsdAndTransformationMatches() {
         Structure structure3 = new Structure("1tst",
                 new String[] {"A" },
                 new int[] { 0, 2 },
@@ -197,7 +197,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenAminopeptidaseExampleWithAllAtoms_thenRmsdInflated() {
+    void whenAminopeptidaseExampleWithAllAtoms_thenRmsdInflated() {
         Structure structure1 = structureReader.readFromInputStream(getOriginalBcif("1lap"));
         List<Map<LabelAtomId, float[]>> residues1 = Stream.of("A-250", "A-255", "A-273", "A-332", "A-334")
                 .map(id -> id.split("-"))
@@ -216,7 +216,7 @@ public class QuaternionAlignmentServiceTest {
     }
 
     @Test
-    public void whenAminopeptidaseExampleWithNonAmbiguous_thenRmsdMatches() {
+    void whenAminopeptidaseExampleWithNonAmbiguous_thenRmsdMatches() {
         Set<LabelAtomId> ambiguous = Set.of(LabelAtomId.OD1, LabelAtomId.OD2, LabelAtomId.OE1, LabelAtomId.OE2);
         Structure structure1 = structureReader.readFromInputStream(getOriginalBcif("1lap"));
         List<Map<LabelAtomId, float[]>> residues1 = Stream.of("A-250", "A-255", "A-273", "A-332", "A-334")

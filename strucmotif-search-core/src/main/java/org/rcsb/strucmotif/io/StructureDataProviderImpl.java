@@ -36,7 +36,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final StructureWriter renumberedStructureWriter;
     private final StrucmotifConfig strucmotifConfig;
     private final String dataSource;
-    private final Path renumberedPath;
+    private final Path renumberedDirectory;
     private final String extension;
     private boolean paths;
     private boolean caching;
@@ -57,7 +57,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.renumberedStructureWriter = structureWriter;
         this.strucmotifConfig = strucmotifConfig;
         this.dataSource = strucmotifConfig.getDataSource();
-        this.renumberedPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED_DIRECTORY);
+        this.renumberedDirectory = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED_DIRECTORY);
         this.extension = strucmotifConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
 
         logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {} - gzipping: {}",
@@ -72,7 +72,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     private void ensureRenumberedPathExists() {
         try {
-            Files.createDirectories(renumberedPath);
+            Files.createDirectories(renumberedDirectory);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -81,13 +81,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     @SuppressWarnings("Duplicates")
     private String prepareUri(String raw, String structureIdentifier) {
         String pdbId = structureIdentifier.toLowerCase();
-        String PDBID = pdbId.toUpperCase();
+        String pdbIdUc = pdbId.toUpperCase();
         String middle = pdbId.substring(1, 3);
-        String MIDDLE = middle.toUpperCase();
+        String middleUc = middle.toUpperCase();
         return raw.replace("{middle}", middle)
-                .replace("{MIDDLE}", MIDDLE)
+                .replace("{MIDDLE}", middleUc)
                 .replace("{id}", pdbId)
-                .replace("{ID}", PDBID);
+                .replace("{ID}", pdbIdUc);
     }
 
     private URL getCifFetchUrl(String structureIdentifier) {
@@ -103,7 +103,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     }
 
     private Path getRenumberedStructurePath(String structureIdentifier) {
-        return renumberedPath.resolve(structureIdentifier + extension);
+        return renumberedDirectory.resolve(structureIdentifier + extension);
     }
 
     private InputStream getRenumberedInputStream(String structureIdentifier) {
@@ -128,9 +128,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             logger.info("Structure data will be kept in memory - start loading...");
 
             this.caching = true;
-            List<Path> paths;
-            try (Stream<Path> p = Files.walk(renumberedPath)) {
-                paths = p.parallel()
+            List<Path> files;
+            try (Stream<Path> pathStream = Files.walk(renumberedDirectory)) {
+                files = pathStream.parallel()
                         .filter(path -> !Files.isDirectory(path))
                         .collect(Collectors.toList());
             }
@@ -138,7 +138,7 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             this.structureCache = new HashMap<>();
 
             int loadingChunkSize = strucmotifConfig.getLoadingChunkSize();
-            Partition<Path> partitions = new Partition<>(paths, loadingChunkSize);
+            Partition<Path> partitions = new Partition<>(files, loadingChunkSize);
             logger.info("Formed {} partitions of {} structures",
                     partitions.size(),
                     loadingChunkSize);

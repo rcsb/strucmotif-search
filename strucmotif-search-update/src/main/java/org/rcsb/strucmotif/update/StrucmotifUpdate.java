@@ -256,8 +256,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         } catch (IOException e) {
             throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
         } catch (ParsingException e) {
-            logger.warn("Cif parsing failed for " + structureIdentifier, e);
-            throw e;
+            throw new ParsingException("Cif parsing failed for " + structureIdentifier, e);
         }
 
         int count = context.structureCounter.incrementAndGet();
@@ -309,7 +308,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     structureContext,
                     e);
             // fail complete update
-            throw new RuntimeException(e);
+            throw new RuntimeException("Residue graph determination failed for " + structureIdentifier, e);
         }
     }
 
@@ -377,12 +376,12 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         // inverted index is expensive and should be done as batch
-        if (identifiers.size() > 0) {
+        if (!identifiers.isEmpty()) {
             Set<Integer> mapped = identifiers.stream()
                     .filter(structureIndexProvider::containsKey)
                     .map(structureIndexProvider::selectStructureIndex)
                     .collect(Collectors.toSet());
-            if (mapped.size() > 0) {
+            if (!mapped.isEmpty()) {
                 invertedIndex.delete(mapped);
             }
         }
@@ -469,7 +468,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         Set<Integer> lingeringInIndex = knownToIndex.stream()
                 .filter(i -> !knownToState.contains(i))
                 .collect(Collectors.toSet());
-        if (lingeringInIndex.size() > 0) {
+        if (!lingeringInIndex.isEmpty()) {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }

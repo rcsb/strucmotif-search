@@ -73,7 +73,7 @@ public class QuaternionAlignmentServiceTest {
         List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
         List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).collect(Collectors.toList());
         AlignmentResult alignmentResult = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
-        assertEquals(-0.719106, alignmentResult.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA);
+        assertEquals(0.719106, alignmentResult.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA);
     }
 
     @Test

@@ -216,7 +216,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             try {
                 handleUpdateItemInternal(item, context);
                 break;
-            } catch (UncheckedIOException e) {
+            } catch (UncheckedIOException | ParsingException e) {
                 if (i >= maxRetries) {
                     // max retries exceeded
                     throw e;
@@ -225,7 +225,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 int count = context.structureCounter.get();
                 String source = item.getUrl() != null ? item.getUrl().toString() : item.getStructureIdentifier();
                 String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + source;
-                logger.warn("[{}] [{}] [try: {} / {}] Failed to download source file - {}",
+                logger.warn("[{}] [{}] [try: {} / {}] Failed to download or parse source file - {}",
                         context.partitionContext,
                         structureContext,
                         i,

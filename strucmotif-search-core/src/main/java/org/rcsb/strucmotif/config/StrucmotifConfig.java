@@ -77,9 +77,9 @@ public class StrucmotifConfig {
      */
     private boolean invertedIndexGzip = false;
     /**
-     * Number of allowed tries during file download before an {@link java.io.IOException} is thrown.
+     * Number of allowed tries during CIF download/parsing before an exception is thrown.
      */
-    private int downloadTries = 1;
+    private int downloadTries = 5;
     /**
      * Allocate a lot of memory to keep index and structure data in memory?
      */

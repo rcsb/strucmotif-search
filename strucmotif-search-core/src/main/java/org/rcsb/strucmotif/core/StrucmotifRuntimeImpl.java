@@ -75,6 +75,8 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
 
             result.setHits(hits);
             result.getTimings().queryStop();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -99,6 +101,8 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
 
             int hits = consumeHits(context, consumer);
             logHitTimings(context.getId(), hits, result.getTimings().getScoreHitsTime());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -202,6 +206,8 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
             result.getTimings().queryStop();
 
             logHitTimings(context.getId(), hits.size(), result.getTimings().getQueryTime());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -230,6 +236,8 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
             int hits = consumeHits(context, consumer);
 
             logHitTimings(context.getId(), hits, result.getTimings().getQueryTime());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);

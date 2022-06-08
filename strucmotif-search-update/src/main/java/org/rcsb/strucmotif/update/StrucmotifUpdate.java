@@ -319,6 +319,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     context.partitionContext,
                     structureContext,
                     structureMotifCounter.get());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             logger.warn("[{}] [{}] Residue graph determination failed",
                     context.partitionContext,

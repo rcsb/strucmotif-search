@@ -52,7 +52,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(988, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(1026, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     @Test
@@ -73,7 +73,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(777, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(807, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     @Test
@@ -95,7 +95,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(966, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(1004, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     @Test
@@ -117,7 +117,7 @@ class StructureWriterImplTest {
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // this number ensures: polymer-only, no alt-locs, no ambiguous atom names
-        assertEquals(33, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(39, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
     private void delete(Path directory) throws IOException {

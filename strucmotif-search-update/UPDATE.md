@@ -63,6 +63,7 @@ might require a full load.
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
+| `commit-interval` | How many chunks to process before committing to index | `25` |
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `1` |

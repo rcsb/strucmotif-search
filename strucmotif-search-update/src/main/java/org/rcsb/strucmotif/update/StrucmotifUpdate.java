@@ -195,6 +195,11 @@ public class StrucmotifUpdate implements CommandLineRunner {
             }).get();
 
             writeTemporaryFiles(context);
+
+            if (i % strucmotifConfig.getCommitInterval() == 0) {
+                invertedIndex.commit();
+                context.batchId.set(0);
+            }
         }
 
         // mark as dirty before index update

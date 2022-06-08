@@ -111,6 +111,11 @@ public class StrucmotifConfig {
      */
     private ModifiedResidueStrategy modifiedResidueStrategy = ModifiedResidueStrategy.INTERNAL;
     /**
+     * How often are files committed to the inverted index during update. This is the interval between dumping residue
+     * pairs into temporary files and compacting these temporary files and actually adding them to the real index file.
+     */
+    private int commitInterval = 16;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -496,5 +501,22 @@ public class StrucmotifConfig {
      */
     public void setModifiedResidueStrategy(ModifiedResidueStrategy modifiedResidueStrategy) {
         this.modifiedResidueStrategy = modifiedResidueStrategy;
+    }
+
+    /**
+     * How often are temporary files committed to the index during update.
+     * @return an int
+     */
+    public int getCommitInterval() {
+        return commitInterval;
+    }
+
+    /**
+     * Update how often temporary files are committed to the inverted index during update. Low values are slower but
+     * also safer & more resilient.
+     * @param commitInterval an integer greater 0
+     */
+    public void setCommitInterval(int commitInterval) {
+        this.commitInterval = commitInterval;
     }
 }

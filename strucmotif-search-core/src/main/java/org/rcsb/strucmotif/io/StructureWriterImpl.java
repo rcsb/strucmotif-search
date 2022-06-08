@@ -242,14 +242,14 @@ public class StructureWriterImpl implements StructureWriter {
                                 continue;
                             }
                         }
-                    case NONE:
+                    default:
                         // everything else is allowed to pass
                 }
             }
 
             LabelSelection labelSelection = new LabelSelection(labelAsymId, Transformation.DEFAULT_OPERATOR, labelSeqId);
             ResidueType residueType = residueTypeResolver.selectResidueType(atomSite.getLabelCompId().get(row));
-            // don't write/index any unknown components
+            // don't write/index any unknown components (some will still pass this check due to microheterogenity like B-2 in 1aw8)
             if (residueType == ResidueType.UNKNOWN_COMPONENT) {
                 continue;
             }
@@ -298,13 +298,9 @@ public class StructureWriterImpl implements StructureWriter {
                 return (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2);
             case GLUTAMIC_ACID:
                 return (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2);
-            case LEUCINE:
-                return (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2);
             case PHENYLALANINE: case TYROSINE:
                 return (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
                         || labelAtomId == LabelAtomId.CE2);
-            case  VALINE:
-                return (labelAtomId == LabelAtomId.CG1 || labelAtomId == LabelAtomId.CG2);
             default:
                 return false;
         }

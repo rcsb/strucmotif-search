@@ -288,8 +288,6 @@ public class InvertedIndexImpl implements InvertedIndex {
     private void ensureDirectoriesExist() {
         try {
             List<String> oneLetterCodes = Stream.of(ResidueType.values())
-                    // ignore unknown component
-                    .filter(residueType -> residueType.getPolymerType() != PolymerType.UNKNOWN_POLYMER)
                     .map(ResidueType::getInternalCode)
                     // has to be sorted to honor the implicit contract on when identifiers are flipped
                     .sorted()

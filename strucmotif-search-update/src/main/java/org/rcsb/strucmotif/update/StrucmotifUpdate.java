@@ -179,6 +179,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 strucmotifConfig.getUpdateChunkSize());
 
         Collection<String> known = getKnown();
+        boolean needsCommit = false;
 
         // split into partitions and process
         for (int i = 0; i < partitions.size(); i++) {
@@ -195,13 +196,21 @@ public class StrucmotifUpdate implements CommandLineRunner {
             }).get();
 
             writeTemporaryFiles(context);
+            needsCommit = true;
 
             if (i % strucmotifConfig.getCommitInterval() == 0) {
-                invertedIndex.commit();
+                commit(context, known);
                 context.batchId.set(0);
+                needsCommit = false;
             }
         }
 
+        if (needsCommit) {
+            commit(context, known);
+        }
+    }
+
+    private void commit(Context context, Collection<String> known) {
         // mark as dirty before index update
         Set<String> dirty = context.processed.stream()
                 .map(StructureInformation::getStructureIdentifier)

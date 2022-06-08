@@ -200,7 +200,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
             if (i % strucmotifConfig.getCommitInterval() == 0) {
                 commit(context, known);
-                context.batchId.set(0);
                 needsCommit = false;
             }
         }
@@ -223,6 +222,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
         // processed contains all StructureIdentifiers + corresponding revision
         stateRepository.insertKnown(context.processed);
         stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
+
+        // reset state
+        context.processed.clear();
+        context.batchId.set(0);
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {

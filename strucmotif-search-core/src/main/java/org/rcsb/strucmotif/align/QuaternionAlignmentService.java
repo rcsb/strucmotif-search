@@ -112,9 +112,9 @@ public class QuaternionAlignmentService implements AlignmentService {
         float[][] rot = new float[3][3];
 
         // inner product
-        double G1 = 0.0;
-        double G2 = 0.0;
-        double[] A = new double[9];
+        double g1 = 0.0;
+        double g2 = 0.0;
+        double[] matA = new double[9];
 
         for (int i = 0; i < referencePoints.size(); i++) {
             float[] r = referencePoints.get(i);
@@ -123,94 +123,153 @@ public class QuaternionAlignmentService implements AlignmentService {
             double x1 = r[0];
             double y1 = r[1];
             double z1 = r[2];
-            G1 += x1 * x1 + y1 * y1 + z1 * z1;
+            g1 += x1 * x1 + y1 * y1 + z1 * z1;
 
             double x2 = c[0];
             double y2 = c[1];
             double z2 = c[2];
-            G2 += (x2 * x2 + y2 * y2 + z2 * z2);
+            g2 += (x2 * x2 + y2 * y2 + z2 * z2);
 
-            A[0] +=  (x1 * x2);
-            A[1] +=  (x1 * y2);
-            A[2] +=  (x1 * z2);
+            matA[0] +=  (x1 * x2);
+            matA[1] +=  (x1 * y2);
+            matA[2] +=  (x1 * z2);
 
-            A[3] +=  (y1 * x2);
-            A[4] +=  (y1 * y2);
-            A[5] +=  (y1 * z2);
+            matA[3] +=  (y1 * x2);
+            matA[4] +=  (y1 * y2);
+            matA[5] +=  (y1 * z2);
 
-            A[6] +=  (z1 * x2);
-            A[7] +=  (z1 * y2);
-            A[8] +=  (z1 * z2);
+            matA[6] +=  (z1 * x2);
+            matA[7] +=  (z1 * y2);
+            matA[8] +=  (z1 * z2);
         }
-        double E0 = (G1 + G2) * 0.5;
+        double e0 = (g1 + g2) * 0.5;
 
         // fast calc RMSD and rotation
-        double Sxx, Sxy, Sxz, Syx, Syy, Syz, Szx, Szy, Szz;
-        double Szz2, Syy2, Sxx2, Sxy2, Syz2, Sxz2, Syx2, Szy2, Szx2,
-                SyzSzymSyySzz2, Sxx2Syy2Szz2Syz2Szy2, Sxy2Sxz2Syx2Szx2,
-                SxzpSzx, SyzpSzy, SxypSyx, SyzmSzy,
-                SxzmSzx, SxymSyx, SxxpSyy, SxxmSyy;
-        double[] C = new double[4];
+        double sxx;
+        double sxy;
+        double sxz;
+        double syx;
+        double syy;
+        double syz;
+        double szx;
+        double szy;
+        double szz;
+        double szz2;
+        double syy2;
+        double sxx2;
+        double sxy2;
+        double syz2;
+        double sxz2;
+        double syx2;
+        double szy2;
+        double szx2;
+        double syzszymsyyszz2;
+        double sxx2syy2szz2syz2szy2;
+        double sxy2sxz2syx2szx2;
+        double sxzpszx;
+        double syzpszy;
+        double sxypsyx;
+        double syzmszy;
+        double sxzmszx;
+        double sxymsyx;
+        double sxxpsyy;
+        double sxxmsyy;
+        double[] c = new double[4];
         int i;
         double mxEigenV;
         double oldg;
-        double b, a, delta, rms, qsqr;
-        double q1, q2, q3, q4, normq;
-        double a11, a12, a13, a14, a21, a22, a23, a24;
-        double a31, a32, a33, a34, a41, a42, a43, a44;
-        double a2, x2, y2, z2;
-        double xy, az, zx, ay, yz, ax;
-        double a3344_4334, a3244_4234, a3243_4233, a3143_4133,a3144_4134, a3142_4132;
+        double b;
+        double a;
+        double delta;
+        double rms;
+        double qsqr;
+        double q1;
+        double q2;
+        double q3;
+        double q4;
+        double normq;
+        double a11;
+        double a12;
+        double a13;
+        double a14;
+        double a21;
+        double a22;
+        double a23;
+        double a24;
+        double a31;
+        double a32;
+        double a33;
+        double a34;
+        double a41;
+        double a42;
+        double a43;
+        double a44;
+        double a2;
+        double x2;
+        double y2;
+        double z2;
+        double xy;
+        double az;
+        double zx;
+        double ay;
+        double yz;
+        double ax;
+        double a3344_4334;
+        double a3244_4234;
+        double a3243_4233;
+        double a3143_4133;
+        double a3144_4134;
+        double a3142_4132;
         double evecprec = 1e-6;
         double evalprec = 1e-11;
 
-        Sxx = A[0]; Sxy = A[1]; Sxz = A[2];
-        Syx = A[3]; Syy = A[4]; Syz = A[5];
-        Szx = A[6]; Szy = A[7]; Szz = A[8];
+        sxx = matA[0]; sxy = matA[1]; sxz = matA[2];
+        syx = matA[3]; syy = matA[4]; syz = matA[5];
+        szx = matA[6]; szy = matA[7]; szz = matA[8];
 
-        Sxx2 = Sxx * Sxx;
-        Syy2 = Syy * Syy;
-        Szz2 = Szz * Szz;
+        sxx2 = sxx * sxx;
+        syy2 = syy * syy;
+        szz2 = szz * szz;
 
-        Sxy2 = Sxy * Sxy;
-        Syz2 = Syz * Syz;
-        Sxz2 = Sxz * Sxz;
+        sxy2 = sxy * sxy;
+        syz2 = syz * syz;
+        sxz2 = sxz * sxz;
 
-        Syx2 = Syx * Syx;
-        Szy2 = Szy * Szy;
-        Szx2 = Szx * Szx;
+        syx2 = syx * syx;
+        szy2 = szy * szy;
+        szx2 = szx * szx;
 
-        SyzSzymSyySzz2 = 2.0 * (Syz * Szy - Syy * Szz);
-        Sxx2Syy2Szz2Syz2Szy2 = Syy2 + Szz2 - Sxx2 + Syz2 + Szy2;
+        syzszymsyyszz2 = 2.0 * (syz * szy - syy * szz);
+        sxx2syy2szz2syz2szy2 = syy2 + szz2 - sxx2 + syz2 + szy2;
 
-        C[2] = -2.0 * (Sxx2 + Syy2 + Szz2 + Sxy2 + Syx2 + Sxz2 + Szx2 + Syz2 + Szy2);
-        C[1] = 8.0 * (Sxx * Syz * Szy + Syy * Szx * Sxz + Szz * Sxy * Syx - Sxx * Syy * Szz - Syz * Szx * Sxy - Szy * Syx * Sxz);
+        c[2] = -2.0 * (sxx2 + syy2 + szz2 + sxy2 + syx2 + sxz2 + szx2 + syz2 + szy2);
+        c[1] = 8.0 * (sxx * syz * szy + syy * szx * sxz + szz * sxy * syx - sxx * syy * szz - syz * szx * sxy - szy * syx * sxz);
 
-        SxzpSzx = Sxz + Szx;
-        SyzpSzy = Syz + Szy;
-        SxypSyx = Sxy + Syx;
-        SyzmSzy = Syz - Szy;
-        SxzmSzx = Sxz - Szx;
-        SxymSyx = Sxy - Syx;
-        SxxpSyy = Sxx + Syy;
-        SxxmSyy = Sxx - Syy;
-        Sxy2Sxz2Syx2Szx2 = Sxy2 + Sxz2 - Syx2 - Szx2;
+        sxzpszx = sxz + szx;
+        syzpszy = syz + szy;
+        sxypsyx = sxy + syx;
+        syzmszy = syz - szy;
+        sxzmszx = sxz - szx;
+        sxymsyx = sxy - syx;
+        sxxpsyy = sxx + syy;
+        sxxmsyy = sxx - syy;
+        sxy2sxz2syx2szx2 = sxy2 + sxz2 - syx2 - szx2;
 
-        C[0] = Sxy2Sxz2Syx2Szx2 * Sxy2Sxz2Syx2Szx2
-                + (Sxx2Syy2Szz2Syz2Szy2 + SyzSzymSyySzz2) * (Sxx2Syy2Szz2Syz2Szy2 - SyzSzymSyySzz2)
-                + (-(SxzpSzx) * (SyzmSzy) + (SxymSyx) * (SxxmSyy - Szz)) * (-(SxzmSzx) * (SyzpSzy) + (SxymSyx) * (SxxmSyy + Szz))
-                + (-(SxzpSzx) * (SyzpSzy) - (SxypSyx) * (SxxpSyy - Szz)) * (-(SxzmSzx) * (SyzmSzy) - (SxypSyx) * (SxxpSyy + Szz))
-                + ((SxypSyx) * (SyzpSzy) + (SxzpSzx) * (SxxmSyy + Szz)) * (-(SxymSyx) * (SyzmSzy) + (SxzpSzx) * (SxxpSyy + Szz))
-                + ((SxypSyx) * (SyzmSzy) + (SxzmSzx) * (SxxmSyy - Szz)) * (-(SxymSyx) * (SyzpSzy) + (SxzmSzx) * (SxxpSyy - Szz));
+        c[0] = sxy2sxz2syx2szx2 * sxy2sxz2syx2szx2
+                + (sxx2syy2szz2syz2szy2 + syzszymsyyszz2) * (sxx2syy2szz2syz2szy2 - syzszymsyyszz2)
+                + (-(sxzpszx) * (syzmszy) + (sxymsyx) * (sxxmsyy - szz)) * (-(sxzmszx) * (syzpszy) + (sxymsyx) * (sxxmsyy + szz))
+                + (-(sxzpszx) * (syzpszy) - (sxypsyx) * (sxxpsyy - szz)) * (-(sxzmszx) * (syzmszy) - (sxypsyx) * (sxxpsyy + szz))
+                + ((sxypsyx) * (syzpszy) + (sxzpszx) * (sxxmsyy + szz)) * (-(sxymsyx) * (syzmszy) + (sxzpszx) * (sxxpsyy + szz))
+                + ((sxypsyx) * (syzmszy) + (sxzmszx) * (sxxmsyy - szz)) * (-(sxymsyx) * (syzpszy) + (sxzmszx) * (sxxpsyy - szz));
 
         /* Newton-Raphson */
-        mxEigenV = E0;
+        mxEigenV = e0;
         for (i = 0; i < 50; ++i) {
             oldg = mxEigenV;
             x2 = mxEigenV * mxEigenV;
-            b = (x2 + C[2]) * mxEigenV;
-            a = b + C[1];
-            delta = ((a * mxEigenV + C[0]) / (2.0 * x2 * mxEigenV + b + a));
+            b = (x2 + c[2]) * mxEigenV;
+            a = b + c[1];
+            delta = ((a * mxEigenV + c[0]) / (2.0 * x2 * mxEigenV + b + a));
             mxEigenV -= delta;
             if (Math.abs(mxEigenV - oldg) < Math.abs(evalprec * mxEigenV)) {
                 break;
@@ -218,24 +277,24 @@ public class QuaternionAlignmentService implements AlignmentService {
         }
 
         /* the abs() is to guard against tiny, but *negative* numbers due to floating point error */
-        rms = Math.sqrt(Math.abs(2.0 * (E0 - mxEigenV) / referencePoints.size()));
+        rms = Math.sqrt(Math.abs(2.0 * (e0 - mxEigenV) / referencePoints.size()));
 
-        a11 = SxxpSyy + Szz - mxEigenV;
-        a12 = SyzmSzy;
-        a13 = -SxzmSzx;
-        a14 = SxymSyx;
-        a21 = SyzmSzy;
-        a22 = SxxmSyy - Szz - mxEigenV;
-        a23 = SxypSyx;
-        a24 = SxzpSzx;
+        a11 = sxxpsyy + szz - mxEigenV;
+        a12 = syzmszy;
+        a13 = -sxzmszx;
+        a14 = sxymsyx;
+        a21 = syzmszy;
+        a22 = sxxmsyy - szz - mxEigenV;
+        a23 = sxypsyx;
+        a24 = sxzpszx;
         a31 = a13;
         a32 = a23;
-        a33 = Syy - Sxx - Szz - mxEigenV;
-        a34 = SyzpSzy;
+        a33 = syy - sxx - szz - mxEigenV;
+        a34 = syzpszy;
         a41 = a14;
         a42 = a24;
         a43 = a34;
-        a44 = Szz - SxxpSyy - mxEigenV;
+        a44 = szz - sxxpsyy - mxEigenV;
         a3344_4334 = a33 * a44 - a43 * a34;
         a3244_4234 = a32 * a44 - a42 * a34;
         a3243_4233 = a32 * a43 - a42 * a33;
@@ -262,9 +321,12 @@ public class QuaternionAlignmentService implements AlignmentService {
             qsqr = q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4;
 
             if (qsqr < evecprec) {
-                double a1324_1423 = a13 * a24 - a14 * a23, a1224_1422 = a12 * a24 - a14 * a22;
-                double a1223_1322 = a12 * a23 - a13 * a22, a1124_1421 = a11 * a24 - a14 * a21;
-                double a1123_1321 = a11 * a23 - a13 * a21, a1122_1221 = a11 * a22 - a12 * a21;
+                double a1324_1423 = a13 * a24 - a14 * a23;
+                double a1224_1422 = a12 * a24 - a14 * a22;
+                double a1223_1322 = a12 * a23 - a13 * a22;
+                double a1124_1421 = a11 * a24 - a14 * a21;
+                double a1123_1321 = a11 * a23 - a13 * a21;
+                double a1122_1221 = a11 * a22 - a12 * a21;
 
                 q1 =  a42 * a1324_1423 - a43 * a1224_1422 + a44 * a1223_1322;
                 q2 = -a41 * a1324_1423 + a43 * a1124_1421 - a44 * a1123_1321;

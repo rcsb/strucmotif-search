@@ -45,8 +45,8 @@ public class InvertedIndexRunner {
         }
 
         logger.info("");
-        logger.info("Average time:");
-        logger.info(Double.toString(times.stream().mapToLong(l -> l).average().orElseThrow()));
+        double avg = times.stream().mapToLong(l -> l).average().orElseThrow();
+        logger.info("Average time: {}", avg);
 
         //2021-10-27 14:39:15.286 [main] INFO  org.rcsb.strucmotif.io.InvertedIndexImpl - Index files will not be gzipped - extension: .msg
         //Read 616421 elements in 216 ms

@@ -116,7 +116,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = parseOperation(args);
-        List<UpdateItem> requested = parseUpdateList(operation, args);
+        List<UpdateItem> requested = parseUpdateList(args);
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {
@@ -142,7 +142,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         switch (operation) {
             case ADD:
-                add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId(args)));
+                add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId()));
                 break;
             case REMOVE:
                 remove(getDeltaMinusIdentifiers(requested));
@@ -517,11 +517,11 @@ public class StrucmotifUpdate implements CommandLineRunner {
         return Operation.resolve(args[0]);
     }
 
-    private AtomicInteger parseBatchId(String[] args) {
+    private AtomicInteger parseBatchId() {
         return new AtomicInteger();
     }
 
-    private List<UpdateItem> parseUpdateList(Operation operation, String[] args) throws IOException {
+    private List<UpdateItem> parseUpdateList(String[] args) throws IOException {
         int offset = 1;
         String[] ids = new String[args.length - offset];
         List<UpdateItem> requested;

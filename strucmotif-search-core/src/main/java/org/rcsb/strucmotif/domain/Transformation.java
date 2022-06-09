@@ -15,6 +15,14 @@ public class Transformation {
     /**
      * Neutral/identity transformation.
      */
+    public static final float[][] IDENTITY_MATRIX_3D = new float[][] {
+            { 1, 0, 0 },
+            { 0, 1, 0 },
+            { 0, 0, 1 }
+    };
+    /**
+     * Neutral/identity transformation.
+     */
     public static final float[][] IDENTITY_MATRIX_4D = new float[][] {
             { 1, 0, 0, 0 },
             { 0, 1, 0, 0 },

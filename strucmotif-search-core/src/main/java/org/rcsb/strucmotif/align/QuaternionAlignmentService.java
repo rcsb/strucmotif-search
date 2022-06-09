@@ -20,12 +20,6 @@ import java.util.Objects;
  */
 @Service
 public class QuaternionAlignmentService implements AlignmentService {
-    private static final float[][] IDENTITY_MATRIX_3D = new float[][] {
-            { 1, 0, 0 },
-            { 0, 1, 0 },
-            { 0, 0, 1 }
-    };
-
     @Override
     public AlignmentResult align(List<Map<LabelAtomId, float[]>> reference, List<Map<LabelAtomId, float[]>> candidate, AtomPairingScheme atomPairingScheme) {
         // validate parameters
@@ -214,12 +208,12 @@ public class QuaternionAlignmentService implements AlignmentService {
         double ay;
         double yz;
         double ax;
-        double a3344_4334;
-        double a3244_4234;
-        double a3243_4233;
-        double a3143_4133;
-        double a3144_4134;
-        double a3142_4132;
+        double a33444334;
+        double a32444234;
+        double a32434233;
+        double a31434133;
+        double a31444134;
+        double a31424132;
         double evecprec = 1e-6;
         double evalprec = 1e-11;
 
@@ -295,16 +289,16 @@ public class QuaternionAlignmentService implements AlignmentService {
         a42 = a24;
         a43 = a34;
         a44 = szz - sxxpsyy - mxEigenV;
-        a3344_4334 = a33 * a44 - a43 * a34;
-        a3244_4234 = a32 * a44 - a42 * a34;
-        a3243_4233 = a32 * a43 - a42 * a33;
-        a3143_4133 = a31 * a43 - a41 * a33;
-        a3144_4134 = a31 * a44 - a41 * a34;
-        a3142_4132 = a31 * a42 - a41 * a32;
-        q1 =  a22 * a3344_4334 - a23 * a3244_4234 + a24 * a3243_4233;
-        q2 = -a21 * a3344_4334 + a23 * a3144_4134 - a24 * a3143_4133;
-        q3 =  a21 * a3244_4234 - a22 * a3144_4134 + a24 * a3142_4132;
-        q4 = -a21 * a3243_4233 + a22 * a3143_4133 - a23 * a3142_4132;
+        a33444334 = a33 * a44 - a43 * a34;
+        a32444234 = a32 * a44 - a42 * a34;
+        a32434233 = a32 * a43 - a42 * a33;
+        a31434133 = a31 * a43 - a41 * a33;
+        a31444134 = a31 * a44 - a41 * a34;
+        a31424132 = a31 * a42 - a41 * a32;
+        q1 =  a22 * a33444334 - a23 * a32444234 + a24 * a32434233;
+        q2 = -a21 * a33444334 + a23 * a31444134 - a24 * a31434133;
+        q3 =  a21 * a32444234 - a22 * a31444134 + a24 * a31424132;
+        q4 = -a21 * a32434233 + a22 * a31434133 - a23 * a31424132;
 
         qsqr = q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4;
 
@@ -314,36 +308,36 @@ public class QuaternionAlignmentService implements AlignmentService {
            uncommented, but it is most likely unnecessary.
         */
         if (qsqr < evecprec) {
-            q1 =  a12 * a3344_4334 - a13 * a3244_4234 + a14 * a3243_4233;
-            q2 = -a11 * a3344_4334 + a13 * a3144_4134 - a14 * a3143_4133;
-            q3 =  a11 * a3244_4234 - a12 * a3144_4134 + a14 * a3142_4132;
-            q4 = -a11 * a3243_4233 + a12 * a3143_4133 - a13 * a3142_4132;
+            q1 =  a12 * a33444334 - a13 * a32444234 + a14 * a32434233;
+            q2 = -a11 * a33444334 + a13 * a31444134 - a14 * a31434133;
+            q3 =  a11 * a32444234 - a12 * a31444134 + a14 * a31424132;
+            q4 = -a11 * a32434233 + a12 * a31434133 - a13 * a31424132;
             qsqr = q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4;
 
             if (qsqr < evecprec) {
-                double a1324_1423 = a13 * a24 - a14 * a23;
-                double a1224_1422 = a12 * a24 - a14 * a22;
-                double a1223_1322 = a12 * a23 - a13 * a22;
-                double a1124_1421 = a11 * a24 - a14 * a21;
-                double a1123_1321 = a11 * a23 - a13 * a21;
-                double a1122_1221 = a11 * a22 - a12 * a21;
+                double a13241423 = a13 * a24 - a14 * a23;
+                double a12241422 = a12 * a24 - a14 * a22;
+                double a12231322 = a12 * a23 - a13 * a22;
+                double a11241421 = a11 * a24 - a14 * a21;
+                double a11231321 = a11 * a23 - a13 * a21;
+                double a11221221 = a11 * a22 - a12 * a21;
 
-                q1 =  a42 * a1324_1423 - a43 * a1224_1422 + a44 * a1223_1322;
-                q2 = -a41 * a1324_1423 + a43 * a1124_1421 - a44 * a1123_1321;
-                q3 =  a41 * a1224_1422 - a42 * a1124_1421 + a44 * a1122_1221;
-                q4 = -a41 * a1223_1322 + a42 * a1123_1321 - a43 * a1122_1221;
+                q1 =  a42 * a13241423 - a43 * a12241422 + a44 * a12231322;
+                q2 = -a41 * a13241423 + a43 * a11241421 - a44 * a11231321;
+                q3 =  a41 * a12241422 - a42 * a11241421 + a44 * a11221221;
+                q4 = -a41 * a12231322 + a42 * a11231321 - a43 * a11221221;
                 qsqr = q1*q1 + q2 *q2 + q3 * q3 + q4 * q4;
 
                 if (qsqr < evecprec) {
-                    q1 =  a32 * a1324_1423 - a33 * a1224_1422 + a34 * a1223_1322;
-                    q2 = -a31 * a1324_1423 + a33 * a1124_1421 - a34 * a1123_1321;
-                    q3 =  a31 * a1224_1422 - a32 * a1124_1421 + a34 * a1122_1221;
-                    q4 = -a31 * a1223_1322 + a32 * a1123_1321 - a33 * a1122_1221;
+                    q1 =  a32 * a13241423 - a33 * a12241422 + a34 * a12231322;
+                    q2 = -a31 * a13241423 + a33 * a11241421 - a34 * a11231321;
+                    q3 =  a31 * a12241422 - a32 * a11241421 + a34 * a11221221;
+                    q4 = -a31 * a12231322 + a32 * a11231321 - a33 * a11221221;
                     qsqr = q1 * q1 + q2 * q2 + q3 * q3 + q4 * q4;
 
                     if (qsqr < evecprec) {
                         /* if qsqr is still too small, return the identity matrix. */
-                        rot = IDENTITY_MATRIX_3D;
+                        rot = Transformation.IDENTITY_MATRIX_3D;
                     }
                 }
             }

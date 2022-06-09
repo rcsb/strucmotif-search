@@ -198,7 +198,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             writeTemporaryFiles(context);
             needsCommit = true;
 
-            if (i % strucmotifConfig.getCommitInterval() == 0) {
+            if (i > 0 && i % strucmotifConfig.getCommitInterval() == 0) {
                 commit(context, known);
                 needsCommit = false;
             }
@@ -298,6 +298,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         try {
+            long start = System.nanoTime();
             ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
             // extract motifs
@@ -315,10 +316,11 @@ public class StrucmotifUpdate implements CommandLineRunner {
                         });
                 return null;
             }).get();
-            logger.info("[{}] [{}] Extracted {} residue pairs",
+            logger.info("[{}] [{}] Extracted {} residue pairs in {} ms",
                     context.partitionContext,
                     structureContext,
-                    structureMotifCounter.get());
+                    structureMotifCounter.get(),
+                    (System.nanoTime() - start) / 1000 / 1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (Exception e) {

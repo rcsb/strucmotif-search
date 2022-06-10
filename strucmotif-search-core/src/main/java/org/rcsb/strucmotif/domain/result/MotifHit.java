@@ -78,7 +78,7 @@ public class MotifHit implements Hit {
 
     @Override
     public String toString() {
-        return "SpriteHit{" +
+        return "MotifHit{" +
                 "motifIdentifier='" + motifIdentifier + '\'' +
                 ", labelSelections=" + labelSelections +
                 ", residueTypes=" + residueTypes +

@@ -90,7 +90,7 @@ public class StructureHit implements Hit {
 
     @Override
     public String toString() {
-        return "AssamHit{" +
+        return "StructureHit{" +
                 "structureIdentifier='" + structureIdentifier + '\'' +
                 ", assemblyIdentifier='" + assemblyIdentifier + '\'' +
                 ", labelSelections=" + labelSelections +

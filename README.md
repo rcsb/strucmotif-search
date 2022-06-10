@@ -123,6 +123,7 @@ Strucmotif.detectMotifs()
 ## Configuration
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
+| `ccd-url` | URL to the chemical component dictionary | wwPDB |
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `in-memory-strategy` | Preload structure data for increased performance? | `off` |

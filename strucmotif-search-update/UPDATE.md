@@ -67,6 +67,7 @@ might require a full load.
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `1` |
+| `entry-holdings-url` | Location of RCSB PDB holdings file | RCSB PDB Data API |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
 | `inverted-index-gzip` | Gzip index files? | `false` |
 | `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |

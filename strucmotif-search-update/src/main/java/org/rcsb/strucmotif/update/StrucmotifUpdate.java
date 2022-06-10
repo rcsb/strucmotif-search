@@ -420,9 +420,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @throws IOException connection failure
      */
     public List<UpdateItem> getAllIdentifiers() throws IOException {
-        logger.info("Retrieving current entry list from {}", StrucmotifConfig.RCSB_ENTRY_LIST);
+        String rcsbEntryHoldingsUrl = strucmotifConfig.getRcsbEntryHoldingsUrl();
+        logger.info("Retrieving current entry list from {}", rcsbEntryHoldingsUrl);
         String response;
-        try (InputStream inputStream = new URL(StrucmotifConfig.RCSB_ENTRY_LIST).openStream()) {
+        try (InputStream inputStream = new URL(rcsbEntryHoldingsUrl).openStream()) {
             try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
                 response = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
             }

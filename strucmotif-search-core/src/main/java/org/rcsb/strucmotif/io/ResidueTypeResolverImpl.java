@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 @Service
 public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     private static final Logger logger = LoggerFactory.getLogger(ResidueTypeResolverImpl.class);
-    private static final String CCD_URL = "https://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz";
     private static final String MAPPING_FILE = "residue-type-mapping.json";
     private static final Map<String, ResidueType> THREE_LETTER_CODE_MAPPING = Arrays.stream(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getThreeLetterCode, Function.identity()));
@@ -70,14 +69,15 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
 
     public ResidueTypeResolverImpl(StrucmotifConfig strucmotifConfig) {
         ModifiedResidueStrategy modifiedResidueStrategy = strucmotifConfig.getModifiedResidueStrategy();
-        this.mapping = initialize(modifiedResidueStrategy);
+        String ccdUrl = strucmotifConfig.getCcdUrl();
+        this.mapping = initialize(modifiedResidueStrategy, ccdUrl);
         logger.info("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",
                 modifiedResidueStrategy,
                 mapping.keySet().size(),
                 mapping.values().stream().distinct().count());
     }
 
-    private Map<String, ResidueType> initialize(ModifiedResidueStrategy modifiedResidueStrategy) {
+    private Map<String, ResidueType> initialize(ModifiedResidueStrategy modifiedResidueStrategy, String ccdUrl) {
         Map<String, ResidueType> out;
         switch (modifiedResidueStrategy) {
             case NONE:
@@ -88,7 +88,7 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
                 out.putAll(THREE_LETTER_CODE_MAPPING);
                 return out;
             case CCD_PARENT:
-                out = createCcdMapping();
+                out = createCcdMapping(ccdUrl);
                 out.putAll(D_AMINO_ACID_MAPPING);
                 out.putAll(THREE_LETTER_CODE_MAPPING);
                 return out;
@@ -119,9 +119,10 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
         }
     }
 
-    private static Map<String, ResidueType> createCcdMapping() {
+    private static Map<String, ResidueType> createCcdMapping(String ccdUrl) {
         try {
-            List<MmCifBlock> blocks = CifIO.readFromURL(new URL(CCD_URL)).as(StandardSchemata.MMCIF).getBlocks();
+            logger.info("Reading CCD from {}", ccdUrl);
+            List<MmCifBlock> blocks = CifIO.readFromURL(new URL(ccdUrl)).as(StandardSchemata.MMCIF).getBlocks();
             Map<String, ResidueType> map = new HashMap<>();
 
             for (MmCifBlock block : blocks) {
@@ -148,7 +149,8 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     }
 
     private static void updateResidueTypeMappingFile() throws IOException {
-        Map<String, String> ccdMapping = createCcdMapping().entrySet()
+        String ccdUrl = new StrucmotifConfig().getCcdUrl();
+        Map<String, String> ccdMapping = createCcdMapping(ccdUrl).entrySet()
                 .stream()
                 .map(entry -> Map.entry(entry.getKey(), entry.getValue().getThreeLetterCode()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

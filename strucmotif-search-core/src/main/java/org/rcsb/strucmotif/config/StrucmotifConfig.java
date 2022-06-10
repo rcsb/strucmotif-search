@@ -116,6 +116,14 @@ public class StrucmotifConfig {
      */
     private int commitInterval = 16;
     /**
+     * RCSB URL that reports currently present identifiers in archive.
+     */
+    private String rcsbEntryHoldingsUrl = "https://data.rcsb.org/rest/v1/holdings/current/entry_ids";
+    /**
+     * URL of the Chemical Component Dictionary.
+     */
+    private String ccdUrl = "https://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz";
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -131,10 +139,6 @@ public class StrucmotifConfig {
      * Name of the inverted index directory.
      */
     public static final String INDEX_DIRECTORY = "index";
-    /**
-     * RCSB URL that reports currently present identifiers in archive.
-     */
-    public static final String RCSB_ENTRY_LIST = "https://data.rcsb.org/rest/v1/holdings/current/entry_ids";
 
     /**
      * Maximum distance of residue pairs.
@@ -518,5 +522,37 @@ public class StrucmotifConfig {
      */
     public void setCommitInterval(int commitInterval) {
         this.commitInterval = commitInterval;
+    }
+
+    /**
+     * Where entry holdings are fetched from.
+     * @return a URL
+     */
+    public String getRcsbEntryHoldingsUrl() {
+        return rcsbEntryHoldingsUrl;
+    }
+
+    /**
+     * Update where holdings data is fetched from.
+     * @param rcsbEntryHoldingsUrl a URL
+     */
+    public void setRcsbEntryHoldingsUrl(String rcsbEntryHoldingsUrl) {
+        this.rcsbEntryHoldingsUrl = rcsbEntryHoldingsUrl;
+    }
+
+    /**
+     * Where component data is fetched from.
+     * @return a URL
+     */
+    public String getCcdUrl() {
+        return ccdUrl;
+    }
+
+    /**
+     * Update where component data is fetched from.
+     * @param ccdUrl a URL
+     */
+    public void setCcdUrl(String ccdUrl) {
+        this.ccdUrl = ccdUrl;
     }
 }

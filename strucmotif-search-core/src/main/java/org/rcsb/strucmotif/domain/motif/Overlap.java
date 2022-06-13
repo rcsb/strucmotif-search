@@ -68,20 +68,6 @@ public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, I
             IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
             return testInternal(indexSelection12, indexSelection22);
         }
-    },
-    /**
-     * Both sides overlap.
-     */
-    BOTH {
-        @Override
-        public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
-            IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
-            IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
-            IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
-            IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
-            return (testInternal(indexSelection11, indexSelection21) && testInternal(indexSelection12, indexSelection22)) ||
-                    (testInternal(indexSelection11, indexSelection22) && testInternal(indexSelection12, indexSelection21));
-        }
     };
 
     private static boolean testInternal(IndexSelection indexSelection1, IndexSelection indexSelection2) {
@@ -113,8 +99,6 @@ public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, I
 
         if (!equal1112 && !equal1122 && !equal1221 && !equal1222) {
             return NONE;
-        } else if ((equal1112 && equal1222) || (equal1122 && equal1221)) {
-            return BOTH;
         } else if (equal1112) {
             return LEFT_LEFT;
         } else if (equal1222) {

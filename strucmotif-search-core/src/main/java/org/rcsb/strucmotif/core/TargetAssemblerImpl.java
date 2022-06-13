@@ -201,7 +201,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
             Overlap[] overlapProfile = new Overlap[pathGeneration];
             for (int i = 0; i < pathGeneration; i++) {
                 // defined by query structure, known LabelSelections
-                overlapProfile[i] = Overlap.ofResiduePairIdentifiers((IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(i), (IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(pathGeneration));
+                overlapProfile[i] = Overlap.ofResiduePairIdentifiers((IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(i),
+                        (IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(pathGeneration));
             }
 
             // focus on valid target structures as this set should be smaller

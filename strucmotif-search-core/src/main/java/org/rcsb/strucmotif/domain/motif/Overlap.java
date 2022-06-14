@@ -70,17 +70,21 @@ public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, I
         }
     },
     /**
-     * Both sides overlap.
+     * One side matches but it's unclear which. This happens for descriptors that have the same residue type twice (like
+     * LL-4-5-4).
      */
-    BOTH {
+    AMBIGUOUS {
         @Override
         public boolean test(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
             IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
             IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
             IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
             IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
-            return (testInternal(indexSelection11, indexSelection21) && testInternal(indexSelection12, indexSelection22)) ||
-                    (testInternal(indexSelection11, indexSelection22) && testInternal(indexSelection12, indexSelection21));
+
+            return indexSelection11.equals(indexSelection21) || // LEFT_LEFT
+                    indexSelection11.equals(indexSelection22) || // LEFT_RIGHT
+                    indexSelection12.equals(indexSelection21) || // RIGHT_LEFT
+                    indexSelection12.equals(indexSelection22); // RIGHT_RIGHT
         }
     };
 
@@ -98,9 +102,10 @@ public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, I
      * Determines the overlap between 2 {@link IndexSelectionResiduePairIdentifier} instances.
      * @param residuePairIdentifier1 the first instance
      * @param residuePairIdentifier2 the second instance
+     * @param isAmbiguous match is ambiguous
      * @return a description of the observed overlap
      */
-    public static Overlap ofResiduePairIdentifiers(IndexSelectionResiduePairIdentifier residuePairIdentifier1, IndexSelectionResiduePairIdentifier residuePairIdentifier2) {
+    public static Overlap ofResiduePairIdentifiers(IndexSelectionResiduePairIdentifier residuePairIdentifier1, IndexSelectionResiduePairIdentifier residuePairIdentifier2, boolean isAmbiguous) {
         IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
         IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
         IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
@@ -113,8 +118,8 @@ public enum Overlap implements BiPredicate<InvertedIndexResiduePairIdentifier, I
 
         if (!equal1112 && !equal1122 && !equal1221 && !equal1222) {
             return NONE;
-        } else if ((equal1112 && equal1222) || (equal1122 && equal1221)) {
-            return BOTH;
+        } else if (isAmbiguous) {
+            return AMBIGUOUS;
         } else if (equal1112) {
             return LEFT_LEFT;
         } else if (equal1222) {

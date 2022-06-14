@@ -113,4 +113,12 @@ public class ResiduePairDescriptor {
     public boolean isFlipped() {
         return flipped;
     }
+
+    /**
+     * Extra work is needed when a descriptor describes the same residue type in both positions.
+     * @return true if this descriptor is ambiguous because both residue types are the same
+     */
+    public boolean isAmbiguous() {
+        return residueType1 == residueType2;
+    }
 }

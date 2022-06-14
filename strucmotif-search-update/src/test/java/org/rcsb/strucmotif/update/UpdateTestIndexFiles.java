@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class UpdateTestIndexFiles {
     /**
      * Update index files used for testing.
-     * @param args absolute poth to test resource directory of core module
+     * @param args absolute path to test resource directory of core module
      * @throws Exception update failed
      */
     public static void main(String[] args) throws Exception {

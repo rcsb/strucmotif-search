@@ -8,13 +8,18 @@ import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.align.AlignmentResult;
+import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.result.StructureHit;
 import org.rcsb.strucmotif.domain.result.StructureSearchResult;
+import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
@@ -36,6 +41,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,12 +52,13 @@ import static org.mockito.Mockito.when;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 
 class StructureIntegrationTest {
+    private StrucmotifConfig strucmotifConfig;
     private StructureReader structureReader;
     private StructureContextBuilder contextBuilder;
 
     @BeforeEach
     public void init() {
-        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        this.strucmotifConfig = new StrucmotifConfig();
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
@@ -186,6 +193,62 @@ class StructureIntegrationTest {
         assertTrue(response.getHits().stream()
                 .map(StructureHit::getRootMeanSquareDeviation)
                 .anyMatch(s -> s < 0.5), "no low-RMSD hits observed");
+    }
+
+    /**
+     * This one is based on HELP-18632 & HELP-18634 and ensures that modified amino acids get resolved in a reasonable
+     * fashion.
+     */
+    @Test
+    void whenSearchingForModifiedAminoAcids_thenResolvedCorrectly() {
+        Structure forwardStructure = structureReader.readFromInputStream(getOriginalBcif("6tne"));
+        List<LabelSelection> forwardLabelSelections = List.of(new LabelSelection("A", "1", 21), // E
+                new LabelSelection("A", "1", 22), // D
+                new LabelSelection("A", "1", 67), // D
+//                new LabelSelection("A", "1", 95), // S // TODO would be nice to support this natively somehow, CB distance is 2
+                new LabelSelection("A", "1", 117)); // K
+
+        Structure backwardStructure = structureReader.readFromInputStream(getOriginalBcif("1zdm"));
+        List<LabelSelection> backwardLabelSelections = List.of(new LabelSelection("A", "1", 12), // D
+                new LabelSelection("A", "1", 13), // D
+                new LabelSelection("A", "1", 57), // BFD -> D
+//                new LabelSelection("A", "1", 87), // T
+                new LabelSelection("A", "1", 109)); // K
+
+        Collection<String> structures = Set.of("6TNE", "1ZDM");
+
+        List<Map<LabelAtomId, float[]>> forwardResidues = forwardStructure.manifestResidues(forwardLabelSelections);
+        List<Map<LabelAtomId, float[]>> backwardResidues = backwardStructure.manifestResidues(backwardLabelSelections);
+        AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
+        assertEquals(0.57, align.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
+
+        List<ResiduePairOccurrence> forwardDescriptors = new ResidueGraph(forwardStructure, forwardLabelSelections, forwardResidues, strucmotifConfig)
+                .residuePairOccurrencesSequential()
+                .collect(Collectors.toList());
+        List<ResiduePairOccurrence> backwardDescriptors = new ResidueGraph(backwardStructure, backwardLabelSelections, backwardResidues, strucmotifConfig)
+                .residuePairOccurrencesSequential()
+                .collect(Collectors.toList());
+        System.out.println(forwardDescriptors);
+        System.out.println(backwardDescriptors);
+
+        StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
+                .buildParameters()
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 21), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
+                .allowedStructures(structures)
+                .buildContext()
+                .run();
+        // TODO this fails because residue-identifier ambiguity for
+        assertEquals(3, forwardResult.getHits().size());
+        assertTrue(forwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("1ZDM")));
+
+        StructureSearchResult backwardResult = contextBuilder.defineByStructureAndSelection(backwardStructure, backwardLabelSelections)
+                .buildParameters()
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 12), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
+                .allowedStructures(structures)
+                .buildContext()
+                .run();
+        assertEquals(3, backwardResult.getHits().size());
+        assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("6TNE")));
     }
 
     /**

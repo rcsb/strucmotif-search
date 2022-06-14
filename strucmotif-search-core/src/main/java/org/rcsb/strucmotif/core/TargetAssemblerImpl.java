@@ -92,6 +92,9 @@ public class TargetAssemblerImpl implements TargetAssembler {
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                     .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
+            for (Map.Entry<Integer, InvertedIndexResiduePairIdentifier[]> e : residuePairIdentifiers.entrySet()) {
+                System.out.println(e.getKey() + " -> " + Arrays.toString(e.getValue()));
+            }
 
             // TODO try to avoid object creation
             // TODO try to consume stream directly
@@ -171,6 +174,9 @@ public class TargetAssemblerImpl implements TargetAssembler {
             i++;
         }
 
+        if (i == 0) {
+            return Stream.empty();
+        }
         return Arrays.stream(out).limit(i);
     }
 

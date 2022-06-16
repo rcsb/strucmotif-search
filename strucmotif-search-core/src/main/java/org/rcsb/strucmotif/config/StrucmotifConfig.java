@@ -124,6 +124,11 @@ public class StrucmotifConfig {
      */
     private String ccdUrl = "https://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz";
     /**
+     * Set to true to enable D-amino acids by mapping them to their L-counterpart. When false, D-amino acids will be
+     * treated as unknown component.
+     */
+    private boolean supportDAminoAcids = true;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -554,5 +559,21 @@ public class StrucmotifConfig {
      */
     public void setCcdUrl(String ccdUrl) {
         this.ccdUrl = ccdUrl;
+    }
+
+    /**
+     * True if D-amino acids are mapped to their L-counterpart.
+     * @return a Boolean
+     */
+    public boolean isSupportDAminoAcids() {
+        return supportDAminoAcids;
+    }
+
+    /**
+     * Update the handling of D-amino acids.
+     * @param supportDAminoAcids whether to allow D-amino acids
+     */
+    public void setSupportDAminoAcids(boolean supportDAminoAcids) {
+        this.supportDAminoAcids = supportDAminoAcids;
     }
 }

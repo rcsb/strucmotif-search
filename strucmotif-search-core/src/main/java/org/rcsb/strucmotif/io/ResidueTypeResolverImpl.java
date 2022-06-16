@@ -7,7 +7,6 @@ import org.rcsb.cif.model.ValueKind;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.ChemComp;
 import org.rcsb.cif.schema.mm.MmCifBlock;
-import org.rcsb.strucmotif.config.ModifiedResidueStrategy;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -29,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -68,33 +68,32 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     }
 
     public ResidueTypeResolverImpl(StrucmotifConfig strucmotifConfig) {
-        ModifiedResidueStrategy modifiedResidueStrategy = strucmotifConfig.getModifiedResidueStrategy();
-        String ccdUrl = strucmotifConfig.getCcdUrl();
-        this.mapping = initialize(modifiedResidueStrategy, ccdUrl);
+        this.mapping = initialize(strucmotifConfig);
         logger.info("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",
-                modifiedResidueStrategy,
+                strucmotifConfig.getModifiedResidueStrategy(),
                 mapping.keySet().size(),
                 mapping.values().stream().distinct().count());
     }
 
-    private Map<String, ResidueType> initialize(ModifiedResidueStrategy modifiedResidueStrategy, String ccdUrl) {
-        Map<String, ResidueType> out;
-        switch (modifiedResidueStrategy) {
+    private Map<String, ResidueType> initialize(StrucmotifConfig strucmotifConfig) {
+        Map<String, ResidueType> out = new ConcurrentHashMap<>();
+        switch (strucmotifConfig.getModifiedResidueStrategy()) {
             case NONE:
-                return THREE_LETTER_CODE_MAPPING;
+                break;
             case INTERNAL:
-                out = readResidueTypeMappingFile();
-                out.putAll(D_AMINO_ACID_MAPPING);
-                out.putAll(THREE_LETTER_CODE_MAPPING);
-                return out;
+                out.putAll(readResidueTypeMappingFile());
+                break;
             case CCD_PARENT:
-                out = createCcdMapping(ccdUrl);
-                out.putAll(D_AMINO_ACID_MAPPING);
-                out.putAll(THREE_LETTER_CODE_MAPPING);
-                return out;
+                out.putAll(createCcdMapping(strucmotifConfig.getCcdUrl()));
+                break;
             default:
-                throw new UnsupportedOperationException(modifiedResidueStrategy + " isn't implemented");
+                throw new UnsupportedOperationException(strucmotifConfig.getModifiedResidueStrategy() + " isn't implemented");
         }
+        if (strucmotifConfig.isSupportDAminoAcids()) {
+            out.putAll(D_AMINO_ACID_MAPPING);
+        }
+        out.putAll(THREE_LETTER_CODE_MAPPING);
+        return out;
     }
 
     @Override

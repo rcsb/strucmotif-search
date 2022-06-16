@@ -6,7 +6,8 @@ Unreleased
 ### Added
 - support for modified residues
 - support for pyrrolysine, selenocysteine, inosinic acid & 2'-deoxyuridine-5'-monophosphate
-- write index updates as temporary files and merge only in configurable intervals
+- support for D-amino acids
+- faster updates by writing index updates as temporary files and merging only in configurable intervals
 
 ### Bug fix
 - add 2'-Deoxythymidine-5'-monophosphate as `DT`

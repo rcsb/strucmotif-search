@@ -92,9 +92,6 @@ public class TargetAssemblerImpl implements TargetAssembler {
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                     .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
-            for (Map.Entry<Integer, InvertedIndexResiduePairIdentifier[]> e : residuePairIdentifiers.entrySet()) {
-                System.out.println(e.getKey() + " -> " + Arrays.toString(e.getValue()));
-            }
 
             // TODO try to avoid object creation
             // TODO try to consume stream directly
@@ -142,6 +139,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
 
     private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(InvertedIndex invertedIndex, ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
+        // the ugly case which requires the creation of both residuePairs
+        boolean ambiguous = descriptor.isAmbiguous();
         @SuppressWarnings("unchecked")
         Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
 
@@ -164,14 +163,28 @@ public class TargetAssemblerImpl implements TargetAssembler {
             }
 
             int[] occurrencePositions = bucket.getOccurrencePositions();
-            InvertedIndexResiduePairIdentifier[] identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length];
+            InvertedIndexResiduePairIdentifier[] identifiers;
+            if (ambiguous) {
+                identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length * 2];
 
-            for (int j = 0; j < occurrencePositions.length; j++) {
-                identifiers[j] = createResiduePairIdentifier(bucket, descriptor.isFlipped(), occurrencePositions[j]);
+                for (int j = 0; j < occurrencePositions.length; j++) {
+                    int o = occurrencePositions[j];
+                    int indexA = bucket.getIndex(o);
+                    int indexB = bucket.getIndex(o + 1);
+                    String structOperIdA = bucket.getStructOperId(o);
+                    String structOperIdB = bucket.getStructOperId(o + 1);
+                    identifiers[2 * j] = new InvertedIndexResiduePairIdentifier(indexA, indexB, structOperIdA, structOperIdB);
+                    identifiers[2 * j + 1] = new InvertedIndexResiduePairIdentifier(indexB, indexA, structOperIdB, structOperIdA);
+                }
+            } else {
+                identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length];
+
+                for (int j = 0; j < occurrencePositions.length; j++) {
+                    identifiers[j] = createResiduePairIdentifier(bucket, descriptor.isFlipped(), occurrencePositions[j]);
+                }
             }
 
-            out[i] = new Pair<>(structureIndex, identifiers);
-            i++;
+            out[i++] = new Pair<>(structureIndex, identifiers);
         }
 
         if (i == 0) {

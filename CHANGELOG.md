@@ -10,6 +10,7 @@ Unreleased
 
 ### Bug fix
 - add 2'-Deoxythymidine-5'-monophosphate as `DT`
+- fix behavior for ambiguous residue pair descriptors (like `DD-4-5-4`)
 
 strucmotif-search 0.15.2
 -------------

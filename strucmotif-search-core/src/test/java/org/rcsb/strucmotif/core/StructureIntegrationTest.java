@@ -10,7 +10,6 @@ import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
-import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
@@ -19,7 +18,6 @@ import org.rcsb.strucmotif.domain.result.StructureHit;
 import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
-import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
@@ -222,22 +220,12 @@ class StructureIntegrationTest {
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
         assertEquals(0.57, align.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 
-        List<ResiduePairOccurrence> forwardDescriptors = new ResidueGraph(forwardStructure, forwardLabelSelections, forwardResidues, strucmotifConfig)
-                .residuePairOccurrencesSequential()
-                .collect(Collectors.toList());
-        List<ResiduePairOccurrence> backwardDescriptors = new ResidueGraph(backwardStructure, backwardLabelSelections, backwardResidues, strucmotifConfig)
-                .residuePairOccurrencesSequential()
-                .collect(Collectors.toList());
-        System.out.println(forwardDescriptors);
-        System.out.println(backwardDescriptors);
-
         StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
                 .buildParameters()
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 21), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
                 .allowedStructures(structures)
                 .buildContext()
                 .run();
-        // TODO this fails because residue-identifier ambiguity for
         assertEquals(3, forwardResult.getHits().size());
         assertTrue(forwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("1ZDM")));
 
@@ -247,7 +235,7 @@ class StructureIntegrationTest {
                 .allowedStructures(structures)
                 .buildContext()
                 .run();
-        assertEquals(3, backwardResult.getHits().size());
+        assertEquals(5, backwardResult.getHits().size());
         assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("6TNE")));
     }
 

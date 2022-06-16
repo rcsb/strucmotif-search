@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.config;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.io.codec.ColferCodec;
 import org.rcsb.strucmotif.io.codec.MessagePackCodec;
+import org.rcsb.strucmotif.io.codec.JsonCodec;
 
 /**
  * How to persist inverted index data?
@@ -15,7 +16,11 @@ public enum InvertedIndexBackend {
     /**
      * Less compact and slower MessagePack in a common serialization format.
      */
-    MESSAGE_PACK(new MessagePackCodec(), ".msg");
+    MESSAGE_PACK(new MessagePackCodec(), ".msg"),
+    /**
+     * Useful for debugging.
+     */
+    JSON(new JsonCodec(), ".txt");
 
     private final BucketCodec bucketCodec;
     private final String extension;

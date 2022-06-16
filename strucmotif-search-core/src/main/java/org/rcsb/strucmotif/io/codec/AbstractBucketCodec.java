@@ -25,7 +25,7 @@ public abstract class AbstractBucketCodec implements BucketCodec {
         private final int[] operatorIndices;
         private final String[] operatorData;
 
-        private ArrayBucket(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
+        ArrayBucket(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
             this.structureIndices = structureIndices;
             this.positionOffsets = positionOffsets;
             this.positionData = positionData;

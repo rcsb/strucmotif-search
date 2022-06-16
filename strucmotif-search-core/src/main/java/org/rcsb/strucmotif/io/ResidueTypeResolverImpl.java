@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -76,7 +75,7 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     }
 
     private Map<String, ResidueType> initialize(StrucmotifConfig strucmotifConfig) {
-        Map<String, ResidueType> out = new ConcurrentHashMap<>();
+        Map<String, ResidueType> out = new HashMap<>();
         switch (strucmotifConfig.getModifiedResidueStrategy()) {
             case NONE:
                 break;

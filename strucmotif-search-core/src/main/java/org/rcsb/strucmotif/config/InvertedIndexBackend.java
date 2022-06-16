@@ -20,7 +20,7 @@ public enum InvertedIndexBackend {
     /**
      * Useful for debugging.
      */
-    JSON(new JsonCodec(), ".txt");
+    JSON(new JsonCodec(), ".json");
 
     private final BucketCodec bucketCodec;
     private final String extension;

@@ -111,54 +111,50 @@ public enum ResidueType {
     /**
      * 2'-Deoxyinosine-5'-monophosphate
      */
-    DEOXYINOSINE("DI", "8", PolymerType.NUCLEOTIDE),
+    DEOXYINOSINE("DI", "3", PolymerType.NUCLEOTIDE),
     /**
      * 2'-Deoxythymidine-5'-monophosphate
      */
-    DEOXYTHYMIDINE("DT", "3", PolymerType.NUCLEOTIDE),
+    DEOXYTHYMIDINE("DT", "4", PolymerType.NUCLEOTIDE),
     /**
      * 2'-Deoxyuridine-5'-monophosphate
      */
-    DEOXYURIDINE("DU", "B", PolymerType.NUCLEOTIDE),
+    DEOXYURIDINE("DU", "5", PolymerType.NUCLEOTIDE),
 
     // RNA
     /**
      * Adenosine-5'-monophosphate
      */
-    ADENOSINE("A", "4", PolymerType.NUCLEOTIDE),
+    ADENOSINE("A", "6", PolymerType.NUCLEOTIDE),
     /*
      * Cytidine-5'-monophosphate
      */
-    CYTIDINE("C", "5", PolymerType.NUCLEOTIDE), // 30
+    CYTIDINE("C", "7", PolymerType.NUCLEOTIDE), // 30
     /**
      * Guanosine-5'-monophosphate
      */
-    GUANOSINE("G", "6", PolymerType.NUCLEOTIDE),
+    GUANOSINE("G", "8", PolymerType.NUCLEOTIDE),
     /**
      * Inosinic acid
      */
     INOSINIC_ACID("I", "9", PolymerType.NUCLEOTIDE),
     /**
-     * Thymidine-5'-monophosphate
-     */
-    THYMIDINE("T", "J", PolymerType.NUCLEOTIDE),
-    /**
      * Uridine-5'-monophosphate
      */
-    URIDINE("U", "7", PolymerType.NUCLEOTIDE), // 34
+    URIDINE("U", "B", PolymerType.NUCLEOTIDE), // 33
 
     /**
      * Some unknown amino acid.
      */
-    UNKNOWN_AMINO_ACID("UNK", "X", PolymerType.AMINO_ACID),
+    UNKNOWN_AMINO_ACID("UNK", "J", PolymerType.AMINO_ACID),
     /**
      * Some unknown nucleotide.
      */
-    UNKNOWN_NUCLEOTIDE("N", "Z", PolymerType.NUCLEOTIDE),
+    UNKNOWN_NUCLEOTIDE("N", "X", PolymerType.NUCLEOTIDE),
     /**
      * Some unknown, yet polymeric component.
      */
-    UNKNOWN_COMPONENT("?", "_", PolymerType.UNKNOWN_POLYMER); // 37
+    UNKNOWN_COMPONENT("?", "Z", PolymerType.UNKNOWN_POLYMER); // 36
 
     // used to retrieve the correct entity from the label_comp_id field
     private final String threeLetterCode;

@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 /**
  * Update the test resources in the core-module.
  */
-public class UpdateTestIndexFiles {
+public class UpdateTestFiles {
     /**
      * Update index files used for testing.
      * @param args absolute path to test resource directory of core module

@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.io;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.model.ValueKind;
 import org.rcsb.cif.schema.StandardSchemata;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,6 +61,15 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
             Map.entry("DVA", ResidueType.VALINE),
             Map.entry("DNE", ResidueType.LEUCINE));
     private final Map<String, ResidueType> mapping;
+
+    // Lazy initialization if no JSON is desired
+    static class GsonHolder {
+        static final Gson instance = new Gson();
+    }
+
+    static class MapTypeHolder {
+        static final Type instance = new TypeToken<Map<String, String>>(){}.getType();
+    }
 
     private static final String MAPPING_FILE_PATH = "strucmotif-search-core/src/main/resources/" + MAPPING_FILE;
     // updates the residue-type-mapping.json file
@@ -107,10 +118,10 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     private static Map<String, ResidueType> readResidueTypeMappingFile() {
         try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(MAPPING_FILE)) {
             Objects.requireNonNull(inputStream, MAPPING_FILE + " isn't available!");
-            Map<?, ?> map = new Gson().fromJson(new InputStreamReader(inputStream), Map.class);
+            Map<String, String> map = GsonHolder.instance.fromJson(new InputStreamReader(inputStream), MapTypeHolder.instance);
             return map.entrySet()
                     .stream()
-                    .map(e -> Map.entry((String) e.getKey(), ofThreeLetterCode((String) e.getValue()).orElseThrow()))
+                    .map(e -> Map.entry(e.getKey(), ofThreeLetterCode(e.getValue()).orElseThrow()))
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         } catch (IOException e) {
             throw new UncheckedIOException(e);

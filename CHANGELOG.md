@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-Unreleased
+strucmotif-search 0.16.0
 -------------
 ### Added
 - support for modified residues
@@ -12,6 +12,10 @@ Unreleased
 ### Bug fix
 - add 2'-Deoxythymidine-5'-monophosphate as `DT`
 - fix behavior for ambiguous residue pair descriptors (like `DD-4-5-4`)
+
+### Breaking changes
+- don't index `T` anymore
+- internal codes of residue types rearranged
 
 strucmotif-search 0.15.2
 -------------

@@ -145,10 +145,10 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
                     parent = D_AMINO_ACID_MAPPING.get(parent).getThreeLetterCode();
                 }
                 // ignore everything that doesn't resolve to something hard-coded
-                ResidueType parentType = ofThreeLetterCode(parent).orElseThrow();
-                if (parentType == ResidueType.UNKNOWN_COMPONENT) continue;
+                Optional<ResidueType> parentType = ofThreeLetterCode(parent);
+                if (parentType.isEmpty()) continue;
 
-                map.put(chemComp.getId().get(0), parentType);
+                map.put(chemComp.getId().get(0), parentType.get());
             }
 
             return map;

@@ -62,11 +62,12 @@ might require a full load.
 
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
+| `ccd-url` | URL to the chemical component dictionary | wwPDB |
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
 | `commit-interval` | How many chunks to process before committing to index | `25` |
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
-| `download-tries` | Number of tries to download structure data during update | `1` |
+| `download-tries` | Number of tries to download structure data during update | `3` |
 | `entry-holdings-url` | Location of RCSB PDB holdings file | RCSB PDB Data API |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
 | `inverted-index-gzip` | Gzip index files? | `false` |
@@ -77,6 +78,7 @@ might require a full load.
 | `residue-quality-cutoff` | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0` |
 | `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `qa_metric_local_above_cutoff` |
 | `root-path` | Path where data files will be written | `/opt/data/` |
+| `support-d-amino-acids` | Map D-amino acids to their L-counterpart | `true` |
 | `undefined-assemblies` | Index structures without assembly information? | `true` |
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `2400` |
 

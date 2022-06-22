@@ -126,7 +126,7 @@ public enum ResidueType {
      * Adenosine-5'-monophosphate
      */
     ADENOSINE("A", "6", PolymerType.NUCLEOTIDE),
-    /*
+    /**
      * Cytidine-5'-monophosphate
      */
     CYTIDINE("C", "7", PolymerType.NUCLEOTIDE), // 30

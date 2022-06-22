@@ -67,6 +67,7 @@ public class StructureWriterImpl implements StructureWriter {
 
     /**
      * Construct a writer.
+     * @param residueTypeResolver the resolver instance
      * @param strucmotifConfig the global config
      */
     public StructureWriterImpl(ResidueTypeResolver residueTypeResolver, StrucmotifConfig strucmotifConfig) {

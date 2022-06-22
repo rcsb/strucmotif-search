@@ -522,7 +522,7 @@ public class StrucmotifConfig {
 
     /**
      * Update how often temporary files are committed to the inverted index during update. Low values are slower but
-     * also safer & more resilient.
+     * also safer and more resilient.
      * @param commitInterval an integer greater 0
      */
     public void setCommitInterval(int commitInterval) {

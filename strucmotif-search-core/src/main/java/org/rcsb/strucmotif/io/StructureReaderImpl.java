@@ -37,6 +37,10 @@ public class StructureReaderImpl implements StructureReader {
     private static final Pattern RANGE_PATTERN = Pattern.compile("-");
     private final ResidueTypeResolver residueTypeResolver;
 
+    /**
+     * Create an instance.
+     * @param residueTypeResolver the resolver instance
+     */
     public StructureReaderImpl(ResidueTypeResolver residueTypeResolver) {
         this.residueTypeResolver = residueTypeResolver;
     }

@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Shared functionality of a bucket codec implementation.
+ */
 public abstract class AbstractBucketCodec implements BucketCodec {
     @Override
     public ByteArrayOutputStream encode(Bucket bucket) throws IOException {

@@ -33,6 +33,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Maps three-letter-code to their hard-coded {@link ResidueType}. If there's no hard-coded value present (which happens
+ * for non-standard components), the parent component will be used, if none exists the unknown component is returned.
+ */
 @Service
 public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     private static final Logger logger = LoggerFactory.getLogger(ResidueTypeResolverImpl.class);
@@ -72,11 +76,19 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     }
 
     private static final String MAPPING_FILE_PATH = "strucmotif-search-core/src/main/resources/" + MAPPING_FILE;
-    // updates the residue-type-mapping.json file
+    /**
+     * Updates the residue-type-mapping.json file.
+     * @param args empty
+     * @throws IOException if IO fails
+     */
     public static void main(String[] args) throws IOException {
         updateResidueTypeMappingFile();
     }
 
+    /**
+     * Construct an instance.
+     * @param strucmotifConfig the global config
+     */
     public ResidueTypeResolverImpl(StrucmotifConfig strucmotifConfig) {
         this.mapping = initialize(strucmotifConfig);
         logger.info("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",

@@ -115,7 +115,11 @@ public class StructureReaderImpl implements StructureReader {
         private short[] convertCoords(double[] array) {
             short[] out = new short[array.length];
             for (int i = 0; i < out.length; i++) {
-                // TODO need underflow/overflow check here? 3j3q e.g. is in range of [0.0, 1100.0] and more than safe
+                /*
+                min values: [-9455, -9694, -9147] @ [4V4G, 4F46, 3SXO]
+                max values: [27864, 22349, 30178] @ [1Q5C, 1Q55, 3HQV]
+                 */
+                // TODO need underflow/overflow check here?
                 out[i] = (short) Math.round(array[i] * 10);
             }
             return out;
@@ -141,6 +145,14 @@ public class StructureReaderImpl implements StructureReader {
             int[] out = new int[offsets.size()];
             for (int i = 0; i < out.length; i++) {
                 out[i] = offsets.get(i);
+            }
+            return out;
+        }
+
+        private short[] convertLabelSeqId(List<Integer> labelSeqIdCollapsed) {
+            short[] out = new short[labelSeqIdCollapsed.size()];
+            for (int i = 0; i < out.length; i++) {
+                out[i] = labelSeqIdCollapsed.get(i).shortValue();
             }
             return out;
         }
@@ -184,7 +196,7 @@ public class StructureReaderImpl implements StructureReader {
             return new Structure(structureIdentifier,
                     convertStrings(chainIds),
                     convertOffsets(chainOffsets),
-                    convertOffsets(labelSeqIdCollapsed),
+                    convertLabelSeqId(labelSeqIdCollapsed),
                     convertOffsets(residueOffsets),
                     convertResidueTypes(residueTypes),
                     labelAtomId,

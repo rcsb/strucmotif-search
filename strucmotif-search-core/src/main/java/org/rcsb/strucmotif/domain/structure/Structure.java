@@ -19,7 +19,7 @@ public class Structure {
     private final String structureIdentifier;
     private final String[] chainIds;
     private final int[] chainOffsets;
-    private final int[] labelSeqId;
+    private final short[] labelSeqId;
     private final int chainCount;
     private final int residueCount;
     private final int atomCount;
@@ -54,7 +54,7 @@ public class Structure {
     public Structure(String structureIdentifier,
                      String[] chainIds,
                      int[] chainOffsets,
-                     int[] labelSeqId,
+                     short[] labelSeqId,
                      int[] residueOffsets,
                      byte[] residueTypes,
                      byte[] labelAtomId,
@@ -131,7 +131,7 @@ public class Structure {
         int chainStart = chainOffsets[chainIndex];
         int chainEnd = chainOffsets[chainIndex + 1];
         // on the sub-array binary search works
-        int index = Arrays.binarySearch(this.labelSeqId, chainStart, chainEnd, labelSeqId);
+        int index = Arrays.binarySearch(this.labelSeqId, chainStart, chainEnd, (short) labelSeqId);
         if (index < 0) {
             throw new NoSuchElementException("Didn't find residue with label_seq_id " + labelSeqId + " in chain " + labelAsymId);
         }

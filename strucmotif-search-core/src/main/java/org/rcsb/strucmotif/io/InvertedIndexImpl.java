@@ -4,7 +4,6 @@ import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.structure.PolymerType;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;

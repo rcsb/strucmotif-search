@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.16.1
+-------------
+### Bug fix
+- store `label_seq_id` as short[]
+
 strucmotif-search 0.16.0
 -------------
 ### Added

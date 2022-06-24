@@ -235,7 +235,8 @@ class StructureIntegrationTest {
                 .allowedStructures(structures)
                 .buildContext()
                 .run();
-        assertEquals(5, backwardResult.getHits().size());
+        assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.getStructureIdentifier() + h.getLabelSelections()).distinct().count(), "there are duplicate hits");
+        assertEquals(3, backwardResult.getHits().size());
         assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("6TNE")));
     }
 

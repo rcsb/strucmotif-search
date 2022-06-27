@@ -87,10 +87,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
             long s = System.nanoTime();
             ResiduePairOccurrence residuePairOccurrence = queryStructure.getResiduePairOccurrences().get(i);
             ResiduePairDescriptor residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
+            boolean ambiguous = residuePairDescriptor.isAmbiguous() && i > 0;
 
             // sort into target structures
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                    .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
+                    .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored, ambiguous))
                     .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
 
             // TODO try to avoid object creation
@@ -137,10 +138,8 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return result;
     }
 
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(InvertedIndex invertedIndex, ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
+    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(InvertedIndex invertedIndex, ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored, boolean ambiguous) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
-        // the ugly case which requires the creation of both residuePairs
-        boolean ambiguous = descriptor.isAmbiguous();
         @SuppressWarnings("unchecked")
         Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
 

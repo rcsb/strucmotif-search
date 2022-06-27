@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-Unreleased
+strucmotif-search 0.16.2
 -------------
 ### Bug fix
 - under some circumstances duplicated hits were reported

@@ -93,7 +93,8 @@ public class TargetStructure {
                     InvertedIndexResiduePairIdentifier previousResiduePairIdentifier = path[k];
 
                     Overlap queryOverlap = overlapProfile[k];
-                    if (!queryOverlap.test(previousResiduePairIdentifier, candidateResiduePairIdentifier)) {
+                    Overlap candidateOverlap = Overlap.ofResiduePairIdentifiers(previousResiduePairIdentifier, candidateResiduePairIdentifier);
+                    if (queryOverlap != candidateOverlap) {
                         continue p;
                     }
                 }

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.16.3
+-------------
+### Bug fix
+- rework Overlap detection for better performance
+
 strucmotif-search 0.16.2
 -------------
 ### Bug fix

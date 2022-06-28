@@ -63,7 +63,7 @@ class StructureIntegrationTest {
         this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
-        InvertedIndexImpl invertedIndex = new InvertedIndexImpl(strucmotifConfig) {
+        InvertedIndexImpl invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
             @Override
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here

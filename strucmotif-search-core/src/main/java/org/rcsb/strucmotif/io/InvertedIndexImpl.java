@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
@@ -56,13 +57,15 @@ public class InvertedIndexImpl implements InvertedIndex {
     private final String extension;
     private final BucketCodec bucketCodec;
     private final Pattern tempExtension;
+    private final ThreadPool threadPool;
     private boolean paths;
 
     /**
      * Construct an inverted index instance.
+     * @param threadPool shared pool for parallel operations
      * @param strucmotifConfig the config
      */
-    public InvertedIndexImpl(StrucmotifConfig strucmotifConfig) {
+    public InvertedIndexImpl(ThreadPool threadPool, StrucmotifConfig strucmotifConfig) {
         this.basePath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX_DIRECTORY);
         this.gzipped = strucmotifConfig.isInvertedIndexGzip();
         InvertedIndexBackend backend = strucmotifConfig.getInvertedIndexBackend();
@@ -70,6 +73,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.extension = backend.getExtension() + (gzipped ? ".gz" : "");
         logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);
         this.tempExtension = Pattern.compile(".*" + extension.replace(".", "\\.") + "\\.[0-9]+$");
+        this.threadPool = threadPool;
         this.paths = false;
     }
 
@@ -96,6 +100,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         logger.info("Committing temporary files to index");
         try {
             Map<Path, Set<Path>> toMerge = new ConcurrentHashMap<>();
+            // TODO pool
             try (Stream<Path> paths = temporaryFiles()) {
                 AtomicInteger counter = new AtomicInteger();
                 paths.peek(p -> progress(counter, 50000, "{} files scanned")).forEach(p -> {
@@ -109,6 +114,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             logger.info("Merging {} bins", toMerge.size());
 
             AtomicInteger counter = new AtomicInteger();
+            // TODO pool
             toMerge.entrySet()
                     .parallelStream()
                     .peek(p -> progress(counter, 50000, "{} files merged"))
@@ -162,6 +168,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             logger.info("Collecting all temporary index files at {}", basePath);
             AtomicInteger counter = new AtomicInteger();
             try (Stream<Path> paths = temporaryFiles()) {
+                // TODO pool
                 paths.peek(p -> progress(counter, 10000, "{} files deleted"))
                         .forEach(p -> {
                             try {
@@ -236,6 +243,7 @@ public class InvertedIndexImpl implements InvertedIndex {
 
             AtomicInteger counter = new AtomicInteger();
             // walk whole lookup
+            // TODO pool
             indexFiles()
                     .peek(path -> progress(counter, 10000, "{} bins of inverted index cleaned"))
                     .map(this::createResiduePairDescriptor)
@@ -314,6 +322,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         try {
             logger.info("Collecting all known descriptors at {}", basePath);
             AtomicInteger counter = new AtomicInteger();
+            // TODO pool
             return indexFiles()
                     .peek(p -> progress(counter, 10000, "{} bins scanned"))
                     .map(this::createResiduePairDescriptor)
@@ -328,6 +337,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         try {
             logger.info("Collecting all known keys at {}", basePath);
             AtomicInteger counter = new AtomicInteger();
+            // TODO pool
             return indexFiles()
                     .peek(p -> progress(counter, 10000, "{} bins scanned"))
                     .map(this::createResiduePairDescriptor)

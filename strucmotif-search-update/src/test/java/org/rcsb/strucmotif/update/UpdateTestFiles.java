@@ -60,8 +60,8 @@ public class UpdateTestFiles {
         StructureReader structureReader = new StructureReaderImpl(residueTypeResolver);
         StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
         StructureDataProvider structureDataProvider = new StructureDataProviderImpl(structureReader, structureWriter, strucmotifConfig);
-        InvertedIndex invertedIndex = new InvertedIndexImpl(strucmotifConfig);
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        InvertedIndex invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig);
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         StrucmotifUpdate strucmotifUpdate = new StrucmotifUpdate(stateRepository, structureDataProvider, invertedIndex, strucmotifConfig, threadPool, structureIndexProvider);
         strucmotifUpdate.run(cmd.toArray(String[]::new));

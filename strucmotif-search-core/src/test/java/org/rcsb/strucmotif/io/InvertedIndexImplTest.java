@@ -3,6 +3,8 @@ package org.rcsb.strucmotif.io;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.core.ThreadPool;
+import org.rcsb.strucmotif.core.ThreadPoolImpl;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
@@ -20,7 +22,9 @@ class InvertedIndexImplTest {
 
     @BeforeEach
     public void init() {
-        invertedIndex = new InvertedIndexImpl(new StrucmotifConfig()) {
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
             @Override
             protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
                 // null is okay here

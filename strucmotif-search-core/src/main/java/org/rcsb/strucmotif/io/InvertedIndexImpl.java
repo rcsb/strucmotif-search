@@ -98,7 +98,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             Map<Path, Set<Path>> toMerge = new ConcurrentHashMap<>();
             try (Stream<Path> paths = temporaryFiles()) {
                 AtomicInteger counter = new AtomicInteger();
-                paths.peek(p -> progress(counter, 10000, "{} files scanned")).forEach(p -> {
+                paths.peek(p -> progress(counter, 50000, "{} files scanned")).forEach(p -> {
                     String filename = p.getFileName().toString();
                     Path persistentPath = p.resolveSibling(filename.substring(0, filename.lastIndexOf(".")));
                     Set<Path> bin = toMerge.computeIfAbsent(persistentPath, e -> Collections.synchronizedSet(new HashSet<>()));
@@ -108,8 +108,10 @@ public class InvertedIndexImpl implements InvertedIndex {
 
             logger.info("Merging {} bins", toMerge.size());
 
+            AtomicInteger counter = new AtomicInteger();
             toMerge.entrySet()
                     .parallelStream()
+                    .peek(p -> progress(counter, 50000, "{} files merged"))
                     .forEach(entry -> {
                         Path destination = entry.getKey();
                         Set<Path> sources = entry.getValue();

@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+Unreleased
+-------------
+### Bug fix
+- make sure that `InvertedIndex` impl honors `number-threads` parameter
+
 strucmotif-search 0.16.3
 -------------
 ### Bug fix

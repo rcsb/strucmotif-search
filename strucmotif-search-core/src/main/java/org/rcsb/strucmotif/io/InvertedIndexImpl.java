@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -100,65 +101,79 @@ public class InvertedIndexImpl implements InvertedIndex {
         logger.info("Committing temporary files to index");
         try {
             Map<Path, Set<Path>> toMerge = new ConcurrentHashMap<>();
-            // TODO pool
             try (Stream<Path> paths = temporaryFiles()) {
                 AtomicInteger counter = new AtomicInteger();
-                paths.peek(p -> progress(counter, 50000, "{} files scanned")).forEach(p -> {
-                    String filename = p.getFileName().toString();
-                    Path persistentPath = p.resolveSibling(filename.substring(0, filename.lastIndexOf(".")));
-                    Set<Path> bin = toMerge.computeIfAbsent(persistentPath, e -> Collections.synchronizedSet(new HashSet<>()));
-                    bin.add(persistentPath.resolveSibling(p));
-                });
+                threadPool.submit(() -> {
+                    paths.peek(p -> progress(counter, 50000, "{} files scanned")).forEach(p -> {
+                        String filename = p.getFileName().toString();
+                        Path persistentPath = p.resolveSibling(filename.substring(0, filename.lastIndexOf(".")));
+                        Set<Path> bin = toMerge.computeIfAbsent(persistentPath, e -> Collections.synchronizedSet(new HashSet<>()));
+                        bin.add(persistentPath.resolveSibling(p));
+                    });
+                    return null;
+                }).get();
+            } catch (ExecutionException e) {
+                throw new RuntimeException("Parallel operation failed - Thread raised exception");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Parallel operation failed - Thread was interrupted");
             }
 
             logger.info("Merging {} bins", toMerge.size());
 
             AtomicInteger counter = new AtomicInteger();
-            // TODO pool
-            toMerge.entrySet()
-                    .parallelStream()
-                    .peek(p -> progress(counter, 50000, "{} files merged"))
-                    .forEach(entry -> {
-                        Path destination = entry.getKey();
-                        Set<Path> sources = entry.getValue();
+            threadPool.submit(() -> {
+                toMerge.entrySet()
+                        .parallelStream()
+                        .peek(p -> progress(counter, 50000, "{} files merged"))
+                        .forEach(entry -> {
+                            Path destination = entry.getKey();
+                            Set<Path> sources = entry.getValue();
 
-                        try {
-                            Map<Integer, Collection<ResiduePairIdentifier>> merged = new HashMap<>();
-                            // populate with persistent data
-                            if (Files.exists(destination)) {
-                                try (InputStream inputStream = getInputStream(destination)) {
-                                    addAll(merged, bucketCodec.decode(inputStream),  null);
+                            try {
+                                Map<Integer, Collection<ResiduePairIdentifier>> merged = new HashMap<>();
+                                // populate with persistent data
+                                if (Files.exists(destination)) {
+                                    try (InputStream inputStream = getInputStream(destination)) {
+                                        addAll(merged, bucketCodec.decode(inputStream), null);
+                                    }
+                                } else {
+                                    // there's only a single file and the destination exists not yet (aka no merging to be done)
+                                    if (sources.size() == 1) {
+                                        Path source = sources.stream().findFirst().orElseThrow();
+                                        Files.move(source, destination);
+                                        logger.debug("Moved {} to {}", source, destination);
+                                        return;
+                                    }
                                 }
-                            } else {
-                                // there's only a single file and the destination exists not yet (aka no merging to be done)
-                                if (sources.size() == 1) {
-                                    Path source = sources.stream().findFirst().orElseThrow();
-                                    Files.move(source, destination);
-                                    logger.debug("Moved {} to {}", source, destination);
-                                    return;
-                                }
-                            }
 
-                            // merge all new, temporary data
-                            for (Path p : sources) {
-                                try (InputStream inputStream = getInputStream(p)) {
-                                    addAll(merged, bucketCodec.decode(inputStream), null);
+                                // merge all new, temporary data
+                                for (Path p : sources) {
+                                    try (InputStream inputStream = getInputStream(p)) {
+                                        addAll(merged, bucketCodec.decode(inputStream), null);
+                                    }
                                 }
-                            }
-                            ByteArrayOutputStream outputStream = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
-                            write(destination, outputStream);
-                            outputStream.close();
+                                ByteArrayOutputStream outputStream = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
+                                write(destination, outputStream);
+                                outputStream.close();
 
-                            for (Path source : sources) {
-                                Files.delete(source);
+                                for (Path source : sources) {
+                                    Files.delete(source);
+                                }
+                                logger.debug("Merged {} into {}", sources, destination);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException(e);
                             }
-                            logger.debug("Merged {} into {}", sources, destination);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    });
+                        });
+                return null;
+            }).get();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
         }
     }
 
@@ -168,18 +183,25 @@ public class InvertedIndexImpl implements InvertedIndex {
             logger.info("Collecting all temporary index files at {}", basePath);
             AtomicInteger counter = new AtomicInteger();
             try (Stream<Path> paths = temporaryFiles()) {
-                // TODO pool
-                paths.peek(p -> progress(counter, 10000, "{} files deleted"))
-                        .forEach(p -> {
-                            try {
-                                Files.delete(p);
-                            } catch (IOException e) {
-                                throw new UncheckedIOException(e);
-                            }
-                        });
+                threadPool.submit(() -> {
+                    paths.peek(p -> progress(counter, 10000, "{} files deleted"))
+                            .forEach(p -> {
+                                try {
+                                    Files.delete(p);
+                                } catch (IOException e) {
+                                    throw new UncheckedIOException(e);
+                                }
+                            });
+                    return null;
+                }).get();
             }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
         }
     }
 
@@ -243,13 +265,18 @@ public class InvertedIndexImpl implements InvertedIndex {
 
             AtomicInteger counter = new AtomicInteger();
             // walk whole lookup
-            // TODO pool
-            indexFiles()
-                    .peek(path -> progress(counter, 10000, "{} bins of inverted index cleaned"))
-                    .map(this::createResiduePairDescriptor)
-                    .forEach(residuePairDescriptor -> delete(residuePairDescriptor, removals));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            threadPool.submit(() -> {
+                indexFiles()
+                        .peek(path -> progress(counter, 10000, "{} bins of inverted index cleaned"))
+                        .map(this::createResiduePairDescriptor)
+                        .forEach(residuePairDescriptor -> delete(residuePairDescriptor, removals));
+                return null;
+            }).get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
         }
     }
 
@@ -322,13 +349,15 @@ public class InvertedIndexImpl implements InvertedIndex {
         try {
             logger.info("Collecting all known descriptors at {}", basePath);
             AtomicInteger counter = new AtomicInteger();
-            // TODO pool
-            return indexFiles()
-                    .peek(p -> progress(counter, 10000, "{} bins scanned"))
-                    .map(this::createResiduePairDescriptor)
-                    .collect(Collectors.toSet());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            return threadPool.submit(() -> indexFiles()
+                        .peek(p -> progress(counter, 10000, "{} bins scanned"))
+                        .map(this::createResiduePairDescriptor)
+                        .collect(Collectors.toSet())).get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
         }
     }
 
@@ -337,16 +366,18 @@ public class InvertedIndexImpl implements InvertedIndex {
         try {
             logger.info("Collecting all known keys at {}", basePath);
             AtomicInteger counter = new AtomicInteger();
-            // TODO pool
-            return indexFiles()
+            return threadPool.submit(() -> indexFiles()
                     .peek(p -> progress(counter, 10000, "{} bins scanned"))
                     .map(this::createResiduePairDescriptor)
                     .map(this::getBucket)
                     .map(Bucket::getStructureIndices)
                     .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+                    .collect(Collectors.toSet())).get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
         }
     }
 

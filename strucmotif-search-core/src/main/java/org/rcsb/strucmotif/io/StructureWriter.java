@@ -2,16 +2,14 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.schema.mm.MmCifFile;
 
-import java.nio.file.Path;
-
 /**
  * The contract to write optimized structure data that don't contain non-polymers, hydrogen, model afters #1 etc.
  */
 public interface StructureWriter {
     /**
-     * Write structure data to the file system.
+     * Converts a structure data to its binary representation.
      * @param source a MmCifFile to process
-     * @param destination where to write data
+     * @return a byte[] with the file content or null if the structure would be empty
      */
-    void write(MmCifFile source, Path destination);
+    byte[] write(MmCifFile source);
 }

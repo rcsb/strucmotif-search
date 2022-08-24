@@ -5,9 +5,6 @@ import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,12 +13,12 @@ import java.util.stream.Collectors;
  * Gives access to the decoded data of an inverted index bucket.
  */
 public class InvertedIndexBucket implements Bucket {
-    private static final Map<Integer, String> EMPTY_MAP = Collections.emptyMap();
-    private static final int[] EMPTY_ARRAY = new int[0];
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
     /**
      * An empty bucket which will refuse to iterate on structures or occurrences.
      */
-    public static final InvertedIndexBucket EMPTY_BUCKET = new InvertedIndexBucket(EMPTY_ARRAY, EMPTY_ARRAY, EMPTY_ARRAY, EMPTY_ARRAY, new String[0]) {
+    public static final InvertedIndexBucket EMPTY_BUCKET = new InvertedIndexBucket(EMPTY_INT_ARRAY, EMPTY_INT_ARRAY, EMPTY_INT_ARRAY, EMPTY_INT_ARRAY, EMPTY_STRING_ARRAY) {
         @Override
         public boolean hasNextStructure() {
             return false;
@@ -45,7 +42,8 @@ public class InvertedIndexBucket implements Bucket {
     private int positionPointer; // the current position in the positionData array
     private int lastPosition; // the last valid position in the positionData array that references the first position of a residue pair (after that the array will reference the next structure or end)
 
-    private final Map<Integer, String> operators;
+    private final int[] operatorIndices;
+    private final String[] operatorData;
 
     /**
      * Construct an inverted index bucket from source array.
@@ -60,12 +58,11 @@ public class InvertedIndexBucket implements Bucket {
         this.positionOffsets = positionOffsets;
         this.positionData = positionData;
         if (operatorIndices.length > 0) {
-            this.operators = new HashMap<>();
-            for (int i = 0; i < operatorIndices.length; i++) {
-                operators.put(operatorIndices[i], operatorData[i]);
-            }
+            this.operatorIndices = operatorIndices;
+            this.operatorData = operatorData;
         } else {
-            this.operators = EMPTY_MAP;
+            this.operatorIndices = EMPTY_INT_ARRAY;
+            this.operatorData = EMPTY_STRING_ARRAY;
         }
 
         this.structurePointer = -1;
@@ -170,7 +167,11 @@ public class InvertedIndexBucket implements Bucket {
 
     @Override
     public String getStructOperId1() {
-        return operators.getOrDefault(positionPointer, Transformation.DEFAULT_OPERATOR);
+        int index = Arrays.binarySearch(operatorIndices, positionPointer);
+        if (index < 0) {
+            return Transformation.DEFAULT_OPERATOR;
+        }
+        return operatorData[index];
     }
 
     /**
@@ -179,12 +180,20 @@ public class InvertedIndexBucket implements Bucket {
      * @return a String
      */
     public String getStructOperId(int i) {
-        return operators.getOrDefault(i, Transformation.DEFAULT_OPERATOR);
+        int index = Arrays.binarySearch(operatorIndices, i);
+        if (index < 0) {
+            return Transformation.DEFAULT_OPERATOR;
+        }
+        return operatorData[index];
     }
 
     @Override
     public String getStructOperId2() {
-        return operators.getOrDefault(positionPointer + 1, Transformation.DEFAULT_OPERATOR);
+        int index = Arrays.binarySearch(operatorIndices, positionPointer + 1);
+        if (index < 0) {
+            return Transformation.DEFAULT_OPERATOR;
+        }
+        return operatorData[index];
     }
 
     @Override

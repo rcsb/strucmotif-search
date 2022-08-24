@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,10 +17,10 @@ public interface StateRepository {
      * Returns all registered revisions.
      * @return a collection of ids and their corresponding revision
      */
-    Collection<StructureInformation> selectKnown();
+    Set<StructureInformation> selectKnown();
 
     /**
-     * Scans the entire index and returns all referenced structure indices.
+     * Returns all referenced structure indices.
      * @return a collection of all structure indices
      */
     default Set<Integer> reportKnownKeys() {
@@ -36,29 +35,29 @@ public interface StateRepository {
      * Problematic if not the empty set after an update.
      * @return a collection of ids
      */
-    Collection<String> selectDirty();
+    Set<String> selectDirty();
 
     /**
      * Insert into 'known' collection.
      * @param additions a collection of ids
      */
-    void insertKnown(Collection<StructureInformation> additions);
+    void insertKnown(Set<StructureInformation> additions);
 
     /**
      * Insert into 'dirty' collection.
      * @param additions a collection of ids
      */
-    void insertDirty(Collection<String> additions);
+    void insertDirty(Set<String> additions);
 
     /**
      * Remove from 'known' collection.
      * @param removals a collection of ids
      */
-    void deleteKnown(Collection<String> removals);
+    void deleteKnown(Set<String> removals);
 
     /**
      * Remove from 'dirty' collection.
      * @param removals a collection of ids
      */
-    void deleteDirty(Collection<String> removals);
+    void deleteDirty(Set<String> removals);
 }

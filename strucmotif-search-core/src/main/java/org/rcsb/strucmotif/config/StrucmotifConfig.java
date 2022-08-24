@@ -69,14 +69,6 @@ public class StrucmotifConfig {
      */
     private int renumberedCoordinatePrecision = 1;
     /**
-     * Gzip renumbered files? Yields smaller files that are slower to read.
-     */
-    private boolean renumberedGzip = true;
-    /**
-     * Gzip inverted index files? Yields smaller files that are slower to read.
-     */
-    private boolean invertedIndexGzip = false;
-    /**
      * Number of allowed tries during CIF download/parsing before an exception is thrown.
      */
     private int downloadTries = 5;
@@ -139,11 +131,27 @@ public class StrucmotifConfig {
     /**
      * Name of the renumbered directory.
      */
-    public static final String RENUMBERED_DIRECTORY = "renumbered";
+    public static final String RENUMBERED = "renumbered";
     /**
      * Name of the inverted index directory.
      */
-    public static final String INDEX_DIRECTORY = "index";
+    public static final String INDEX = "index";
+    /**
+     * Extension of FFindex data files.
+     */
+    public static final String DATA_EXT = ".data";
+    /**
+     * Extension of FFindex index files.
+     */
+    public static final String INDEX_EXT = ".ffindex";
+    /**
+     * Extension of temporary files while updating FFindex files.
+     */
+    public static final String TMP_EXT = ".wip";
+    /**
+     * Extension of temporart inverted index files while updating.
+     */
+    public static final String PARTIAL_EXT = ".partial";
 
     /**
      * Maximum distance of residue pairs.
@@ -349,38 +357,6 @@ public class StrucmotifConfig {
      */
     public void setRenumberedCoordinatePrecision(int renumberedCoordinatePrecision) {
         this.renumberedCoordinatePrecision = renumberedCoordinatePrecision;
-    }
-
-    /**
-     * Gzip renumbered files?
-     * @return a Boolean
-     */
-    public boolean isRenumberedGzip() {
-        return renumberedGzip;
-    }
-
-    /**
-     * Set gzip renumbered files?
-     * @param renumberedGzip a Boolean
-     */
-    public void setRenumberedGzip(boolean renumberedGzip) {
-        this.renumberedGzip = renumberedGzip;
-    }
-
-    /**
-     * Gzip inverted index files?
-     * @return a Boolean
-     */
-    public boolean isInvertedIndexGzip() {
-        return invertedIndexGzip;
-    }
-
-    /**
-     * Set gzip inverted index files.
-     * @param invertedIndexGzip a Boolean
-     */
-    public void setInvertedIndexGzip(boolean invertedIndexGzip) {
-        this.invertedIndexGzip = invertedIndexGzip;
     }
 
     /**

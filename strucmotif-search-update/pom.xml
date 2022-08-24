@@ -10,7 +10,7 @@
     <artifactId>strucmotif-search-update</artifactId>
 
     <properties>
-        <log4j.version>2.17.2</log4j.version>
+        <log4j.version>2.18.0</log4j.version>
     </properties>
 
     <dependencies>
@@ -22,19 +22,9 @@
 
         <!-- TODO better solution? these are needed when JAR is used directly but should not be propagated if module is used as dependency -->
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.1</version>
         </dependency>
 
         <!-- test dependencies -->
@@ -42,7 +32,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <version>2.7.0</version>
+            <version>2.7.3</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.junit.vintage</groupId>
@@ -63,7 +53,7 @@
                     <dependency>
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
-                        <version>2.7.0</version>
+                        <version>2.7.3</version>
                     </dependency>
                 </dependencies>
                 <configuration>

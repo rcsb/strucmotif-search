@@ -71,11 +71,6 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
     }
 
     @Override
-    public void clearTemporaryFiles() {
-        immutable();
-    }
-
-    @Override
     public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
         return index.getOrDefault(residuePairDescriptor, InvertedIndexBucket.EMPTY_BUCKET);
     }

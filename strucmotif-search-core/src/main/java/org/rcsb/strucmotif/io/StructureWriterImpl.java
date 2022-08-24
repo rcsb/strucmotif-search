@@ -30,7 +30,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -72,12 +71,11 @@ public class StructureWriterImpl implements StructureWriter {
      */
     public StructureWriterImpl(ResidueTypeResolver residueTypeResolver, StrucmotifConfig strucmotifConfig) {
         int precision = strucmotifConfig.getRenumberedCoordinatePrecision();
-        boolean gzipped = strucmotifConfig.isRenumberedGzip();
         this.options = CifOptions.builder()
                 .encodingStrategyHint("atom_site", "Cartn_x", "delta", precision)
                 .encodingStrategyHint("atom_site", "Cartn_y", "delta", precision)
                 .encodingStrategyHint("atom_site", "Cartn_z", "delta", precision)
-                .gzip(gzipped)
+                .gzip(true)
                 .build();
         this.residueQualityStrategy = strucmotifConfig.getResidueQualityStrategy();
         this.residueQualityCutoff = strucmotifConfig.getResidueQualityCutoff();
@@ -90,7 +88,7 @@ public class StructureWriterImpl implements StructureWriter {
     }
 
     @Override
-    public void write(MmCifFile source, Path destination) {
+    public byte[] write(MmCifFile source) {
         MmCifBlock block = source.getFirstBlock();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
@@ -202,11 +200,11 @@ public class StructureWriterImpl implements StructureWriter {
 
         // skip empty files
         if (outputFile.getBlocks().get(0).getAtomSite().getRowCount() == 0) {
-            return;
+            return null;
         }
 
         try {
-            CifIO.writeBinary(outputFile, destination, options);
+            return CifIO.writeBinary(outputFile, options);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

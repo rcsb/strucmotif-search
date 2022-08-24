@@ -32,7 +32,6 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +67,7 @@ class MotifIntegrationTest {
 
         StateRepository stateRepository = new StateRepositoryImpl(strucmotifConfig) {
             @Override
-            public Collection<StructureInformation> selectKnown() {
+            public Set<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
                 return new BufferedReader(new InputStreamReader(inputStream))
                         .lines()

@@ -3,16 +3,15 @@ package org.rcsb.strucmotif.update;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.core.ThreadPoolImpl;
-import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
 import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StateRepositoryImpl;
-import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureDataProviderImpl;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
@@ -42,31 +41,31 @@ class UpdateIntegrationTest {
     private static final List<TestCases> UPDATE_OVERLAP = List.of(TestCases.PDB_2RLL, TestCases.PDB_4TUT);
     private StrucmotifConfig strucmotifConfig;
     private Path path;
-    private Path renumberedPath;
     private StateRepository state;
-    private StructureDataProvider data;
-    private InvertedIndex index;
+    private StructureDataProviderImpl data;
+    private InvertedIndexImpl index;
     private StrucmotifUpdate update;
 
     @BeforeEach
     public void setup() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
-        strucmotifConfig.setUndefinedAssemblies(true);
         // ensure merging and side-by-side temporary files happen
         strucmotifConfig.setUpdateChunkSize(1);
+        strucmotifConfig.setCommitInterval(1);
+        strucmotifConfig.setInvertedIndexBackend(InvertedIndexBackend.COLFER);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
-        Path indexPath = path.resolve("index");
-        Files.createDirectories(indexPath);
-        this.renumberedPath = path.resolve("renumbered");
-        Files.createDirectories(renumberedPath);
+        Files.createFile(path.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.DATA_EXT));
+        Files.createFile(path.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT));
+        Files.createFile(path.resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.DATA_EXT));
+        Files.createFile(path.resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.INDEX_EXT));
 
         strucmotifConfig.setRootPath(path.toFile().getAbsolutePath());
         this.state = new StateRepositoryImpl(strucmotifConfig);
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
         StructureReader reader = new StructureReaderImpl(residueTypeResolver);
         StructureWriter writer = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
-        this.data = new StructureDataProviderImpl(reader, writer, strucmotifConfig);
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        this.data = new StructureDataProviderImpl(reader, writer, threadPool, strucmotifConfig);
         this.index = new InvertedIndexImpl(threadPool, strucmotifConfig);
 
         init();
@@ -75,7 +74,7 @@ class UpdateIntegrationTest {
     /**
      * Some operations may need to rerun to update application state.
      */
-    private void init() {
+    private void init() throws IOException {
         ThreadPool pool = new ThreadPoolImpl(strucmotifConfig);
         StructureIndexProvider keys = new StructureIndexProviderImpl(state);
         this.update = new StrucmotifUpdate(state, data, index, strucmotifConfig, pool, keys) {
@@ -84,6 +83,8 @@ class UpdateIntegrationTest {
                 return TestCases.getInputStream(item.getStructureIdentifier());
             }
         };
+        this.index.setUp();
+        this.data.setUp();
     }
 
     @AfterEach
@@ -125,10 +126,10 @@ class UpdateIntegrationTest {
         assertStateCounts(8, 8, 8);
     }
 
-    private void assertStateCounts(int stateCount, int structureCount, int indexCount) throws IOException {
-        assertEquals(stateCount, state.reportKnownKeys().size(), stateCount == 0 ? "State should be empty" : "State count don't match");
-        assertEquals(structureCount, Files.list(renumberedPath).count(), structureCount == 0 ? "Structure data dir should be empty" : "Structure count don't match");
-        assertEquals(indexCount, index.reportKnownKeys().size(), indexCount == 0 ? "Index should be empty" : "Index count don't match");
+    private void assertStateCounts(int stateCount, int structureCount, int indexCount) {
+        assertEquals(stateCount, state.reportKnownKeys().size(), stateCount == 0 ? "State should be empty" : "State counts don't match");
+        assertEquals(structureCount, data.reportKnownFiles().size(), structureCount == 0 ? "Structure data dir should be empty" : "Structure counts don't match");
+        assertEquals(indexCount, index.reportKnownKeys().size(), indexCount == 0 ? "Index should be empty" : "Index counts don't match");
     }
 
     @Test

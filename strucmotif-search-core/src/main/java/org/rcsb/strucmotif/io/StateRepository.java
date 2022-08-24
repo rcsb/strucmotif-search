@@ -21,7 +21,7 @@ public interface StateRepository {
     Collection<StructureInformation> selectKnown();
 
     /**
-     * Scans the entire index and returns all referenced structure indices.
+     * Returns all referenced structure indices.
      * @return a collection of all structure indices
      */
     default Set<Integer> reportKnownKeys() {

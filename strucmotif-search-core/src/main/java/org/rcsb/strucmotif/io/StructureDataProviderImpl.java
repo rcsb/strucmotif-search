@@ -1,8 +1,13 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.schema.mm.MmCifFile;
+import org.rcsb.ffindex.AppendableFileBundle;
+import org.rcsb.ffindex.FileBundleIO;
+import org.rcsb.ffindex.ReadableFileBundle;
+import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.math.Partition;
@@ -12,19 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Default implementation of a structure data provider.
@@ -36,9 +47,19 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final StructureWriter renumberedStructureWriter;
     private final StrucmotifConfig strucmotifConfig;
     private final String dataSource;
-    private final Path renumberedDirectory;
+    private final ThreadPool threadPool;
+    // 'production' data that can be queried
+    private final Path dataPath;
+    private final Path indexPath;
+    private ReadableFileBundle fileBundle;
+    // 'update' data that holds the partial delta of new data (to be merged into production files)
+    private final Path partialDataPath;
+    private final Path partialIndexPath;
+    private AppendableFileBundle partialFileBundle;
+    // paths for 'temporary' bundle written when 'production' data is getting modified
+    private final Path temporaryDataPath;
+    private final Path temporaryIndexPath;
     private final String extension;
-    private boolean paths;
     private boolean caching;
     // keys must be upper-case
     private Map<String, Structure> structureCache;
@@ -47,35 +68,34 @@ public class StructureDataProviderImpl implements StructureDataProvider {
      * Construct a structure provider.
      * @param structureReader the reader
      * @param structureWriter the writer
+     * @param threadPool shared pool for parallel operations
      * @param strucmotifConfig the config
      */
     @Autowired
     public StructureDataProviderImpl(StructureReader structureReader,
                                      StructureWriter structureWriter,
-                                     StrucmotifConfig strucmotifConfig) {
+                                     ThreadPool threadPool,
+                                     StrucmotifConfig strucmotifConfig) throws IOException {
         this.structureReader = structureReader;
         this.renumberedStructureWriter = structureWriter;
         this.strucmotifConfig = strucmotifConfig;
         this.dataSource = strucmotifConfig.getDataSource();
-        this.renumberedDirectory = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED_DIRECTORY);
-        this.extension = strucmotifConfig.isRenumberedGzip() ? ".bcif.gz" : ".bcif";
+        this.threadPool = threadPool;
+        this.dataPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.DATA_EXT);
+        this.indexPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.INDEX_EXT);
+        this.partialDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
+        this.partialIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
+        this.temporaryDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.TMP_EXT);
+        this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
+        this.extension = ".bcif.gz";
 
-        logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {} - gzipping: {}",
+        logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {}",
                 strucmotifConfig.getDataSource(),
                 strucmotifConfig.getCifFetchUrl(),
-                strucmotifConfig.getRenumberedCoordinatePrecision(),
-                strucmotifConfig.isRenumberedGzip());
+                strucmotifConfig.getRenumberedCoordinatePrecision());
+        initializeFileBundle();
 
-        this.paths = false;
         this.caching = false;
-    }
-
-    private void ensureRenumberedPathExists() {
-        try {
-            Files.createDirectories(renumberedDirectory);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
     }
 
     @SuppressWarnings("Duplicates")
@@ -102,21 +122,64 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         return Paths.get(prepareUri(dataSource, structureIdentifier));
     }
 
-    private Path getRenumberedStructurePath(String structureIdentifier) {
-        return renumberedDirectory.resolve(structureIdentifier + extension);
+    private String getRenumberedFilename(String structureIdentifier) {
+        return structureIdentifier + extension;
     }
 
     private InputStream getRenumberedInputStream(String structureIdentifier) {
         try {
-            return Files.newInputStream(getRenumberedStructurePath(structureIdentifier));
+            return toInputStream(fileBundle.readFile(getRenumberedFilename(structureIdentifier)));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
     }
 
-    @Override
+    private InputStream toInputStream(ByteBuffer byteBuffer) {
+        byteBuffer.rewind();
+        byte[] out = new byte[byteBuffer.remaining()];
+        byteBuffer.get(out);
+        return new ByteArrayInputStream(out);
+    }
+
     @PostConstruct
-    public void initializeRenumberedStructureCache() throws IOException {
+    public void setUp() throws IOException {
+        initializeFileBundle();
+        Files.deleteIfExists(partialDataPath);
+        Files.deleteIfExists(partialIndexPath);
+        initializePartialFileBundle();
+        Files.deleteIfExists(temporaryDataPath);
+        Files.deleteIfExists(temporaryIndexPath);
+
+        initializeRenumberedStructureCache();
+    }
+
+    @PreDestroy
+    public void tearDown() throws IOException {
+        fileBundle.close();
+        partialFileBundle.close();
+        Files.deleteIfExists(partialDataPath);
+        Files.deleteIfExists(partialIndexPath);
+        Files.deleteIfExists(temporaryDataPath);
+        Files.deleteIfExists(temporaryIndexPath);
+    }
+
+    private void initializeFileBundle() throws IOException {
+        logger.debug("Opening renumbered file bundle ({}, {})", dataPath, indexPath);
+        this.fileBundle = FileBundleIO.openBundle(dataPath, indexPath).inReadOnlyMode();
+    }
+
+    private void initializePartialFileBundle() throws IOException {
+        logger.debug("Creating partial renumbered file bundle ({}, {})", partialDataPath, partialIndexPath);
+        this.partialFileBundle = FileBundleIO.openBundle(partialDataPath, partialIndexPath).inReadWriteMode();
+    }
+
+    private WritableFileBundle initializeTemporaryFileBundle() throws IOException {
+        logger.debug("Creating temporary renumbered file bundle ({}, {})", temporaryDataPath, temporaryIndexPath);
+        return FileBundleIO.openBundle(temporaryDataPath, temporaryIndexPath).inWriteOnlyMode();
+    }
+
+    @Override
+    public void initializeRenumberedStructureCache() {
         InMemoryStrategy strategy = strucmotifConfig.getInMemoryStrategy();
         if (strategy == InMemoryStrategy.OFF) {
             logger.info("Structure data will be read from file-system");
@@ -128,17 +191,12 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             logger.info("Structure data will be kept in memory - start loading...");
 
             this.caching = true;
-            List<Path> files;
-            try (Stream<Path> pathStream = Files.walk(renumberedDirectory)) {
-                files = pathStream.parallel()
-                        .filter(path -> !Files.isDirectory(path))
-                        .collect(Collectors.toList());
-            }
+            List<String> filenames = fileBundle.filenames().collect(Collectors.toList());
             long start = System.nanoTime();
             this.structureCache = new HashMap<>();
 
             int loadingChunkSize = strucmotifConfig.getLoadingChunkSize();
-            Partition<Path> partitions = new Partition<>(files, loadingChunkSize);
+            Partition<String> partitions = new Partition<>(filenames, loadingChunkSize);
             logger.info("Formed {} partitions of {} structures",
                     partitions.size(),
                     loadingChunkSize);
@@ -146,13 +204,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             for (int i = 0; i < partitions.size(); i++) {
                 String partitionContext = (i + 1) + " / " + partitions.size();
 
-                List<Path> partition = partitions.get(i);
+                List<String> partition = partitions.get(i);
                 logger.info("[{}] Start loading partition", partitionContext);
 
                 // this will run on strucmotif-instances only: let's ignore thread-parameter
                 Map<String, Structure> buffer = partition.parallelStream()
-                        .map(this::loadRenumberedStructure)
-                        .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
+                        .map(this::loadRenumberedStructurePair)
+                        .collect(Collectors.toConcurrentMap(Pair::getFirst, Pair::getSecond));
 
                 this.structureCache.putAll(buffer);
             }
@@ -167,14 +225,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         }
     }
 
-    private Pair<String, Structure> loadRenumberedStructure(Path path) {
-        try {
-            String pdbId = path.toFile().getName().split("\\.")[0];
-            Structure structure = readFromInputStream(Files.newInputStream(path));
-            return new Pair<>(pdbId, structure);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    private Pair<String, Structure> loadRenumberedStructurePair(String filename) {
+        String pdbId = filename.split("\\.")[0];
+        return new Pair<>(pdbId, readFromInputStream(getRenumberedInputStream(pdbId)));
     }
 
     @Override
@@ -201,6 +254,17 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         if (caching) {
             return structureCache.get(structureIdentifier);
         }
+
+        // during the update, this file might only be known in the partial update file
+        String filename = getRenumberedFilename(structureIdentifier);
+        if (partialFileBundle.containsFile(filename)) {
+            try {
+                return readFromInputStream(toInputStream(partialFileBundle.readFile(filename)));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+
         return readFromInputStream(getRenumberedInputStream(structureIdentifier));
     }
 
@@ -216,9 +280,8 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             return readFromInputStream(Files.newInputStream(originalPath));
         } catch (IOException e1) {
             try {
-                Path renumberedPath = getRenumberedStructurePath(structureIdentifier);
-                if (Files.isReadable(renumberedPath)) {
-                    return readFromInputStream(Files.newInputStream(renumberedPath));
+                if (fileBundle.containsFile(getRenumberedFilename(structureIdentifier))) {
+                    return readFromInputStream(getRenumberedInputStream(structureIdentifier));
                 } else {
                     return readFromInputStream(getCifFetchUrl(structureIdentifier).openStream());
                 }
@@ -230,22 +293,91 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     @Override
     public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile) {
-        if (!paths) {
-            ensureRenumberedPathExists();
-            this.paths = true;
+        byte[] bytes = renumberedStructureWriter.write(mmCifFile);
+        if (bytes == null) {
+            logger.warn("[{}] No valid polymer chain(s) - Not writing empty file", structureIdentifier);
+            return;
         }
-        renumberedStructureWriter.write(mmCifFile, getRenumberedStructurePath(structureIdentifier));
-    }
 
-    @Override
-    public void deleteRenumbered(String structureIdentifier) {
         try {
-            Path renumberedPath = getRenumberedStructurePath(structureIdentifier);
-            if (Files.exists(renumberedPath)) {
-                Files.delete(getRenumberedStructurePath(structureIdentifier));
-            }
+            partialFileBundle.writeFile(getRenumberedFilename(structureIdentifier), ByteBuffer.wrap(bytes));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @Override
+    public void deleteRenumbered(Collection<String> structureIdentifiers) {
+        Set<String> filenamesToDrop = structureIdentifiers.stream()
+                .map(this::getRenumberedFilename)
+                .collect(Collectors.toSet());
+
+        try {
+            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
+            fileBundle.filenames()
+                    .filter(f -> !filenamesToDrop.contains(f))
+                    .forEach(f -> copyBetweenBundles(f, fileBundle, temporaryFileBundle));
+
+            // update file bundle by replacing the production files with the updated files
+            fileBundle.close();
+            temporaryFileBundle.close();
+            Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
+            initializeFileBundle();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private void copyBetweenBundles(String filename, ReadableFileBundle source, WritableFileBundle destination) {
+        try {
+            ByteBuffer byteBuffer = source.readFile(filename);
+            destination.writeFile(filename, byteBuffer);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @Override
+    public void commit() {
+        try {
+            // retain original data
+            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
+            threadPool.submit(() -> {
+                fileBundle.filenames()
+                        .parallel()
+                        .forEach(f -> copyBetweenBundles(f, fileBundle, temporaryFileBundle));
+                return null;
+            }).get();
+            threadPool.submit(() -> {
+                partialFileBundle.filenames()
+                        .parallel()
+                        .forEach(f -> copyBetweenBundles(f, partialFileBundle, temporaryFileBundle));
+                return null;
+            }).get();
+
+            // delete partial file bundle and swap temporary files with real ones
+            fileBundle.close();
+            partialFileBundle.close();
+            temporaryFileBundle.close();
+            Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.deleteIfExists(partialDataPath);
+            Files.deleteIfExists(partialIndexPath);
+            initializeFileBundle();
+            initializePartialFileBundle();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        } catch (ExecutionException e) {
+            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
+        }
+    }
+
+    @Override
+    public Set<String> reportKnownFiles() {
+        return fileBundle.filenames().collect(Collectors.toSet());
     }
 }

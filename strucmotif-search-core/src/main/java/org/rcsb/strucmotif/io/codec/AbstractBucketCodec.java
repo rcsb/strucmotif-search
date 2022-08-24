@@ -3,8 +3,8 @@ package org.rcsb.strucmotif.io.codec;
 import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 public abstract class AbstractBucketCodec implements BucketCodec {
     @Override
-    public ByteArrayOutputStream encode(Bucket bucket) throws IOException {
+    public ByteBuffer encode(Bucket bucket) throws IOException {
         ArrayBucket arrays = toArrays(bucket);
         return encode(arrays.getStructureIndices(), arrays.getPositionOffsets(), arrays.getPositionData(), arrays.getOperatorIndices(), arrays.getOperatorData());
     }

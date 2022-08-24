@@ -127,9 +127,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 logger.info("Recovering from dirty state");
                 recover(dirtyStructureIdentifiers);
             }
-
-            logger.info("Making sure that no temporary files linger");
-            invertedIndex.clearTemporaryFiles();
         }
 
         logger.info("Starting update - Operation: {}, {} ids ({})",
@@ -210,6 +207,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
     }
 
     private void commit(Context context, Collection<String> known) {
+        logger.info("Committing data on {} structures", context.processed.size());
         // mark as dirty before index update
         Set<String> dirty = context.processed.stream()
                 .map(StructureInformation::getStructureIdentifier)
@@ -217,6 +215,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 .filter(id -> !known.contains(id))
                 .collect(Collectors.toSet());
         stateRepository.insertDirty(dirty);
+        structureDataProvider.commit();
         invertedIndex.commit();
 
         // processed contains all StructureIdentifiers + corresponding revision
@@ -279,12 +278,12 @@ public class StrucmotifUpdate implements CommandLineRunner {
         int count = context.structureCounter.incrementAndGet();
         String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
 
-        // fails when file is missing (should not happen) or does not contain valid polymer chain
+        // fails when file is missing (should not happen at this point)
         Structure structure;
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] [{}] No valid polymer chain(s) - Skipping",
+            logger.warn("[{}] [{}] No renumbered source file present - Skipping",
                     context.partitionContext,
                     structureContext);
             return;
@@ -323,6 +322,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     (System.nanoTime() - start) / 1000 / 1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         } catch (Exception e) {
             logger.warn("[{}] [{}] Residue graph determination failed",
                     context.partitionContext,
@@ -388,15 +388,11 @@ public class StrucmotifUpdate implements CommandLineRunner {
         // mark everything that will be touched as dirty in case this operation fails
         stateRepository.insertDirty(identifiers);
 
-        AtomicInteger counter = new AtomicInteger();
-        for (String structureIdentifier : identifiers) {
-            logger.info("[{}] Removing renumbered structure for entry: {}",
-                    counter.incrementAndGet() + " / " + identifiers.size(),
-                    structureIdentifier);
-            structureDataProvider.deleteRenumbered(structureIdentifier);
-        }
+        // modifying the renumbered file bundle is expensive and is done as batch
+        logger.info("Removing {} renumbered structure", identifiers.size());
+        structureDataProvider.deleteRenumbered(identifiers);
 
-        // inverted index is expensive and should be done as batch
+        // modifying the inverted index is expensive and is done as batch
         if (!identifiers.isEmpty()) {
             Set<Integer> mapped = identifiers.stream()
                     .filter(structureIndexProvider::containsKey)
@@ -494,9 +490,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }
-
-        logger.info("Making sure that no temporary files linger");
-        invertedIndex.clearTemporaryFiles();
     }
 
     private void printUsage() {

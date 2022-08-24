@@ -4,12 +4,15 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.rcsb.ffindex.FileBundleIO;
+import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
+import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
@@ -23,6 +26,7 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
@@ -32,11 +36,13 @@ import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
 import org.rcsb.strucmotif.io.StateRepositoryImpl;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
+import org.rcsb.strucmotif.io.codec.ColferCodec;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +61,7 @@ class StructureIntegrationTest {
     private StructureContextBuilder contextBuilder;
 
     @BeforeEach
-    public void init() {
+    public void init() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
@@ -63,16 +69,21 @@ class StructureIntegrationTest {
         this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
-        InvertedIndexImpl invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
+        ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
+        ColferCodec bucketCodec = new ColferCodec();
+        InvertedIndex invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
             @Override
-            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
-                // null is okay here
-                InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("index/" + residuePairDescriptor + ".colf");
-                if (inputStream == null) {
-                    throw new IOException();
+            public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
+                String filename = residuePairDescriptor.toString().substring(0, 2) + "/" + residuePairDescriptor + ".colf";
+                if (!fileBundle.containsFile(filename)) {
+                    return InvertedIndexBucket.EMPTY_BUCKET;
                 }
-                return inputStream;
+
+                try {
+                    return bucketCodec.decode(fileBundle.readFile(filename));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             }
         };
 

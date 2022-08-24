@@ -7,6 +7,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,7 +30,7 @@ public class Helpers {
     public static void main(String[] args) throws IOException {
         // use this to update inverted index files
         printTestIdentifiers();
-        copyTestFiles();
+        copyTestFiles(); // TODO update
     }
 
     private static void printTestIdentifiers() {
@@ -48,7 +49,7 @@ public class Helpers {
 
         Files.copy(dataRoot.resolve(StrucmotifConfig.STATE_KNOWN_LIST), resourcePath.resolve(StrucmotifConfig.STATE_KNOWN_LIST), StandardCopyOption.REPLACE_EXISTING);
 
-        Files.list(dataRoot.resolve(StrucmotifConfig.RENUMBERED_DIRECTORY))
+        Files.list(dataRoot.resolve(StrucmotifConfig.RENUMBERED))
                 .filter(p -> p.toFile().getName().endsWith(".bcif.gz"))
                 .forEach(source -> {
                     try {
@@ -66,7 +67,7 @@ public class Helpers {
                 .forEach(destination -> {
                     try {
                         String name = destination.toFile().getName();
-                        Path source = dataRoot.resolve(StrucmotifConfig.INDEX_DIRECTORY).resolve(name.substring(0, 2)).resolve(name);
+                        Path source = dataRoot.resolve(StrucmotifConfig.INDEX).resolve(name.substring(0, 2)).resolve(name);
                         System.out.println(source + " -> " + destination);
                         Files.copy(source, destination.getParent().resolve(name), StandardCopyOption.REPLACE_EXISTING);
                     } catch (IOException e) {
@@ -148,5 +149,9 @@ public class Helpers {
         return Arrays.stream(labelSeqIds)
                 .mapToObj(i -> new LabelSelection(labelAsymId, null, i))
                 .collect(Collectors.toList());
+    }
+
+    public static Path getResourceAsPath(String path) {
+        return Paths.get(new File("src/test/resources/").getAbsolutePath()).resolve(path);
     }
 }

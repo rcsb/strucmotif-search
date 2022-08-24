@@ -47,7 +47,8 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        structureWriter.write(mmCifFile, outputPath);
+        byte[] bytes = structureWriter.write(mmCifFile);
+        Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
@@ -68,7 +69,8 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        structureWriter.write(mmCifFile, outputPath);
+        byte[] bytes = structureWriter.write(mmCifFile);
+        Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
@@ -90,7 +92,8 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        structureWriter.write(mmCifFile, outputPath);
+        byte[] bytes = structureWriter.write(mmCifFile);
+        Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
@@ -112,7 +115,8 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        structureWriter.write(mmCifFile, outputPath);
+        byte[] bytes = structureWriter.write(mmCifFile);
+        Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
         AtomSite atomSite = read.getFirstBlock().getAtomSite();

@@ -12,7 +12,7 @@ import java.util.stream.Stream;
  * The specification on how to insert and select residue pair occurrences. Update operate is not directly supported
  * (rather invalid/obsolete identifiers have to be removed manually and subsequently the new data can be inserted).
  */
-public interface InvertedIndex {
+public interface InvertedIndex extends Committable {
     /**
      * Insert operation for new data.
      * @param residuePairDescriptor the bin for which new data should be written
@@ -20,16 +20,6 @@ public interface InvertedIndex {
      * @param batchId extension of the temporary file to be written
      */
     void insert(ResiduePairDescriptor residuePairDescriptor, Bucket residuePairOccurrences, int batchId);
-
-    /**
-     * Process all temporary files and make them available via {@link #select(ResiduePairDescriptor)}.
-     */
-    void commit();
-
-    /**
-     * Remove all temporary files (e.g., from a failed update operation).
-     */
-    void clearTemporaryFiles();
 
     /**
      * Perform lookup for a particular bin.

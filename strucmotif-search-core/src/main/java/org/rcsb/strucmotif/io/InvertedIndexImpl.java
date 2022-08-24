@@ -1,5 +1,9 @@
 package org.rcsb.strucmotif.io;
 
+import org.rcsb.ffindex.AppendableFileBundle;
+import org.rcsb.ffindex.FileBundleIO;
+import org.rcsb.ffindex.ReadableFileBundle;
+import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
@@ -16,33 +20,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.nio.file.FileVisitOption;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * The implementation of the inverted index.
@@ -52,14 +50,20 @@ public class InvertedIndexImpl implements InvertedIndex {
     private static final Logger logger = LoggerFactory.getLogger(InvertedIndexImpl.class);
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getInternalCode, Function.identity()));
-    private static final int BUFFER_SIZE = 65536;
-    private final Path basePath;
-    private final boolean gzipped;
     private final String extension;
     private final BucketCodec bucketCodec;
-    private final Pattern tempExtension;
     private final ThreadPool threadPool;
-    private boolean paths;
+    // 'production' data that can be queried
+    private final Path dataPath;
+    private final Path indexPath;
+    private ReadableFileBundle fileBundle;
+    // 'update' data that holds the partial delta of new data (to be merged into production files)
+    private final Path partialDataPath;
+    private final Path partialIndexPath;
+    private AppendableFileBundle partialFileBundle;
+    // paths for 'temporary' bundle written when 'production' data is getting modified
+    private final Path temporaryDataPath;
+    private final Path temporaryIndexPath;
 
     /**
      * Construct an inverted index instance.
@@ -67,32 +71,67 @@ public class InvertedIndexImpl implements InvertedIndex {
      * @param strucmotifConfig the config
      */
     public InvertedIndexImpl(ThreadPool threadPool, StrucmotifConfig strucmotifConfig) {
-        this.basePath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX_DIRECTORY);
-        this.gzipped = strucmotifConfig.isInvertedIndexGzip();
-        InvertedIndexBackend backend = strucmotifConfig.getInvertedIndexBackend();
-        this.bucketCodec = backend.getBucketCodec();
-        this.extension = backend.getExtension() + (gzipped ? ".gz" : "");
-        logger.info("Index files will {}be gzipped - extension: {}", gzipped ? "" : "not ", extension);
-        this.tempExtension = Pattern.compile(".*" + extension.replace(".", "\\.") + "\\.[0-9]+$");
+        InvertedIndexBackend invertedIndexBackend = strucmotifConfig.getInvertedIndexBackend();
+        this.bucketCodec = invertedIndexBackend.getBucketCodec();
+        this.extension = invertedIndexBackend.getExtension();
+        logger.info("Extension of inverted index files: {}", extension);
         this.threadPool = threadPool;
-        this.paths = false;
+        this.dataPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + StrucmotifConfig.DATA_EXT);
+        this.indexPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT);
+        this.partialDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
+        this.partialIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
+        this.temporaryDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.TMP_EXT);
+        this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
+    }
+
+    @PostConstruct
+    public void setUp() throws IOException {
+        initializeFileBundle();
+        Files.deleteIfExists(partialDataPath);
+        Files.deleteIfExists(partialIndexPath);
+        initializePartialFileBundle();
+        Files.deleteIfExists(temporaryDataPath);
+        Files.deleteIfExists(temporaryIndexPath);
+    }
+
+    @PreDestroy
+    public void tearDown() throws IOException {
+        fileBundle.close();
+        partialFileBundle.close();
+        Files.deleteIfExists(partialDataPath);
+        Files.deleteIfExists(partialIndexPath);
+        Files.deleteIfExists(temporaryDataPath);
+        Files.deleteIfExists(temporaryIndexPath);
+    }
+
+    private void initializeFileBundle() throws IOException {
+        logger.debug("Opening index file bundle ({}, {})", dataPath, indexPath);
+        this.fileBundle = FileBundleIO.openBundle(dataPath, indexPath).inReadOnlyMode();
+    }
+
+    private void initializePartialFileBundle() throws IOException {
+        logger.debug("Creating partial index file bundle ({}, {})", partialDataPath, partialIndexPath);
+        this.partialFileBundle = FileBundleIO.openBundle(partialDataPath, partialIndexPath).inReadWriteMode();
+    }
+
+    private WritableFileBundle initializeTemporaryFileBundle() throws IOException {
+        logger.debug("Creating temporary index file bundle ({}, {})", temporaryDataPath, temporaryIndexPath);
+        return FileBundleIO.openBundle(temporaryDataPath, temporaryIndexPath).inWriteOnlyMode();
     }
 
     @Override
     public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket bucket, int batchId) {
-        if (!paths) {
-            ensureDirectoriesExist();
-            this.paths = true;
+        if (bucket.getResiduePairCount() == 0) {
+            throw new IllegalStateException("won't write empty bucket for " + residuePairDescriptor);
         }
 
+        // write a temporary file (appended by the batchId)
+        String filename = getFilename(residuePairDescriptor, batchId);
         try {
-            // write a temporary file (appended by the batchId)
-            Path tmpPath = getPath(residuePairDescriptor, batchId);
-            try (ByteArrayOutputStream outputStream = bucketCodec.encode(bucket)) {
-                write(tmpPath, outputStream);
-            }
+            ByteBuffer byteBuffer = bucketCodec.encode(bucket);
+            partialFileBundle.writeFile(filename, byteBuffer);
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw new UncheckedIOException("can't write " + filename, e);
         }
     }
 
@@ -100,183 +139,147 @@ public class InvertedIndexImpl implements InvertedIndex {
     public void commit() {
         logger.info("Committing temporary files to index");
         try {
-            Map<Path, Set<Path>> toMerge = new ConcurrentHashMap<>();
-            try (Stream<Path> paths = temporaryFiles()) {
-                AtomicInteger counter = new AtomicInteger();
-                threadPool.submit(() -> {
-                    paths.peek(p -> progress(counter, 50000, "{} files scanned")).forEach(p -> {
-                        String filename = p.getFileName().toString();
-                        Path persistentPath = p.resolveSibling(filename.substring(0, filename.lastIndexOf(".")));
-                        Set<Path> bin = toMerge.computeIfAbsent(persistentPath, e -> Collections.synchronizedSet(new HashSet<>()));
-                        bin.add(persistentPath.resolveSibling(p));
+            // this captures the original data
+            Map<String, Set<String>> toMerge = indexFilenames()
+                    .parallel()
+                    .collect(Collectors.toConcurrentMap(Function.identity(), v -> Collections.synchronizedSet(new HashSet<>())));
+            // this captures all additional data
+            partialFilenames()
+                    .parallel()
+                    .forEach(partialFilename -> {
+                        String persistentFilename = partialFilename.substring(0, partialFilename.lastIndexOf("."));
+                        Set<String> bin = toMerge.computeIfAbsent(persistentFilename, e -> Collections.synchronizedSet(new HashSet<>()));
+                        bin.add(partialFilename);
                     });
-                    return null;
-                }).get();
-            } catch (ExecutionException e) {
-                throw new RuntimeException("Parallel operation failed - Thread raised exception");
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Parallel operation failed - Thread was interrupted");
-            }
-
             logger.info("Merging {} bins", toMerge.size());
 
-            AtomicInteger counter = new AtomicInteger();
+            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
             threadPool.submit(() -> {
+                AtomicInteger counter = new AtomicInteger();
                 toMerge.entrySet()
                         .parallelStream()
-                        .peek(p -> progress(counter, 50000, "{} files merged"))
+                        .peek(p -> progress(counter, 50000, "{} / " + toMerge.size() + " files merged"))
                         .forEach(entry -> {
-                            Path destination = entry.getKey();
-                            Set<Path> sources = entry.getValue();
+                            String destination = entry.getKey();
+                            Set<String> sources = entry.getValue();
 
                             try {
                                 Map<Integer, Collection<ResiduePairIdentifier>> merged = new HashMap<>();
-                                // populate with persistent data
-                                if (Files.exists(destination)) {
-                                    try (InputStream inputStream = getInputStream(destination)) {
-                                        addAll(merged, bucketCodec.decode(inputStream), null);
-                                    }
-                                } else {
-                                    // there's only a single file and the destination exists not yet (aka no merging to be done)
-                                    if (sources.size() == 1) {
-                                        Path source = sources.stream().findFirst().orElseThrow();
-                                        Files.move(source, destination);
-                                        logger.debug("Moved {} to {}", source, destination);
-                                        return;
-                                    }
+                                // populate with existing data
+                                if (fileBundle.containsFile(destination)) {
+                                    InvertedIndexBucket existing = bucketCodec.decode(fileBundle.readFile(destination));
+                                    addAll(merged, existing, null);
                                 }
 
-                                // merge all new, temporary data
-                                for (Path p : sources) {
-                                    try (InputStream inputStream = getInputStream(p)) {
-                                        addAll(merged, bucketCodec.decode(inputStream), null);
-                                    }
+                                // merge all new, partial data
+                                for (String s : sources) {
+                                    InvertedIndexBucket additions = bucketCodec.decode(partialFileBundle.readFile(s));
+                                    addAll(merged, additions, null);
                                 }
-                                ByteArrayOutputStream outputStream = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
-                                write(destination, outputStream);
-                                outputStream.close();
 
-                                for (Path source : sources) {
-                                    Files.delete(source);
-                                }
+                                ByteBuffer output = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
+                                temporaryFileBundle.writeFile(destination, output);
+
                                 logger.debug("Merged {} into {}", sources, destination);
                             } catch (IOException e) {
-                                throw new UncheckedIOException(e);
+                                throw new UncheckedIOException("can't merge " + destination, e);
                             }
                         });
                 return null;
             }).get();
+
+            // delete partial file bundle and swap temporary files with real ones
+            fileBundle.close();
+            partialFileBundle.close();
+            temporaryFileBundle.close();
+            Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.deleteIfExists(partialDataPath);
+            Files.deleteIfExists(partialIndexPath);
+            initializeFileBundle();
+            initializePartialFileBundle();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
-        }
-    }
-
-    @Override
-    public void clearTemporaryFiles() {
-        try {
-            logger.info("Collecting all temporary index files at {}", basePath);
-            AtomicInteger counter = new AtomicInteger();
-            try (Stream<Path> paths = temporaryFiles()) {
-                threadPool.submit(() -> {
-                    paths.peek(p -> progress(counter, 10000, "{} files deleted"))
-                            .forEach(p -> {
-                                try {
-                                    Files.delete(p);
-                                } catch (IOException e) {
-                                    throw new UncheckedIOException(e);
-                                }
-                            });
-                    return null;
-                }).get();
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
-        }
-    }
-
-    private void write(Path path, ByteArrayOutputStream data) throws IOException {
-        try (OutputStream outputStream = Files.newOutputStream(path)) {
-            OutputStream actual = gzipped ? new GZIPOutputStream(outputStream, BUFFER_SIZE) : outputStream;
-            data.writeTo(actual);
-            actual.flush();
-            actual.close();
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
         }
     }
 
     @Override
     public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
-        try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
-            // PSE can cause identifiers to flip - if so we need to flip them again to ensure correct overlap with other words
-            return bucketCodec.decode(inputStream);
-        } catch (IOException e) {
+        String filename = getFilename(residuePairDescriptor);
+        if (!fileBundle.containsFile(filename)) {
             return InvertedIndexBucket.EMPTY_BUCKET;
+        }
+
+        try {
+            return bucketCodec.decode(getByteBuffer(filename));
+        } catch (IOException e) {
+            throw new UncheckedIOException("can't read " + filename, e);
         }
     }
 
-    /**
-     * Acquire the input stream for a descriptor.
-     * @param residuePairDescriptor the descriptor of interest
-     * @return the corresponding input stream
-     * @throws IOException reading failed
-     */
-    protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
-        return getInputStream(getPath(residuePairDescriptor));
+    private ByteBuffer getByteBuffer(String filename) throws IOException {
+        return fileBundle.readFile(filename);
     }
 
-    private InputStream getInputStream(Path path) throws IOException {
-        InputStream inputStream = Files.newInputStream(path);
-        return gzipped ? new GZIPInputStream(inputStream, BUFFER_SIZE) : new BufferedInputStream(inputStream, BUFFER_SIZE);
-    }
-
-    private Path getPath(ResiduePairDescriptor residuePairDescriptor) {
+    private String getFilename(ResiduePairDescriptor residuePairDescriptor) {
         String bin = residuePairDescriptor.toString();
         String uberbin = bin.substring(0, 2);
-        return basePath.resolve(uberbin).resolve(bin + extension);
+        return uberbin + "/" + bin + extension;
     }
 
-    private Path getPath(ResiduePairDescriptor residuePairDescriptor, int batchId) {
-        Path actual = getPath(residuePairDescriptor);
-        return actual.resolveSibling(actual.getFileName().toString() + "." + batchId);
-    }
-
-    private InvertedIndexBucket getBucket(ResiduePairDescriptor residuePairDescriptor) {
-        try (InputStream inputStream = getInputStream(residuePairDescriptor)) {
-            return bucketCodec.decode(inputStream);
-        } catch (IOException e) {
-            return InvertedIndexBucket.EMPTY_BUCKET;
-        }
+    private String getFilename(ResiduePairDescriptor residuePairDescriptor, int batchId) {
+        return getFilename(residuePairDescriptor) + "." + batchId;
     }
 
     @Override
     public void delete(Collection<Integer> removals) {
         try {
             logger.info("Removing {} structures from inverted index", removals.size());
+            int fileCount = fileBundle.fileCount();
 
+            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
             AtomicInteger counter = new AtomicInteger();
             // walk whole lookup
             threadPool.submit(() -> {
-                indexFiles()
-                        .peek(path -> progress(counter, 10000, "{} bins of inverted index cleaned"))
-                        .map(this::createResiduePairDescriptor)
-                        .forEach(residuePairDescriptor -> delete(residuePairDescriptor, removals));
+                indexFilenames()
+                        .parallel()
+                        .peek(path -> progress(counter, 10000, "{} / " + fileCount + " bins of inverted index processed"))
+                        .forEach(filename -> {
+                            try {
+                                ResiduePairDescriptor residuePairDescriptor = createResiduePairDescriptor(filename);
+                                ByteBuffer byteBuffer = delete(residuePairDescriptor, removals);
+
+                                // result may be empty, don't write anything in that case
+                                if (byteBuffer == null) {
+                                    return;
+                                }
+
+                                temporaryFileBundle.writeFile(filename, byteBuffer);
+                            } catch (IOException e) {
+                                throw new UncheckedIOException("can't process " + filename, e);
+                            }
+                        });
                 return null;
             }).get();
+
+            // swap new and old files
+            fileBundle.close();
+            temporaryFileBundle.close();
+            Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
+            initializeFileBundle();
         } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -287,8 +290,10 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
     }
 
-    private ResiduePairDescriptor createResiduePairDescriptor(Path path) {
-        String name = path.toFile().getName();
+    private ResiduePairDescriptor createResiduePairDescriptor(String filename) {
+        String[] filenameSplit = filename.split("/");
+        String name = filenameSplit[filenameSplit.length - 1];
+
         String[] split = name.split("\\.")[0].split("-");
         ResidueType residueType1 = OLC_LOOKUP.getOrDefault(split[0].substring(0, 1), null);
         ResidueType residueType2 = OLC_LOOKUP.getOrDefault(split[0].substring(1, 2), null);
@@ -298,109 +303,70 @@ public class InvertedIndexImpl implements InvertedIndex {
         return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a);
     }
 
-    private void delete(ResiduePairDescriptor residuePairDescriptor, Collection<Integer> removals) {
-        try {
-            InvertedIndexBucket bucket = getBucket(residuePairDescriptor);
-            Set<Integer> structureIndices = bucket.getStructureIndices();
+    /**
+     * Remove structures from the bucket, based on their structure identifiers.
+     * @param residuePairDescriptor the descriptor to process
+     * @param removals what to remove
+     * @return a {@link ByteBuffer} with a subset of the original bucket or null if this operation resulted in an empty
+     * bucket
+     * @throws IOException when encoding fails
+     */
+    private ByteBuffer delete(ResiduePairDescriptor residuePairDescriptor, Collection<Integer> removals) throws IOException {
+        ByteBuffer byteBuffer = getByteBuffer(getFilename(residuePairDescriptor));
+        InvertedIndexBucket bucket = bucketCodec.decode(byteBuffer);
+        Set<Integer> structureIndices = bucket.getStructureIndices();
 
-            // if no entry would be removed: don't bother and return
-            if (removals.stream().noneMatch(structureIndices::contains)) {
-                return;
-            }
-
-            // remove all occurrences of structure identifiers
-            ResiduePairIdentifierBucket filteredBucket = removeByKey(bucket, removals);
-
-            // serialize message
-            try (ByteArrayOutputStream outputStream = bucketCodec.encode(filteredBucket)) {
-                Path path = getPath(residuePairDescriptor);
-                write(path, outputStream);
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        // if no entry would be removed: don't bother and return
+        if (removals.stream().noneMatch(structureIndices::contains)) {
+            byteBuffer.rewind();
+            return byteBuffer;
         }
-    }
 
-    private void ensureDirectoriesExist() {
-        try {
-            List<String> oneLetterCodes = Stream.of(ResidueType.values())
-                    .map(ResidueType::getInternalCode)
-                    // has to be sorted to honor the implicit contract on when identifiers are flipped
-                    .sorted()
-                    .collect(Collectors.toList());
-
-            // create all combinations of one-letter-codes
-            for (int i = 0; i < oneLetterCodes.size(); i++) {
-                for (int j = i; j < oneLetterCodes.size(); j++) {
-                    Path dir = basePath.resolve(oneLetterCodes.get(i) + oneLetterCodes.get(j));
-
-                    if (!Files.exists(dir)) {
-                        Files.createDirectories(dir);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        // remove all occurrences of structure identifiers
+        ResiduePairIdentifierBucket filteredBucket = removeByKey(bucket, removals);
+        if (filteredBucket == null) {
+            return null;
         }
+
+        // serialize message
+        return bucketCodec.encode(filteredBucket);
     }
 
     @Override
     public Set<ResiduePairDescriptor> reportKnownDescriptors() {
-        try {
-            logger.info("Collecting all known descriptors at {}", basePath);
-            AtomicInteger counter = new AtomicInteger();
-            return threadPool.submit(() -> indexFiles()
-                        .peek(p -> progress(counter, 10000, "{} bins scanned"))
-                        .map(this::createResiduePairDescriptor)
-                        .collect(Collectors.toSet())).get();
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
-        }
+        return indexFilenames()
+                .parallel()
+                .map(this::createResiduePairDescriptor)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<Integer> reportKnownKeys() {
         try {
-            logger.info("Collecting all known keys at {}", basePath);
+            logger.info("Collecting all known keys in bundle ({}, {})", dataPath, indexPath);
             AtomicInteger counter = new AtomicInteger();
-            return threadPool.submit(() -> indexFiles()
+            return threadPool.submit(() -> indexFilenames()
+                    .parallel()
                     .peek(p -> progress(counter, 10000, "{} bins scanned"))
                     .map(this::createResiduePairDescriptor)
-                    .map(this::getBucket)
+                    .map(this::select)
                     .map(Bucket::getStructureIndices)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet())).get();
         } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception");
+            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted");
+            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
         }
     }
 
-    private Stream<Path> indexFiles() throws IOException {
-        return files().filter(p -> p.getFileName().toString().endsWith(extension));
+    private Stream<String> indexFilenames() {
+        return fileBundle.filenames();
     }
 
-    private Stream<Path> temporaryFiles() throws IOException {
-        return files().filter(p -> tempExtension.matcher(p.getFileName().toString()).matches());
-    }
-
-    private Stream<Path> allFiles() throws IOException {
-        return files().filter(p -> p.getFileName().toString().contains(extension));
-    }
-
-    private Stream<Path> files() throws IOException {
-        if (!Files.exists(basePath)) {
-            return Stream.empty();
-        }
-
-        return Files.walk(basePath, FileVisitOption.FOLLOW_LINKS)
-                .parallel()
-                .filter(Files::isRegularFile);
+    private Stream<String> partialFilenames() {
+        return partialFileBundle.filenames();
     }
 
     private void addAll(Map<Integer, Collection<ResiduePairIdentifier>> map, Bucket bucket, Collection<Integer> ignore) {
@@ -433,6 +399,12 @@ public class InvertedIndexImpl implements InvertedIndex {
     private ResiduePairIdentifierBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
         Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
         addAll(map, bucket, removals);
+
+        // report empty maps as null
+        if (map.isEmpty()) {
+            return null;
+        }
+
         return new ResiduePairIdentifierBucket(map);
     }
 }

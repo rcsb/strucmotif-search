@@ -267,6 +267,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             Map<String, String[]> assemblyInformation = AssemblyInformation.of(mmCifFile);
 
             // write renumbered structure
+            logger.debug("[{}] Writing renumbered structure file for {}", context.partitionContext, structureIdentifier);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
             context.processed.add(new StructureInformation(structureIdentifier, structureIndex, revision, assemblyInformation));
         } catch (IOException e) {

@@ -180,6 +180,7 @@ public class InvertedIndexBucket implements Bucket {
      * @return a String
      */
     public String getStructOperId(int i) {
+        // TODO measure against map-based
         int index = Arrays.binarySearch(operatorIndices, i);
         if (index < 0) {
             return Transformation.DEFAULT_OPERATOR;

@@ -4,8 +4,8 @@ import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.InputMismatchException;
 
@@ -17,26 +17,20 @@ public class ColferCodec extends AbstractBucketCodec {
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     @Override
-    public InvertedIndexBucket decode(InputStream inputStream) throws IOException {
-        byte[] buf = inputStream.readAllBytes();
-        return decodeInternal(buf);
-    }
-
     @SuppressWarnings("Duplicates")
-    private InvertedIndexBucket decodeInternal(byte[] buf) {
+    public InvertedIndexBucket decode(ByteBuffer byteBuffer) {
         int[] structureIndices = EMPTY_INT_ARRAY;
         int[] positionOffsets = EMPTY_INT_ARRAY;
         int[] positionData = EMPTY_INT_ARRAY;
         int[] operatorIndices = EMPTY_INT_ARRAY;
         String[] operatorData = EMPTY_STRING_ARRAY;
 
-        int i = 0;
-        byte header = buf[i++];
+        byte header = byteBuffer.get();
 
         if (header == 0) {
             int length = 0;
             for (int shift = 0; true; shift += 7) {
-                byte b = buf[i++];
+                byte b = byteBuffer.get();
                 length |= (b & 0x7f) << shift;
                 if (shift == 28 || b >= 0) break;
             }
@@ -45,19 +39,19 @@ public class ColferCodec extends AbstractBucketCodec {
             for (int ai = 0; ai < length; ai++) {
                 int x = 0;
                 for (int shift = 0; true; shift += 7) {
-                    byte b = buf[i++];
+                    byte b = byteBuffer.get();
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
                 structureIndices[ai] = (x >> 1) ^ -(x & 1);
             }
-            header = buf[i++];
+            header = byteBuffer.get();
         }
 
         if (header == 1) {
             int length = 0;
             for (int shift = 0; true; shift += 7) {
-                byte b = buf[i++];
+                byte b = byteBuffer.get();
                 length |= (b & 0x7f) << shift;
                 if (shift == 28 || b >= 0) break;
             }
@@ -66,19 +60,19 @@ public class ColferCodec extends AbstractBucketCodec {
             for (int ai = 0; ai < length; ai++) {
                 int x = 0;
                 for (int shift = 0; true; shift += 7) {
-                    byte b = buf[i++];
+                    byte b = byteBuffer.get();
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
                 positionOffsets[ai] = (x >> 1) ^ -(x & 1);
             }
-            header = buf[i++];
+            header = byteBuffer.get();
         }
 
         if (header == 2) {
             int length = 0;
             for (int shift = 0; true; shift += 7) {
-                byte b = buf[i++];
+                byte b = byteBuffer.get();
                 length |= (b & 0x7f) << shift;
                 if (shift == 28 || b >= 0) break;
             }
@@ -87,19 +81,19 @@ public class ColferCodec extends AbstractBucketCodec {
             for (int ai = 0; ai < length; ai++) {
                 int x = 0;
                 for (int shift = 0; true; shift += 7) {
-                    byte b = buf[i++];
+                    byte b = byteBuffer.get();
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
                 positionData[ai] = (x >> 1) ^ -(x & 1);
             }
-            header = buf[i++];
+            header = byteBuffer.get();
         }
 
         if (header == 3) {
             int length = 0;
             for (int shift = 0; true; shift += 7) {
-                byte b = buf[i++];
+                byte b = byteBuffer.get();
                 length |= (b & 0x7f) << shift;
                 if (shift == 28 || b >= 0) break;
             }
@@ -108,19 +102,19 @@ public class ColferCodec extends AbstractBucketCodec {
             for (int ai = 0; ai < length; ai++) {
                 int x = 0;
                 for (int shift = 0; true; shift += 7) {
-                    byte b = buf[i++];
+                    byte b = byteBuffer.get();
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
                 operatorIndices[ai] = (x >> 1) ^ -(x & 1);
             }
-            header = buf[i++];
+            header = byteBuffer.get();
         }
 
         if (header == 4) {
             int length = 0;
             for (int shift = 0; true; shift += 7) {
-                byte b = buf[i++];
+                byte b = byteBuffer.get();
                 length |= (b & 0x7f) << shift;
                 if (shift == 28 || b >= 0) break;
             }
@@ -129,20 +123,20 @@ public class ColferCodec extends AbstractBucketCodec {
             for (int ai = 0; ai < length; ai++) {
                 int size = 0;
                 for (int shift = 0; true; shift += 7) {
-                    byte b = buf[i++];
+                    byte b = byteBuffer.get();
                     size |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
 
-                int start = i;
-                i += size;
-                operatorData[ai] = new String(buf, start, size, StandardCharsets.US_ASCII);
+                byte[] buf = new byte[size];
+                byteBuffer.get(buf);
+                operatorData[ai] = new String(buf, StandardCharsets.US_ASCII);
             }
-            header = buf[i++];
+            header = byteBuffer.get();
         }
 
         if (header != 0x7f) {
-            throw new InputMismatchException("colfer: unknown header at byte " + (i - 1));
+            throw new InputMismatchException("colfer: unknown header at byte " + (byteBuffer.position() - 1));
         }
 
         return new InvertedIndexBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
@@ -226,9 +220,10 @@ public class ColferCodec extends AbstractBucketCodec {
     }
 
     @Override
-    public ByteArrayOutputStream encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        encodeInternal(outputStream, structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
-        return outputStream;
+    public ByteBuffer encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            encodeInternal(outputStream, structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
+            return ByteBuffer.wrap(outputStream.toByteArray());
+        }
     }
 }

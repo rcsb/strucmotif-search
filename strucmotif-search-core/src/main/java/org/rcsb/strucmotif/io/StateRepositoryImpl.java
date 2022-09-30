@@ -4,6 +4,8 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.FileWriter;
@@ -13,7 +15,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import java.util.stream.Stream;
  */
 @Service
 public class StateRepositoryImpl implements StateRepository {
+    private static final Logger logger = LoggerFactory.getLogger(StateRepositoryImpl.class);
     private static final String TOP_LEVEL_DELIMITER = ",";
     private static final String ASSEMBLY_INFORMATION_DELIMITER = ";";
     private final Path knownPath;
@@ -42,7 +44,7 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     @Override
-    public Collection<StructureInformation> selectKnown() {
+    public Set<StructureInformation> selectKnown() {
         try (Stream<String> lines = Files.lines(knownPath)) {
             return lines.filter(line -> !line.isBlank())
                     .map(line -> line.split(TOP_LEVEL_DELIMITER))
@@ -76,7 +78,7 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     @Override
-    public Collection<String> selectDirty() {
+    public Set<String> selectDirty() {
         if (Files.exists(dirtyPath)) {
             return select(dirtyPath);
         } else {
@@ -94,7 +96,8 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     @Override
-    public void insertKnown(Collection<StructureInformation> additions) {
+    public void insertKnown(Set<StructureInformation> additions) {
+        logger.debug("Inserting information on {} structures", additions.size());
         try (FileWriter writer = new FileWriter(knownPath.toFile(), true)) {
             for (StructureInformation addition : additions) {
                 // let's concat externally in case 'append' invocation from multiple threads race
@@ -111,14 +114,17 @@ public class StateRepositoryImpl implements StateRepository {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        logger.debug("Structure holdings have been updated");
     }
 
     @Override
-    public void insertDirty(Collection<String> additions) {
+    public void insertDirty(Set<String> additions) {
+        logger.debug("Marking {} structures as dirty", additions.size());
         insert(additions, dirtyPath);
+        logger.debug("Dirty holdings have been updated");
     }
 
-    private void insert(Collection<String> additions, Path destination) {
+    private void insert(Set<String> additions, Path destination) {
         try (FileWriter writer = new FileWriter(destination.toFile(), true)) {
             for (String structureIdentifier : additions) {
                 // let's concat externally in case 'append' invocation from multiple threads race
@@ -131,12 +137,15 @@ public class StateRepositoryImpl implements StateRepository {
     }
 
     @Override
-    public void deleteKnown(Collection<String> removals) {
+    public void deleteKnown(Set<String> removals) {
+        logger.debug("Removing information on {} structures", removals.size());
         delete(removals, knownPath);
+        logger.debug("Structure holdings have been updated");
     }
 
     @Override
-    public void deleteDirty(Collection<String> removals) {
+    public void deleteDirty(Set<String> removals) {
+        logger.debug("Removing dirty state for {} structures", removals.size());
         if (Files.exists(dirtyPath)) {
             delete(removals, dirtyPath);
         } else {
@@ -146,15 +155,16 @@ public class StateRepositoryImpl implements StateRepository {
                 throw new UncheckedIOException(e);
             }
         }
+        logger.debug("Dirty holdings have been updated");
     }
 
-    private void delete(Collection<String> removals, Path destination) {
+    private static void delete(Set<String> removals, Path destination) {
         if (!Files.exists(destination)) {
             return;
         }
 
         try (Stream<String> lines = Files.lines(destination)) {
-            String output = lines.filter(line -> removals.stream().noneMatch(line::startsWith))
+            String output = lines.filter(line -> !removals.contains(line.split(TOP_LEVEL_DELIMITER)[0]))
                     .collect(Collectors.joining("\n", "", "\n"));
             Files.write(destination, output.getBytes());
         } catch (IOException e) {

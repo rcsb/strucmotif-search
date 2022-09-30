@@ -70,11 +70,9 @@ might require a full load.
 | `download-tries` | Number of tries to download structure data during update | `3` |
 | `entry-holdings-url` | Location of RCSB PDB holdings file | RCSB PDB Data API |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
-| `inverted-index-gzip` | Gzip index files? | `false` |
 | `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
 | `number-threads` | Number of worker threads | available processors |
 | `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
-| `renumbered-gzip` | Gzip BinaryCIF files? | `true` |
 | `residue-quality-cutoff` | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0` |
 | `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `qa_metric_local_above_cutoff` |
 | `root-path` | Path where data files will be written | `/opt/data/` |

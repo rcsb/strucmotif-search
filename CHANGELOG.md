@@ -1,6 +1,19 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.17.0
+-------------
+### Added
+- drop the "many small data files" approach and move to concatenated data file and index table for access
+
+### Breaking changes
+- switch format of data files to FFindex-based files
+- remove config options that determine gzipping of structure & index files -- now structures are always gzipped and index files are always uncompressed
+- replace `Collection` type in `StateRepository` with `Set` impl to avoid performance penalties when passing other collection impls
+- `StructureDataProvider#deleteRenumbered(String)` to `StructureDataProvider#deleteRenumbered(Set)`
+- `StructureWriter` doesn't write to file-system anymore, now returns a `byte[]`
+- use `ByteBuffer` when performing bucket-specific operations
+
 strucmotif-search 0.16.4
 -------------
 ### Bug fix

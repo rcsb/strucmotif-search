@@ -2,6 +2,9 @@ package org.rcsb.strucmotif.io;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rcsb.ffindex.FileBundleIO;
+import org.rcsb.ffindex.ReadableFileBundle;
+import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.core.ThreadPoolImpl;
@@ -10,9 +13,10 @@ import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
+import org.rcsb.strucmotif.io.codec.ColferCodec;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.UncheckedIOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -21,19 +25,24 @@ class InvertedIndexImplTest {
     private InvertedIndex invertedIndex;
 
     @BeforeEach
-    public void init() {
+    public void init() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
+        ColferCodec bucketCodec = new ColferCodec();
         invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
             @Override
-            protected InputStream getInputStream(ResiduePairDescriptor residuePairDescriptor) throws IOException {
-                // null is okay here
-                InputStream inputStream = Thread.currentThread().getContextClassLoader()
-                        .getResourceAsStream("index/" + residuePairDescriptor + ".colf");
-                if (inputStream == null) {
-                    throw new IOException();
+            public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
+                String filename = residuePairDescriptor.toString().substring(0, 2) + "/" + residuePairDescriptor + ".colf";
+                if (!fileBundle.containsFile(filename)) {
+                    return InvertedIndexBucket.EMPTY_BUCKET;
                 }
-                return inputStream;
+
+                try {
+                    return bucketCodec.decode(fileBundle.readFile(filename));
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
             }
         };
     }

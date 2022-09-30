@@ -5,17 +5,18 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * Access structure data.
  */
-public interface StructureDataProvider {
+public interface StructureDataProvider extends Committable {
     /**
      * If `strucmotif.in-memory-strategy` is active: Initialize caching by reading all structures and keeping them in
      * memory for fast access.
-     * @throws IOException reading of structure data failed
      */
-    void initializeRenumberedStructureCache() throws IOException;
+    void initializeRenumberedStructureCache();
 
     /**
      * Read everything from an input stream.
@@ -54,9 +55,9 @@ public interface StructureDataProvider {
 
     /**
      * Drop information on a renumbered structure.
-     * @param structureIdentifier the structure identifier to remove
+     * @param structureIdentifiers the collection of structure identifier to remove
      */
-    void deleteRenumbered(String structureIdentifier);
+    void deleteRenumbered(Collection<String> structureIdentifiers);
 
     /**
      * Acquire the input stream of an original structure.
@@ -64,4 +65,10 @@ public interface StructureDataProvider {
      * @return the corresponding input stream
      */
     InputStream getOriginalInputStream(String structureIdentifier);
+
+    /**
+     * Report all known structure files.
+     * @return a collection of filenames
+     */
+    Set<String> reportKnownFiles();
 }

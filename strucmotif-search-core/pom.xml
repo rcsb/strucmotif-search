@@ -10,7 +10,7 @@
     <artifactId>strucmotif-search-core</artifactId>
 
     <properties>
-        <log4j.version>2.17.2</log4j.version>
+        <log4j.version>2.18.0</log4j.version>
     </properties>
 
     <dependencies>
@@ -21,11 +21,17 @@
             <version>4.0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.rcsb</groupId>
+            <artifactId>ffindex-java-core</artifactId>
+            <version>0.1.2</version>
+        </dependency>
+
         <!-- dependency injection and configuration -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-            <version>2.7.0</version>
+            <version>2.7.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -36,7 +42,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>2.7.0</version>
+            <version>2.7.4</version>
             <optional>true</optional>
         </dependency>
 
@@ -44,7 +50,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.0</version>
+            <version>2.9.1</version>
             <scope>compile</scope>
         </dependency>
 
@@ -53,7 +59,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <version>2.7.0</version>
+            <version>2.7.4</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.junit.vintage</groupId>
@@ -62,21 +68,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-api</artifactId>
-            <version>${log4j.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.4.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

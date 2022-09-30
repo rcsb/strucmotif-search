@@ -4,6 +4,8 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * An implementation of a {@link StructureDataProvider} that only deals with a single structure. Used in the
@@ -51,7 +53,7 @@ public class SingleStructureDataProvider implements StructureDataProvider {
     }
 
     @Override
-    public void deleteRenumbered(String structureIdentifier) {
+    public void deleteRenumbered(Collection<String> structureIdentifiers) {
         immutable();
     }
 
@@ -60,7 +62,17 @@ public class SingleStructureDataProvider implements StructureDataProvider {
         return null;
     }
 
+    @Override
+    public void commit() {
+        immutable();
+    }
+
     private void immutable() {
         throw new UnsupportedOperationException("This data provider is read-only");
+    }
+
+    @Override
+    public Set<String> reportKnownFiles() {
+        throw new UnsupportedOperationException("This data provider contains a single not registered structure");
     }
 }

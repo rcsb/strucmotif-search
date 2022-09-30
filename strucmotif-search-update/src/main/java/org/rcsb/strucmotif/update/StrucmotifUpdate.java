@@ -120,16 +120,13 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {
-            Collection<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
+            Set<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
             if (dirtyStructureIdentifiers.size() > 0) {
                 logger.warn("Update state is dirty - Problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
                 logger.info("Recovering from dirty state");
                 recover(dirtyStructureIdentifiers);
             }
-
-            logger.info("Making sure that no temporary files linger");
-            invertedIndex.clearTemporaryFiles();
         }
 
         logger.info("Starting update - Operation: {}, {} ids ({})",
@@ -178,7 +175,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 partitions.size(),
                 strucmotifConfig.getUpdateChunkSize());
 
-        Collection<String> known = getKnown();
+        Set<String> known = getKnown();
         boolean needsCommit = false;
 
         // split into partitions and process
@@ -209,7 +206,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
     }
 
-    private void commit(Context context, Collection<String> known) {
+    private void commit(Context context, Set<String> known) {
+        logger.info("Committing data on {} structures", context.processed.size());
         // mark as dirty before index update
         Set<String> dirty = context.processed.stream()
                 .map(StructureInformation::getStructureIdentifier)
@@ -217,6 +215,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 .filter(id -> !known.contains(id))
                 .collect(Collectors.toSet());
         stateRepository.insertDirty(dirty);
+        structureDataProvider.commit();
         invertedIndex.commit();
 
         // processed contains all StructureIdentifiers + corresponding revision
@@ -268,6 +267,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             Map<String, String[]> assemblyInformation = AssemblyInformation.of(mmCifFile);
 
             // write renumbered structure
+            logger.debug("[{}] Writing renumbered structure file for {}", context.partitionContext, structureIdentifier);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
             context.processed.add(new StructureInformation(structureIdentifier, structureIndex, revision, assemblyInformation));
         } catch (IOException e) {
@@ -279,12 +279,12 @@ public class StrucmotifUpdate implements CommandLineRunner {
         int count = context.structureCounter.incrementAndGet();
         String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
 
-        // fails when file is missing (should not happen) or does not contain valid polymer chain
+        // fails when file is missing (should not happen at this point)
         Structure structure;
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] [{}] No valid polymer chain(s) - Skipping",
+            logger.warn("[{}] [{}] No renumbered source file present - Skipping",
                     context.partitionContext,
                     structureContext);
             return;
@@ -323,6 +323,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     (System.nanoTime() - start) / 1000 / 1000);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
         } catch (Exception e) {
             logger.warn("[{}] [{}] Residue graph determination failed",
                     context.partitionContext,
@@ -358,9 +359,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
         final int bufferTotal = context.buffer.size();
         AtomicInteger bufferCount = new AtomicInteger();
         threadPool.submit(() -> {
-            context.buffer.entrySet().parallelStream().forEach(entry -> {
-                ResiduePairDescriptor key = entry.getKey();
-                ResiduePairIdentifierBucket output = new ResiduePairIdentifierBucket(entry.getValue());
+            context.buffer.keySet().parallelStream().forEach(key -> {
+                Map<Integer, Collection<ResiduePairIdentifier>> value = context.buffer.remove(key);
+                ResiduePairIdentifierBucket output = new ResiduePairIdentifierBucket(value);
 
                 if (bufferCount.incrementAndGet() % 10000 == 0) {
                     logger.info("[{}] {} / {}",
@@ -382,31 +383,32 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
     /**
      * 'REMOVE' operation.
-     * @param identifiers set of identifiers to remove
+     * @param identifierList set of identifiers to remove
      */
-    public void remove(Collection<String> identifiers) {
+    public void remove(Collection<String> identifierList) {
+        Set<String> identifiers = new HashSet<>(identifierList);
         // mark everything that will be touched as dirty in case this operation fails
         stateRepository.insertDirty(identifiers);
 
-        AtomicInteger counter = new AtomicInteger();
-        for (String structureIdentifier : identifiers) {
-            logger.info("[{}] Removing renumbered structure for entry: {}",
-                    counter.incrementAndGet() + " / " + identifiers.size(),
-                    structureIdentifier);
-            structureDataProvider.deleteRenumbered(structureIdentifier);
-        }
+        // modifying the renumbered file bundle is expensive and is done as batch
+        logger.info("Removing {} renumbered structure", identifiers.size());
+        structureDataProvider.deleteRenumbered(identifiers);
+        logger.debug("Done removing renumbered structure");
 
-        // inverted index is expensive and should be done as batch
+        // modifying the inverted index is expensive and is done as batch
         if (!identifiers.isEmpty()) {
             Set<Integer> mapped = identifiers.stream()
                     .filter(structureIndexProvider::containsKey)
                     .map(structureIndexProvider::selectStructureIndex)
                     .collect(Collectors.toSet());
             if (!mapped.isEmpty()) {
+                logger.info("Removing {} structures from inverted index", mapped.size());
                 invertedIndex.delete(mapped);
+                logger.debug("Done removing structures from inverted index");
             }
         }
 
+        logger.info("Updating holdings");
         stateRepository.deleteKnown(identifiers);
         stateRepository.deleteDirty(identifiers);
         logger.info("Finished removal operation");
@@ -441,15 +443,15 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @param requested the requested update
      * @return UpdateItem collection that need to be processed for the given context
      */
-    public Collection<UpdateItem> getDeltaPlusIdentifiers(Collection<UpdateItem> requested) {
-        Collection<String> known = getKnown();
+    public List<UpdateItem> getDeltaPlusIdentifiers(List<UpdateItem> requested) {
+        Set<String> known = getKnown();
         if (known.isEmpty()) {
             logger.warn("No existing data - Starting from scratch");
             return requested;
         } else {
             return requested.stream()
                     .filter(item -> !known.contains(item.getStructureIdentifier()))
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         }
     }
 
@@ -458,29 +460,29 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @param requested the requested update
      * @return UpdateItem collection that need to be removed for the given context
      */
-    public Collection<String> getDeltaMinusIdentifiers(Collection<UpdateItem> requested) {
-        Collection<String> known = getKnown();
+    public List<String> getDeltaMinusIdentifiers(List<UpdateItem> requested) {
+        Set<String> known = getKnown();
         if (known.isEmpty()) {
             logger.warn("No existing data - no need for cleanup of obsolete entries");
-            return Collections.emptySet();
+            return Collections.emptyList();
         } else {
-            Collection<String> unwrapped = requested.stream()
+            Set<String> unwrapped = requested.stream()
                     .map(UpdateItem::getStructureIdentifier)
                     .collect(Collectors.toSet());
             return known.stream()
                     .filter(unwrapped::contains)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         }
     }
 
-    private Collection<String> getKnown() {
+    private Set<String> getKnown() {
         return stateRepository.selectKnown()
                 .stream()
                 .map(StructureInformation::getStructureIdentifier)
                 .collect(Collectors.toSet());
     }
 
-    private void recover(Collection<String> dirty) {
+    private void recover(Set<String> dirty) {
         remove(dirty);
 
         // this will happen when writing to the inverted index fails: then bins can be corrupted and filled with structure indices that point nowhere
@@ -494,9 +496,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
             logger.info("{} lingering keys detected - removing...", lingeringInIndex.size());
             invertedIndex.delete(lingeringInIndex);
         }
-
-        logger.info("Making sure that no temporary files linger");
-        invertedIndex.clearTemporaryFiles();
     }
 
     private void printUsage() {

@@ -91,7 +91,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
             // sort into target structures
             Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                     .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
-                    .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
+                    .collect(Collectors.toConcurrentMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
 
             // TODO try to avoid object creation
             // TODO try to consume stream directly
@@ -237,7 +237,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
                                 // append target structure by whatever the new target identifiers for this structure have to offer
                                 return entry.getValue().consume(residuePairIdentifiers, overlapProfile);
                             })
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
+                            .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue)))
                     .get());
         }
     }

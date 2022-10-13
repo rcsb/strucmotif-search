@@ -9,10 +9,6 @@
 
     <artifactId>strucmotif-search-core</artifactId>
 
-    <properties>
-        <log4j.version>2.18.0</log4j.version>
-    </properties>
-
     <dependencies>
         <!-- BinaryCIF handling -->
         <dependency>
@@ -24,7 +20,7 @@
         <dependency>
             <groupId>org.rcsb</groupId>
             <artifactId>ffindex-java-core</artifactId>
-            <version>0.1.2</version>
+            <version>0.2.0</version>
         </dependency>
 
         <!-- dependency injection and configuration -->

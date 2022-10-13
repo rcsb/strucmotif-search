@@ -1,6 +1,17 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.18.0
+-------------
+### Added
+- `full` update is now based on RCSB PDB Search API and supports `full_csm`
+
+### Bug fix
+- better handling of memory-mapped regions -- don't crash JVM by exceeding `/proc/sys/vm/max_map_count`
+
+### Breaking changes
+- removed `rcsb-entry-holdings-url` property -- parsing of that is RCSB-specific anyway
+
 strucmotif-search 0.17.0
 -------------
 ### Added

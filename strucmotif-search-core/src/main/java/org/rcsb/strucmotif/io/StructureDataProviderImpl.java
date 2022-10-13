@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -47,7 +46,6 @@ public class StructureDataProviderImpl implements StructureDataProvider {
     private final StructureWriter renumberedStructureWriter;
     private final StrucmotifConfig strucmotifConfig;
     private final String dataSource;
-    private final ThreadPool threadPool;
     // 'production' data that can be queried
     private final Path dataPath;
     private final Path indexPath;
@@ -80,7 +78,6 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.renumberedStructureWriter = structureWriter;
         this.strucmotifConfig = strucmotifConfig;
         this.dataSource = strucmotifConfig.getDataSource();
-        this.threadPool = threadPool;
         this.dataPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.DATA_EXT);
         this.indexPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.INDEX_EXT);
         this.partialDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
@@ -315,34 +312,16 @@ public class StructureDataProviderImpl implements StructureDataProvider {
 
     @Override
     public void deleteRenumbered(Collection<String> structureIdentifiers) {
-        Set<String> filenamesToDrop = structureIdentifiers.stream()
+        String[] filenamesToDrop = structureIdentifiers.stream()
                 .map(this::getRenumberedFilename)
-                .collect(Collectors.toSet());
+                .distinct()
+                .toArray(String[]::new);
 
         try {
-            // TODO move delete functionality to ffindex library?
-            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
-            fileBundle.filenames()
-                    .filter(f -> !filenamesToDrop.contains(f))
-                    .forEach(f -> copyBetweenBundles(f, fileBundle, temporaryFileBundle));
-
-            // update file bundle by replacing the production files with the updated files
             fileBundle.close();
-            temporaryFileBundle.close();
-            Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
-            Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
+            FileBundleIO.unlinkFiles(indexPath, filenamesToDrop);
+            FileBundleIO.compactBundle(dataPath, indexPath);
             initializeFileBundle();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
-
-    private void copyBetweenBundles(String filename, ReadableFileBundle source, WritableFileBundle destination) {
-        try {
-            // note these buffers don't get released automatically, only a GC run will clean then up, there's no official way to unmap them
-            // so, it's possible to run out of mmap handles or off-heap memory if this runs in a tight loop
-            ByteBuffer byteBuffer = source.readFile(filename);
-            destination.writeFile(filename, byteBuffer);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -354,18 +333,13 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             logger.debug("Adding original data");
             Files.copy(dataPath, temporaryDataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.copy(indexPath, temporaryIndexPath, StandardCopyOption.REPLACE_EXISTING);
-            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
             logger.debug("Adding partial data");
-            threadPool.submit(() -> {
-                partialFileBundle.filenames()
-                        .parallel()
-                        .forEach(f -> copyBetweenBundles(f, partialFileBundle, temporaryFileBundle));
-                return null;
-            }).get();
+            partialFileBundle.close();
+            FileBundleIO.mergeBundles(temporaryDataPath, temporaryIndexPath, partialDataPath, partialIndexPath);
+            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
 
             logger.debug("Deleting partial file bundle and swap temporary files with real ones");
             fileBundle.close();
-            partialFileBundle.close();
             temporaryFileBundle.close();
             Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
@@ -375,11 +349,6 @@ public class StructureDataProviderImpl implements StructureDataProvider {
             initializePartialFileBundle();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
         }
     }
 

@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.update;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.ParsingException;
 import org.rcsb.cif.schema.StandardSchemata;
@@ -31,16 +34,18 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,8 +57,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.MatchResult;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,6 +71,8 @@ import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOpti
 public class StrucmotifUpdate implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(StrucmotifUpdate.class);
     private static final Set<String> STRUCTURE_EXTENSIONS = Set.of(".cif", ".cif.gz", ".bcif", ".bcif.gz");
+    private static final String FULL = "full";
+    private static final String FULL_CSM = "`full_csm`";
 
     /**
      * Entry point from the command-line.
@@ -414,28 +419,58 @@ public class StrucmotifUpdate implements CommandLineRunner {
         logger.info("Finished removal operation");
     }
 
-    private static final Pattern ENTRY_ID_PATTERN = Pattern.compile("[0-9][0-9A-Z]{3}");
-
     /**
      * Reports all structures currently present in the PDB archive.
      * @return collection of update items
      * @throws IOException connection failure
      */
-    public List<UpdateItem> getAllIdentifiers() throws IOException {
-        String rcsbEntryHoldingsUrl = strucmotifConfig.getRcsbEntryHoldingsUrl();
-        logger.info("Retrieving current entry list from {}", rcsbEntryHoldingsUrl);
-        String response;
-        try (InputStream inputStream = new URL(rcsbEntryHoldingsUrl).openStream()) {
-            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-                response = bufferedReader.lines().collect(Collectors.joining(System.lineSeparator()));
-            }
+    public List<UpdateItem> getAllIdentifiers(String mode) throws IOException {
+        logger.info("Retrieving current {} entry list from RCSB PDB Search API", mode);
+        List<UpdateItem> out = new ArrayList<>();
+        try (InputStream inputStream = composeSearchUrl(mode).openStream()) {
+            JsonElement jsonElement = new Gson().fromJson(new InputStreamReader(inputStream), JsonElement.class);
+            JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+            jsonObject.getAsJsonArray("result_set")
+                    .forEach(id -> out.add(new UpdateItem(id.getAsString())));
         }
-        return ENTRY_ID_PATTERN.matcher(response)
-                .results()
-                .map(MatchResult::group)
-                .map(String::toUpperCase)
-                .map(UpdateItem::new)
-                .collect(Collectors.toList());
+        return out;
+    }
+
+    private URL composeSearchUrl(String mode) throws MalformedURLException {
+        String types;
+        switch (mode) {
+            case FULL:
+                types = "\"experimental\"";
+                break;
+            case FULL_CSM:
+                types = "\"computational\", \"experimental\"";
+                break;
+            default:
+                throw new UnsupportedOperationException(mode + " is not yet implemented");
+        }
+
+        String query = URLEncoder.encode("{\n" +
+                "  \"query\": {\n" +
+                        "    \"type\": \"terminal\",\n" +
+                        "    \"label\": \"text\",\n" +
+                        "    \"service\": \"text\",\n" +
+                        "    \"parameters\": {\n" +
+                        "      \"attribute\": \"rcsb_entry_container_identifiers.entry_id\",\n" +
+                        "      \"operator\": \"exists\",\n" +
+                        "      \"negation\": false\n" +
+                        "    }\n" +
+                        "  },\n" +
+                        "  \"return_type\": \"entry\",\n" +
+                        "  \"request_options\": {\n" +
+                        "    \"results_content_type\": [\n" +
+                        types +
+                        "    ],\n" +
+                        "    \"return_all_hits\": true,\n" +
+                        "    \"results_verbosity\": \"compact\"\n" +
+                        "  }\n" +
+                        "}", StandardCharsets.UTF_8);
+        return new URL("https://search.rcsb.org/rcsbsearch/v2/query?json=" + query);
     }
 
     /**
@@ -503,7 +538,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         System.out.println();
         System.out.println("Usage: java -Xmx12G -jar update.jar operation ...");
         System.out.println("Valid operation values: " + Arrays.toString(Operation.values()));
-        System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument 'full' for complete update)");
+        System.out.println("Optionally: list of entry ids - (no argument performs null operation, use single argument '" + FULL + "' for complete update based on RCSB PDB holdings, use '" + FULL_CSM + "' to include computed structure models from AlphaFold DB)");
         System.out.println("If you want to update entries you have to explicitly remove them first");
         System.out.println();
         System.out.println("Example: java -Xmx12G -jar update.jar ADD 1acj 1exr 4hhb");
@@ -526,8 +561,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
         String[] ids = new String[args.length - offset];
         List<UpdateItem> requested;
         System.arraycopy(args, offset, ids, 0, ids.length);
-        if (ids.length == offset && ids[0].equalsIgnoreCase("full")) {
-            requested = getAllIdentifiers();
+        if (ids.length == offset && (ids[0].equalsIgnoreCase(FULL) || ids[0].equalsIgnoreCase(FULL_CSM))) {
+            requested = getAllIdentifiers(ids[0].toLowerCase());
         } else if (ids.length == offset + 1 && ids[0].equalsIgnoreCase("path")) {
             try (Stream<Path> paths = Files.walk(Paths.get(ids[offset]))) {
                 requested = paths.filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))

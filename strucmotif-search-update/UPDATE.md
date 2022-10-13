@@ -17,7 +17,8 @@ class Demo {
 ```
 
 Supported operations are `ADD` and `REMOVE`. Either process all current PDB structures (`full`) or provide an array of
-entry IDs you want to process (e.g., `"4HHB", "1MUW", "1EXR"`).
+entry IDs you want to process (e.g., `"4HHB", "1MUW", "1EXR"`). Use `full_csm` to index all experimental PDB structures
+as well as all computed structure models integrated into rcsb.org (˜1 million AlphaFold DB structures).
 
 ### Loading Non-Archived Structures
 It's also possible to load and index non-archived structures such as computed structure models, e.g. from the AlphaFold
@@ -68,7 +69,6 @@ might require a full load.
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
 | `download-tries` | Number of tries to download structure data during update | `3` |
-| `entry-holdings-url` | Location of RCSB PDB holdings file | RCSB PDB Data API |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
 | `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
 | `number-threads` | Number of worker threads | available processors |

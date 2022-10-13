@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.18.0
+strucmotif-search 0.18.1
 -------------
 ### Added
 - `full` update is now based on RCSB PDB Search API and supports `full_csm`

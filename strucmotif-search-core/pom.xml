@@ -9,16 +9,12 @@
 
     <artifactId>strucmotif-search-core</artifactId>
 
-    <properties>
-        <snakeyaml.version>1.33</snakeyaml.version>
-    </properties>
-
     <dependencies>
         <!-- BinaryCIF handling -->
         <dependency>
             <groupId>org.rcsb</groupId>
             <artifactId>ciftools-java</artifactId>
-            <version>4.0.2</version>
+            <version>5.0.0</version>
         </dependency>
 
         <dependency>
@@ -31,7 +27,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
-            <version>2.7.4</version>
+            <version>2.7.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.springframework.boot</groupId>
@@ -42,7 +38,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
-            <version>2.7.4</version>
+            <version>2.7.8</version>
             <optional>true</optional>
         </dependency>
 
@@ -50,7 +46,7 @@
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.9.1</version>
+            <version>2.10.1</version>
             <scope>compile</scope>
         </dependency>
 
@@ -66,7 +62,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <version>2.7.4</version>
+            <version>2.7.8</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.junit.vintage</groupId>
@@ -77,7 +73,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.3</version>
+            <version>1.4.5</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

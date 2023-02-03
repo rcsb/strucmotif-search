@@ -110,7 +110,7 @@ public class StrucmotifConfig {
     /**
      * URL of the Chemical Component Dictionary.
      */
-    private String ccdUrl = "https://ftp.wwpdb.org/pub/pdb/data/monomers/components.cif.gz";
+    private String ccdUrl = "https://files.wwpdb.org/pub/pdb/data/monomers/components.cif.gz";
     /**
      * Set to true to enable D-amino acids by mapping them to their L-counterpart. When false, D-amino acids will be
      * treated as unknown component.

@@ -141,5 +141,10 @@ all structure files and add them to an inverted index that allows efficient sear
 Details can be found in:
 [UPDATE.md](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md)
 
+## Related Projects
+- [ciftools-java](https://github.com/rcsb/ciftools-java): mmCIF parsing and BinaryCIF implementation
+- [ffindex-java](https://github.com/rcsb/ffindex-java): bundle large amounts of small files together
+- [rcsb-molstar](https://github.com/molstar/rcsb-molstar): define motifs in 3D and visualize results
+
 ## Publication
 Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

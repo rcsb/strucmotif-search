@@ -50,13 +50,6 @@
             <scope>compile</scope>
         </dependency>
 
-        <!-- force newer dep without vulnerabilities -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.33</version>
-        </dependency>
-
         <!-- test dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

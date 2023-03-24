@@ -63,6 +63,7 @@ might require a full load.
 
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
+| `ambiguous-monomer-strategy` | How to resolve ASX and GLX? | `TYPE` |
 | `ccd-url` | URL to the chemical component dictionary | wwPDB |
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
 | `commit-interval` | How many chunks to process before committing to index | `25` |

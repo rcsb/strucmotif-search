@@ -3,9 +3,12 @@ package org.rcsb.strucmotif.io;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
+import org.rcsb.strucmotif.config.AmbiguousMonomerStrategy;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -214,6 +217,20 @@ class StructureReaderImplTest {
         assertEquals(5208, multiplier * chainCount(structure));
         assertEquals(5208 * 413, multiplier * residueCount(structure));
         assertEquals(5208 * 3231, multiplier * atomCount(structure));
+    }
+
+    @Test
+    void whenReadingStructureWithAmbiguousResidueType_thenSupported() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1kp0"));
+        // GLX at position 5
+        int residueIndex = structure.getResidueIndex("A", 5);
+        assertNotEquals(ResidueType.UNKNOWN_COMPONENT, structure.getResidueType(residueIndex));
+
+        ResidueGraph residueGraph = new ResidueGraph(structure, new StrucmotifConfig(), ResidueGraph.ResidueGraphOptions.deposited());
+        residueGraph.residuePairOccurrencesParallel()
+                .filter(p -> p.getResidueIdentifier().getIndex1() == 4 || p.getResidueIdentifier().getIndex2() == 4)
+                .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .forEach(d -> assertTrue(d.getResidueType1() == ResidueType.UNKNOWN_AMINO_ACID || d.getResidueType2() == ResidueType.UNKNOWN_AMINO_ACID));
     }
 
     private long chainCount(Structure structure) {

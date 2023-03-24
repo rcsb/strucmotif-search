@@ -117,6 +117,10 @@ public class StrucmotifConfig {
      */
     private boolean supportDAminoAcids = true;
     /**
+     * Set to true to map GLX and ASX to their respective acid (GLU or ASP).
+     */
+    private AmbiguousMonomerStrategy ambiguousMonomerStrategy = AmbiguousMonomerStrategy.TYPE;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -531,5 +535,21 @@ public class StrucmotifConfig {
      */
     public void setSupportDAminoAcids(boolean supportDAminoAcids) {
         this.supportDAminoAcids = supportDAminoAcids;
+    }
+
+    /**
+     * Specify how ambiguous monomers are mapped to their non-ambiguous flavors.
+     * @return the strategy to apply
+     */
+    public AmbiguousMonomerStrategy getAmbiguousMonomerStrategy() {
+        return ambiguousMonomerStrategy;
+    }
+
+    /**
+     * Update the handling of ambiguous monomers.
+     * @param ambiguousMonomerStrategy how to remap ambiguous monomers
+     */
+    public void setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy ambiguousMonomerStrategy) {
+        this.ambiguousMonomerStrategy = ambiguousMonomerStrategy;
     }
 }

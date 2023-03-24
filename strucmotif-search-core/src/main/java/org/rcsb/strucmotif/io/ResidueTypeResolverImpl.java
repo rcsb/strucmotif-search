@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -43,6 +42,15 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
     private static final String MAPPING_FILE = "residue-type-mapping.json";
     private static final Map<String, ResidueType> THREE_LETTER_CODE_MAPPING = Arrays.stream(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getThreeLetterCode, Function.identity()));
+    private static final Map<String, ResidueType> AMBIGUOUS_TO_TYPE = Map.of(
+            "ASX", ResidueType.UNKNOWN_AMINO_ACID,
+            "GLX", ResidueType.UNKNOWN_AMINO_ACID);
+    private static final Map<String, ResidueType> AMBIGUOUS_TO_ACID = Map.of(
+            "ASX", ResidueType.ASPARTIC_ACID,
+            "GLX", ResidueType.GLUTAMIC_ACID);
+    private static final Map<String, ResidueType> AMBIGUOUS_TO_AMIDE = Map.of(
+            "ASX", ResidueType.ASPARAGINE,
+            "GLX", ResidueType.GLUTAMINE);
     private static final Map<String, ResidueType> D_AMINO_ACID_MAPPING = Map.ofEntries(
             Map.entry("DAL", ResidueType.ALANINE),
             Map.entry("DAR", ResidueType.ARGININE),
@@ -110,6 +118,12 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
                 break;
             default:
                 throw new UnsupportedOperationException(strucmotifConfig.getModifiedResidueStrategy() + " isn't implemented");
+        }
+        switch (strucmotifConfig.getAmbiguousMonomerStrategy()) {
+            case UNKNOWN_COMPONENT -> { }
+            case TYPE -> out.putAll(AMBIGUOUS_TO_TYPE);
+            case AMIDE -> out.putAll(AMBIGUOUS_TO_AMIDE);
+            case ACID -> out.putAll(AMBIGUOUS_TO_ACID);
         }
         if (strucmotifConfig.isSupportDAminoAcids()) {
             out.putAll(D_AMINO_ACID_MAPPING);

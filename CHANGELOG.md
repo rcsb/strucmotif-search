@@ -3,6 +3,9 @@ Strucmotif-search Changelog
 
 Unreleased
 -------------
+### Added
+- configurable support for ambiguous amino acids (GLX, ASX)
+
 ### Breaking changes
 - switch to Java 17
 

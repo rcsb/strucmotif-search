@@ -240,14 +240,9 @@ public class StructureContextBuilder implements ContextBuilder {
          */
         public MandatoryBuilderStep motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
-                case KRUSKAL:
-                    this.motifPruner = StructureContextBuilder.this.kruskalMotifPruner;
-                    break;
-                case NONE:
-                    this.motifPruner = StructureContextBuilder.this.noOperationMotifPruner;
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unhandled case: " + motifPruningStrategy);
+                case KRUSKAL -> this.motifPruner = StructureContextBuilder.this.kruskalMotifPruner;
+                case NONE -> this.motifPruner = StructureContextBuilder.this.noOperationMotifPruner;
+                default -> throw new UnsupportedOperationException("Unhandled case: " + motifPruningStrategy);
             }
             return this;
         }

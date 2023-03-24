@@ -290,19 +290,14 @@ public class StructureWriterImpl implements StructureWriter {
      */
     private static boolean ambiguousAtom(ResidueType residueType, LabelAtomId labelAtomId) {
         // see Coutsias, 2019
-        switch (residueType) {
-            case ARGININE:
-                return (labelAtomId == LabelAtomId.NH1 || labelAtomId == LabelAtomId.NH2);
-            case ASPARTIC_ACID:
-                return (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2);
-            case GLUTAMIC_ACID:
-                return (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2);
-            case PHENYLALANINE: case TYROSINE:
-                return (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
-                        || labelAtomId == LabelAtomId.CE2);
-            default:
-                return false;
-        }
+        return switch (residueType) {
+            case ARGININE -> (labelAtomId == LabelAtomId.NH1 || labelAtomId == LabelAtomId.NH2);
+            case ASPARTIC_ACID -> (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2);
+            case GLUTAMIC_ACID -> (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2);
+            case PHENYLALANINE, TYROSINE -> (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
+                    || labelAtomId == LabelAtomId.CE2);
+            default -> false;
+        };
     }
 
     private double findMetricValue(MaQaMetricLocal category, String labelAsymId, int labelSeqId) {

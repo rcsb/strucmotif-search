@@ -49,28 +49,21 @@ public class MessagePackCodec extends AbstractBucketCodec {
             return int8;
         }
 
-        switch (type) {
+        return switch (type) {
             // uint8
-            case 0xCC:
-                return byteBuffer.get() & 0xFF;
+            case 0xCC -> byteBuffer.get() & 0xFF;
             // uint16
-            case 0xCD:
-                return byteBuffer.getShort() & 0xFFFF;
+            case 0xCD -> byteBuffer.getShort() & 0xFFFF;
             // uint32
-            case 0xCE:
-                return readUnsignedInt(byteBuffer);
+            case 0xCE -> readUnsignedInt(byteBuffer);
             // int8
-            case 0xD0:
-                return byteBuffer.get();
+            case 0xD0 -> byteBuffer.get();
             // int16
-            case 0xD1:
-                return byteBuffer.getShort();
+            case 0xD1 -> byteBuffer.getShort();
             // int32
-            case 0xD2:
-                return byteBuffer.getInt();
-            default:
-                throw new IllegalArgumentException("Unknown MessagePack type 0x" + Integer.toHexString(type) + ", expected a int here!");
-        }
+            case 0xD2 -> byteBuffer.getInt();
+            default -> throw new IllegalArgumentException("Unknown MessagePack type 0x" + Integer.toHexString(type) + ", expected a int here!");
+        };
     }
 
     private String[] decodeStringArray(ByteBuffer byteBuffer) {
@@ -96,19 +89,15 @@ public class MessagePackCodec extends AbstractBucketCodec {
             return type & 0x1F;
         }
 
-        switch (type) {
+        return switch (type) {
             // str8
-            case 0xD9:
-                return byteBuffer.get() & 0xFF;
+            case 0xD9 -> byteBuffer.get() & 0xFF;
             // str16
-            case 0xDA:
-                return byteBuffer.getShort() & 0xFFFF;
+            case 0xDA -> byteBuffer.getShort() & 0xFFFF;
             // str32
-            case 0xDB:
-                return readUnsignedInt(byteBuffer);
-            default:
-                throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected a StringArray here!");
-        }
+            case 0xDB -> readUnsignedInt(byteBuffer);
+            default -> throw new IllegalArgumentException("Unexpected MessagePack type 0x" + Integer.toHexString(type) + ", expected a StringArray here!");
+        };
     }
 
     private int readArrayLength(ByteBuffer byteBuffer) {

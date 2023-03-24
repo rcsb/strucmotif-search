@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Set;

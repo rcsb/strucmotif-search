@@ -9,10 +9,6 @@
 
     <artifactId>strucmotif-search-benchmark</artifactId>
 
-    <properties>
-        <log4j.version>2.18.0</log4j.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.rcsb</groupId>
@@ -23,12 +19,12 @@
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
-            <version>1.36</version>
+            <version>${jmh.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
-            <version>1.36</version>
+            <version>${jmh.version}</version>
         </dependency>
     </dependencies>
 </project>

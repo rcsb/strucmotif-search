@@ -177,6 +177,6 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         String output = new GsonBuilder().setPrettyPrinting().create().toJson(ccdMapping);
-        Files.write(Paths.get(MAPPING_FILE_PATH), output.getBytes(StandardCharsets.UTF_8));
+        Files.writeString(Paths.get(MAPPING_FILE_PATH), output);
     }
 }

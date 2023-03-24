@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+Unreleased
+-------------
+### Breaking changes
+- switch to Java 17
+
 strucmotif-search 0.18.1
 -------------
 ### Added

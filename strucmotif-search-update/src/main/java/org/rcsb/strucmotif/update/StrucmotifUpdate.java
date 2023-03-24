@@ -143,15 +143,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
                         .collect(Collectors.joining(", ", "[",  requested.size() > 5 ? ", ...]" : "]")));
 
         switch (operation) {
-            case ADD:
-                add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId()));
-                break;
-            case REMOVE:
-                remove(getDeltaMinusIdentifiers(requested));
-                break;
-            case RECOVER:
-                recover(stateRepository.selectDirty());
-                break;
+            case ADD -> add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId()));
+            case REMOVE -> remove(getDeltaMinusIdentifiers(requested));
+            case RECOVER -> recover(stateRepository.selectDirty());
         }
 
         logger.info("Finished update operation");
@@ -438,17 +432,11 @@ public class StrucmotifUpdate implements CommandLineRunner {
     }
 
     private URL composeSearchUrl(String mode) throws MalformedURLException {
-        String types;
-        switch (mode) {
-            case FULL:
-                types = "\"experimental\"";
-                break;
-            case FULL_CSM:
-                types = "\"computational\", \"experimental\"";
-                break;
-            default:
-                throw new UnsupportedOperationException(mode + " is not yet implemented");
-        }
+        String types = switch (mode) {
+            case FULL -> "\"experimental\"";
+            case FULL_CSM -> "\"computational\", \"experimental\"";
+            default -> throw new UnsupportedOperationException(mode + " is not yet implemented");
+        };
 
         String query = URLEncoder.encode("{\n" +
                 "  \"query\": {\n" +

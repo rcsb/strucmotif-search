@@ -132,7 +132,8 @@ Strucmotif.detectMotifs()
 | `number-threads` | Number of worker threads | available processors |
 | `undefined-assembly-identifier` | If allowed: What's the identifier of undefined assemblies? | `0` |
 
-Configure by placing your `application.properties` on the classpath.
+Configure by placing your `application.properties` on the classpath. All properties specific to this project must be 
+prefixed with `strucmotif.`.
 
 ## Index Structure Data and Run Updates
 You will need to process your corpus of structure data before using the service. This will create an optimized version of

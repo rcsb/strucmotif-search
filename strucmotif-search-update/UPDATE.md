@@ -81,4 +81,5 @@ might require a full load.
 | `undefined-assemblies` | Index structures without assembly information? | `true` |
 | `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `2400` |
 
-Configure by placing your `application.properties` on the classpath.
+Configure by placing your `application.properties` on the classpath. All properties specific to this project must be
+prefixed with `strucmotif.`.

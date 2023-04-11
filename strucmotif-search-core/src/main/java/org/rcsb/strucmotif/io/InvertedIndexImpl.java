@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -85,12 +86,22 @@ public class InvertedIndexImpl implements InvertedIndex {
 
     @PostConstruct
     public void setUp() throws IOException {
-        // during update, it's OK to start with non-existent files
-        if (Files.notExists(dataPath)) {
-            Files.createFile(dataPath);
-        }
-        if (Files.notExists(indexPath)) {
-            Files.createFile(indexPath);
+        try {
+            // during update, it's OK to start with non-existent files
+            if (Files.notExists(dataPath)) {
+                Files.createFile(dataPath);
+                logger.debug("Created inverted index data file '{}'", dataPath);
+            }
+            if (Files.notExists(indexPath)) {
+                Files.createFile(indexPath);
+                logger.debug("Created inverted index index file '{}'", indexPath);
+            }
+        } catch (NoSuchFileException e) {
+            logger.error("Could not create inverted index file bundle (data path: '{}', index path: '{}') - make sure that '{}' exists and is accessible",
+                    dataPath,
+                    indexPath,
+                    dataPath.getParent());
+            throw e;
         }
 
         initializeFileBundle();

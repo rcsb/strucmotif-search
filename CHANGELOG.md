@@ -6,6 +6,9 @@ Unreleased
 ### Added
 - configurable support for ambiguous amino acids (GLX, ASX)
 
+### Bug fix
+- more user-friendly error messages upon missing directory/permissions
+
 ### Breaking changes
 - switch to Java 17
 

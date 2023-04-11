@@ -1,5 +1,5 @@
 # Running Updates
-Before searching, you need to add structure and inverted index data. Use the `MotifSearchUpdate` class to perform an
+Before searching, you need to add structure and inverted index data. Use the `StrucmotifUpdate` class to perform an
 update.
 
 ## Update Structure and Inverted Index Data
@@ -11,7 +11,7 @@ current holdings and can perform incremental/delta loads that add the newly rele
 class Demo {
     public static void main(String[] args) {
         // perform a full load of all structures in RCSB PDB with default configuration
-        MotifSearchUpdate.main(new String[] { "ADD", "full" });
+        StrucmotifUpdate.main(new String[] { "ADD", "full" });
     }
 }
 ```
@@ -27,7 +27,7 @@ database or by pointing to local files.
 ```java
 class Demo {
     public static void main(String[] args) {
-        MotifSearchUpdate.main(new String[] { "ADD",
+        StrucmotifUpdate.main(new String[] { "ADD",
                 // provide a unique identifier if pointing to external files
                 // written files and entries in the inverted index are identified by this key
                 "AF-P07477-F1,https://alphafold.ebi.ac.uk/files/AF-P07477-F1-model_v1.cif",
@@ -52,7 +52,7 @@ resource-specific prefixes (`AF-` and `MA-` for AlphaFold and ModelArchive, resp
 ```java
 class Demo {
     public static void main(String[] args) {
-        MotifSearchUpdate.main(new String[] { "ADD", "path", "/opt/data/pdb/" });
+        StrucmotifUpdate.main(new String[] { "ADD", "path", "/opt/data/pdb/" });
     }
 }
 ```

@@ -47,13 +47,13 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.targetEncoding>UTF-8</project.build.targetEncoding>
-        <spring.version>3.0.5</spring.version>
-        <ciftools.version>5.0.0</ciftools.version>
+        <spring.version>3.1.0</spring.version>
+        <ciftools.version>5.0.1</ciftools.version>
         <ffindex.version>0.2.0</ffindex.version>
         <gson.version>2.10.1</gson.version>
         <jmh.version>1.36</jmh.version>
-        <junit.version>5.9.2</junit.version>
-        <mockito.version>5.2.0</mockito.version>
+        <junit.version>5.10.0-M1</junit.version>
+        <mockito.version>5.3.1</mockito.version>
         <sonar.organization>rcsb</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
@@ -89,7 +89,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <!-- JUnit 5 requires Surefire version 2.22.0 or higher -->
-                <version>3.0.0</version>
+                <version>3.1.0</version>
             </plugin>
         </plugins>
     </build>
@@ -129,7 +129,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>3.1.0</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -152,7 +152,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.2.1</version>
+                        <version>3.3.0</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -169,7 +169,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>3.5.0</version>
                         <configuration>
-                            <source>11</source>
+                            <source>17</source>
                         </configuration>
                         <executions>
                             <execution>

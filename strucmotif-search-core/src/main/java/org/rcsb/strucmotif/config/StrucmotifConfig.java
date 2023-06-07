@@ -1,8 +1,13 @@
 package org.rcsb.strucmotif.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * All properties used throughout the strucmotif-search application.
@@ -11,6 +16,7 @@ import org.springframework.context.annotation.Configuration;
 @EnableConfigurationProperties
 @ConfigurationProperties(prefix = "strucmotif")
 public class StrucmotifConfig {
+    private static final Logger logger = LoggerFactory.getLogger(StrucmotifConfig.class);
     /**
      * The maximum distance in Å between alpha carbon atoms of residue pairs. All pairs below will be added the inverted
      * index and can appear as search results. Lower values ease storage requirements and improve speed of update
@@ -551,5 +557,23 @@ public class StrucmotifConfig {
      */
     public void setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy ambiguousMonomerStrategy) {
         this.ambiguousMonomerStrategy = ambiguousMonomerStrategy;
+    }
+
+    /**
+     * Dumps the current configuration to the logs.
+     */
+    public void logCurrentConfig() {
+        logger.info("Current strucmotif config is:");
+        for (Field field : this.getClass().getDeclaredFields()) {
+            if (Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+
+            try {
+                logger.info("    {}: {}", field.getName(), field.get(this));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

@@ -119,6 +119,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
             return;
         }
 
+        strucmotifConfig.logCurrentConfig();
+
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = parseOperation(args);
         List<UpdateItem> requested = parseUpdateList(args);

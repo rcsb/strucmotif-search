@@ -38,6 +38,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -119,7 +121,16 @@ public class StrucmotifUpdate implements CommandLineRunner {
             return;
         }
 
-        strucmotifConfig.logCurrentConfig();
+        logger.info("Strucmotif config used for loading is:");
+        for (Method method : strucmotifConfig.getClass().getMethods()) {
+            int modifiers = method.getModifiers();
+            String name = method.getName();
+            if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers) || !name.startsWith("get") || name.equals("getClass")) {
+                continue;
+            }
+
+            logger.info("    {}: {}", name, method.invoke(strucmotifConfig));
+        }
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
         Operation operation = parseOperation(args);

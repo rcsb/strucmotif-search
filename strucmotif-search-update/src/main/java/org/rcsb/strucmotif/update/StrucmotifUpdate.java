@@ -74,7 +74,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(StrucmotifUpdate.class);
     private static final Set<String> STRUCTURE_EXTENSIONS = Set.of(".cif", ".cif.gz", ".bcif", ".bcif.gz");
     private static final String FULL = "full";
-    private static final String FULL_CSM = "`full_csm`";
+    private static final String FULL_CSM = "full_csm";
 
     /**
      * Entry point from the command-line.

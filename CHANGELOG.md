@@ -8,6 +8,7 @@ Unreleased
 
 ### Bug fix
 - more user-friendly error messages upon missing directory/permissions
+- fix handling of `full_csm` argument during update
 
 ### Breaking changes
 - switch to Java 17

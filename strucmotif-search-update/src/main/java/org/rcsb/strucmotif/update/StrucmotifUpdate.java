@@ -586,7 +586,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     // upper-case PDB-IDs, leave URLs be
                     .map(id -> {
                         String[] split = id.split(",");
-                        if (split[0].matches(PDB_REGEX) || split[0].matches(CSM_REGEX)) {
+                        if (id.matches(PDB_REGEX) || id.matches(CSM_REGEX)) {
                             return new UpdateItem(id.toUpperCase());
                         } else if (split.length == 2) {
                             try {

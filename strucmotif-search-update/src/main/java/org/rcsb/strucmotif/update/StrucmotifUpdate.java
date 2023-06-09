@@ -129,7 +129,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                 continue;
             }
 
-            logger.info("    {}: {}", name, method.invoke(strucmotifConfig));
+            logger.info("    strucmotif.{}: {}", kebabCase(name.replace("get", "")), method.invoke(strucmotifConfig));
         }
 
         // determine identifiers requested by user - either provided collection or all currently reported identifiers by RCSB PDB
@@ -162,6 +162,15 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         logger.info("Finished update operation");
+    }
+
+    private static final String RE1 = "([a-z0-9])([A-Z])";
+    private static final String RE2 = "([A-Z])([A-Z])(?=[a-z])";
+    private static final String REPLACEMENT = "$1-$2";
+    private String kebabCase(String s) {
+        return s.replaceAll(RE1, REPLACEMENT)
+                .replaceAll(RE2, REPLACEMENT)
+                .toLowerCase();
     }
 
     private UpdateItem mapFile(Path path) {

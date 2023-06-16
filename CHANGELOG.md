@@ -13,6 +13,7 @@ Unreleased
 
 ### Breaking changes
 - switch to Java 17
+- rename `MotifSearchQuery` -> `MotifQuery` (to align with `StructureQuery`)
 
 strucmotif-search 0.18.1
 -------------

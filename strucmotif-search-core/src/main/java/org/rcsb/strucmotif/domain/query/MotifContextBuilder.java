@@ -270,7 +270,7 @@ public class MotifContextBuilder implements ContextBuilder {
 
         @Override
         public MotifSearchContext buildContext() {
-            MotifSearchQuery query = new MotifSearchQuery(structureIdentifier,
+            MotifQuery query = new MotifQuery(structureIdentifier,
                     structure,
                     motifDefinitions,
                     parameters);

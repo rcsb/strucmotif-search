@@ -9,7 +9,7 @@ import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.PositionSpecificExchange;
 import org.rcsb.strucmotif.domain.query.MotifParameters;
 import org.rcsb.strucmotif.domain.query.MotifQueryStructure;
-import org.rcsb.strucmotif.domain.query.MotifSearchQuery;
+import org.rcsb.strucmotif.domain.query.MotifQuery;
 import org.rcsb.strucmotif.domain.result.MotifHit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -41,7 +41,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
     private final InvertedIndex invertedIndex;
     private final StructureIndexProvider structureIndexProvider;
     private final StructureDataProvider structureDataProvider;
-    private final MotifSearchQuery query;
+    private final MotifQuery query;
     private final MotifSearchResult result;
 
     /**
@@ -53,7 +53,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
      * @param structureDataProvider data provider
      * @param query the actual query
      */
-    public MotifSearchContext(StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifSearchQuery query) {
+    public MotifSearchContext(StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifQuery query) {
         this.runtime = strucmotifRuntime;
         this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;
@@ -106,7 +106,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
     }
 
     @Override
-    public MotifSearchQuery getQuery() {
+    public MotifQuery getQuery() {
         return query;
     }
 

@@ -264,11 +264,11 @@ class StructureIntegrationTest {
                         new LabelSelection("C", "2", 45),
                         new LabelSelection("C", "2", 49));
 
-        StructureQuery motifSearchQuery = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
+        StructureQuery structureQuery = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
                 .buildParameters()
                 .buildContext()
                 .getQuery();
-        assertEquals(6, motifSearchQuery.getQueryStructure().getResidues().size(), "not all residues present");
+        assertEquals(6, structureQuery.getQueryStructure().getResidues().size(), "not all residues present");
     }
 
     /**

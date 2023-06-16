@@ -310,4 +310,37 @@ class StructureIntegrationTest {
                 .size();
         assertEquals(fullQueryCount, pdbQueryCount);
     }
+
+    @Test
+    void whenDanglingResidue_thenExceptionThrown() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 162), // K
+                new LabelSelection("A", "1", 193), // D
+                new LabelSelection("A", "1", 219), // E
+                new LabelSelection("A", "1", 245), // E
+                new LabelSelection("A", "1", 295), // H
+                new LabelSelection("A", "1", 43)); // V
+
+        StructureContextBuilder.OptionalBuilderStep step = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters()
+                .resultsContentType(ResultsContentType.EXPERIMENTAL, ResultsContentType.COMPUTATIONAL);
+        assertThrows(IllegalQueryDefinitionException.class, step::buildContext);
+    }
+
+    @Test
+    void whenFragmentedMotif_thenExceptionThrown() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("2mnr"));
+        List<LabelSelection> labelSelections = List.of(new LabelSelection("A", "1", 162), // K
+                new LabelSelection("A", "1", 193), // D
+                new LabelSelection("A", "1", 219), // E
+                new LabelSelection("A", "1", 245), // E
+                new LabelSelection("A", "1", 295), // H
+                new LabelSelection("A", "1", 43),  // V
+                new LabelSelection("A", "1", 39)); // T
+
+        StructureContextBuilder.OptionalBuilderStep step = contextBuilder.defineByStructureAndSelection(structure, labelSelections)
+                .buildParameters()
+                .resultsContentType(ResultsContentType.EXPERIMENTAL, ResultsContentType.COMPUTATIONAL);
+        assertThrows(IllegalQueryDefinitionException.class, step::buildContext);
+    }
 }

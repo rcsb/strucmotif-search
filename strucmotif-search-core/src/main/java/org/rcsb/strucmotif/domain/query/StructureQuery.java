@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
@@ -48,6 +49,12 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
                           Collection<ResultsContentType> resultsContentType,
                           StrucmotifConfig strucmotifConfig) {
         ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
+
+        // validate graph and reject motifs with dangling residues or multiple fragments
+        if (!residueGraph.isConnected()) {
+            throw new IllegalQueryDefinitionException("Query violates distance threshold");
+        }
+
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
         this.queryStructure = new StructureQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;

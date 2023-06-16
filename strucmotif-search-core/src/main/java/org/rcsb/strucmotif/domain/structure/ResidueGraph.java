@@ -11,6 +11,8 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.math.Algebra;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,10 +33,12 @@ import static org.rcsb.strucmotif.math.Algebra.*;
  * residues.
  */
 public class ResidueGraph {
+    private static final Logger logger = LoggerFactory.getLogger(ResidueGraph.class);
     private final Structure structure;
     private final Map<IndexSelection, Map<IndexSelection, Float>> backboneDistances;
     private final Map<IndexSelection, Map<IndexSelection, Float>> sideChainDistances;
     private final Map<IndexSelection, Map<IndexSelection, Float>> angles;
+    private final int selectionCount;
     private final int numberOfResidues;
     private final int numberOfPairings;
 
@@ -161,8 +165,9 @@ public class ResidueGraph {
                     .toArray(String[]::new));
         }
 
+        this.selectionCount = labelSelections.size();
         this.numberOfResidues = backboneVectors.size();
-        this.numberOfPairings =  fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, strucmotifConfig.getSquaredDistanceCutoff(), all(), assemblyMap);
+        this.numberOfPairings = fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, strucmotifConfig.getSquaredDistanceCutoff(), all(), assemblyMap);
     }
 
     /**
@@ -251,12 +256,13 @@ public class ResidueGraph {
             }
         }
 
+        this.selectionCount = transformedBackboneVectors.size();
         this.numberOfResidues = transformedBackboneVectors.size();
         this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, strucmotifConfig.getSquaredDistanceCutoff(), options, assemblyMap);
     }
 
     private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, ResidueGraphOptions options, Map<String, String[]> assemblies) {
-        // temporary ResidueGrid to efficient distance calculation
+        // temporary ResidueGrid for efficient distance calculation
         ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
         Map<String, List<String>> assemblyMap = assemblies.entrySet()
                 .stream()
@@ -325,11 +331,11 @@ public class ResidueGraph {
                 continue;
             }
 
-            Map<IndexSelection, Float> innerPolymerAnchorMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerPolymerAnchorMap.put(residueKey2, residueContact.getDistance());
+            Map<IndexSelection, Float> innerBackboneMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
+            innerBackboneMap.put(residueKey2, residueContact.getDistance());
 
-            Map<IndexSelection, Float> innerInteractionCenterMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerInteractionCenterMap.put(residueKey2, distance3d(sideChainCoordinates1, sideChainCoordinates2));
+            Map<IndexSelection, Float> innerSideChainMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
+            innerSideChainMap.put(residueKey2, distance3d(sideChainCoordinates1, sideChainCoordinates2));
 
             Map<IndexSelection, Float> innerAngleMap = angles.computeIfAbsent(residueKey1, key -> new HashMap<>());
             innerAngleMap.put(residueKey2, angle(normalVector1, normalVector2));
@@ -541,5 +547,45 @@ public class ResidueGraph {
      */
     public int getNumberOfResidues() {
         return numberOfResidues;
+    }
+
+    /**
+     * Checks whether the graph described by these residues is connected. Not optimized and only intended to check
+     * validity of query motifs.
+     * @return false if there are residues that aren't reachable from another residue or if the graph has no nodes
+     */
+    public boolean isConnected() {
+        long start = System.nanoTime();
+        if (selectionCount == 0) {
+            return false;
+        }
+
+        Set<IndexSelection> visited = new HashSet<>();
+        Set<Pair<IndexSelection, IndexSelection>> edges = residuePairOccurrencesSequential()
+                .map(ResiduePairOccurrence::getResidueIdentifier)
+                .map(p -> new Pair<>(p.getIndexSelection1(), p.getIndexSelection2()))
+                .collect(Collectors.toSet());
+        IndexSelection random = backboneDistances.keySet().iterator().next();
+        dfs(random, edges, visited);
+
+        logger.debug("Checked for connectedness in {} ms", (System.nanoTime() - start) * 0.001 * 0.001);
+        return visited.size() == selectionCount;
+    }
+
+    private void dfs(IndexSelection currentNode, Set<Pair<IndexSelection, IndexSelection>> edges, Set<IndexSelection> visited) {
+        visited.add(currentNode);
+
+        for (Pair<IndexSelection, IndexSelection> edge : edges) {
+            IndexSelection node1 = edge.getFirst();
+            IndexSelection node2 = edge.getSecond();
+            if (!currentNode.equals(node1) && !currentNode.equals(node2)) {
+                continue;
+            }
+
+            IndexSelection neighbor = (node1.equals(currentNode)) ? node2 : node1;
+            if (!visited.contains(neighbor)) {
+                dfs(neighbor, edges, visited);
+            }
+        }
     }
 }

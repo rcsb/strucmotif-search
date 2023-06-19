@@ -7,9 +7,6 @@ import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 

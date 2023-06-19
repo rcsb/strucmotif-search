@@ -565,6 +565,11 @@ public class ResidueGraph {
                 .map(ResiduePairOccurrence::getResidueIdentifier)
                 .map(p -> new Pair<>(p.getIndexSelection1(), p.getIndexSelection2()))
                 .collect(Collectors.toSet());
+
+        if (backboneDistances.isEmpty()) {
+            return false;
+        }
+
         IndexSelection random = backboneDistances.keySet().iterator().next();
         dfs(random, edges, visited);
 

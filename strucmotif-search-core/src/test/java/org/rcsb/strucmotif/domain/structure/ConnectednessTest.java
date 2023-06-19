@@ -7,6 +7,9 @@ import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -76,6 +79,20 @@ public class ConnectednessTest {
         );
         List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
         ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
+        assertFalse(residueGraph.isConnected());
+    }
+
+    @Test
+    void whenNoEdges_thenReportFalse() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1w27"));
+        List<LabelSelection> sel = List.of(
+                new LabelSelection("A", "1", 110),
+                new LabelSelection("A", "1", 349),
+                new LabelSelection("A", "1", 398)
+        );
+        List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
+        ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
+        residueGraph.residuePairOccurrencesSequential().forEach(System.out::println);
         assertFalse(residueGraph.isConnected());
     }
 }

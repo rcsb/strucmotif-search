@@ -117,7 +117,7 @@ public class StrucmotifConfig {
      */
     private boolean supportDAminoAcids = true;
     /**
-     * Set to true to map GLX and ASX to their respective acid (GLU or ASP).
+     * Specify whether to map GLX and ASX to their respective amide, acid, or the unknown amino acid.
      */
     private AmbiguousMonomerStrategy ambiguousMonomerStrategy = AmbiguousMonomerStrategy.TYPE;
     /**

@@ -11,6 +11,8 @@ import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
 
 class StructureReaderImplTest {
     private StructureReader structureReader;
@@ -230,6 +233,24 @@ class StructureReaderImplTest {
                 .filter(p -> p.getResidueIdentifier().getIndex1() == 4 || p.getResidueIdentifier().getIndex2() == 4)
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
                 .forEach(d -> assertTrue(d.getResidueType1() == ResidueType.UNKNOWN_AMINO_ACID || d.getResidueType2() == ResidueType.UNKNOWN_AMINO_ACID));
+    }
+
+    @Test
+    void whenReading1c3c_thenAssemblyChainsCorrectlySorted() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1c3c"));
+        String[] chains = structure.getAssemblies().get("1");
+        int i1 = 0;
+        int i2 = 0;
+        for (int i = 0; i < chains.length; i++) {
+            String s = chains[i];
+            if ("B_1".equals(s)) {
+                i1 = i;
+            }
+            if ("B_2".equals(s)) {
+                i2 = i;
+            }
+        }
+        assertTrue(i1 < i2);
     }
 
     private long chainCount(Structure structure) {

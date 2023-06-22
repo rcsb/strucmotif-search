@@ -10,6 +10,7 @@ Unreleased
 - more user-friendly error messages upon missing directory/permissions
 - fix handling of `full_csm` argument during update
 - have motifs fail validation if they don't resemble a connected graph
+- fix missing residue pairs by ensuring assembly information is accurately sorted
 
 ### Breaking changes
 - switch to Java 17

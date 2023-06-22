@@ -5,7 +5,7 @@ import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,7 +47,7 @@ public class AssemblyInformation {
                 String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
                 List<String> operList = getOperList(operExpression, asymIdList);
 
-                Set<String> sorted = assemblyInformation.computeIfAbsent(assemblyId, e -> new HashSet<>());
+                Set<String> sorted = assemblyInformation.computeIfAbsent(assemblyId, e -> new LinkedHashSet<>());
                 sorted.addAll(operList);
             }
         }

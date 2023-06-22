@@ -93,7 +93,7 @@ public class StrucmotifConfig {
     /**
      * How is inverted index data stored?
      */
-    private InvertedIndexBackend invertedIndexBackend = InvertedIndexBackend.JSON;
+    private InvertedIndexBackend invertedIndexBackend = InvertedIndexBackend.COLFER;
     /**
      * What identifier to use when undefined assemblies are allowed?
      */

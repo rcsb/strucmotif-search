@@ -62,7 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.all;
 
 /**
  * Runs strucmotif updates from the command-line.
@@ -216,7 +216,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
             writeTemporaryFiles(context);
             needsCommit = true;
 
-            if (i > 0 && i % strucmotifConfig.getCommitInterval() == 0) {
+            int commitInterval = strucmotifConfig.getCommitInterval();
+            if (commitInterval == 1 || (i > 0 && (i + 1) % commitInterval == 0)) {
                 commit(context, known);
                 needsCommit = false;
             }
@@ -320,7 +321,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         try {
             long start = System.nanoTime();
-            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, all());
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();

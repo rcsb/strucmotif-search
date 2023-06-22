@@ -68,7 +68,7 @@ might require a full load.
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
 | `commit-interval` | How many chunks to process before committing to index | `25` |
 | `data-source` | Path to local CIF archive | cif-fetch-url |
-| `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `15` |
+| `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `20` |
 | `download-tries` | Number of tries to download structure data during update | `3` |
 | `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
 | `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |

@@ -5,6 +5,7 @@ Unreleased
 -------------
 ### Added
 - configurable support for ambiguous amino acids (GLX, ASX)
+- now indexes all residue pairs within an assembly (overhead is negligible next to CSMs)
 
 ### Bug fix
 - more user-friendly error messages upon missing directory/permissions

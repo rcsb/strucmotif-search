@@ -566,8 +566,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
         return new AtomicInteger();
     }
 
-    private static final String PDB_REGEX = "^[1-9][A-Z0-9]{3}$"; // TODO need to revisit for extended PDB-IDs
-    private static final String CSM_REGEX = "^[A-Z0-9]+_[A-Z0-9]{6,}$"; // pattern used by rcsb.org for computed structure models
+    private static final String PDB_REGEX = "^[1-9][a-zA-Z0-9]{3}$"; // TODO need to revisit for extended PDB-IDs
+    private static final String CSM_REGEX = "^[a-zA-Z0-9]+_[a-zA-Z0-9]{6,}$"; // pattern used by rcsb.org for computed structure models
     private List<UpdateItem> parseUpdateList(String[] args) throws IOException {
         int offset = 1;
         String[] ids = new String[args.length - offset];

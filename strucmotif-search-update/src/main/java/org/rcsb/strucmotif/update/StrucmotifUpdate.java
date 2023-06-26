@@ -62,7 +62,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.all;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
 
 /**
  * Runs strucmotif updates from the command-line.
@@ -321,7 +321,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         try {
             long start = System.nanoTime();
-            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, all());
+            // TODO include whole chain in contact? 'all' is favorable but wastes a lot of space
+            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();

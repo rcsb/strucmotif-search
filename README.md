@@ -142,6 +142,20 @@ all structure files and add them to an inverted index that allows efficient sear
 Details can be found in:
 [UPDATE.md](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md)
 
+## Implementation Details
+### Addressing Atoms
+Two address schemes exist. `LabelSelection` is a high-level, object-based way of referencing individual residues. It 
+uses a combination of mmCIF properties, namely `label_asym_id`, `struct_oper_id`, and `label_seq_id`:
+```java
+LabelSelection ref = new LabelSelection("A", "1", 123);
+```
+
+Internally, access is facilitated using 32-bit unsigned primitive encoded integers. It doesn't follow any particular 
+layout rather, all encountered residues are addressed by their index. Chain boundaries are ignored. Operations required
+for assemblies are honored as they occur in the source file and merely increment the counter.
+Additional work is done to preserve information on chains and assemblies. Chain and operator names as well as boundaries
+are stored in memory and can be used to reconstruct `LabelSelection` instances if needed.
+
 ## Related Projects
 - [ciftools-java](https://github.com/rcsb/ciftools-java): mmCIF parsing and BinaryCIF implementation
 - [ffindex-java](https://github.com/rcsb/ffindex-java): bundle large amounts of small files together

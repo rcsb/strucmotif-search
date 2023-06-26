@@ -219,12 +219,21 @@ public class Structure {
     }
 
     /**
-     * Access to a specific transformation.
+     * Access to a specific transformation by its struct_oper_id String.
      * @param structOperIdentifier the struct_oper_id expression
      * @return a Transformation object
      */
     public Transformation getTransformation(String structOperIdentifier) {
         int transformationIndex = indexOf(transformationIds, structOperIdentifier);
+        return transformations[transformationIndex];
+    }
+
+    /**
+     * Access to a specific transformation.
+     * @param transformationIndex the internal index
+     * @return a Transformation object
+     */
+    public Transformation getTransformation(int transformationIndex) {
         return transformations[transformationIndex];
     }
 

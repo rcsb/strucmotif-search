@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.wip;
 
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
@@ -39,12 +38,14 @@ public class FileBackedStructure implements Structure {
     private final int depositedAtomCount;
     private final int instancedAtomCount;
 
-    // TODO remove undefined-assemblies hack
+    public FileBackedStructure(String structureIdentifier, String[] labelAsymIds, int[] chainOffsets, short[] labelSeqIds, int[] residueOffsets, byte[] residueTypes, byte[] labelAtomIds, short[] x, short[] y, short[] z) {
+        this(structureIdentifier, null, null, null, null, null, labelAsymIds, chainOffsets, labelSeqIds, residueOffsets, residueTypes, labelAtomIds, x, y, z);
+    }
 
     public FileBackedStructure(String structureIdentifier,
 
                                // assembly-level data
-                               // all may be null if there's implicitly only assembly "1"
+                               // all may be null if there's implicitly only assembly "1" and no transformations
                                String[] assemblyIdentifiers,
                                int[] assemblyOffsets, // start positions of an assembly in assemblyReferences
                                String[] assemblyReferences, // tuples of (label_asym_id, transformationIdentifier)
@@ -52,7 +53,6 @@ public class FileBackedStructure implements Structure {
                                float[] transformations, // blocks of 16 values in row-major indexing
 
                                // chain-level data
-                               // all may be null if there's implicitly only chain "A"
                                String[] labelAsymIds,
                                int[] chainOffsets,
 
@@ -79,7 +79,7 @@ public class FileBackedStructure implements Structure {
 
         this.labelAsymIds = labelAsymIds;
         this.chainOffsets = chainOffsets; // start indices of chains
-        this.depositedChainCount = labelAsymIds != null ? labelAsymIds.length : 1;
+        this.depositedChainCount = labelAsymIds.length;
 
         this.labelSeqIds = labelSeqIds;
         this.residueOffsets = residueOffsets; // start indices of residues
@@ -98,20 +98,6 @@ public class FileBackedStructure implements Structure {
             this.instancedChainCount = depositedChainCount;
             this.instancedResidueCount = depositedResidueCount;
             this.instancedAtomCount = depositedAtomCount;
-
-//            this.instancedChainOffsets = chainOffsets;
-//            this.instancedResidueOffsets = residueOffsets;
-        } else if (labelAsymIds == null) {
-            // assemblies but only single chain
-            this.instancedChainCount = assemblyReferences.length / 2;
-            this.instancedResidueCount = instancedChainCount * depositedResidueCount;
-            this.instancedAtomCount = instancedChainCount * depositedAtomCount;
-
-//            this.instancedChainOffsets = new int[chainOffsets.length / 2];
-//            this.instancedResidueOffsets = new int[residueOffsets.length / 2];
-//            for (int i = 0; i < chainOffsets.length - 1; i = i + 2) {
-//
-//            }
         } else {
             this.instancedChainCount = assemblyReferences.length / 2;
 
@@ -120,7 +106,7 @@ public class FileBackedStructure implements Structure {
             for (int i = 0; i < chainOffsets.length; i++) {
                 String chain = labelAsymIds[i];
                 int start = chainOffsets[i];
-                int end = i == chainOffsets.length - 1 ? depositedResidueCount : chainOffsets[i + 1];
+                int end = (i == chainOffsets.length - 1 ? depositedResidueCount : chainOffsets[i + 1]) - 1;
 
                 residuePerChain.put(chain, end - start);
                 atomsPerChain.put(chain, residueOffsets[end] - residueOffsets[start]);

@@ -1,20 +1,29 @@
 package org.rcsb.strucmotif.wip;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifBlock;
+import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import java.util.Arrays;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssemblyInformationTest {
+    private DefaultStructureReader structureReader;
+
+    @BeforeEach
+    public void init() {
+        this.structureReader = new DefaultStructureReader(new ResidueTypeResolverImpl(new StrucmotifConfig()));
+    }
+
     private static final String DATA_1M4X = """
             data_1M4X
             #
@@ -109,12 +118,20 @@ class AssemblyInformationTest {
             #""";
 
     @Test
-    void whenFirstAssemblyIsCandidate_thenMapNull() throws IOException {
+    void whenFirstAssemblyIsCandidateAndTransformations_thenRecordReturned() throws IOException {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Map<String, List<String>> assemblyInfo = AssemblyInformation.of(block);
-        assertNull(assemblyInfo);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        assertNotNull(assemblyInfo);
+        assertArrayEquals(new String[] { "1" }, assemblyInfo.assemblyIdentifiers());
+        assertArrayEquals(new int[] { 0 }, assemblyInfo.assemblyOffsets());
+        assertEquals("A", assemblyInfo.assemblyReferences()[0]);
+        assertEquals("1x61", assemblyInfo.assemblyReferences()[1]);
+        assertEquals("B", assemblyInfo.assemblyReferences()[2]);
+        assertEquals("1x61", assemblyInfo.assemblyReferences()[3]);
+        assertEquals("C", assemblyInfo.assemblyReferences()[4]);
+        assertEquals("1x61", assemblyInfo.assemblyReferences()[5]);
     }
 
     @Test
@@ -122,10 +139,19 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_5CBG.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Map<String, List<String>> assemblyInfo = AssemblyInformation.of(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
         assertNotNull(assemblyInfo);
-        assertEquals(3, assemblyInfo.size());
-        System.out.println(assemblyInfo);
+        assertEquals(3, assemblyInfo.assemblyIdentifiers().length);
+    }
+
+    @Test
+    void whenSingleCandidate1m4x_thenMultipleMapEntries() throws IOException {
+        MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X.getBytes(StandardCharsets.UTF_8)))
+                .as(StandardSchemata.MMCIF)
+                .getFirstBlock();
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        assertNotNull(assemblyInfo);
+        assertEquals(1, assemblyInfo.assemblyIdentifiers().length);
     }
 
     @Test
@@ -133,10 +159,9 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X_ALL_CANDIDATES.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Map<String, List<String>> assemblyInfo = AssemblyInformation.of(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
         assertNotNull(assemblyInfo);
-        assertEquals(7, assemblyInfo.size());
-        System.out.println(assemblyInfo);
+        assertEquals(7, assemblyInfo.assemblyIdentifiers().length);
     }
 
     @Test
@@ -144,7 +169,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_AFA0A009IHW8F1.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Map<String, List<String>> assemblyInfo = AssemblyInformation.of(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
         assertNull(assemblyInfo);
     }
 
@@ -153,8 +178,8 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Set<String> candidates = AssemblyInformation.getAssemblyCandidates(block);
-        assertNull(candidates);
+        Set<String> candidates = structureReader.getAssemblyCandidates(block);
+        assertEquals(Set.of("1"), candidates);
     }
 
     @Test
@@ -162,7 +187,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_5CBG.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Set<String> candidates = AssemblyInformation.getAssemblyCandidates(block);
+        Set<String> candidates = structureReader.getAssemblyCandidates(block);
         assertEquals(Set.of("1", "2", "3"), candidates);
     }
 
@@ -171,16 +196,16 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X_ALL_CANDIDATES.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Set<String> candidates = AssemblyInformation.getAssemblyCandidates(block);
+        Set<String> candidates = structureReader.getAssemblyCandidates(block);
         assertEquals(Set.of("1", "2", "3", "4", "5", "6", "7"), candidates);
     }
 
     @Test
-    void whenNoAssemblyInformation_thenCandidatesNull() throws IOException {
+    void whenNoAssemblyInformation_thenCandidatesEmpty() throws IOException {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_AFA0A009IHW8F1.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        Set<String> candidates = AssemblyInformation.getAssemblyCandidates(block);
-        assertNull(candidates);
+        Set<String> candidates = structureReader.getAssemblyCandidates(block);
+        assertTrue(candidates.isEmpty());
     }
 }

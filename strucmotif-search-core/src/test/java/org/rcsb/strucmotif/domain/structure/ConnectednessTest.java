@@ -89,7 +89,6 @@ public class ConnectednessTest {
         );
         List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
         ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
-        residueGraph.residuePairOccurrencesSequential().forEach(System.out::println);
         assertFalse(residueGraph.isConnected());
     }
 }

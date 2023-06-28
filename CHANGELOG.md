@@ -16,6 +16,8 @@ Unreleased
 ### Breaking changes
 - switch to Java 17
 - rename `MotifSearchQuery` -> `MotifQuery` (to align with `StructureQuery`)
+- drop support for structures without assembly information (fix at source if needed)
+- coordinate precision is not configurable anymore (now always 1 decimal place)
 
 strucmotif-search 0.18.1
 -------------

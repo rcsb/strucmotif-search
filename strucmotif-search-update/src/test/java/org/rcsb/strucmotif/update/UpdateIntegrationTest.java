@@ -65,7 +65,7 @@ class UpdateIntegrationTest {
         StructureReader reader = new StructureReaderImpl(residueTypeResolver);
         StructureWriter writer = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
         ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
-        this.data = new StructureDataProviderImpl(reader, writer, threadPool, strucmotifConfig);
+        this.data = new StructureDataProviderImpl(reader, writer, strucmotifConfig);
         this.index = new InvertedIndexImpl(threadPool, strucmotifConfig);
 
         init();

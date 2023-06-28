@@ -312,8 +312,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
             return;
         }
 
-        if (!strucmotifConfig.isUndefinedAssemblies() && structure.getAssemblies().isEmpty()) {
-            logger.warn("[{}] [{}] No assembly information - Configured to skip",
+        if (structure.getAssemblies().isEmpty()) {
+            logger.warn("[{}] [{}] No assembly information - Ignoring",
                     context.partitionContext,
                     structureContext);
             return;

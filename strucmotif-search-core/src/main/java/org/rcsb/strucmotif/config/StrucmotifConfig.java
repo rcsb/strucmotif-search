@@ -65,10 +65,6 @@ public class StrucmotifConfig {
      */
     private String cifFetchUrl = "https://models.rcsb.org/{id}.bcif";
     /**
-     * What precision to use to write renumbered structure data.
-     */
-    private int renumberedCoordinatePrecision = 1;
-    /**
      * Number of allowed tries during CIF download/parsing before an exception is thrown.
      */
     private int downloadTries = 5;
@@ -76,11 +72,6 @@ public class StrucmotifConfig {
      * Allocate a lot of memory to keep index and structure data in memory?
      */
     private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
-    /**
-     * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
-     * Hits without assembly are report as '0'.
-     */
-    private boolean undefinedAssemblies = true;
     /**
      * Filter for residues with a certain quality/confidence. Only relevant when combined with
      * {@link ResidueQualityStrategy}.
@@ -94,10 +85,6 @@ public class StrucmotifConfig {
      * How is inverted index data stored?
      */
     private InvertedIndexBackend invertedIndexBackend = InvertedIndexBackend.COLFER;
-    /**
-     * What identifier to use when undefined assemblies are allowed?
-     */
-    private String undefinedAssemblyIdentifier = "0";
     /**
      * How to index modified residues.
      */
@@ -344,22 +331,6 @@ public class StrucmotifConfig {
     }
 
     /**
-     * How many digits to write for renumbered files.
-     * @return an int
-     */
-    public int getRenumberedCoordinatePrecision() {
-        return renumberedCoordinatePrecision;
-    }
-
-    /**
-     * Set how many digits to write for renumbered files.
-     * @param renumberedCoordinatePrecision an int
-     */
-    public void setRenumberedCoordinatePrecision(int renumberedCoordinatePrecision) {
-        this.renumberedCoordinatePrecision = renumberedCoordinatePrecision;
-    }
-
-    /**
      * How many tries are allowed for connection failures/timeouts during update.
      * @return an int
      */
@@ -389,22 +360,6 @@ public class StrucmotifConfig {
      */
     public void setInMemoryStrategy(InMemoryStrategy inMemoryStrategy) {
         this.inMemoryStrategy = inMemoryStrategy;
-    }
-
-    /**
-     * Are hits without assembly allowed?
-     * @return a Boolean
-     */
-    public boolean isUndefinedAssemblies() {
-        return undefinedAssemblies;
-    }
-
-    /**
-     * Set if hits without assembly are allowed.
-     * @param undefinedAssemblies true to allow
-     */
-    public void setUndefinedAssemblies(boolean undefinedAssemblies) {
-        this.undefinedAssemblies = undefinedAssemblies;
     }
 
     /**
@@ -454,22 +409,6 @@ public class StrucmotifConfig {
      */
     public void setInvertedIndexBackend(InvertedIndexBackend invertedIndexBackend) {
         this.invertedIndexBackend = invertedIndexBackend;
-    }
-
-    /**
-     * What's the fallback identifier for undefined assemblies.
-     * @return a String
-     */
-    public String getUndefinedAssemblyIdentifier() {
-        return undefinedAssemblyIdentifier;
-    }
-
-    /**
-     * Set the fallback identifier for undefined assemblies.
-     * @param undefinedAssemblyIdentifier a String
-     */
-    public void setUndefinedAssemblyIdentifier(String undefinedAssemblyIdentifier) {
-        this.undefinedAssemblyIdentifier = undefinedAssemblyIdentifier;
     }
 
     /**

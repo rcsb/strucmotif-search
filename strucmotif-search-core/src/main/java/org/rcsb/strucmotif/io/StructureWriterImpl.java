@@ -70,11 +70,10 @@ public class StructureWriterImpl implements StructureWriter {
      * @param strucmotifConfig the global config
      */
     public StructureWriterImpl(ResidueTypeResolver residueTypeResolver, StrucmotifConfig strucmotifConfig) {
-        int precision = strucmotifConfig.getRenumberedCoordinatePrecision();
         this.options = CifOptions.builder()
-                .encodingStrategyHint("atom_site", "Cartn_x", "delta", precision)
-                .encodingStrategyHint("atom_site", "Cartn_y", "delta", precision)
-                .encodingStrategyHint("atom_site", "Cartn_z", "delta", precision)
+                .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
+                .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)
+                .encodingStrategyHint("atom_site", "Cartn_z", "delta", 1)
                 .gzip(true)
                 .build();
         this.residueQualityStrategy = strucmotifConfig.getResidueQualityStrategy();

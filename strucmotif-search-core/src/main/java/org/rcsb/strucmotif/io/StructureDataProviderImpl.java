@@ -7,7 +7,6 @@ import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.math.Partition;
@@ -67,13 +66,11 @@ public class StructureDataProviderImpl implements StructureDataProvider {
      * Construct a structure provider.
      * @param structureReader the reader
      * @param structureWriter the writer
-     * @param threadPool shared pool for parallel operations
      * @param strucmotifConfig the config
      */
     @Autowired
     public StructureDataProviderImpl(StructureReader structureReader,
                                      StructureWriter structureWriter,
-                                     ThreadPool threadPool,
                                      StrucmotifConfig strucmotifConfig) {
         this.structureReader = structureReader;
         this.renumberedStructureWriter = structureWriter;
@@ -87,10 +84,9 @@ public class StructureDataProviderImpl implements StructureDataProvider {
         this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
         this.extension = ".bcif.gz";
 
-        logger.info("BinaryCIF data source is {} - CIF fetch URL: {} - precision: {}",
+        logger.info("BinaryCIF data source is {} - CIF fetch URL: {}",
                 strucmotifConfig.getDataSource(),
-                strucmotifConfig.getCifFetchUrl(),
-                strucmotifConfig.getRenumberedCoordinatePrecision());
+                strucmotifConfig.getCifFetchUrl());
 
         this.caching = false;
     }

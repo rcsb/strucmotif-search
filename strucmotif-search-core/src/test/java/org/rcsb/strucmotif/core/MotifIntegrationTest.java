@@ -79,7 +79,7 @@ class MotifIntegrationTest {
 
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
         TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
+        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
         StrucmotifRuntime strucmotifRuntime = new StrucmotifRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
         this.motifs = new MotifDefinitionRegistryImpl(structureDataProvider)
                 .enrichMotifDefinitions(this::loadMotif)

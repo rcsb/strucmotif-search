@@ -44,7 +44,6 @@ class ResidueGraphTest {
     public void init() {
         strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
-        strucmotifConfig.setUndefinedAssemblies(false);
         structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
     }
 

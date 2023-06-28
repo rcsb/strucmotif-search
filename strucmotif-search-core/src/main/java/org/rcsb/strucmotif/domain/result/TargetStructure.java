@@ -142,23 +142,16 @@ public class TargetStructure {
         // determine all assembly ids that this collection of label selections appears in
         int residueCount = labelSelections.size();
         // this is the inverted mapping from opers to assemblies that contain this expression - can't use structure map here
-        Map<String, Set<String>> assemblyMap = assemblyInformationProvider.selectAssemblyMap(structureIdentifier);
-        Map<String, Long> assemblyCounts;
-
+        Map<String, Set<String>> assemblyMap = assemblyInformationProvider.selectAssemblyMap(structureIdentifier); // TODO this can now prolly come from structure directly
         if (assemblyMap.isEmpty()) {
-            // only allow hits in 'default'/fallback assembly if flag active and actually no information present
-            if (!undefinedAssemblies) {
-                return Stream.empty();
-            }
-
-            assemblyCounts = Map.of(assemblyInformationProvider.getUndefinedAssemblyIdentifier(), (long) residueCount);
-        } else {
-            assemblyCounts = labelSelections.stream()
-                    .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
-                    .map(assemblyMap::get)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            return Stream.empty();
         }
+
+        Map<String, Long> assemblyCounts = labelSelections.stream()
+                .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
+                .map(assemblyMap::get)
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         return assemblyCounts.entrySet()
                 .stream()

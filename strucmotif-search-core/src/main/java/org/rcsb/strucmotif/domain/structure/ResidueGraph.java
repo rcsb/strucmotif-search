@@ -155,15 +155,6 @@ public class ResidueGraph {
         }
 
         Map<String, String[]> assemblyMap = structure.getAssemblies();
-        // handle case where undefined assemblies are allowed and no assembly info is present
-        if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
-            assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), structure.getLabelSelections()
-                    .stream()
-                    .map(LabelSelection::getLabelAsymId)
-                    .distinct()
-                    .map(c -> c + "_1")
-                    .toArray(String[]::new));
-        }
 
         this.selectionCount = labelSelections.size();
         this.numberOfResidues = backboneVectors.size();
@@ -189,14 +180,6 @@ public class ResidueGraph {
                 .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
         // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
         Map<String, String[]> assemblyMap = structure.getAssemblies();
-
-        // handle case where undefined assemblies are allowed and no assembly info is present
-        if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
-            assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), chainMap.keySet()
-                    .stream()
-                    .map(c -> c + "_" + Transformation.DEFAULT_OPERATOR)
-                    .toArray(String[]::new));
-        }
 
         List<float[]> originalBackboneVectors = new ArrayList<>();
         List<float[]> originalSideChainVectors = new ArrayList<>();

@@ -130,7 +130,6 @@ Strucmotif.detectMotifs()
 | `max-results` | Maximum number of results that will be returned | `50000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
 | `number-threads` | Number of worker threads | available processors |
-| `undefined-assembly-identifier` | If allowed: What's the identifier of undefined assemblies? | `0` |
 
 Configure by placing your `application.properties` on the classpath. All properties specific to this project must be 
 prefixed with `strucmotif.`.

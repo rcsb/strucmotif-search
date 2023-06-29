@@ -11,7 +11,7 @@ import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
@@ -28,13 +28,12 @@ class DefaultStructureReaderTest {
     @Test
     void whenReadingRNA_thenAssembliesParsedCorrectly() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
-//        assertEquals(2, structure.getAssemblies()
-//                .values()
-//                .stream()
-//                .flatMap(Arrays::stream)
-//                .map(oper -> oper.split("_")[1])
-//                .distinct()
-//                .count());
+        String[] refs = structure.getReferencedChainInstances("1");
+        assertEquals(2, IntStream.range(0, refs.length / 2)
+                .map(i -> 2 * i + 1)
+                .mapToObj(i -> refs[i])
+                .distinct()
+                .count());
     }
 
     @Test
@@ -44,7 +43,7 @@ class DefaultStructureReaderTest {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vk6"));
         List<Map<LabelAtomId, float[]>> residues = selection.stream()
                 .map(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         assertTrue(residues.size() < 4, "contains duplicates");
         assertEquals(3, residues.size());
     }
@@ -69,12 +68,14 @@ class DefaultStructureReaderTest {
     void whenProcessing4chaInRenumberedFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4cha"));
         assertEquals(6, structure.getDepositedChainCount());
+        assertEquals(6, structure.getInstancedChainCount());
     }
 
     @Test
     void whenDuplicatedChainsAndIdentityOperationsInRenumberedFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3uud"));
         assertEquals(4, structure.getDepositedChainCount());
+        assertEquals(4, structure.getInstancedChainCount());
     }
 
     @Test
@@ -122,8 +123,11 @@ class DefaultStructureReaderTest {
     @Test
     void whenProcessingStructureWithSymmetryInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
-//        int multiplier = structure.getTransformations().size();
-        assertEquals(2, structure.getInstancedChainCount());
+
+        assertEquals(2, structure.getDepositedChainCount());
+        assertEquals(1056, structure.getDepositedResidueCount());
+        assertEquals(8190, structure.getDepositedAtomCount());
+        assertEquals(2, structure.getInstancedChainCount()); // TODO need to fix renumbered files
         assertEquals(1056, structure.getInstancedResidueCount());
         assertEquals(8190, structure.getInstancedAtomCount());
     }
@@ -131,10 +135,13 @@ class DefaultStructureReaderTest {
     @Test
     void whenProcessingStructureWithAssemblyInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1m4x"));
-//        int multiplier = structure.getTransformations().size();
-        assertEquals(5208, structure.getInstancedChainCount());
-        assertEquals(5208 * 413, structure.getInstancedResidueCount());
-        assertEquals(5208 * 3231, structure.getInstancedAtomCount());
+
+        assertEquals(3, structure.getDepositedChainCount());
+        assertEquals(1239, structure.getDepositedResidueCount());
+        assertEquals(9693, structure.getDepositedAtomCount());
+        assertEquals(5040, structure.getInstancedChainCount()); // TODO need to fix renumbered files
+        assertEquals(2081520, structure.getInstancedResidueCount());
+        assertEquals(16284240, structure.getInstancedAtomCount());
     }
 
     @Test
@@ -158,6 +165,9 @@ class DefaultStructureReaderTest {
     void whenProcessing4chaInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"));
 
+        assertEquals(11, structure.getDepositedChainCount());
+        assertEquals(482, structure.getDepositedResidueCount());
+        assertEquals(3591, structure.getDepositedAtomCount());
         assertEquals(11, structure.getInstancedChainCount());
         assertEquals(482, structure.getInstancedResidueCount());
         assertEquals(3591, structure.getInstancedAtomCount());
@@ -167,6 +177,9 @@ class DefaultStructureReaderTest {
     void whenDuplicatedChainsAndIdentityOperationsInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("3uud"));
 
+        assertEquals(14, structure.getDepositedChainCount());
+        assertEquals(509, structure.getDepositedResidueCount());
+        assertEquals(4459, structure.getDepositedAtomCount());
         assertEquals(14, structure.getInstancedChainCount());
         assertEquals(509, structure.getInstancedResidueCount());
         assertEquals(4459, structure.getInstancedAtomCount());
@@ -185,6 +198,9 @@ class DefaultStructureReaderTest {
     void whenProcessing1exrInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1exr"));
 
+        assertEquals(7, structure.getDepositedChainCount());
+        assertEquals(152, structure.getDepositedResidueCount());
+        assertEquals(1650, structure.getDepositedAtomCount());
         assertEquals(7, structure.getInstancedChainCount());
         assertEquals(152, structure.getInstancedResidueCount());
         assertEquals(1650, structure.getInstancedAtomCount());
@@ -193,8 +209,10 @@ class DefaultStructureReaderTest {
     @Test
     void whenProcessingStructureWithSymmetryInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
-//        int multiplier = structure.getTransformations().size();
 
+        assertEquals(3, structure.getDepositedChainCount());
+        assertEquals(528, structure.getDepositedResidueCount());
+        assertEquals(4192, structure.getDepositedAtomCount());
         assertEquals(6, structure.getInstancedChainCount());
         assertEquals(1060, structure.getInstancedResidueCount());
         assertEquals(8384, structure.getInstancedAtomCount());
@@ -203,11 +221,13 @@ class DefaultStructureReaderTest {
     @Test
     void whenProcessingStructureWithAssemblyInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1m4x"));
-//        int multiplier = structure.getTransformations().size();
 
-        assertEquals(5208, structure.getInstancedChainCount());
-        assertEquals(5208 * 413, structure.getInstancedResidueCount());
-        assertEquals(5208 * 3231, structure.getInstancedAtomCount());
+        assertEquals(3, structure.getDepositedChainCount());
+        assertEquals(1239, structure.getDepositedResidueCount());
+        assertEquals(9693, structure.getDepositedAtomCount());
+        assertEquals(5040, structure.getInstancedChainCount());
+        assertEquals(2081520, structure.getInstancedResidueCount());
+        assertEquals(16284240, structure.getInstancedAtomCount());
     }
 
     @Test
@@ -226,18 +246,19 @@ class DefaultStructureReaderTest {
     @Test
     void whenReading1c3c_thenAssemblyChainsCorrectlySorted() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1c3c"));
-//        String[] chains = structure.getAssemblies().get("1");
-//        int i1 = 0;
-//        int i2 = 0;
-//        for (int i = 0; i < chains.length; i++) {
-//            String s = chains[i];
-//            if ("B_1".equals(s)) {
-//                i1 = i;
-//            }
-//            if ("B_2".equals(s)) {
-//                i2 = i;
-//            }
-//        }
-//        assertTrue(i1 < i2);
+        String[] refs = structure.getReferencedChainInstances("1");
+        String[] fused = IntStream.range(0, refs.length / 2).map(i -> 2 * i).mapToObj(i -> refs[i] + "_" + refs[i + 1]).toArray(String[]::new);
+        int i1 = 0;
+        int i2 = 0;
+        for (int i = 0; i < fused.length; i++) {
+            String s = fused[i];
+            if ("B_1".equals(s)) {
+                i1 = i;
+            }
+            if ("B_2".equals(s)) {
+                i2 = i;
+            }
+        }
+        assertTrue(i1 < i2);
     }
 }

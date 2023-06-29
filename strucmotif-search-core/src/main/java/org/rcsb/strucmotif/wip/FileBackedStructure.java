@@ -1,14 +1,21 @@
 package org.rcsb.strucmotif.wip;
 
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class FileBackedStructure implements Structure {
+    private static final String[] DEFAULT_ASSEMBLY_IDENTIFIERS = new String[] { "1" };
+    private static final String[] DEFAULT_TRANSFORMATION_IDENTIFIERS = new String[] { "1" };
+    private static final int[] DEFAULT_ASSEMBLY_OFFSETS = new int[] { 0 };
+    private static final float[] DEFAULT_TRANSFORMATIONS = new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
     private final String structureIdentifier;
 
     private final String[] assemblyIdentifiers;
@@ -37,10 +44,6 @@ public class FileBackedStructure implements Structure {
     private final short[] z;
     private final int depositedAtomCount;
     private final int instancedAtomCount;
-
-    public FileBackedStructure(String structureIdentifier, String[] labelAsymIds, int[] chainOffsets, short[] labelSeqIds, int[] residueOffsets, byte[] residueTypes, byte[] labelAtomIds, short[] x, short[] y, short[] z) {
-        this(structureIdentifier, null, null, null, null, null, labelAsymIds, chainOffsets, labelSeqIds, residueOffsets, residueTypes, labelAtomIds, x, y, z);
-    }
 
     public FileBackedStructure(String structureIdentifier,
 
@@ -71,11 +74,11 @@ public class FileBackedStructure implements Structure {
         this.assemblyIdentifiers = assemblyIdentifiers;
         this.assemblyOffsets = assemblyOffsets;
         this.assemblyReferences = assemblyReferences;
-        this.assemblyCount = assemblyIdentifiers != null ? assemblyIdentifiers.length : 1;
+        this.assemblyCount = assemblyIdentifiers.length;
 
         this.transformationIdentifiers = transformationIdentifiers;
         this.transformations = transformations;
-        this.transformationCount = transformationIdentifiers != null ? transformationIdentifiers.length : 1;
+        this.transformationCount = transformationIdentifiers.length;
 
         this.labelAsymIds = labelAsymIds;
         this.chainOffsets = chainOffsets; // start indices of chains
@@ -93,8 +96,8 @@ public class FileBackedStructure implements Structure {
         this.depositedAtomCount = labelAtomIds.length;
 
         // compute properties
-        if (assemblyCount == 1) {
-            // no assemblies
+        if (assemblyCount == 1 && transformationCount == 1) {
+            // no transformations
             this.instancedChainCount = depositedChainCount;
             this.instancedResidueCount = depositedResidueCount;
             this.instancedAtomCount = depositedAtomCount;
@@ -106,10 +109,10 @@ public class FileBackedStructure implements Structure {
             for (int i = 0; i < chainOffsets.length; i++) {
                 String chain = labelAsymIds[i];
                 int start = chainOffsets[i];
-                int end = (i == chainOffsets.length - 1 ? depositedResidueCount : chainOffsets[i + 1]) - 1;
+                int endExclusive = (i == chainOffsets.length - 1 ? depositedResidueCount : chainOffsets[i + 1]);
 
-                residuePerChain.put(chain, end - start);
-                atomsPerChain.put(chain, residueOffsets[end] - residueOffsets[start]);
+                residuePerChain.put(chain, endExclusive - start);
+                atomsPerChain.put(chain, (endExclusive == residueOffsets.length ? depositedAtomCount : residueOffsets[endExclusive]) - residueOffsets[start]);
             }
 
             int residueCount = 0;
@@ -225,15 +228,49 @@ public class FileBackedStructure implements Structure {
     }
 
     @Override
-    public int remapResidueIndex(int raw) {
+    public String[] getAssemblyIdentifiers() {
+        return assemblyIdentifiers != null ? assemblyIdentifiers : DEFAULT_ASSEMBLY_IDENTIFIERS;
+    }
+
+    @Override
+    public String[] getReferencedChainInstances(String assemblyIdentifier) {
+        return assemblyReferences != null ? assemblyReferences :
+                Arrays.stream(labelAsymIds).flatMap(i -> Stream.of(i, "1")).toArray(String[]::new);
+    }
+
+    @Override
+    public String[] getTransformationIdentifiers() {
+        return transformationIdentifiers != null ? transformationIdentifiers : DEFAULT_TRANSFORMATION_IDENTIFIERS;
+    }
+
+    @Override
+    public float[] getTransformations() {
+        return transformations != null ? transformations : DEFAULT_TRANSFORMATIONS;
+    }
+
+    @Override
+    public int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId) {
+        return 0;
+    }
+
+    @Override
+    public int getResidueIndex(LabelSelection labelSelection) {
+        return 0;
+    }
+
+    @Override
+    public LabelSelection getLabelSelection(int residueIndex) {
+        return null;
+    }
+
+    private int remapResidueIndex(int raw) {
         if (assemblyCount == 1) {
             return raw;
         }
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public int remapAtomIndex(int raw) {
+    private int remapAtomIndex(int raw) {
         if (assemblyCount == 1) {
             return raw;
         }

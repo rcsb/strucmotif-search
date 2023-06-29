@@ -170,7 +170,7 @@ class AssemblyInformationTest {
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
         DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
-        assertNull(assemblyInfo);
+        assertNull(assemblyInfo.assemblyReferences());
     }
 
     @Test

@@ -8,20 +8,18 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
+import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
+import org.rcsb.strucmotif.math.Algebra;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -177,35 +175,21 @@ public class DefaultStructureReader {
             }
 
             AssemblyInformation assemblyInformation = parseAssemblies(block);
-            if (assemblyInformation == null) {
-                // single assemblies
-                return new FileBackedStructure(
-                        structureIdentifier,
-                        convertStrings(chainIds),
-                        convertOffsets(chainOffsets),
-                        convertLabelSeqId(labelSeqIdCollapsed),
-                        convertOffsets(residueOffsets),
-                        convertResidueTypes(residueTypes),
-                        labelAtomId,
-                        x, y, z
-                );
-            } else {
-                return new FileBackedStructure(
-                        structureIdentifier,
-                        assemblyInformation.assemblyIdentifiers,
-                        assemblyInformation.assemblyOffsets,
-                        assemblyInformation.assemblyReferences,
-                        assemblyInformation.transformationIdentifiers,
-                        assemblyInformation.transformations,
-                        convertStrings(chainIds),
-                        convertOffsets(chainOffsets),
-                        convertLabelSeqId(labelSeqIdCollapsed),
-                        convertOffsets(residueOffsets),
-                        convertResidueTypes(residueTypes),
-                        labelAtomId,
-                        x, y, z
-                );
-            }
+            return new FileBackedStructure(
+                    structureIdentifier,
+                    assemblyInformation.assemblyIdentifiers,
+                    assemblyInformation.assemblyOffsets,
+                    assemblyInformation.assemblyReferences,
+                    assemblyInformation.transformationIdentifiers,
+                    assemblyInformation.transformations,
+                    convertStrings(chainIds),
+                    convertOffsets(chainOffsets),
+                    convertLabelSeqId(labelSeqIdCollapsed),
+                    convertOffsets(residueOffsets),
+                    convertResidueTypes(residueTypes),
+                    labelAtomId,
+                    x, y, z
+            );
         }
     }
 
@@ -247,10 +231,11 @@ public class DefaultStructureReader {
             "deposited_coordinates",
             "details"
     );
+
     /**
      * Filters for biologically relevant assemblies by checking against a dictionary of accepted phrases. E.g., for 1m4x
      * a handful of assemblies are defined but only the 1st (complete) assembly is relevant and shown on rcsb.org.
-     * See https://rcsbpdb.atlassian.net/browse/RO-172 and https://github.com/rcsb/py-rcsb_utils_dictionary/blob/acd11adede68c16c582bd24cf5d6966adbbdc22b/rcsb/utils/dictionary/DictMethodAssemblyHelper.py#L38
+     * See <a href="https://rcsbpdb.atlassian.net/browse/RO-172">RO-172</a> and <a href="https://github.com/rcsb/py-rcsb_utils_dictionary/blob/acd11adede68c16c582bd24cf5d6966adbbdc22b/rcsb/utils/dictionary/DictMethodAssemblyHelper.py#L38">py-rcsb_utils_dictionary</a>
      * for details.
      * @param block data container
      * @return all selected assembly identifiers
@@ -271,11 +256,13 @@ public class DefaultStructureReader {
         return candidates;
     }
 
-    record AssemblyInformation(String[] assemblyIdentifiers,
-                               int[] assemblyOffsets,
-                               String[] assemblyReferences,
-                               String[] transformationIdentifiers,
-                               float[] transformations) {}
+    record AssemblyInformation(String[] assemblyIdentifiers, int[] assemblyOffsets, String[] assemblyReferences, String[] transformationIdentifiers, float[] transformations) {}
+
+    private static final String[] DEFAULT_TRANSFORMATION_IDENTIFIER = new String[] { "1" };
+    private static final float[] DEFAULT_TRANSFORMATION = new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+    private static final Map<String, float[]> DEFAULT_STRUCT_OPER_LIST = Map.of(DEFAULT_TRANSFORMATION_IDENTIFIER[0], DEFAULT_TRANSFORMATION);
+    private static final AssemblyInformation DEFAULT_ASSEMBLY_INFORMATION = new AssemblyInformation(new String[] { "1" },
+            new int[] { 0 }, null, DEFAULT_TRANSFORMATION_IDENTIFIER, DEFAULT_TRANSFORMATION);
 
     /**
      * Construct assembly information instance from source file. Returns <code>null</code> for the trivial case of a
@@ -290,7 +277,7 @@ public class DefaultStructureReader {
         Set<String> assemblyCandidates = getAssemblyCandidates(block);
         if (assemblyCandidates.isEmpty()) {
             // no (valid) assembly information, could throw here, let's treat it as "1" with no transforms for now
-            return null;
+            return DEFAULT_ASSEMBLY_INFORMATION;
         }
 
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
@@ -329,21 +316,72 @@ public class DefaultStructureReader {
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         if (assemblyIdentifiers.length == 1 && pdbxStructOperList.getRowCount() == 1) {
             // don't bother holding uninteresting information
-            return null;
+            return DEFAULT_ASSEMBLY_INFORMATION;
         }
 
         // parse transformations
-        String[] transformationIdentifiers = null;
-        float[] transformations = null;
+        Map<String, float[]> transformationMap = parseStructOperList(block);
+        String[] transformationIdentifiers = transformationMap.keySet().toArray(String[]::new);
+        float[] transformations = new float[transformationMap.size() * 16];
+        int p = 0;
+        for (float[] transformation : transformationMap.values()) {
+            System.arraycopy(transformation, 0, transformations, p, transformation.length);
+            p += 16;
+        }
 
-        return new AssemblyInformation(assemblyIdentifiers, assemblyOffsets, assemblyReferences, transformationIdentifiers, transformations);
+        return new AssemblyInformation(assemblyIdentifiers,
+                assemblyOffsets,
+                assemblyReferences,
+                transformationIdentifiers,
+                transformations);
+    }
+
+    /**
+     * Construct transformations from registered operations.
+     * @return all transformations, identified by their structOperIdentifier
+     */
+    private Map<String, float[]> parseStructOperList(MmCifBlock block) {
+        PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
+        if (pdbxStructOperList.getRowCount() < 2) {
+            return DEFAULT_STRUCT_OPER_LIST;
+        }
+
+        Map<String, float[]> matrices = IntStream.range(0, pdbxStructOperList.getRowCount())
+                .boxed()
+                .collect(Collectors.toMap(row -> pdbxStructOperList.getId().get(row),
+                        row -> new float[] {
+                                (float) pdbxStructOperList.getMatrix11().get(row),
+                                (float) pdbxStructOperList.getMatrix12().get(row),
+                                (float) pdbxStructOperList.getMatrix13().get(row),
+                                (float) pdbxStructOperList.getVector1().get(row),
+
+                                (float) pdbxStructOperList.getMatrix21().get(row),
+                                (float) pdbxStructOperList.getMatrix22().get(row),
+                                (float) pdbxStructOperList.getMatrix23().get(row),
+                                (float) pdbxStructOperList.getVector2().get(row),
+
+                                (float) pdbxStructOperList.getMatrix31().get(row),
+                                (float) pdbxStructOperList.getMatrix32().get(row),
+                                (float) pdbxStructOperList.getMatrix33().get(row),
+                                (float) pdbxStructOperList.getVector3().get(row),
+
+                                0, 0, 0, 1
+                        }, (x, y) -> y, LinkedHashMap::new));
+
+        PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
+        Map<String, float[]> transformations = new LinkedHashMap<>();
+        for (int row = 0; row < pdbxStructAssemblyGen.getRowCount(); row++) {
+            String operExpression = pdbxStructAssemblyGen.getOperExpression().get(row);
+            transformations.putAll(getTransformations(matrices, operExpression));
+        }
+        return transformations;
     }
 
     private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
     private static final Pattern LIST_PATTERN = Pattern.compile(",");
     private List<String> parseOperList(String operExpression, String asymIdList) {
         List<String> operations = new ArrayList<>();
-        List<String> chains = LIST_PATTERN.splitAsStream(asymIdList).collect(Collectors.toList());
+        List<String> chains = LIST_PATTERN.splitAsStream(asymIdList).toList();
         String[] split = OPERATION_PATTERN.split(operExpression);
         if (split.length > 1) {
             List<String> ids1 = extractTransformationIds(split[0]);
@@ -388,6 +426,58 @@ public class DefaultStructureReader {
             return IntStream.range(Integer.parseInt(s[0]), Integer.parseInt(s[1]) + 1)
                     .mapToObj(String::valueOf);
         }
+    }
+
+    private Map<String, float[]> getTransformations(Map<String, float[]> transformations, String operations) {
+        Map<String, float[]> composedTransformations = new LinkedHashMap<>();
+
+        String[] split = OPERATION_PATTERN.split(operations);
+        if (split.length > 1) {
+            List<String> ids1 = extractTransformationIds(split[0]);
+            List<String> ids2 = extractTransformationIds(split[1]);
+            for (String id1 : ids1) {
+                for (String id2 : ids2) {
+                    composedTransformations.put(id1 + "x" + id2, multiply(transformations.get(id1), transformations.get(id2)));
+                }
+            }
+        } else {
+            List<String> ids = extractTransformationIds(operations);
+            for (String id : ids) {
+                composedTransformations.put(id, transformations.get(id));
+            }
+        }
+
+        return composedTransformations;
+    }
+
+    private float[] multiply(float[] matrix4d1, float[] matrix4d2) {
+        return new float[]{
+                matrix4d1[0] * matrix4d2[0] + matrix4d1[1] * matrix4d2[4] +
+                        matrix4d1[2] * matrix4d2[8] + matrix4d1[3] * matrix4d2[12],
+                matrix4d1[0] * matrix4d2[1] + matrix4d1[1] * matrix4d2[5] +
+                        matrix4d1[2] * matrix4d2[9] + matrix4d1[3] * matrix4d2[13],
+                matrix4d1[0] * matrix4d2[2] + matrix4d1[1] * matrix4d2[6] +
+                        matrix4d1[2] * matrix4d2[10] + matrix4d1[3] * matrix4d2[14],
+                matrix4d1[0] * matrix4d2[3] + matrix4d1[1] * matrix4d2[7] +
+                        matrix4d1[2] * matrix4d2[11] + matrix4d1[3] * matrix4d2[15],
+
+                matrix4d1[4] * matrix4d2[0] + matrix4d1[5] * matrix4d2[4] +
+                        matrix4d1[6] * matrix4d2[8] + matrix4d1[7] * matrix4d2[12],
+                matrix4d1[4] * matrix4d2[1] + matrix4d1[5] * matrix4d2[5] +
+                        matrix4d1[6] * matrix4d2[9] + matrix4d1[7] * matrix4d2[13],
+                matrix4d1[4] * matrix4d2[2] + matrix4d1[5] * matrix4d2[6] +
+                        matrix4d1[6] * matrix4d2[10] + matrix4d1[7] * matrix4d2[14],
+                matrix4d1[4] * matrix4d2[3] + matrix4d1[5] * matrix4d2[7] +
+                        matrix4d1[6] * matrix4d2[11] + matrix4d1[7] * matrix4d2[15],
+
+                matrix4d1[8] * matrix4d2[0] + matrix4d1[9] * matrix4d2[4] +
+                        matrix4d1[10] * matrix4d2[8] + matrix4d1[11] * matrix4d2[12],
+                matrix4d1[8] * matrix4d2[1] + matrix4d1[9] * matrix4d2[5] +
+                        matrix4d1[10] * matrix4d2[9] + matrix4d1[11] * matrix4d2[13],
+                matrix4d1[8] * matrix4d2[2] + matrix4d1[9] * matrix4d2[6] +
+                        matrix4d1[10] * matrix4d2[10] + matrix4d1[11] * matrix4d2[14],
+                matrix4d1[8]
+        };
     }
 }
 

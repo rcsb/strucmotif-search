@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.wip;
 
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.util.Map;
@@ -19,16 +20,16 @@ public interface Structure {
 
     IntStream residueIndices(); // traverse all residues (deposited and instanced)
     IntStream atomIndices(); // traverse all atoms (deposited and instanced)
-//    String[] getAssemblyIdentifiers();
-//    String[] getReferencedChainInstances(String assemblyIdentifier);
-//    String[] getTransformationIdentifiers();
-//    Transformation[] getTransformations();
+    String[] getAssemblyIdentifiers();
+    String[] getReferencedChainInstances(String assemblyIdentifier);
+    String[] getTransformationIdentifiers();
+    float[] getTransformations();
 
     // 'mapping' utils
     // access to all residues?
-    // int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
-    // int getResidueIndex(LabelSelection labelSelection);
-    // LabelSelection getLabelSelection(int residueIndex);
+     int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
+     int getResidueIndex(LabelSelection labelSelection);
+     LabelSelection getLabelSelection(int residueIndex);
 
     // data access
      LabelAtomId getLabelAtomId(int atomIndex);
@@ -39,10 +40,6 @@ public interface Structure {
      float getY(int atomIndex);
      float getZ(int atomIndex);
      Map<LabelAtomId, float[]> manifestResidue(int residueIndex);
-
-    int remapResidueIndex(int raw);
-
-    int remapAtomIndex(int raw);
 
     // could sort various properties into sub categories on atoms/residues/chains
 }

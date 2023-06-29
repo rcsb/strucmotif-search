@@ -10,36 +10,44 @@ import java.util.stream.IntStream;
 public interface Structure {
     String getStructureIdentifier();
 
-    int getDepositedChainCount();
-    int getDepositedResidueCount();
-    int getDepositedAtomCount();
+    int getAssemblyCount();
+
+    int getTransformationCount();
+
+    int getModelledChainCount();
+    int getModelledResidueCount();
+    int getModelledAtomCount();
 
     int getInstancedChainCount();
     int getInstancedResidueCount();
     int getInstancedAtomCount();
 
-    IntStream residueIndices(); // traverse all residues (deposited and instanced)
-    IntStream atomIndices(); // traverse all atoms (deposited and instanced)
     String[] getAssemblyIdentifiers();
     String[] getReferencedChainInstances(String assemblyIdentifier);
     String[] getTransformationIdentifiers();
     float[] getTransformations();
 
+    IntStream modelledResidueIndices();
+    IntStream instancedResidueIndices();
+    IntStream modelledAtomIndices();
+    IntStream instancedAtomIndices();
+
     // 'mapping' utils
-    // access to all residues?
-     int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
-     int getResidueIndex(LabelSelection labelSelection);
-     LabelSelection getLabelSelection(int residueIndex);
+    int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
+    int getResidueIndex(LabelSelection labelSelection);
 
     // data access
-     LabelAtomId getLabelAtomId(int atomIndex);
-     int getLabelSeqId(int residueIndex);
-     ResidueType getResidueType(int residueIndex);
-     // must use float here to accommodate transformations
-     float getX(int atomIndex);
-     float getY(int atomIndex);
-     float getZ(int atomIndex);
-     Map<LabelAtomId, float[]> manifestResidue(int residueIndex);
+    String getAssemblyIdentifier(int residueIndex);
+    LabelAtomId getLabelAtomId(int atomIndex); // TODO transform support
+    int getLabelSeqId(int residueIndex);
+    ResidueType getResidueType(int residueIndex);
+    String getLabelAsymId(int residueIndex);
+    String getTransformationIdentifier(int residueIndex);
+    // must use float here to accommodate transformations
+    float getX(int atomIndex); // TODO transform support
+    float getY(int atomIndex); // TODO transform support
+    float getZ(int atomIndex); // TODO transform support
+    Map<LabelAtomId, float[]> manifestResidue(int residueIndex); // TODO transform support
 
     // could sort various properties into sub categories on atoms/residues/chains
 }

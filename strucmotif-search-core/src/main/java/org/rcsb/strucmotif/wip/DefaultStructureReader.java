@@ -8,18 +8,14 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
-import org.rcsb.strucmotif.math.Algebra;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Array;
 import java.util.*;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -174,7 +170,7 @@ public class DefaultStructureReader {
                 }
             }
 
-            AssemblyInformation assemblyInformation = parseAssemblies(block);
+            AssemblyInformation assemblyInformation = parseAssemblies(block, new HashSet<>(chainIds));
             return new FileBackedStructure(
                     structureIdentifier,
                     assemblyInformation.assemblyIdentifiers,
@@ -268,11 +264,12 @@ public class DefaultStructureReader {
      * Construct assembly information instance from source file. Returns <code>null</code> for the trivial case of a
      * single assembly and no transforms.
      * @param block data container
+     * @param chainIds relevant chains, operations on everything else will be ignored
      * @return a map, keys are assembly identifiers, values are associated label_asym_id and struct_oper_id, stored in
      * an alternating, flat list -- returns <code>null</code> instead if all chains are (implicitly) member of assembly
      * "1" and no transforms have been registered
      */
-    AssemblyInformation parseAssemblies(MmCifBlock block) {
+    AssemblyInformation parseAssemblies(MmCifBlock block, Set<String> chainIds) {
         // filter away non-biological assemblies
         Set<String> assemblyCandidates = getAssemblyCandidates(block);
         if (assemblyCandidates.isEmpty()) {
@@ -291,7 +288,11 @@ public class DefaultStructureReader {
 
             String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
             String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
-            List<String> rowSpecificOperList = parseOperList(operExpression, asymIdList);
+            List<String> rowSpecificOperList = parseOperList(operExpression, asymIdList, chainIds);
+            // doesn't reference any meaningful chain
+            if (rowSpecificOperList.isEmpty()) {
+                continue;
+            }
 
             List<String> assemblySpecificOperList = assemblyInformation.computeIfAbsent(assemblyId, e -> new ArrayList<>());
             assemblySpecificOperList.addAll(rowSpecificOperList);
@@ -379,7 +380,7 @@ public class DefaultStructureReader {
 
     private static final Pattern OPERATION_PATTERN = Pattern.compile("\\)\\(");
     private static final Pattern LIST_PATTERN = Pattern.compile(",");
-    private List<String> parseOperList(String operExpression, String asymIdList) {
+    private List<String> parseOperList(String operExpression, String asymIdList, Set<String> chainIds) {
         List<String> operations = new ArrayList<>();
         List<String> chains = LIST_PATTERN.splitAsStream(asymIdList).toList();
         String[] split = OPERATION_PATTERN.split(operExpression);
@@ -389,6 +390,9 @@ public class DefaultStructureReader {
             for (String id1 : ids1) {
                 for (String id2 : ids2) {
                     for (String chain : chains) {
+                        if (!chainIds.contains(chain)) {
+                            continue;
+                        }
                         operations.add(chain);
                         operations.add(id1 + "x" + id2);
                     }
@@ -397,6 +401,9 @@ public class DefaultStructureReader {
         } else {
             for (String id : extractTransformationIds(operExpression)) {
                 for (String chain : chains) {
+                    if (!chainIds.contains(chain)) {
+                        continue;
+                    }
                     operations.add(chain);
                     operations.add(id);
                 }
@@ -428,6 +435,7 @@ public class DefaultStructureReader {
         }
     }
 
+    private static final String STRUCT_OPER_ID_DELIMITER = "x";
     private Map<String, float[]> getTransformations(Map<String, float[]> transformations, String operations) {
         Map<String, float[]> composedTransformations = new LinkedHashMap<>();
 
@@ -437,7 +445,7 @@ public class DefaultStructureReader {
             List<String> ids2 = extractTransformationIds(split[1]);
             for (String id1 : ids1) {
                 for (String id2 : ids2) {
-                    composedTransformations.put(id1 + "x" + id2, multiply(transformations.get(id1), transformations.get(id2)));
+                    composedTransformations.put(id1 + STRUCT_OPER_ID_DELIMITER + id2, multiply(transformations.get(id1), transformations.get(id2)));
                 }
             }
         } else {

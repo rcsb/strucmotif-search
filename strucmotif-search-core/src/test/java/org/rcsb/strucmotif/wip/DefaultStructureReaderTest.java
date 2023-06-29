@@ -59,23 +59,17 @@ class DefaultStructureReaderTest {
     }
 
     @Test
-    void whenNoModel1InRenumberedFile_thenThrowUnsupportedOperationException() {
-        // multiple NMR models distributed over multiple structures - file will start with model nr 18
-        assertThrows(UnsupportedOperationException.class, () -> structureReader.readFromInputStream(getRenumberedBcif("1ezc")));
-    }
-
-    @Test
     void whenProcessing4chaInRenumberedFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4cha"));
-        assertEquals(6, structure.getDepositedChainCount());
+        assertEquals(6, structure.getModelledChainCount());
         assertEquals(6, structure.getInstancedChainCount());
     }
 
     @Test
     void whenDuplicatedChainsAndIdentityOperationsInRenumberedFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3uud"));
-        assertEquals(4, structure.getDepositedChainCount());
-        assertEquals(4, structure.getInstancedChainCount());
+        assertEquals(4, structure.getModelledChainCount());
+        assertEquals(8, structure.getInstancedChainCount(), "Instanced should equal all chain references with duplicates (4 in '1', 2 in '2', 2 in '2')");
     }
 
     @Test
@@ -90,9 +84,9 @@ class DefaultStructureReaderTest {
     @Test
     void whenProcessing1exrInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1exr"));
-        assertEquals(1, structure.getDepositedChainCount());
-        assertEquals(146, structure.getDepositedResidueCount());
-        assertEquals(1150, structure.getDepositedAtomCount());
+        assertEquals(1, structure.getModelledChainCount());
+        assertEquals(146, structure.getModelledResidueCount());
+        assertEquals(1026, structure.getModelledAtomCount());
 
         // also has many alt locs
         /*
@@ -124,24 +118,24 @@ class DefaultStructureReaderTest {
     void whenProcessingStructureWithSymmetryInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
 
-        assertEquals(2, structure.getDepositedChainCount());
-        assertEquals(1056, structure.getDepositedResidueCount());
-        assertEquals(8190, structure.getDepositedAtomCount());
-        assertEquals(2, structure.getInstancedChainCount()); // TODO need to fix renumbered files
+        assertEquals(1, structure.getModelledChainCount());
+        assertEquals(528, structure.getModelledResidueCount());
+        assertEquals(3771, structure.getModelledAtomCount());
+        assertEquals(2, structure.getInstancedChainCount());
         assertEquals(1056, structure.getInstancedResidueCount());
-        assertEquals(8190, structure.getInstancedAtomCount());
+        assertEquals(7542, structure.getInstancedAtomCount());
     }
 
     @Test
     void whenProcessingStructureWithAssemblyInRenumberedFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1m4x"));
 
-        assertEquals(3, structure.getDepositedChainCount());
-        assertEquals(1239, structure.getDepositedResidueCount());
-        assertEquals(9693, structure.getDepositedAtomCount());
-        assertEquals(5040, structure.getInstancedChainCount()); // TODO need to fix renumbered files
+        assertEquals(3, structure.getModelledChainCount());
+        assertEquals(1239, structure.getModelledResidueCount());
+        assertEquals(8829, structure.getModelledAtomCount()); // 9693 original, ignores ambiguous atoms though
+        assertEquals(5040, structure.getInstancedChainCount());
         assertEquals(2081520, structure.getInstancedResidueCount());
-        assertEquals(16284240, structure.getInstancedAtomCount());
+        assertEquals(14832720, structure.getInstancedAtomCount()); // 16284240 original
     }
 
     @Test
@@ -158,16 +152,16 @@ class DefaultStructureReaderTest {
     void whenNoModel1InOriginalFile_thenIgnoreModelInfoAndReturnChains() {
         // multiple NMR models distributed over multiple structures - file will start with model nr 18
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1ezc"));
-        assertEquals(1, structure.getDepositedChainCount());
+        assertEquals(1, structure.getModelledChainCount());
     }
 
     @Test
     void whenProcessing4chaInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("4cha"));
 
-        assertEquals(11, structure.getDepositedChainCount());
-        assertEquals(482, structure.getDepositedResidueCount());
-        assertEquals(3591, structure.getDepositedAtomCount());
+        assertEquals(11, structure.getModelledChainCount());
+        assertEquals(482, structure.getModelledResidueCount());
+        assertEquals(3591, structure.getModelledAtomCount());
         assertEquals(11, structure.getInstancedChainCount());
         assertEquals(482, structure.getInstancedResidueCount());
         assertEquals(3591, structure.getInstancedAtomCount());
@@ -177,12 +171,12 @@ class DefaultStructureReaderTest {
     void whenDuplicatedChainsAndIdentityOperationsInOriginalFile_thenChainCountMatches() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("3uud"));
 
-        assertEquals(14, structure.getDepositedChainCount());
-        assertEquals(509, structure.getDepositedResidueCount());
-        assertEquals(4459, structure.getDepositedAtomCount());
-        assertEquals(14, structure.getInstancedChainCount());
-        assertEquals(509, structure.getInstancedResidueCount());
-        assertEquals(4459, structure.getInstancedAtomCount());
+        assertEquals(14, structure.getModelledChainCount());
+        assertEquals(509, structure.getModelledResidueCount());
+        assertEquals(4459, structure.getModelledAtomCount());
+        assertEquals(28, structure.getInstancedChainCount());
+        assertEquals(1018, structure.getInstancedResidueCount());
+        assertEquals(8918, structure.getInstancedAtomCount());
     }
 
     @Test
@@ -198,9 +192,9 @@ class DefaultStructureReaderTest {
     void whenProcessing1exrInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1exr"));
 
-        assertEquals(7, structure.getDepositedChainCount());
-        assertEquals(152, structure.getDepositedResidueCount());
-        assertEquals(1650, structure.getDepositedAtomCount());
+        assertEquals(7, structure.getModelledChainCount());
+        assertEquals(152, structure.getModelledResidueCount());
+        assertEquals(1650, structure.getModelledAtomCount());
         assertEquals(7, structure.getInstancedChainCount());
         assertEquals(152, structure.getInstancedResidueCount());
         assertEquals(1650, structure.getInstancedAtomCount());
@@ -210,9 +204,9 @@ class DefaultStructureReaderTest {
     void whenProcessingStructureWithSymmetryInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
 
-        assertEquals(3, structure.getDepositedChainCount());
-        assertEquals(528, structure.getDepositedResidueCount());
-        assertEquals(4192, structure.getDepositedAtomCount());
+        assertEquals(3, structure.getModelledChainCount()); // protein + ligand + water
+        assertEquals(530, structure.getModelledResidueCount()); // protein + ligand + water
+        assertEquals(4192, structure.getModelledAtomCount());
         assertEquals(6, structure.getInstancedChainCount());
         assertEquals(1060, structure.getInstancedResidueCount());
         assertEquals(8384, structure.getInstancedAtomCount());
@@ -222,9 +216,9 @@ class DefaultStructureReaderTest {
     void whenProcessingStructureWithAssemblyInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1m4x"));
 
-        assertEquals(3, structure.getDepositedChainCount());
-        assertEquals(1239, structure.getDepositedResidueCount());
-        assertEquals(9693, structure.getDepositedAtomCount());
+        assertEquals(3, structure.getModelledChainCount());
+        assertEquals(1239, structure.getModelledResidueCount());
+        assertEquals(9693, structure.getModelledAtomCount());
         assertEquals(5040, structure.getInstancedChainCount());
         assertEquals(2081520, structure.getInstancedResidueCount());
         assertEquals(16284240, structure.getInstancedAtomCount());
@@ -236,6 +230,7 @@ class DefaultStructureReaderTest {
         // GLX at position 5
         assertNotEquals(ResidueType.UNKNOWN_COMPONENT, structure.getResidueType(4));
 
+        // TODO add residue graph back here
 //        ResidueGraph residueGraph = new ResidueGraph(structure, new StrucmotifConfig(), ResidueGraph.ResidueGraphOptions.deposited());
 //        residueGraph.residuePairOccurrencesParallel()
 //                .filter(p -> p.getResidueIdentifier().getIndex1() == 4 || p.getResidueIdentifier().getIndex2() == 4)

@@ -11,10 +11,10 @@ import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
 
 class AssemblyInformationTest {
     private DefaultStructureReader structureReader;
@@ -122,7 +122,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block, Set.of("A", "B", "C"));
         assertNotNull(assemblyInfo);
         assertArrayEquals(new String[] { "1" }, assemblyInfo.assemblyIdentifiers());
         assertArrayEquals(new int[] { 0 }, assemblyInfo.assemblyOffsets());
@@ -139,7 +139,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_5CBG.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block, Set.of("A", "B", "C", "D", "E", "F"));
         assertNotNull(assemblyInfo);
         assertEquals(3, assemblyInfo.assemblyIdentifiers().length);
     }
@@ -149,7 +149,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block, Set.of("A", "B", "C"));
         assertNotNull(assemblyInfo);
         assertEquals(1, assemblyInfo.assemblyIdentifiers().length);
     }
@@ -159,7 +159,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_1M4X_ALL_CANDIDATES.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block, Set.of("A", "B", "C"));
         assertNotNull(assemblyInfo);
         assertEquals(7, assemblyInfo.assemblyIdentifiers().length);
     }
@@ -169,7 +169,7 @@ class AssemblyInformationTest {
         MmCifBlock block = CifIO.readFromInputStream(new ByteArrayInputStream(DATA_AFA0A009IHW8F1.getBytes(StandardCharsets.UTF_8)))
                 .as(StandardSchemata.MMCIF)
                 .getFirstBlock();
-        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block);
+        DefaultStructureReader.AssemblyInformation assemblyInfo = structureReader.parseAssemblies(block, Set.of("A"));
         assertNull(assemblyInfo.assemblyReferences());
     }
 
@@ -207,5 +207,16 @@ class AssemblyInformationTest {
                 .getFirstBlock();
         Set<String> candidates = structureReader.getAssemblyCandidates(block);
         assertTrue(candidates.isEmpty());
+    }
+
+    @Test
+    void whenInterleavingAssemblies_thenReferencesResolvedCorrectly() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3uud"));
+        assertArrayEquals(new String[] { "1", "2", "3" }, structure.getAssemblyIdentifiers());
+        assertArrayEquals(new String[] { "A", "1", "B", "1", "C", "1", "D", "1" }, structure.getReferencedChainInstances("1"));
+        assertArrayEquals(new String[] { "A", "1", "C", "1" }, structure.getReferencedChainInstances("2"));
+        assertArrayEquals(new String[] { "B", "1", "D", "1" }, structure.getReferencedChainInstances("3"));
+        assertArrayEquals(new String[] { "1" }, structure.getTransformationIdentifiers());
+        assertArrayEquals(new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }, structure.getTransformations());
     }
 }

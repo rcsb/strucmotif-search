@@ -15,6 +15,7 @@ import org.rcsb.cif.schema.mm.MmCifBlockBuilder;
 import org.rcsb.cif.schema.mm.MmCifCategoryBuilder;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.MmCifFileBuilder;
+import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
@@ -89,6 +90,7 @@ public class StructureWriterImpl implements StructureWriter {
     @Override
     public byte[] write(MmCifFile source) {
         MmCifBlock block = source.getFirstBlock();
+        PdbxStructAssembly pdbxStructAssembly = block.getPdbxStructAssembly();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         AtomSite atomSite = block.getAtomSite();
@@ -97,11 +99,9 @@ public class StructureWriterImpl implements StructureWriter {
         MmCifBlockBuilder outputBuilder = CifBuilder.enterFile(StandardSchemata.MMCIF)
                 .enterBlock(pdbId.toUpperCase());
 
-        if (pdbxStructAssemblyGen.isDefined()) {
+        if (pdbxStructAssembly.isDefined() && pdbxStructAssemblyGen.isDefined() && pdbxStructOperList.isDefined()) {
+            outputBuilder.addCategory(pdbxStructAssembly);
             outputBuilder.addCategory(pdbxStructAssemblyGen);
-        }
-
-        if (pdbxStructOperList.isDefined()) {
             outputBuilder.addCategory(pdbxStructOperList);
         }
 
@@ -293,8 +293,8 @@ public class StructureWriterImpl implements StructureWriter {
             case ARGININE -> (labelAtomId == LabelAtomId.NH1 || labelAtomId == LabelAtomId.NH2);
             case ASPARTIC_ACID -> (labelAtomId == LabelAtomId.OD1 || labelAtomId == LabelAtomId.OD2);
             case GLUTAMIC_ACID -> (labelAtomId == LabelAtomId.OE1 || labelAtomId == LabelAtomId.OE2);
-            case PHENYLALANINE, TYROSINE -> (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2 || labelAtomId == LabelAtomId.CE1
-                    || labelAtomId == LabelAtomId.CE2);
+            case PHENYLALANINE, TYROSINE -> (labelAtomId == LabelAtomId.CD1 || labelAtomId == LabelAtomId.CD2
+                    || labelAtomId == LabelAtomId.CE1 || labelAtomId == LabelAtomId.CE2);
             default -> false;
         };
     }

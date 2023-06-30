@@ -211,7 +211,9 @@ class StructureReaderImplTest {
     @Test
     void whenProcessingStructureWithAssemblyInOriginalFile_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1m4x"));
-        System.out.println(Arrays.toString(structure.manifestResidue(0, "1x62").get(LabelAtomId.CA)));
+        System.out.println(Arrays.toString(structure.getTransformation("1x61").getFlattenedTransformation()));
+        System.out.println(Arrays.toString(structure.getTransformation("1x62").getFlattenedTransformation()));
+        System.out.println(Arrays.toString(structure.getTransformation("2x61").getFlattenedTransformation()));
         int multiplier = structure.getTransformations().size();
 
         assertEquals(5208, multiplier * chainCount(structure));

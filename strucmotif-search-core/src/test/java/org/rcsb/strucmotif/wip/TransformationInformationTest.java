@@ -9,6 +9,7 @@ import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
 
 public class TransformationInformationTest {
@@ -50,32 +51,40 @@ public class TransformationInformationTest {
     }
 
     @Test
-    void when1m4x_thenResidueTransformedCorrectly() {
+    void when1m4x_thenResidueTransformCorrectly() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1m4x"));
 
-//        int i1 = structure.getResidueIndex("A", "1x61", 1);
-//        assertEquals(0, i1);
-//        assertArrayEquals(new float[] { 530.3f, 578.10004f, 67.8f }, structure.manifestResidue(i1).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
-//
-//        int i2 = structure.getResidueIndex("A", "1x61", 413);
-//        assertEquals(412, i2);
-//        assertArrayEquals(new float[] { 547.5f, 586.7f, 24.300001f }, structure.manifestResidue(i2).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
-//
-//        int i3 = structure.getResidueIndex("B", "1x61", 1);
-//        assertEquals(413, i3);
-//        assertArrayEquals(new float[] { 527.60004f, 583.60004f, 44.2f }, structure.manifestResidue(i3).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
-//
-//        int i4 = structure.getResidueIndex("B", "1x61", 413);
-//        assertEquals(825, i4);
-//        assertArrayEquals(new float[] { 559.0f, 571.5f, 77.9f }, structure.manifestResidue(i4).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
-//
-//        int i5 = structure.getResidueIndex("C", "1x61", 1);
-//        assertEquals(826, i5);
-//        assertArrayEquals(new float[] { 547.8f, 572.3f, 51.9f }, structure.manifestResidue(i5).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
-//
-//        int i6 = structure.getResidueIndex("C", "1x61", 413);
-//        assertEquals(1238, i6);
-//        assertArrayEquals(new float[] { 510.0f, 597.7f, 65.6f }, structure.manifestResidue(i6).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
+        // assert transform are composed correctly
+        float[] t1x61 = structure.getTransformation("1x61");
+        assertArrayEquals(new float[] { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f }, t1x61);
+        float[] t1x62 = structure.getTransformation("1x62");
+        assertArrayEquals(new float[] { 0.999773f, 0.014247f, -0.015805f, -49.486f, -0.014842f, 0.999161f, -0.038166f, 14.993f, 0.015248f, 0.038393f, 0.999147f, 32.902f, 0.0f, 0.0f, 0.0f, 1.0f }, t1x62);
+        float[] t2x61 = structure.getTransformation("2x61");
+        assertArrayEquals(new float[] { 0.809017f, 0.309017f, 0.5f, 0.0f, 0.309017f, 0.5f, -0.809017f, 0.0f, -0.5f, 0.809017f, 0.309017f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f }, t2x61);
+
+        int i1 = structure.getResidueIndex("A", "1x61", 1);
+        assertEquals(0, i1);
+        assertArrayEquals(new float[] { 530.3f, 578.10004f, 67.8f }, structure.manifestResidue(i1).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
+
+        int i2 = structure.getResidueIndex("A", "1x61", 413);
+        assertEquals(412, i2);
+        assertArrayEquals(new float[] { 547.5f, 586.7f, 24.300001f }, structure.manifestResidue(i2).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
+
+        int i3 = structure.getResidueIndex("B", "1x61", 1);
+        assertEquals(413, i3);
+        assertArrayEquals(new float[] { 527.60004f, 583.60004f, 44.2f }, structure.manifestResidue(i3).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
+
+        int i4 = structure.getResidueIndex("B", "1x61", 413);
+        assertEquals(825, i4);
+        assertArrayEquals(new float[] { 559.0f, 571.5f, 77.9f }, structure.manifestResidue(i4).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
+
+        int i5 = structure.getResidueIndex("C", "1x61", 1);
+        assertEquals(826, i5);
+        assertArrayEquals(new float[] { 547.8f, 572.3f, 51.9f }, structure.manifestResidue(i5).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
+
+        int i6 = structure.getResidueIndex("C", "1x61", 413);
+        assertEquals(1238, i6);
+        assertArrayEquals(new float[] { 510.0f, 597.7f, 65.6f }, structure.manifestResidue(i6).get(LabelAtomId.CA), SINGLE_DIGIT_PRECISION);
 
         int i7 = structure.getResidueIndex("A", "1x62", 1);
         assertEquals(1239, i7);
@@ -229,5 +238,14 @@ public class TransformationInformationTest {
         assertEquals("D", structure.getLabelAsymId(lastResidueChainD));
         assertEquals("1" , structure.getTransformationIdentifier(lastResidueChainD));
         assertEquals(498, structure.getResidueIndex("D", "1", 11));
+    }
+
+    @Test
+    void whenSingleAssemblyNoTransforms_thenCoordinatesUnchanged() {
+        Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
+
+        float[] transformation = structure.getTransformation("1");
+        assertTrue(transformation[0] == 1.0f && transformation[5] == 1.0f && transformation[10] == 1.0f, "Expected identity matrix");
+        assertArrayEquals(new float[] { 6.8f, 0.4f, -3.4f }, structure.manifestResidue(16).get(LabelAtomId.CA));
     }
 }

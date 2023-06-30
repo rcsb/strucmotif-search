@@ -10,25 +10,22 @@ import java.util.stream.IntStream;
 public interface Structure {
     String getStructureIdentifier();
 
-    int getAssemblyCount();
-
-    int getTransformationCount();
-
     int getModelledChainCount();
     int getModelledResidueCount();
     int getModelledAtomCount();
-
     int getInstancedChainCount();
     int getInstancedResidueCount();
     int getInstancedAtomCount();
+    IntStream modelledResidueIndices();
+    IntStream instancedResidueIndices();
 
+    int getAssemblyCount();
     String[] getAssemblyIdentifiers();
     String[] getReferencedChainInstances(String assemblyIdentifier);
     String[] getTransformationIdentifiers();
     float[] getTransformations();
-
-    IntStream modelledResidueIndices();
-    IntStream instancedResidueIndices();
+    float[] getTransformation(String transformationIdentifier);
+    int getTransformationCount();
 
     // 'mapping' utils
     int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);

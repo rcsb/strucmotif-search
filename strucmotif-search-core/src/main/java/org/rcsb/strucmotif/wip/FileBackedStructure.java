@@ -202,43 +202,68 @@ public class FileBackedStructure implements Structure {
 
     @Override
     public String getAssemblyIdentifier(int residueIndex) {
-        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        return assemblyIdentifiers[instancedChainToAssemblyIndices[i]];
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        return assemblyIdentifiers[instancedChainToAssemblyIndices[instancedChainIndex]];
     }
 
     @Override
     public String getLabelAsymId(int residueIndex) {
-        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        return labelAsymIds[instancedChainToLabelAsymIdsIndices[i]];
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        return labelAsymIds[instancedChainToLabelAsymIdsIndices[instancedChainIndex]];
     }
 
     @Override
     public String getTransformationIdentifier(int residueIndex) {
-        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        return transformationIdentifiers[instancedChainToTransformationIndices[i]];
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        return transformationIdentifiers[instancedChainToTransformationIndices[instancedChainIndex]];
+    }
+
+    @Override
+    public float[] getTransformation(String transformationIdentifier) {
+        int transformationIndex = indexOf(transformationIdentifiers, transformationIdentifier);
+        if (transformationIndex < 0) {
+            throw new NoSuchElementException("No transformation with name '" + transformationIdentifier + "' registered");
+        }
+        float[] out = new float[16];
+        System.arraycopy(transformations, transformationIndex * 16, out, 0, out.length);
+        return out;
     }
 
     @Override
     public int getLabelSeqId(int residueIndex) {
-        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        return labelSeqIds[residueIndex - instancedChainOffsets[i] + chainOffsets[instancedChainToLabelAsymIdsIndices[i]]];
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        return labelSeqIds[residueIndex - instancedChainOffsets[instancedChainIndex] + chainOffsets[instancedChainToLabelAsymIdsIndices[instancedChainIndex]]];
     }
 
     @Override
     public ResidueType getResidueType(int residueIndex) {
-        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        return ResidueType.values()[residueTypes[residueIndex - instancedChainOffsets[i] + chainOffsets[instancedChainToLabelAsymIdsIndices[i]]]];
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        return ResidueType.values()[residueTypes[residueIndex - instancedChainOffsets[instancedChainIndex] + chainOffsets[instancedChainToLabelAsymIdsIndices[instancedChainIndex]]]];
     }
 
     @Override
     public Map<LabelAtomId, float[]> manifestResidue(int residueIndex) {
-        // TODO shortcut if single assembly without transforms?
-        // TODO optimize, maybe split into instanced index and modelled + transform index?
-        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        int modelledResidueIndex = residueIndex - instancedChainOffsets[i] + chainOffsets[instancedChainToLabelAsymIdsIndices[i]];
-        int transformIndex = indexOf(transformationIdentifiers, assemblyReferences[2 * i + 1]);
-
         Map<LabelAtomId, float[]> out = new EnumMap<>(LabelAtomId.class);
+        if (assemblyCount == 1 && transformationCount == 1) {
+            int offsetStart = residueOffsets[residueIndex];
+            int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[residueIndex + 1];
+            for (int j = offsetStart; j < offsetEnd; j++) {
+                LabelAtomId labelAtomId = LabelAtomId.values()[labelAtomIds[j]];
+                // ignore 'non-standard' atoms
+                if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
+                    continue;
+                }
+
+                float[] v = new float[] { x[j] * 0.1f, y[j] * 0.1f, z[j] * 0.1f };
+                out.put(labelAtomId, v);
+            }
+            return out;
+        }
+
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        int modelledResidueIndex = residueIndex - instancedChainOffsets[instancedChainIndex] + chainOffsets[instancedChainToLabelAsymIdsIndices[instancedChainIndex]];
+        int transformIndex = indexOf(transformationIdentifiers, assemblyReferences[2 * instancedChainIndex + 1]);
+
         int offsetStart = residueOffsets[modelledResidueIndex];
         int offsetEnd = modelledResidueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[modelledResidueIndex + 1];
 
@@ -263,9 +288,9 @@ public class FileBackedStructure implements Structure {
 
     @Override
     public String[] getReferencedChainInstances(String assemblyIdentifier) {
-        int i = indexOf(assemblyIdentifiers, assemblyIdentifier);
-        int start = assemblyOffsets[i];
-        int end = i + 1 == assemblyOffsets.length ? assemblyReferences.length : assemblyOffsets[i + 1];
+        int assemblyIndex = indexOf(assemblyIdentifiers, assemblyIdentifier);
+        int start = assemblyOffsets[assemblyIndex];
+        int end = assemblyIndex + 1 == assemblyOffsets.length ? assemblyReferences.length : assemblyOffsets[assemblyIndex + 1];
         String[] out = new String[end - start];
         System.arraycopy(assemblyReferences, start, out, 0, out.length);
         return out;
@@ -283,14 +308,14 @@ public class FileBackedStructure implements Structure {
 
     @Override
     public int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId) {
-        int i = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId);
-        int chainIndex = instancedChainToLabelAsymIdsIndices[i];
+        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId);
+        int chainIndex = instancedChainToLabelAsymIdsIndices[instancedChainIndex];
         int chainEnd = chainIndex == chainOffsets.length - 1 ? labelSeqIds.length : chainOffsets[chainIndex + 1];
         int residueIndex = Arrays.binarySearch(labelSeqIds, chainOffsets[chainIndex], chainEnd, (short) labelSeqId);
         if (residueIndex < 0) {
             throw new NoSuchElementException("Didn't find residue with label_seq_id '" + labelSeqId + "' in chain '" + labelAsymId + "'");
         }
-        return residueIndex + instancedChainOffsets[i] - chainOffsets[chainIndex];
+        return residueIndex + instancedChainOffsets[instancedChainIndex] - chainOffsets[chainIndex];
     }
 
     @Override
@@ -361,6 +386,11 @@ public class FileBackedStructure implements Structure {
     }
 
     private static void transform(float[] v, float[] m, int offset) {
+        // nop on identity matrix
+        if (m[offset] == 1.0f && m[offset + 5] == 1.0f && m[offset + 10] == 1.0f) {
+            return;
+        }
+
         float x = v[0];
         float y = v[1];
         float z = v[2];

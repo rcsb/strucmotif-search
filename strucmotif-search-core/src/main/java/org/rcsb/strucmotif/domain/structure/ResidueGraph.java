@@ -68,17 +68,12 @@ public class ResidueGraph {
     /**
      * Modulate behavior of the residue graph.
      */
-    public static class ResidueGraphOptions {
-        final ResidueGraphMode mode;
-        final String assemblyIdentifier;
-
-        private ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier) {
-            this.mode = mode;
-            this.assemblyIdentifier = assemblyIdentifier;
-        }
+    public record ResidueGraphOptions(ResidueGraphMode mode,
+                                      String assemblyIdentifier) {
 
         /**
          * Only report contacts of deposited coordinates.
+         *
          * @return the corresponding options
          */
         public static ResidueGraphOptions deposited() {
@@ -87,6 +82,7 @@ public class ResidueGraph {
 
         /**
          * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         *
          * @return the corresponding options
          */
         public static ResidueGraphOptions depositedAndContacts() {
@@ -95,6 +91,7 @@ public class ResidueGraph {
 
         /**
          * Only report contacts of deposited coordinates.
+         *
          * @param assemblyIdentifier which assembly to consider?
          * @return the corresponding options
          */
@@ -105,6 +102,7 @@ public class ResidueGraph {
         /**
          * Report all contacts, regardless of assembly or applied transformation. This makes only sense when the graph
          * is computed on a substructure, defined by a number of {@link LabelSelection}.
+         *
          * @return the corresponding options
          */
         public static ResidueGraphOptions all() {
@@ -275,14 +273,14 @@ public class ResidueGraph {
         int size = 0;
         for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
             // avoid symmetry/duplicates
-            if (residueContact.getI() >= residueContact.getJ()) {
+            if (residueContact.i() >= residueContact.j()) {
                 continue;
             }
 
-            IndexSelection residueKey1 = indexSelections.get(residueContact.getI());
+            IndexSelection residueKey1 = indexSelections.get(residueContact.i());
             String chainExpr1 = labelSelections.get(residueKey1.getIndex()).getLabelAsymId() + "_" + residueKey1.getStructOperId();
 
-            IndexSelection residueKey2 = indexSelections.get(residueContact.getJ());
+            IndexSelection residueKey2 = indexSelections.get(residueContact.j());
             String chainExpr2 = labelSelections.get(residueKey2.getIndex()).getLabelAsymId() + "_" + residueKey2.getStructOperId();
 
             switch (mode) {
@@ -315,7 +313,7 @@ public class ResidueGraph {
             }
 
             Map<IndexSelection, Float> innerBackboneMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerBackboneMap.put(residueKey2, residueContact.getDistance());
+            innerBackboneMap.put(residueKey2, residueContact.distance());
 
             Map<IndexSelection, Float> innerSideChainMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
             innerSideChainMap.put(residueKey2, distance3d(sideChainCoordinates1, sideChainCoordinates2));

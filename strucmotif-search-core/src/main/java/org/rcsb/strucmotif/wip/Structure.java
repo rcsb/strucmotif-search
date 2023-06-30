@@ -29,8 +29,6 @@ public interface Structure {
 
     IntStream modelledResidueIndices();
     IntStream instancedResidueIndices();
-    IntStream modelledAtomIndices();
-    IntStream instancedAtomIndices();
 
     // 'mapping' utils
     int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
@@ -38,16 +36,12 @@ public interface Structure {
 
     // data access
     String getAssemblyIdentifier(int residueIndex);
-    LabelAtomId getLabelAtomId(int atomIndex); // TODO transform support
     int getLabelSeqId(int residueIndex);
     ResidueType getResidueType(int residueIndex);
     String getLabelAsymId(int residueIndex);
     String getTransformationIdentifier(int residueIndex);
     // must use float here to accommodate transformations
-    float getX(int atomIndex); // TODO transform support
-    float getY(int atomIndex); // TODO transform support
-    float getZ(int atomIndex); // TODO transform support
-    Map<LabelAtomId, float[]> manifestResidue(int residueIndex); // TODO transform support
+    Map<LabelAtomId, float[]> manifestResidue(int residueIndex);
 
     // could sort various properties into sub categories on atoms/residues/chains
 }

@@ -201,25 +201,9 @@ public class FileBackedStructure implements Structure {
     }
 
     @Override
-    public IntStream instancedAtomIndices() {
-        return IntStream.range(0, instancedAtomCount);
-    }
-
-    @Override
-    public IntStream modelledAtomIndices() {
-        return IntStream.range(0, modelledAtomCount);
-    }
-
-    @Override
     public String getAssemblyIdentifier(int residueIndex) {
         int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
         return assemblyIdentifiers[instancedChainToAssemblyIndices[i]];
-    }
-
-    @Override
-    public LabelAtomId getLabelAtomId(int atomIndex) {
-//        return LabelAtomId.values()[labelAtomIds[remapAtomIndex(atomIndex)]];
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -247,36 +231,26 @@ public class FileBackedStructure implements Structure {
     }
 
     @Override
-    public float getX(int atomIndex) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public float getY(int atomIndex) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public float getZ(int atomIndex) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Map<LabelAtomId, float[]> manifestResidue(int residueIndex) {
-        // TODO transformation support
+        // TODO shortcut if single assembly without transforms?
+        // TODO optimize, maybe split into instanced index and modelled + transform index?
+        int i = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        int modelledResidueIndex = residueIndex - instancedChainOffsets[i] + chainOffsets[instancedChainToLabelAsymIdsIndices[i]];
+        int transformIndex = indexOf(transformationIdentifiers, assemblyReferences[2 * i + 1]);
 
         Map<LabelAtomId, float[]> out = new EnumMap<>(LabelAtomId.class);
-        int offsetStart = residueOffsets[residueIndex];
-        int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[residueIndex + 1];
+        int offsetStart = residueOffsets[modelledResidueIndex];
+        int offsetEnd = modelledResidueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[modelledResidueIndex + 1];
 
-        for (int i = offsetStart; i < offsetEnd; i++) {
-            LabelAtomId labelAtomId = LabelAtomId.values()[labelAtomIds[i]];
+        for (int j = offsetStart; j < offsetEnd; j++) {
+            LabelAtomId labelAtomId = LabelAtomId.values()[labelAtomIds[j]];
             // ignore 'non-standard' atoms
             if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
                 continue;
             }
 
-            float[] v = new float[] { x[i] * 0.1f, y[i] * 0.1f, z[i] * 0.1f };
+            float[] v = new float[] { x[j] * 0.1f, y[j] * 0.1f, z[j] * 0.1f };
+            transform(v, transformations, transformIndex * 16);
             out.put(labelAtomId, v);
         }
         return out;
@@ -309,6 +283,22 @@ public class FileBackedStructure implements Structure {
 
     @Override
     public int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId) {
+        int i = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId);
+        int chainIndex = instancedChainToLabelAsymIdsIndices[i];
+        int chainEnd = chainIndex == chainOffsets.length - 1 ? labelSeqIds.length : chainOffsets[chainIndex + 1];
+        int residueIndex = Arrays.binarySearch(labelSeqIds, chainOffsets[chainIndex], chainEnd, (short) labelSeqId);
+        if (residueIndex < 0) {
+            throw new NoSuchElementException("Didn't find residue with label_seq_id '" + labelSeqId + "' in chain '" + labelAsymId + "'");
+        }
+        return residueIndex + instancedChainOffsets[i] - chainOffsets[chainIndex];
+    }
+
+    @Override
+    public int getResidueIndex(LabelSelection labelSelection) {
+        return getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getStructOperId(), labelSelection.getLabelSeqId());
+    }
+
+    private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId) {
         int chainIndex = -1;
         for (int i = 0; i < assemblyReferences.length - 1; i = i + 2) {
             if (assemblyReferences[i].equals(labelAsymId) && assemblyReferences[i + 1].equals(structOperId)) {
@@ -319,18 +309,7 @@ public class FileBackedStructure implements Structure {
         if (chainIndex < 0) {
             throw new NoSuchElementException("No chain '" + labelAsymId + "' with transform '" + structOperId + "'");
         }
-
-        int chainEnd = chainIndex == chainOffsets.length - 1 ? labelSeqIds.length : chainOffsets[chainIndex + 1];
-        int residueIndex = Arrays.binarySearch(labelSeqIds, chainOffsets[chainIndex], chainEnd, (short) labelSeqId);
-        if (residueIndex < 0) {
-            throw new NoSuchElementException("Didn't find residue with label_seq_id '" + labelSeqId + "' in chain '" + labelAsymId + "'");
-        }
-        return residueIndex;
-    }
-
-    @Override
-    public int getResidueIndex(LabelSelection labelSelection) {
-        return 0;
+        return chainIndex;
     }
 
     /**
@@ -359,6 +338,9 @@ public class FileBackedStructure implements Structure {
         return binarySearch(data, 0, data.length, key);
     }
 
+    /**
+     * Returns the index of the next smaller element if not found.
+     */
     private static int binarySearch(int[] a, int fromIndex, int toIndex, int key) {
         int low = fromIndex;
         int high = toIndex - 1;
@@ -376,5 +358,15 @@ public class FileBackedStructure implements Structure {
             }
         }
         return low - 1;  // key not found.
+    }
+
+    private static void transform(float[] v, float[] m, int offset) {
+        float x = v[0];
+        float y = v[1];
+        float z = v[2];
+
+        v[0] = m[offset] * x + m[offset + 1] * y + m[offset + 2] * z + m[offset + 3];
+        v[1] = m[offset + 4] * x + m[offset + 5] * y + m[offset + 6] * z + m[offset + 7];
+        v[2] = m[offset + 8] * x + m[offset + 9] * y + m[offset + 10] * z + m[offset + 11];
     }
 }

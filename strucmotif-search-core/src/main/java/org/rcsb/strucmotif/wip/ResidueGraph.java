@@ -126,8 +126,9 @@ public class ResidueGraph {
         }
 
         for (int i = 0; i < residueIndices.length; i++) {
-            ResidueType residueType = structure.getResidueType(i);
-            Map<LabelAtomId, float[]> residue = structure.manifestResidue(residueIndices[i]);
+            int residueIndex = residueIndices[i];
+            ResidueType residueType = structure.getResidueType(residueIndex);
+            Map<LabelAtomId, float[]> residue = structure.manifestResidue(residueIndex);
 
             float[] backbone = getBackboneCoords(residue);
             if (backbone == null) {
@@ -138,7 +139,7 @@ public class ResidueGraph {
                 continue;
             }
 
-            residueIndices[valid] = i;
+            residueIndices[valid] = residueIndex;
             int insertionPoint = valid * 3;
             System.arraycopy(backbone, 0, backboneVectors, insertionPoint, 3);
             System.arraycopy(sideChain, 0, sideChainVectors, insertionPoint, 3);
@@ -197,8 +198,10 @@ public class ResidueGraph {
         this.data = new LinkedHashMap<>();
         int[] residueIndices = residueVectors.residueIndices;
         for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
-            int residueIndex1 = residueIndices[residueContact.i()];
-            int residueIndex2 = residueIndices[residueContact.j()];
+            int i = residueContact.i();
+            int j = residueContact.j();
+            int residueIndex1 = residueIndices[i];
+            int residueIndex2 = residueIndices[j];
 
             String transformationIdentifier1 = structure.getLabelAsymId(residueIndex1) + "_" + structure.getTransformationIdentifier(residueIndex1);
             String transformationIdentifier2 = structure.getLabelAsymId(residueIndex2) + "_" + structure.getTransformationIdentifier(residueIndex2);
@@ -220,8 +223,8 @@ public class ResidueGraph {
             }
 
             DistanceType backboneDistance = DistanceType.ofDistance(residueContact.distance());
-            DistanceType sideChainDistance = DistanceType.ofDistance((float) Math.sqrt(distanceSquared3d(residueVectors.sideChainVectors, residueIndex1, residueIndex2)));
-            AngleType angle = AngleType.ofAngle(angle(residueVectors.normalVectors, residueIndex1, residueIndex2));
+            DistanceType sideChainDistance = DistanceType.ofDistance((float) Math.sqrt(distanceSquared3d(residueVectors.sideChainVectors, i, j)));
+            AngleType angle = AngleType.ofAngle(angle(residueVectors.normalVectors, i, j));
 
             // jam all values into a single short
             long key = (long) residueIndex1 << 32 | residueIndex2;
@@ -265,9 +268,8 @@ public class ResidueGraph {
 
     private ResiduePairOccurrence createResiduePairOccurrence(long residuePairIdentifier) {
         long key = residuePairIdentifier;
-        int residueIndex2 = (int) residuePairIdentifier & 0xFF;
-        residuePairIdentifier >>= 32;
-        int residueIndex1 = (int) residuePairIdentifier & 0xFF;
+        int residueIndex2 = (int) residuePairIdentifier;
+        int residueIndex1 = (int) (residuePairIdentifier >>> 32);
 
         ResidueType residueType1 = structure.getResidueType(residueIndex1);
         ResidueType residueType2 = structure.getResidueType(residueIndex2);
@@ -287,41 +289,35 @@ public class ResidueGraph {
 
     static short encode(DistanceType backboneDistance, DistanceType sideChainDistance, AngleType angle) {
         // XXCC CCCD DDDD EEEE - C: backboneDistance (32 values, 5 bits), D: sideChainDistance, E: angle (10 values, 4 bits)
-        return (short) ((byte) backboneDistance.ordinal() << 10 | (byte) sideChainDistance.ordinal() << 5 | (byte) angle.ordinal());
+        return (short) ((byte) backboneDistance.ordinal() << 9 | (byte) sideChainDistance.ordinal() << 4 | (byte) angle.ordinal());
     }
 
     static int encode(ResidueType residueType1, ResidueType residueType2, short otherProps) {
-        return (byte) residueType1.ordinal() << 24 | (byte) residueType2.ordinal() << 17 | otherProps;
+        return (byte) residueType1.ordinal() << 21 | (byte) residueType2.ordinal() << 14 | otherProps;
     }
 
-    public static int encode(ResiduePairDescriptor residuePairDescriptor) {
+    static int encode(ResiduePairDescriptor residuePairDescriptor) {
         return encode(residuePairDescriptor.getResidueType1(), residuePairDescriptor.getResidueType2(), encode(residuePairDescriptor.getBackboneDistance(), residuePairDescriptor.getSideChainDistance(), residuePairDescriptor.getAngle()));
     }
 
     static int encode(ResidueType residueType1, ResidueType residueType2, DistanceType backboneDistance, DistanceType sideChainDistance, AngleType angle) {
         // XXXX AAAA AAAB BBBB BBCC CCCD DDDD EEEE - A: residueType1 (36 values, 7 bits), B: residueType2, C: backboneDistance (32 values, 5 bits), D: sideChainDistance, E: angle (10 values, 4 bits)
-        return (byte) residueType1.ordinal() << 24 | (byte) residueType2.ordinal() << 17 | (byte) backboneDistance.ordinal() << 10 | (byte) sideChainDistance.ordinal() << 5 | (byte) angle.ordinal();
+        return (byte) residueType1.ordinal() << 21 | (byte) residueType2.ordinal() << 14 | (byte) backboneDistance.ordinal() << 9 | (byte) sideChainDistance.ordinal() << 4 | (byte) angle.ordinal();
     }
 
     static Enum<?>[] decode(short value) {
-        int k = value & 0x1F;
-        value >>= 5;
-        int j = value & 0x1F;
-        value >>= 5;
-        int i = value & 0x1F;
+        int k = value & 0x0F;
+        int j = (value >>> 4) & 0x1F;
+        int i = (value >>> 9) & 0x1F;
         return new Enum<?>[] { DistanceType.values()[i], DistanceType.values()[j], AngleType.values()[k] };
     }
 
     static Enum<?>[] decode(int value) {
-        int m = value & 0x1F;
-        value >>= 5;
-        int l = value & 0x1F;
-        value >>= 5;
-        int k = value & 0x1F;
-        value >>= 7;
-        int j = value & 0x7F;
-        value >>= 7;
-        int i = value & 0x7F;
+        int m = value & 0x0F;
+        int l = (value >>> 4) & 0x1F;
+        int k = (value >>> 9) & 0x1F;
+        int j = (value >>> 14) & 0x7F;
+        int i = (value >>> 21) & 0x7F;
         return new Enum<?>[] { ResidueType.values()[i], ResidueType.values()[j], DistanceType.values()[k], DistanceType.values()[l], AngleType.values()[m] };
     }
 

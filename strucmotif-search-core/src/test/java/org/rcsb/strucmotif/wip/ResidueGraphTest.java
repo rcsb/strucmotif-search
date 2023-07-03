@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -13,6 +12,7 @@ import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 import org.rcsb.strucmotif.math.Algebra;
 
 import java.io.InputStream;
+import java.util.IntSummaryStatistics;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +31,7 @@ class ResidueGraphTest {
                 LabelAtomId.O, new float[] { -1.056f, -0.682f, -0.923f });
 
         float[] betaCarbon = ResidueGraph.getVirtualCB(residue);
-        assertArrayEquals(new float[]{1.204f, -0.620f, 1.296f}, betaCarbon, 0.01f);
+        assertArrayEquals(new float[] { 1.204f, -0.620f, 1.296f }, betaCarbon, 0.01f);
     }
 
     private static final float TEST_DISTANCE_CUTOFF = 20;
@@ -48,7 +48,7 @@ class ResidueGraphTest {
     @Test
     void whenResidueOrderSwapped_thenDescriptorSame() {
         List<String> perms = List.of("456", "465", "546", "564", "645", "654");
-        Set<String> expectedDescriptors = Set.of("5-7-8", "4-5-7", "4-5-2");
+        Set<String> expectedDescriptors = Set.of("5-7-8", "4-5-7", "4-5-3");
         for (String perm : perms) {
             InputStream resource = getResource("cif/1acj-" + perm + ".cif");
             Structure structure = structureReader.readFromInputStream(resource);
@@ -58,7 +58,7 @@ class ResidueGraphTest {
                     .map(o -> o.getBackboneDistance().ordinal() + "-" + o.getSideChainDistance().ordinal() + "-" + o.getAngle().ordinal())
                     .collect(Collectors.toSet());
             for (String desc : descriptors) {
-                assertTrue(expectedDescriptors.contains(desc), "descriptor definition not symmetric");
+                assertTrue(expectedDescriptors.contains(desc), "descriptor definition not symmetric, '" + desc + "' not registered in set of expected descriptors");
             }
         }
     }
@@ -73,15 +73,13 @@ class ResidueGraphTest {
 
         long c = residueGraph.residuePairOccurrencesSequential()
                 .flatMapToInt(ResiduePairOccurrence::residueIndices)
-                .distinct()
                 .mapToObj(structure::getLabelAsymId)
+                .distinct()
                 .count();
-        System.out.println(residueGraph.getPairingCount());
-        System.out.println(residueGraph.pairingsSequential().count());
 
         // this is a structure with distinct chains in altlocs
         // currently, there is no support for altlocs (especially of this nature) - thus, many weird words will be reported - that's okay for now
-        assertEquals(6, c);
+        assertEquals(6, c, "Less than the expected number of chains, only saw: " + residueGraph.residuePairOccurrencesSequential().flatMapToInt(ResiduePairOccurrence::residueIndices).mapToObj(structure::getLabelAsymId).distinct().collect(Collectors.toList()));
     }
 
     @Test
@@ -92,14 +90,15 @@ class ResidueGraphTest {
         List<String> o = residueGraph.residuePairOccurrencesSequential()
                 .flatMapToInt(ResiduePairOccurrence::residueIndices)
                 .distinct()
-                .mapToObj(residueIndex -> new LabelSelection(structure.getLabelAsymId(residueIndex), structure.getTransformationIdentifier(residueIndex), structure.getLabelSeqId(residueIndex)))
+                .sorted()
                 // keep only freakish chain
-                .filter(labelSelection -> labelSelection.getLabelAsymId().equals("C"))
-                // map back to unique groups
-                .map(structure::getResidueIndex)
-                .map(index -> index + " " + structure.getResidueType(index))
+                .filter(residueIndex -> structure.getLabelAsymId(residueIndex).equals("C"))
+                .mapToObj(index -> structure.getLabelSeqId(index) + " " + structure.getResidueType(index))
                 .toList();
+        IntSummaryStatistics stats = o.stream().map(i -> i.split(" ")[0]).mapToInt(Integer::parseInt).summaryStatistics();
 
+        assertEquals(1, stats.getMin(), "First residue must be at position 1");
+        assertEquals(11, stats.getMax(), "Last residue must be at position 11");
         // sequence is T DVA P SAR MVA PXZ T DVA P SAR MVA
         // PXZ at pos 21 doesn't map to parent (also doesn't contain CA and/or CB)
         assertFalse(o.stream().anyMatch(l -> l.startsWith("21 ")));
@@ -112,8 +111,8 @@ class ResidueGraphTest {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
-        assertEquals(5949, residueGraph.residuePairOccurrencesParallel()
-                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
+        assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
+        assertEquals(6393, residueGraph.residuePairOccurrencesParallel()
                 .distinct()
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
@@ -133,8 +132,8 @@ class ResidueGraphTest {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
-        assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
-                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
+        assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
+        assertEquals(32961, residueGraph.residuePairOccurrencesParallel()
                 .distinct()
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
@@ -154,8 +153,8 @@ class ResidueGraphTest {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
-        assertEquals(5949,  residueGraph.residuePairOccurrencesParallel()
-                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
+        assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
+        assertEquals(6393,  residueGraph.residuePairOccurrencesParallel()
                 .distinct()
                 .count());
         assertEquals(1, residueGraph.residuePairOccurrencesParallel()
@@ -175,8 +174,8 @@ class ResidueGraphTest {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
-        assertEquals(25187, residueGraph.residuePairOccurrencesParallel()
-                .peek(d -> assertFalse(d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
+        assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
+        assertEquals(32961, residueGraph.residuePairOccurrencesParallel()
                 .distinct()
                 .count());
         assertEquals(2, residueGraph.residuePairOccurrencesParallel()
@@ -217,18 +216,12 @@ class ResidueGraphTest {
         assertEquals(pairingsAssembly, pairingsAll, "count in assembly 1 must match all contact count");
     }
 
-    private static final ResiduePairDescriptor ARGININE_TWEEZERS = new ResiduePairDescriptor(ResidueType.ARGININE,
-            ResidueType.ARGININE,
-            DistanceType.D15,
-            DistanceType.D14,
-            AngleType.A80);
+    private static final int ARGININE_TWEEZERS = ResidueGraph.encode(ResidueType.ARGININE, ResidueType.ARGININE, DistanceType.D15, DistanceType.D14, AngleType.A80);
 
     @Test
     void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
-        Set<Integer> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS)
-                .map(ResidueGraph::encode)
-                .collect(Collectors.toSet()); // TODO use honorTolerance of desc
+        Set<Integer> residuePairDescriptors = honorTolerance(ARGININE_TWEEZERS).collect(Collectors.toSet());
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
         List<Integer> identifiers = residueGraph.residuePairOccurrencesParallel()
@@ -237,8 +230,7 @@ class ResidueGraphTest {
                 .boxed()
                 .toList();
         assertFalse(identifiers.isEmpty());
-        assertTrue(identifiers.stream()
-                .anyMatch(id -> !structure.getTransformationIdentifier(id).endsWith("_1")));
+        assertTrue(identifiers.stream().anyMatch(id -> !structure.getTransformationIdentifier(id).endsWith("_1")));
     }
 
     @Test
@@ -292,9 +284,9 @@ class ResidueGraphTest {
     @Test
     void whenOrderSwapped_thenAngleSame() {
         for (int i = 0; i < 10; i++) {
-            float[] v1 = new float[] {(float) Math.random(), (float) Math.random(), (float) Math.random()};
+            float[] v1 = new float[] { (float) Math.random(), (float) Math.random(), (float) Math.random() };
             Algebra.normalize3d(v1, v1);
-            float[] v2 = new float[] {(float) Math.random(), (float) Math.random(), (float) Math.random()};
+            float[] v2 = new float[] { (float) Math.random(), (float) Math.random(), (float) Math.random() };
             Algebra.normalize3d(v2, v2);
             float[] data = new float[6];
             System.arraycopy(v1, 0, data, 0, v1.length);

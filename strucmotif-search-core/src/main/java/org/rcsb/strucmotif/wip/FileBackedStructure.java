@@ -106,7 +106,7 @@ public class FileBackedStructure implements Structure {
             this.instancedChainOffsets = chainOffsets;
             this.instancedChainToAssemblyIndices = chainOffsets.length == 1 ? DEFAULT_OFFSET : new int[chainOffsets.length];
             this.instancedChainToLabelAsymIdsIndices = chainOffsets.length == 1 ? DEFAULT_OFFSET : IntStream.range(0, chainOffsets.length).toArray();
-            this.instancedChainToTransformationIndices = DEFAULT_OFFSET;
+            this.instancedChainToTransformationIndices = instancedChainToAssemblyIndices;
         } else {
             this.instancedChainCount = assemblyReferences.length / 2;
             this.instancedChainOffsets = new int[instancedChainCount];
@@ -321,6 +321,12 @@ public class FileBackedStructure implements Structure {
     @Override
     public int getResidueIndex(LabelSelection labelSelection) {
         return getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getStructOperId(), labelSelection.getLabelSeqId());
+    }
+
+    @Override
+    public LabelSelection getLabelSelection(int residueIndex) {
+        // TODO inline some of the partial mapping work?
+        return new LabelSelection(getLabelAsymId(residueIndex), getTransformationIdentifier(residueIndex), getLabelSeqId(residueIndex));
     }
 
     private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId) {

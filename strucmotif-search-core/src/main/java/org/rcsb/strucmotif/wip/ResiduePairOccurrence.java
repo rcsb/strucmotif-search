@@ -34,23 +34,23 @@ public class ResiduePairOccurrence {
     }
 
     public ResidueType getResidueType1() {
-        return ResidueType.values()[(residuePairDescriptor >>> 24) & 0x7F];
+        return ResidueType.values()[(residuePairDescriptor >>> 21) & 0x7F];
     }
 
     public ResidueType getResidueType2() {
-        return ResidueType.values()[(residuePairDescriptor >>> 17) & 0x7F];
+        return ResidueType.values()[(residuePairDescriptor >>> 14) & 0x7F];
     }
 
     public DistanceType getBackboneDistance() {
-        return DistanceType.values()[(residuePairDescriptor >>> 10) & 0x7F];
+        return DistanceType.values()[(residuePairDescriptor >>> 9) & 0x1F];
     }
 
     public DistanceType getSideChainDistance() {
-        return DistanceType.values()[(residuePairDescriptor >>> 5) & 0x7F];
+        return DistanceType.values()[(residuePairDescriptor >>> 4) & 0x1F];
     }
 
     public AngleType getAngle() {
-        return AngleType.values()[residuePairDescriptor & 0x1F];
+        return AngleType.values()[residuePairDescriptor & 0x0F];
     }
 
     /**
@@ -58,7 +58,7 @@ public class ResiduePairOccurrence {
      * @return a residue index
      */
     public int getResidueIndex1() {
-        return (int) (residuePairIdentifier >>> 32) & 0xFF;
+        return (int) (residuePairIdentifier >>> 32);
     }
 
     /**
@@ -66,7 +66,7 @@ public class ResiduePairOccurrence {
      * @return a residue index
      */
     public int getResidueIndex2() {
-        return (int) residuePairIdentifier & 0xFF;
+        return (int) residuePairIdentifier;
     }
 
     /**
@@ -74,7 +74,7 @@ public class ResiduePairOccurrence {
      * @return an IntStream
      */
     public IntStream residueIndices() {
-        return IntStream.of((int) (residuePairIdentifier >>> 32) & 0xFF, (int) residuePairIdentifier & 0xFF);
+        return IntStream.of((int) (residuePairIdentifier >>> 32), (int) residuePairIdentifier);
     }
 
     @Override
@@ -92,7 +92,9 @@ public class ResiduePairOccurrence {
 
     @Override
     public String toString() {
-        return residuePairDescriptor + " -> " + residuePairIdentifier;
+        return "" + getResidueType1().getInternalCode() + getResidueType2().getInternalCode() + "-" +
+                getBackboneDistance().ordinal() + "-" + getSideChainDistance().ordinal() + "-" + getAngle().ordinal() + " -> " +
+                getResidueIndex1() + "-" + getResidueIndex2();
     }
 
 //    /**

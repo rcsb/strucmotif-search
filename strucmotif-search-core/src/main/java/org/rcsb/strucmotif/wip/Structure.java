@@ -30,6 +30,7 @@ public interface Structure {
     // 'mapping' utils
     int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
     int getResidueIndex(LabelSelection labelSelection);
+    LabelSelection getLabelSelection(int residueIndex);
 
     // data access
     String getAssemblyIdentifier(int residueIndex);
@@ -39,6 +40,7 @@ public interface Structure {
     String getTransformationIdentifier(int residueIndex);
     // must use float here to accommodate transformations
     Map<LabelAtomId, float[]> manifestResidue(int residueIndex);
+
 
     // could sort various properties into sub categories on atoms/residues/chains
 }

@@ -170,7 +170,7 @@ public class DefaultStructureReader {
                 }
             }
 
-            AssemblyInformation assemblyInformation = parseAssemblies(block, new HashSet<>(chainIds));
+            AssemblyInformation assemblyInformation = parseAssemblies(block, chainIds);
             return new FileBackedStructure(
                     structureIdentifier,
                     assemblyInformation.assemblyIdentifiers,
@@ -254,11 +254,14 @@ public class DefaultStructureReader {
 
     record AssemblyInformation(String[] assemblyIdentifiers, int[] assemblyOffsets, String[] assemblyReferences, String[] transformationIdentifiers, float[] transformations) {}
 
-    private static final String[] DEFAULT_TRANSFORMATION_IDENTIFIER = new String[] { "1" };
+    private static final String[] DEFAULT_ASSEMBLY_IDENTIFIERS = new String[] { "1" };
+    private static final int[] DEFAULT_ASSEMBLY_OFFSETS = new int[] { 0 };
+    private static final String[] DEFAULT_ASSEMBLY_REFERENCES = new String[] { "A", "1" };
+    private static final String[] DEFAULT_TRANSFORMATION_IDENTIFIERS = new String[] { "1" };
     private static final float[] DEFAULT_TRANSFORMATION = new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
-    private static final Map<String, float[]> DEFAULT_STRUCT_OPER_LIST = Map.of(DEFAULT_TRANSFORMATION_IDENTIFIER[0], DEFAULT_TRANSFORMATION);
-    private static final AssemblyInformation DEFAULT_ASSEMBLY_INFORMATION = new AssemblyInformation(new String[] { "1" },
-            new int[] { 0 }, null, DEFAULT_TRANSFORMATION_IDENTIFIER, DEFAULT_TRANSFORMATION);
+    private static final Map<String, float[]> DEFAULT_STRUCT_OPER_LIST = Map.of(DEFAULT_TRANSFORMATION_IDENTIFIERS[0], DEFAULT_TRANSFORMATION);
+    private static final AssemblyInformation DEFAULT_ASSEMBLY_INFORMATION = new AssemblyInformation(DEFAULT_ASSEMBLY_IDENTIFIERS,
+            DEFAULT_ASSEMBLY_OFFSETS, DEFAULT_ASSEMBLY_REFERENCES, DEFAULT_TRANSFORMATION_IDENTIFIERS, DEFAULT_TRANSFORMATION);
 
     /**
      * Construct assembly information instance from source file. Returns <code>null</code> for the trivial case of a
@@ -269,16 +272,17 @@ public class DefaultStructureReader {
      * an alternating, flat list -- returns <code>null</code> instead if all chains are (implicitly) member of assembly
      * "1" and no transforms have been registered
      */
-    AssemblyInformation parseAssemblies(MmCifBlock block, Set<String> chainIds) {
+    AssemblyInformation parseAssemblies(MmCifBlock block, List<String> chainIds) {
         // filter away non-biological assemblies
         Set<String> assemblyCandidates = getAssemblyCandidates(block);
         if (assemblyCandidates.isEmpty()) {
             // no (valid) assembly information, could throw here, let's treat it as "1" with no transforms for now
-            return DEFAULT_ASSEMBLY_INFORMATION;
+            return defaultAssemblyInformation(chainIds);
         }
 
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         Map<String, List<String>> assemblyInformation = new LinkedHashMap<>();
+        Set<String> chainIdSet = new HashSet<>(chainIds);
         for (int i = 0; i < pdbxStructAssemblyGen.getRowCount(); i++) {
             String assemblyId = pdbxStructAssemblyGen.getAssemblyId().get(i);
             // ignore assemblies not deemed biologically meaningful
@@ -288,7 +292,7 @@ public class DefaultStructureReader {
 
             String operExpression = pdbxStructAssemblyGen.getOperExpression().get(i);
             String asymIdList = pdbxStructAssemblyGen.getAsymIdList().get(i);
-            List<String> rowSpecificOperList = parseOperList(operExpression, asymIdList, chainIds);
+            List<String> rowSpecificOperList = parseOperList(operExpression, asymIdList, chainIdSet);
             // doesn't reference any meaningful chain
             if (rowSpecificOperList.isEmpty()) {
                 continue;
@@ -317,7 +321,7 @@ public class DefaultStructureReader {
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         if (assemblyIdentifiers.length == 1 && pdbxStructOperList.getRowCount() == 1) {
             // don't bother holding uninteresting information
-            return DEFAULT_ASSEMBLY_INFORMATION;
+            return defaultAssemblyInformation(chainIds);
         }
 
         // parse transformations
@@ -335,6 +339,18 @@ public class DefaultStructureReader {
                 assemblyReferences,
                 transformationIdentifiers,
                 transformations);
+    }
+
+    private AssemblyInformation defaultAssemblyInformation(List<String> chainIds) {
+        if (chainIds.size() == 1 && chainIds.contains("A")) {
+            return DEFAULT_ASSEMBLY_INFORMATION;
+        } else {
+            String[] assemblyReferences = chainIds.stream()
+                    .flatMap(c -> Stream.of(c, DEFAULT_TRANSFORMATION_IDENTIFIERS[0]))
+                    .toArray(String[]::new);
+            return new AssemblyInformation(DEFAULT_ASSEMBLY_IDENTIFIERS, DEFAULT_ASSEMBLY_OFFSETS,
+                    assemblyReferences, DEFAULT_TRANSFORMATION_IDENTIFIERS, DEFAULT_TRANSFORMATION);
+        }
     }
 
     /**

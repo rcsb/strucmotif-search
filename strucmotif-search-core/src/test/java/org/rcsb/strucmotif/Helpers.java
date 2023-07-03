@@ -5,6 +5,7 @@ import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
+import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -18,9 +19,13 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Helpers {
@@ -95,6 +100,44 @@ public class Helpers {
     public static InputStream getResource(String location) {
         InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(location);
         return Objects.requireNonNull(resourceAsStream, "failed to locate test resource: " + location);
+    }
+
+    public static Stream<Integer> honorTolerance(int residuePairDescriptor) {
+        int backboneDistanceTolerance = 1;
+        int sideChainDistanceTolerance = 1;
+        int angleTolerance = 1;
+
+        int residueType1 = (residuePairDescriptor >>> 21) & 0x7F;
+        int residueType2 = (residuePairDescriptor >>> 14) & 0x7F;
+        int backboneDistance = (residuePairDescriptor >>> 9) & 0x1F;
+        int sideChainDistance = (residuePairDescriptor >>> 4) & 0x1F;
+        int angle = residuePairDescriptor & 0x0F;
+        Set<Integer> combinations = new HashSet<>(); // TODO optimize prod function and make sure to use set
+
+        for (int i = -backboneDistanceTolerance; i <= backboneDistanceTolerance; i++) {
+            int ii = backboneDistance + i;
+            if (ii < 0 || ii >= DistanceType.values().length) {
+                continue;
+            }
+
+            for (int j = -sideChainDistanceTolerance; j <= sideChainDistanceTolerance; j++) {
+                int ij = sideChainDistance + j;
+                if (ij < 0 || ij >= DistanceType.values().length) {
+                    continue;
+                }
+
+                for (int k = -angleTolerance; k <= angleTolerance; k++) {
+                    int ik = angle + k;
+                    if (ik < 0 || ik >= AngleType.values().length) {
+                        continue;
+                    }
+
+                    combinations.add(residueType1 << 21 | residueType2 << 14 | ii << 9 | ij << 4 | ik);
+                }
+            }
+        }
+
+        return combinations.stream();
     }
 
     public static Stream<ResiduePairDescriptor> honorTolerance(ResiduePairDescriptor residuePairDescriptor) {

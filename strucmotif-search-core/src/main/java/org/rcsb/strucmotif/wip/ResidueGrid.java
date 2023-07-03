@@ -55,13 +55,13 @@ public class ResidueGrid {
     }
 
     private void assignCoordsToGridCell(float[] coords, int i) {
-        int xind = xintgrid2xgridindex(getFloor(coords[i * 3]));
-        int yind = yintgrid2ygridindex(getFloor(coords[i * 3 + 1]));
-        int zind = zintgrid2zgridindex(getFloor(coords[i * 3 + 2]));
+        int xind = xintgrid2xgridindex(getFloor(coords[i]));
+        int yind = yintgrid2ygridindex(getFloor(coords[i + 1]));
+        int zind = zintgrid2zgridindex(getFloor(coords[i + 2]));
         if (gridCells[xind][yind][zind] == null) {
             gridCells[xind][yind][zind] = new ResidueGridCell();
         }
-        this.gridCells[xind][yind][zind].addIndex(i);
+        this.gridCells[xind][yind][zind].addIndex(i / 3);
     }
 
     private int xintgrid2xgridindex(int x) {
@@ -141,25 +141,25 @@ public class ResidueGrid {
 
             float[] v = residueVectors.backboneVectors();
             for (int i = 0; i < v.length - 2; i = i + 3) {
-                if (v[i * 3] > xmax) {
-                    xmax = v[i * 3];
+                if (v[i] > xmax) {
+                    xmax = v[i];
                 }
-                if (v[i * 3] < xmin) {
-                    xmin = v[i * 3];
-                }
-
-                if (v[i * 3 + 1] > ymax) {
-                    ymax = v[i * 3 + 1];
-                }
-                if (v[i * 3 + 1] < ymin) {
-                    ymin = v[i * 3 + 1];
+                if (v[i] < xmin) {
+                    xmin = v[i];
                 }
 
-                if (v[i * 3 + 2] > zmax) {
-                    zmax = v[i * 3 + 2];
+                if (v[i+ 1] > ymax) {
+                    ymax = v[i + 1];
                 }
-                if (v[i * 3 + 2] < zmin) {
-                    zmin = v[i * 3 + 2];
+                if (v[i+ 1] < ymin) {
+                    ymin = v[i + 1];
+                }
+
+                if (v[i + 2] > zmax) {
+                    zmax = v[i + 2];
+                }
+                if (v[i + 2] < zmin) {
+                    zmin = v[i + 2];
                 }
             }
 

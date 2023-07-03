@@ -3,8 +3,7 @@ package org.rcsb.strucmotif.wip;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Transformation;
-import org.rcsb.strucmotif.domain.motif.AngleType;
-import org.rcsb.strucmotif.domain.motif.DistanceType;
+import org.rcsb.strucmotif.domain.motif.*;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -12,12 +11,9 @@ import org.rcsb.strucmotif.math.Algebra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.*;
 import static org.rcsb.strucmotif.math.Algebra.normalize3d;
@@ -30,6 +26,7 @@ public class ResidueGraph {
 //    private short[] data;
 //    private int[] columnIndices;
 //    private int[] rowIndices;
+    private Map<Long, Short> data;
     private final int selectionCount;
     private final int residueCount;
     private final int pairingCount;
@@ -101,7 +98,7 @@ public class ResidueGraph {
         ResidueVectors residueVectors = populateResidueVectors(structure, options);
 
         this.selectionCount = options.mode == ResidueGraphMode.SELECTION ? options.selections.size() : residueVectors.backboneVectors.length;
-        this.residueCount = residueVectors.backboneVectors.length;
+        this.residueCount = residueVectors.backboneVectors.length / 3;
         this.pairingCount = fillResidueGrid(structure, residueVectors, strucmotifConfig.getSquaredDistanceCutoff(), options);
     }
 
@@ -144,9 +141,9 @@ public class ResidueGraph {
             residueIndices[valid] = i;
             int insertionPoint = valid * 3;
             System.arraycopy(backbone, 0, backboneVectors, insertionPoint, 3);
-            System.arraycopy(sideChain, 0, sideChain, insertionPoint, 3);
+            System.arraycopy(sideChain, 0, sideChainVectors, insertionPoint, 3);
             float[] normalVector = normalVector(backbone, sideChain);
-            System.arraycopy(normalVector, 0, normalVector, insertionPoint, 3);
+            System.arraycopy(normalVector, 0, normalVectors, insertionPoint, 3);
             valid++;
         }
 
@@ -197,13 +194,14 @@ public class ResidueGraph {
         }
 
         int contacts = 0;
+        this.data = new LinkedHashMap<>();
         int[] residueIndices = residueVectors.residueIndices;
         for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
             int residueIndex1 = residueIndices[residueContact.i()];
             int residueIndex2 = residueIndices[residueContact.j()];
 
-            String transformationIdentifier1 = structure.getTransformationIdentifier(residueIndex1);
-            String transformationIdentifier2 = structure.getTransformationIdentifier(residueIndex2);
+            String transformationIdentifier1 = structure.getLabelAsymId(residueIndex1) + "_" + structure.getTransformationIdentifier(residueIndex1);
+            String transformationIdentifier2 = structure.getLabelAsymId(residueIndex2) + "_" + structure.getTransformationIdentifier(residueIndex2);
             if (mode != ResidueGraphMode.SELECTION) {
                 if (!acceptedTransformationIdentifiers.contains(transformationIdentifier1)) {
                     continue;
@@ -221,22 +219,88 @@ public class ResidueGraph {
                 continue;
             }
 
-            // TODO correct to use residue index here?
             DistanceType backboneDistance = DistanceType.ofDistance(residueContact.distance());
             DistanceType sideChainDistance = DistanceType.ofDistance((float) Math.sqrt(distanceSquared3d(residueVectors.sideChainVectors, residueIndex1, residueIndex2)));
             AngleType angle = AngleType.ofAngle(angle(residueVectors.normalVectors, residueIndex1, residueIndex2));
 
             // jam all values into a single short
-            short out = encode(backboneDistance, sideChainDistance, angle);
+            long key = (long) residueIndex1 << 32 | residueIndex2;
+            short value = encode(backboneDistance, sideChainDistance, angle);
+            data.put(key, value);
 
             contacts++;
         }
         return contacts;
     }
 
+    public int getSelectionCount() {
+        return selectionCount;
+    }
+
+    public int getResidueCount() {
+        return residueCount;
+    }
+
+    public int getPairingCount() {
+        return pairingCount;
+    }
+
+    public LongStream pairingsSequential() {
+        return data.keySet().stream().mapToLong(l -> l);
+    }
+
+    public LongStream pairingsParallel() {
+        return data.keySet().parallelStream().mapToLong(l -> l);
+    }
+
+    public Stream<ResiduePairOccurrence> residuePairOccurrencesSequential() {
+        return pairingsSequential()
+                .mapToObj(this::createResiduePairOccurrence);
+    }
+
+    public Stream<ResiduePairOccurrence> residuePairOccurrencesParallel() {
+        return pairingsParallel()
+                .mapToObj(this::createResiduePairOccurrence);
+    }
+
+    private ResiduePairOccurrence createResiduePairOccurrence(long residuePairIdentifier) {
+        long key = residuePairIdentifier;
+        int residueIndex2 = (int) residuePairIdentifier & 0xFF;
+        residuePairIdentifier >>= 32;
+        int residueIndex1 = (int) residuePairIdentifier & 0xFF;
+
+        ResidueType residueType1 = structure.getResidueType(residueIndex1);
+        ResidueType residueType2 = structure.getResidueType(residueIndex2);
+        short value = data.get(key);
+        int residuePairDescriptor;
+
+        // first residue must have lower one-letter code - if not: flip
+        if (residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0) {
+            residuePairIdentifier = (long) residueIndex2 << 32 | residueIndex1;
+            residuePairDescriptor = encode(residueType2, residueType1, value);
+        } else {
+            residuePairDescriptor = encode(residueType1, residueType2, value);
+        }
+
+        return new ResiduePairOccurrence(residuePairDescriptor, residuePairIdentifier);
+    }
+
     static short encode(DistanceType backboneDistance, DistanceType sideChainDistance, AngleType angle) {
-        // AAAA ABBB BBXC CCCC - A: backboneDistance, B: sideChainDistance, X: padding, C: angle
+        // XXCC CCCD DDDD EEEE - C: backboneDistance (32 values, 5 bits), D: sideChainDistance, E: angle (10 values, 4 bits)
         return (short) ((byte) backboneDistance.ordinal() << 10 | (byte) sideChainDistance.ordinal() << 5 | (byte) angle.ordinal());
+    }
+
+    static int encode(ResidueType residueType1, ResidueType residueType2, short otherProps) {
+        return (byte) residueType1.ordinal() << 24 | (byte) residueType2.ordinal() << 17 | otherProps;
+    }
+
+    public static int encode(ResiduePairDescriptor residuePairDescriptor) {
+        return encode(residuePairDescriptor.getResidueType1(), residuePairDescriptor.getResidueType2(), encode(residuePairDescriptor.getBackboneDistance(), residuePairDescriptor.getSideChainDistance(), residuePairDescriptor.getAngle()));
+    }
+
+    static int encode(ResidueType residueType1, ResidueType residueType2, DistanceType backboneDistance, DistanceType sideChainDistance, AngleType angle) {
+        // XXXX AAAA AAAB BBBB BBCC CCCD DDDD EEEE - A: residueType1 (36 values, 7 bits), B: residueType2, C: backboneDistance (32 values, 5 bits), D: sideChainDistance, E: angle (10 values, 4 bits)
+        return (byte) residueType1.ordinal() << 24 | (byte) residueType2.ordinal() << 17 | (byte) backboneDistance.ordinal() << 10 | (byte) sideChainDistance.ordinal() << 5 | (byte) angle.ordinal();
     }
 
     static Enum<?>[] decode(short value) {
@@ -246,6 +310,19 @@ public class ResidueGraph {
         value >>= 5;
         int i = value & 0x1F;
         return new Enum<?>[] { DistanceType.values()[i], DistanceType.values()[j], AngleType.values()[k] };
+    }
+
+    static Enum<?>[] decode(int value) {
+        int m = value & 0x1F;
+        value >>= 5;
+        int l = value & 0x1F;
+        value >>= 5;
+        int k = value & 0x1F;
+        value >>= 7;
+        int j = value & 0x7F;
+        value >>= 7;
+        int i = value & 0x7F;
+        return new Enum<?>[] { ResidueType.values()[i], ResidueType.values()[j], DistanceType.values()[k], DistanceType.values()[l], AngleType.values()[m] };
     }
 
     private static float[] getBackboneCoords(Map<LabelAtomId, float[]> residue) {

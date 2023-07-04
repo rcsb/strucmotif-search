@@ -1,47 +1,81 @@
 package org.rcsb.strucmotif.domain.motif;
 
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.IntStream;
 
 /**
  * A residue pair occurrence is the combination of its properties ({@link ResiduePairDescriptor}) and both identifiers
  * (wrapped as {@link ResiduePairIdentifier}).
  */
 public class ResiduePairOccurrence {
-    private final ResiduePairDescriptor residuePairDescriptor;
-    private final ResiduePairIdentifier residuePairIdentifier;
+    private final long residuePairIdentifier;
+    private final int residuePairDescriptor;
 
-    /**
-     * Construct a pair occurrence.
-     * @param residuePairDescriptor what are the properties of this pair?
-     * @param residuePairIdentifier where is this pair located?
-     */
-    public ResiduePairOccurrence(ResiduePairDescriptor residuePairDescriptor, ResiduePairIdentifier residuePairIdentifier) {
-        this.residuePairDescriptor = residuePairDescriptor;
+    public ResiduePairOccurrence(long residuePairIdentifier, int residuePairDescriptor) {
         this.residuePairIdentifier = residuePairIdentifier;
+        this.residuePairDescriptor = residuePairDescriptor;
+    }
+
+    public ResiduePairOccurrence(int residueIndex1, int residueIndex2, ResidueType residueType1, ResidueType residueType2, DistanceType backboneDistance, DistanceType sideChainDistance, AngleType angle) {
+        this(ResiduePairIdentifier.encodeIdentifier(residueIndex1, residueIndex2), ResiduePairDescriptor.encodeDescriptor(residueType1.ordinal(), residueType2.ordinal(), backboneDistance.ordinal(), sideChainDistance.ordinal(), angle.ordinal()));
     }
 
     /**
      * What are the properties of this pair?
      * @return a pair descriptor
      */
-    public ResiduePairDescriptor getResiduePairDescriptor() {
+    public int getResiduePairDescriptor() {
         return residuePairDescriptor;
     }
 
-    /**
-     * Where is this pair located?
-     * @return a pair identifier
-     */
-    public ResiduePairIdentifier getResidueIdentifier() {
+    public ResidueType getResidueType1() {
+        return ResiduePairDescriptor.getResidueType1(residuePairDescriptor);
+    }
+
+    public ResidueType getResidueType2() {
+        return ResiduePairDescriptor.getResidueType2(residuePairDescriptor);
+    }
+
+    public DistanceType getBackboneDistance() {
+        return ResiduePairDescriptor.getBackboneDistance(residuePairDescriptor);
+    }
+
+    public DistanceType getSideChainDistance() {
+        return ResiduePairDescriptor.getSideChainDistance(residuePairDescriptor);
+    }
+
+    public AngleType getAngle() {
+        return ResiduePairDescriptor.getAngle(residuePairDescriptor);
+    }
+
+    public long getResiduePairIdentifier() {
         return residuePairIdentifier;
+    }
+
+    /**
+     * What's the first residue of this pair?
+     * @return a residue index
+     */
+    public int getResidueIndex1() {
+        return ResiduePairIdentifier.getResidueIndex1(residuePairIdentifier);
+    }
+
+    /**
+     * What's the second residue of this pair?
+     * @return a residue index
+     */
+    public int getResidueIndex2() {
+        return ResiduePairIdentifier.getResidueIndex2(residuePairIdentifier);
+    }
+
+    /**
+     * Access to both residue indices.
+     * @return an IntStream
+     */
+    public IntStream residueIndices() {
+        return IntStream.of(getResidueIndex1(), getResidueIndex2());
     }
 
     @Override
@@ -49,8 +83,7 @@ public class ResiduePairOccurrence {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ResiduePairOccurrence that = (ResiduePairOccurrence) o;
-        return Objects.equals(residuePairDescriptor, that.residuePairDescriptor) &&
-                Objects.equals(residuePairIdentifier, that.residuePairIdentifier);
+        return residuePairDescriptor == that.residuePairDescriptor && residuePairIdentifier == that.residuePairIdentifier;
     }
 
     @Override
@@ -60,8 +93,11 @@ public class ResiduePairOccurrence {
 
     @Override
     public String toString() {
-        return residuePairDescriptor + " -> " + residuePairIdentifier;
+        return "" + getResidueType1().getInternalCode() + getResidueType2().getInternalCode() + "-" +
+                getBackboneDistance().ordinal() + "-" + getSideChainDistance().ordinal() + "-" + getAngle().ordinal() + " -> " +
+                getResidueIndex1() + "-" + getResidueIndex2();
     }
+
 
     /**
      * Traverse all {@link ResiduePairDescriptor} instances which are compatible to this one given the specified
@@ -70,20 +106,21 @@ public class ResiduePairOccurrence {
      * @param sideChainTolerance tolerance value
      * @param angleTolerance tolerance value
      * @param exchanges map of position-specific exchanges - may be empty
-     * @return stream of all {@link ResiduePairDescriptor} instances formed
+     * @return stream of all descriptors formed, encoded as int
      */
-    public Stream<ResiduePairDescriptor> residuePairDescriptorsByTolerance(int backboneTolerance,
-                                                                           int sideChainTolerance,
-                                                                           int angleTolerance,
-                                                                           Map<IndexSelection, Set<ResidueType>> exchanges) {
-        // we assign current component type for components without exchanges
-        Set<ResidueType> residueTypes1 = exchanges.getOrDefault(residuePairIdentifier.getIndexSelection1(), Set.of(residuePairDescriptor.getResidueType1()));
-        Set<ResidueType> residueTypes2 = exchanges.getOrDefault(residuePairIdentifier.getIndexSelection2(), Set.of(residuePairDescriptor.getResidueType2()));
+    public IntStream residuePairDescriptorsByTolerance(int backboneTolerance, int sideChainTolerance, int angleTolerance,
+                                                       Map<Integer, Set<ResidueType>> exchanges) {
+        int residueIndex2 = (int) residuePairIdentifier & 0xFF;
+        int residueIndex1 = (int) (residuePairIdentifier >>> 32) & 0xFF;
 
-        int backboneDistance = residuePairDescriptor.getBackboneDistance().ordinal();
-        int sideChainDistance = residuePairDescriptor.getSideChainDistance().ordinal();
-        int angle = residuePairDescriptor.getAngle().ordinal();
-        List<ResiduePairDescriptor> combinations = new ArrayList<>();
+        // we assign current component type for components without exchanges
+        Set<ResidueType> residueTypes1 = exchanges.getOrDefault(residueIndex1, Set.of(getResidueType1()));
+        Set<ResidueType> residueTypes2 = exchanges.getOrDefault(residueIndex2, Set.of(getResidueType2()));
+
+        int backboneDistance = getBackboneDistance().ordinal();
+        int sideChainDistance = getSideChainDistance().ordinal();
+        int angle = getAngle().ordinal();
+        Set<Integer> combinations = new HashSet<>();
 
         for (int i = -backboneTolerance; i <= backboneTolerance; i++) {
             int ii = backboneDistance + i;
@@ -116,18 +153,21 @@ public class ResiduePairOccurrence {
                             Long story short: That's why these cases are marked implicitly. The ResiduePairDescriptor is so
                             kind to flip and keep track of that.
                              */
-                            ResiduePairDescriptor derivedResiduePairDescriptor = new ResiduePairDescriptor(residueType1,
-                                    residueType2,
-                                    DistanceType.values()[ii],
-                                    DistanceType.values()[ij],
-                                    AngleType.values()[ik]);
-                            combinations.add(derivedResiduePairDescriptor);
+                            boolean flipped = residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0;
+                            int descriptor;
+                            if (flipped) {
+                                descriptor = ResiduePairDescriptor.encodeDescriptor(residueType2.ordinal(), residueType1.ordinal(), ii, ij, ik);
+                                descriptor |= ResiduePairDescriptor.FLIPPED_MASK;
+                            } else {
+                                descriptor = ResiduePairDescriptor.encodeDescriptor(residueType1.ordinal(), residueType2.ordinal(), ii, ij, ik);
+                            }
+                            combinations.add(descriptor);
                         }
                     }
                 }
             }
         }
 
-        return combinations.parallelStream();
+        return combinations.parallelStream().mapToInt(i -> i);
     }
 }

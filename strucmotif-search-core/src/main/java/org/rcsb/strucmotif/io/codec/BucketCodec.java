@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.io.codec;
 
-import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 
 import java.io.IOException;
@@ -23,17 +22,5 @@ public interface BucketCodec {
      * @return the encoded data
      * @throws IOException writing failed
      */
-    ByteBuffer encode(Bucket bucket) throws IOException;
-
-    /**
-     * Serialize raw arrays as binary stream.
-     * @param structureIndices index array
-     * @param positionOffsets offset array
-     * @param positionData data array
-     * @param operatorIndices sparse operator indices
-     * @param operatorData sparse operator data
-     * @return the encoded data
-     * @throws IOException writing failed
-     */
-    ByteBuffer encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) throws IOException;
+    ByteBuffer encode(InvertedIndexBucket bucket) throws IOException;
 }

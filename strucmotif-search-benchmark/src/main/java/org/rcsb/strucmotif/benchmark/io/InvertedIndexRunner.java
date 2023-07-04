@@ -2,7 +2,7 @@ package org.rcsb.strucmotif.benchmark.io;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.ThreadPoolImpl;
+import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
@@ -26,7 +26,7 @@ public class InvertedIndexRunner {
      */
     public static void main(String[] args) {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
 
         InvertedIndex invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig);
         List<ResiduePairDescriptor> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());

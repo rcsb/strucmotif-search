@@ -1,4 +1,4 @@
-package org.rcsb.strucmotif.wip;
+package org.rcsb.strucmotif.io;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,6 +6,8 @@ import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.structure.Structure;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 
 import java.io.ByteArrayInputStream;

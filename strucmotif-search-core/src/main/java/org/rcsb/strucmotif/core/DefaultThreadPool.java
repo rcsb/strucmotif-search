@@ -12,7 +12,7 @@ import java.util.concurrent.Future;
  * Wraps a ForkJoinPool.
  */
 @Service
-public class ThreadPoolImpl implements ThreadPool {
+public class DefaultThreadPool implements ThreadPool {
     private final ForkJoinPool pool;
 
     /**
@@ -20,7 +20,7 @@ public class ThreadPoolImpl implements ThreadPool {
      * @param strucmotifConfig injectable configuration
      */
     @Autowired
-    public ThreadPoolImpl(StrucmotifConfig strucmotifConfig) {
+    public DefaultThreadPool(StrucmotifConfig strucmotifConfig) {
         this.pool = new ForkJoinPool(strucmotifConfig.getNumberThreads());
     }
 

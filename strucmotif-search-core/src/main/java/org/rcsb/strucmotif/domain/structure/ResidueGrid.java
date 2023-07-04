@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import org.rcsb.strucmotif.math.Algebra;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,22 +18,22 @@ public class ResidueGrid {
     private final float squaredCutoff;
     private final int cellSize;
 
-    private final List<float[]> vectors;
-    private final BoundingBox boundingBox;
+    private final ResidueGraph.ResidueVectors residueVectors;
+    private final ResidueGrid.BoundingBox boundingBox;
     private final int[] intBounds;
-    private final ResidueGridCell[][][] gridCells;
+    private final ResidueGrid.ResidueGridCell[][][] gridCells;
 
     /**
      * Construct a residue grid from a structure.
-     * @param vectors the data
+     * @param residueVectors the data
      * @param squaredCutoff maximum distance between residues
      */
-    public ResidueGrid(List<float[]> vectors, float squaredCutoff) {
-        this.vectors = vectors;
+    public ResidueGrid(ResidueGraph.ResidueVectors residueVectors, float squaredCutoff) {
+        this.residueVectors = residueVectors;
         this.squaredCutoff = squaredCutoff;
         this.cellSize = (int) Math.floor(Math.sqrt(squaredCutoff) * SCALE);
 
-        this.boundingBox = new BoundingBox();
+        this.boundingBox = new ResidueGrid.BoundingBox();
 
         this.intBounds = boundingBox.getIntBounds();
         this.gridCells = new ResidueGridCell
@@ -51,23 +49,19 @@ public class ResidueGrid {
      * corresponding grid cells.
      */
     private void fillGrid() {
-        int i = -1;
-        for (float[] v : vectors) {
-            i++;
-            if (v != null) {
-                assignCoordsToGridCell(v, i);
-            }
+        for (int i = 0; i < residueVectors.backboneVectors().length - 2; i = i + 3) {
+            assignCoordsToGridCell(residueVectors.backboneVectors(), i);
         }
     }
 
     private void assignCoordsToGridCell(float[] coords, int i) {
-        int xind = xintgrid2xgridindex(getFloor(coords[0]));
-        int yind = yintgrid2ygridindex(getFloor(coords[1]));
-        int zind = zintgrid2zgridindex(getFloor(coords[2]));
+        int xind = xintgrid2xgridindex(getFloor(coords[i]));
+        int yind = yintgrid2ygridindex(getFloor(coords[i + 1]));
+        int zind = zintgrid2zgridindex(getFloor(coords[i + 2]));
         if (gridCells[xind][yind][zind] == null) {
             gridCells[xind][yind][zind] = new ResidueGridCell();
         }
-        this.gridCells[xind][yind][zind].addIndex(i);
+        this.gridCells[xind][yind][zind].addIndex(i / 3);
     }
 
     private int xintgrid2xgridindex(int x) {
@@ -145,30 +139,27 @@ public class ResidueGrid {
             float zmin = Float.MAX_VALUE;
             float zmax = -Float.MAX_VALUE;
 
-            for (float[] v : vectors) {
-                if (v == null) {
-                    continue;
+            float[] v = residueVectors.backboneVectors();
+            for (int i = 0; i < v.length - 2; i = i + 3) {
+                if (v[i] > xmax) {
+                    xmax = v[i];
+                }
+                if (v[i] < xmin) {
+                    xmin = v[i];
                 }
 
-                if (v[0] > xmax) {
-                    xmax = v[0];
+                if (v[i+ 1] > ymax) {
+                    ymax = v[i + 1];
                 }
-                if (v[0] < xmin) {
-                    xmin = v[0];
-                }
-
-                if (v[1] > ymax) {
-                    ymax = v[1];
-                }
-                if (v[1] < ymin) {
-                    ymin = v[1];
+                if (v[i+ 1] < ymin) {
+                    ymin = v[i + 1];
                 }
 
-                if (v[2] > zmax) {
-                    zmax = v[2];
+                if (v[i + 2] > zmax) {
+                    zmax = v[i + 2];
                 }
-                if (v[2] < zmin) {
-                    zmin = v[2];
+                if (v[i + 2] < zmin) {
+                    zmin = v[i + 2];
                 }
             }
 
@@ -215,10 +206,11 @@ public class ResidueGrid {
 
         private List<ResidueContact> getContactsToGridCell(ResidueGridCell other) {
             List<ResidueContact> contacts = new ArrayList<>();
+            float[] backboneVectors = residueVectors.backboneVectors();
             for (int i : indices) {
                 for (int j : other.indices) {
                     if (j > i) {
-                        float squaredDistance = Algebra.distanceSquared3d(vectors.get(i), vectors.get(j));
+                        float squaredDistance = distanceSquared3d(backboneVectors, i, j);
                         if (squaredDistance < squaredCutoff) {
                             contacts.add(new ResidueContact(i, j, (float) Math.sqrt(squaredDistance)));
                         }
@@ -227,7 +219,17 @@ public class ResidueGrid {
             }
             return contacts;
         }
+
+        private float distanceSquared3d(float[] vectors, int i, int j) {
+            i *= 3;
+            j *= 3;
+            float dx = vectors[i] - vectors[j];
+            float dy = vectors[i + 1] - vectors[j + 1];
+            float dz = vectors[i + 2] - vectors[j + 2];
+
+            return dx * dx + dy * dy + dz * dz;
+        }
     }
 
-    public record ResidueContact(int i, int j, float distance) {} // TODO lower visibility again
+    record ResidueContact(int i, int j, float distance) {}
 }

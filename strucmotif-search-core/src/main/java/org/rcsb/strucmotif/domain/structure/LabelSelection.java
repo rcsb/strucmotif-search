@@ -3,47 +3,10 @@ package org.rcsb.strucmotif.domain.structure;
 import java.util.Objects;
 
 /**
- * Identifies a residue unambiguously by label_asym_id, struct_oper_id, and label_seq_id. Basically the 'natural' way to
- * reference residues.
+ * Identifies a residue unambiguously by label_asym_id, struct_oper_id, and label_seq_id. Basically, the 'natural' way
+ * to reference residues.
  */
-public class LabelSelection implements Selection {
-    private final String labelAsymId;
-    private final String structOperId;
-    private final int labelSeqId;
-
-    /**
-     * Construct a label selection.
-     * @param labelAsymId the chain of interest
-     * @param structOperId the operation of interest
-     * @param labelSeqId the sequence position of interest
-     */
-    public LabelSelection(String labelAsymId, String structOperId, int labelSeqId) {
-        this.labelAsymId = labelAsymId;
-        this.structOperId = structOperId;
-        this.labelSeqId = labelSeqId;
-    }
-
-    /**
-     * The chain of interest. Corresponds to 'label_asym_id' in mmCIF.
-     * @return a String
-     */
-    public String getLabelAsymId() {
-        return labelAsymId;
-    }
-
-    @Override
-    public String getStructOperId() {
-        return structOperId;
-    }
-
-    /**
-     * The sequence position of interest. Corresponds to 'label_seq_id' in mmCIF.
-     * @return an int
-     */
-    public int getLabelSeqId() {
-        return labelSeqId;
-    }
-
+public record LabelSelection(String labelAsymId, String structOperId, int labelSeqId) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

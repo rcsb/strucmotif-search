@@ -58,8 +58,8 @@ import java.util.Set;
  * </ul>
  */
 @Service
-public class StructureWriterImpl implements StructureWriter {
-    private static final Logger logger = LoggerFactory.getLogger(StructureWriterImpl.class);
+public class DefaultStructureWriter implements StructureWriter {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultStructureWriter.class);
     private final CifOptions options;
     private final ResidueQualityStrategy residueQualityStrategy;
     private final double residueQualityCutoff;
@@ -70,7 +70,7 @@ public class StructureWriterImpl implements StructureWriter {
      * @param residueTypeResolver the resolver instance
      * @param strucmotifConfig the global config
      */
-    public StructureWriterImpl(ResidueTypeResolver residueTypeResolver, StrucmotifConfig strucmotifConfig) {
+    public DefaultStructureWriter(ResidueTypeResolver residueTypeResolver, StrucmotifConfig strucmotifConfig) {
         this.options = CifOptions.builder()
                 .encodingStrategyHint("atom_site", "Cartn_x", "delta", 1)
                 .encodingStrategyHint("atom_site", "Cartn_y", "delta", 1)

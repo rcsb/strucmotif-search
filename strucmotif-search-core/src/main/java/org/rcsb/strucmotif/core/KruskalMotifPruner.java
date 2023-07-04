@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.core;
 
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +24,7 @@ public class KruskalMotifPruner implements MotifPruner {
                 .collect(Collectors.toList());
 
         // ignore motifs with <4 identifiers
-        if (residueGraph.getNumberOfResidues() < 4) {
+        if (residueGraph.getResidueCount() < 4) {
             return residuePairOccurrences;
         }
 
@@ -32,23 +32,23 @@ public class KruskalMotifPruner implements MotifPruner {
     }
 
     private List<ResiduePairOccurrence> kruskal(List<ResiduePairOccurrence> residuePairOccurrences) {
-        List<Set<IndexSelection>> coveredSelectors = new ArrayList<>();
+        List<Set<Integer>> coveredSelectors = new ArrayList<>();
         List<ResiduePairOccurrence> result = new ArrayList<>();
         // sort all edges by weight
-        residuePairOccurrences.sort(Comparator.comparingInt(mo -> mo.getResiduePairDescriptor().getBackboneDistance().ordinal()));
+        residuePairOccurrences.sort(Comparator.comparingInt(mo -> ResiduePairDescriptor.getBackboneDistance(mo.getResiduePairDescriptor()).ordinal()));
 
         while (!residuePairOccurrences.isEmpty()) {
             ResiduePairOccurrence best = residuePairOccurrences.remove(0);
-            IndexSelection id1 = best.getResidueIdentifier().getIndexSelection1();
-            IndexSelection id2 = best.getResidueIdentifier().getIndexSelection2();
+            int id1 = best.getResidueIndex1();
+            int id2 = best.getResidueIndex2();
 
             // prevent formation of circles
-            Set<IndexSelection> set1 = find(coveredSelectors, id1);
-            Set<IndexSelection> set2 = find(coveredSelectors, id2);
+            Set<Integer> set1 = find(coveredSelectors, id1);
+            Set<Integer> set2 = find(coveredSelectors, id2);
             if (set1 == null || !set1.equals(set2)) {
                 result.add(best);
 
-                Set<IndexSelection> updated = new HashSet<>();
+                Set<Integer> updated = new HashSet<>();
                 if (set1 != null) {
                     coveredSelectors.remove(set1);
                     updated.addAll(set1);
@@ -66,7 +66,7 @@ public class KruskalMotifPruner implements MotifPruner {
         return result;
     }
 
-    private Set<IndexSelection> find(List<Set<IndexSelection>> selectors, IndexSelection selector) {
+    private Set<Integer> find(List<Set<Integer>> selectors, Integer selector) {
         return selectors.stream()
                 .filter(list -> list.contains(selector))
                 .findFirst()

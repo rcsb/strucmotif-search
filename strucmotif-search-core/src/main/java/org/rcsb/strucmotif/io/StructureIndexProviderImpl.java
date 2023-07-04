@@ -43,8 +43,8 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
         // determine the largest known id
         int max = -1; // let's start at 0, negative values are perfectly fine too (and will happen when counter overflows)
         for (StructureInformation structureInformation : stateRepository.selectKnown()) {
-            int structureIndex = structureInformation.getStructureIndex();
-            String structureIdentifier = structureInformation.getStructureIdentifier();
+            int structureIndex = structureInformation.structureIndex();
+            String structureIdentifier = structureInformation.structureIdentifier();
             forward.put(structureIndex, structureIdentifier);
             backward.put(structureIdentifier, structureIndex);
 

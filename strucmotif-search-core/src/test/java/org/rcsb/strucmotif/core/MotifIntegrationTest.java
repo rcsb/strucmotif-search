@@ -51,7 +51,7 @@ class MotifIntegrationTest {
     @BeforeEach
     public void init() {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
@@ -78,10 +78,10 @@ class MotifIntegrationTest {
         };
 
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
+        TargetAssembler targetAssembler = new DefaultTargetAssembler(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
-        StrucmotifRuntime strucmotifRuntime = new StrucmotifRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
-        this.motifs = new MotifDefinitionRegistryImpl(structureDataProvider)
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
+        this.motifs = new DefaultMotifDefinitionRegistry(structureDataProvider)
                 .enrichMotifDefinitions(this::loadMotif)
                 .stream()
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))

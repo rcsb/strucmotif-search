@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.config;
 
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.io.codec.ColferCodec;
-import org.rcsb.strucmotif.io.codec.MessagePackCodec;
 import org.rcsb.strucmotif.io.codec.JsonCodec;
 
 /**
@@ -13,10 +12,6 @@ public enum InvertedIndexBackend {
      * Smaller files that are faster to read/write in a less standard format.
      */
     COLFER(new ColferCodec(), ".colf"),
-    /**
-     * Less compact and slower MessagePack in a common serialization format.
-     */
-    MESSAGE_PACK(new MessagePackCodec(), ".msg"),
     /**
      * Useful for debugging.
      */

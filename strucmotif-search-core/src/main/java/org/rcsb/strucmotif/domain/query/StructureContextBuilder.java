@@ -100,7 +100,10 @@ public class StructureContextBuilder implements ContextBuilder {
      */
     public MandatoryBuilderStep defineByStructureAndSelection(Structure structure, List<LabelSelection> labelSelections) {
         try {
-            List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
+            List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
+                    .mapToInt(structure::getResidueIndex)
+                    .mapToObj(structure::manifestResidue)
+                    .collect(Collectors.toList());
 
             if (residues.size() > strucmotifConfig.getMaxMotifSize()) {
                 throw new IllegalArgumentException("maximum motif size is " + strucmotifConfig.getMaxMotifSize() + " - " +
@@ -122,9 +125,8 @@ public class StructureContextBuilder implements ContextBuilder {
      */
     public MandatoryBuilderStep defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        List<LabelSelection> labelSelections = structure.getLabelSelections()
-                .stream()
-                .map(l -> new LabelSelection(l.getLabelAsymId(), "1", l.getLabelSeqId()))
+        List<LabelSelection> labelSelections = structure.modelledResidueIndices()
+                .mapToObj(structure::getLabelSelection)
                 .collect(Collectors.toList());
         return defineByStructureAndSelection(structure, labelSelections);
     }
@@ -154,7 +156,6 @@ public class StructureContextBuilder implements ContextBuilder {
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
         private int limit;
-        private boolean undefinedAssemblies;
         private Set<PositionSpecificExchange> upstreamExchanges;
 
         MandatoryBuilderStep(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
@@ -170,7 +171,6 @@ public class StructureContextBuilder implements ContextBuilder {
             // defines the 'default' motif pruning strategy
             this.motifPruner = StructureContextBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
-            this.undefinedAssemblies = false;
         }
 
         /**
@@ -258,16 +258,6 @@ public class StructureContextBuilder implements ContextBuilder {
         }
 
         /**
-         * Return undefined assemblies (if indexed).
-         * @param undefinedAssemblies a boolean
-         * @return this builder
-         */
-        public MandatoryBuilderStep undefinedAssemblies(boolean undefinedAssemblies) {
-            this.undefinedAssemblies = undefinedAssemblies;
-            return this;
-        }
-
-        /**
          * Allow setting downstream exchanges via upstream definition.
          * @param upstreamExchanges exchanges from a motif definition
          * @return this builder
@@ -284,8 +274,7 @@ public class StructureContextBuilder implements ContextBuilder {
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner,
-                    limit,
-                    undefinedAssemblies);
+                    limit);
             return new OptionalBuilderStep(structureIdentifier, structure, labelSelections, residues, parameters, upstreamExchanges);
         }
     }

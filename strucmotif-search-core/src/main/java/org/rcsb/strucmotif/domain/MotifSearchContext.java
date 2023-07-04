@@ -163,8 +163,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
                 parentParameters.getRmsdCutoff(),
                 parentParameters.getAtomPairingScheme(),
                 parentParameters.getMotifPruner(),
-                Integer.MAX_VALUE,
-                false);
+                Integer.MAX_VALUE);
 
         Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()
                 .stream()

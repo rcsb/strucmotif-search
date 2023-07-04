@@ -10,11 +10,11 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MotifDefinitionRegistryTest {
-    private MotifDefinitionRegistryImpl registry;
+    private DefaultMotifDefinitionRegistry registry;
 
     @BeforeEach
     public void init() {
-        this.registry = new MotifDefinitionRegistryImpl(null);
+        this.registry = new DefaultMotifDefinitionRegistry(null);
     }
 
     @Test

@@ -50,7 +50,7 @@ public class StructureHit implements Hit {
 
     /**
      * The assembly identifier of this hit.
-     * @return a String, '0' if no assembly information was present and undefined assemblies are allowed
+     * @return a String
      */
     public String getAssemblyIdentifier() {
         return assemblyIdentifier;

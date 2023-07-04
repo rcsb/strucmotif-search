@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.domain.bucket;
 
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-
 import java.util.Set;
 
 /**
@@ -56,38 +54,16 @@ public interface Bucket {
     int getStructureIndex();
 
     /**
-     * The current index1 value.
-     * @return an int
+     * Convenience method that gives access to the current identifier represented by 2 ints.
+     * @return the current residue indices
      */
-    int getIndex1();
-
-    /**
-     * The current index2 value.
-     * @return an int
-     */
-    int getIndex2();
-
-    /**
-     * The current structOperId1 value.
-     * @return a String
-     */
-    String getStructOperId1();
-
-    /**
-     * The current structOperId2 value.
-     * @return a String
-     */
-    String getStructOperId2();
-
-    /**
-     * Convenience method that gives access to the current identifier represented by the individual index and
-     * structOperId values.
-     * @return the current {@link ResiduePairIdentifier}
-     */
-    ResiduePairIdentifier getResiduePairIdentifier();
+    long getResiduePairIdentifier();
 
     /**
      * Move iterators back to start positions.
      */
     void reset();
+
+    int getResidueIndex1(int i);
+    int getResidueIndex2(int i);
 }

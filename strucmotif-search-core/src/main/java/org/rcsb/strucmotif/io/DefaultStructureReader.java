@@ -1,4 +1,4 @@
-package org.rcsb.strucmotif.wip;
+package org.rcsb.strucmotif.io;
 
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.schema.StandardSchemata;
@@ -8,9 +8,10 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
+import org.rcsb.strucmotif.domain.structure.DefaultStructure;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
-import org.rcsb.strucmotif.io.ResidueTypeResolver;
+import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,7 @@ import java.util.stream.Stream;
 /**
  * A simple structure reader that parses CIF data into structure instances.
  */
-public class DefaultStructureReader {
+public class DefaultStructureReader implements StructureReader {
     private final ResidueTypeResolver residueTypeResolver;
 
     /**
@@ -35,6 +36,7 @@ public class DefaultStructureReader {
         this.residueTypeResolver = residueTypeResolver;
     }
 
+    @Override
     public Structure readFromInputStream(InputStream inputStream) {
         try {
             MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
@@ -171,7 +173,7 @@ public class DefaultStructureReader {
             }
 
             AssemblyInformation assemblyInformation = parseAssemblies(block, chainIds);
-            return new FileBackedStructure(
+            return new DefaultStructure(
                     structureIdentifier,
                     assemblyInformation.assemblyIdentifiers,
                     assemblyInformation.assemblyOffsets,

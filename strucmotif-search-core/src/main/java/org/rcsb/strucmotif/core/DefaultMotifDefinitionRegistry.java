@@ -34,8 +34,8 @@ import java.util.stream.Collectors;
  * An in-memory store of all known/registered motifs.
  */
 @Service
-public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
-    private static final Logger logger = LoggerFactory.getLogger(MotifDefinitionRegistryImpl.class);
+public class DefaultMotifDefinitionRegistry implements MotifDefinitionRegistry {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultMotifDefinitionRegistry.class);
     private final StructureDataProvider structureDataProvider;
     private final Set<MotifDefinition> motifDefinitions;
     private final AtomicBoolean dirty; // true if motifs & enriched motifs are out-of-sync
@@ -56,7 +56,7 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
      * @param structureDataProvider source of structure data
      */
     @Autowired
-    public MotifDefinitionRegistryImpl(StructureDataProvider structureDataProvider) {
+    public DefaultMotifDefinitionRegistry(StructureDataProvider structureDataProvider) {
         this.structureDataProvider = structureDataProvider;
         this.motifDefinitions = new HashSet<>();
         this.dirty = new AtomicBoolean(false);
@@ -144,7 +144,11 @@ public class MotifDefinitionRegistryImpl implements MotifDefinitionRegistry {
      */
     private EnrichedMotifDefinition defaultMapping(MotifDefinition motifDefinition) {
         Structure structure = structureDataProvider.readSome(motifDefinition.getStructureIdentifier());
-        List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(motifDefinition.getLabelSelections());
+        List<Map<LabelAtomId, float[]>> residues = motifDefinition.getLabelSelections()
+                .stream()
+                .mapToInt(structure::getResidueIndex)
+                .mapToObj(structure::manifestResidue)
+                .collect(Collectors.toList());
         return new EnrichedMotifDefinition(motifDefinition, structure, residues);
     }
 

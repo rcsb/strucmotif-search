@@ -19,5 +19,5 @@ public interface TargetAssembler {
      * @throws ExecutionException thrown by multi-threading impl
      * @throws InterruptedException thrown by multi-threading impl
      */
-    void assemble(StructureSearchContext context) throws ExecutionException, InterruptedException;
+    void assemble(StructureSearchContext context) throws ExecutionException, InterruptedException; // TODO rework handling of nested/parallel exceptions
 }

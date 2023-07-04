@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.ThreadPoolImpl;
+import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.io.InvertedIndexImpl;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
 import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
@@ -18,7 +18,7 @@ import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.StructureReaderImpl;
 import org.rcsb.strucmotif.io.StructureWriter;
-import org.rcsb.strucmotif.io.StructureWriterImpl;
+import org.rcsb.strucmotif.io.DefaultStructureWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,8 +63,8 @@ class UpdateIntegrationTest {
         this.state = new StateRepositoryImpl(strucmotifConfig);
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
         StructureReader reader = new StructureReaderImpl(residueTypeResolver);
-        StructureWriter writer = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        StructureWriter writer = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
+        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         this.data = new StructureDataProviderImpl(reader, writer, strucmotifConfig);
         this.index = new InvertedIndexImpl(threadPool, strucmotifConfig);
 
@@ -75,7 +75,7 @@ class UpdateIntegrationTest {
      * Some operations may need to rerun to update application state.
      */
     private void init() throws IOException {
-        ThreadPool pool = new ThreadPoolImpl(strucmotifConfig);
+        ThreadPool pool = new DefaultThreadPool(strucmotifConfig);
         StructureIndexProvider keys = new StructureIndexProviderImpl(state);
         this.update = new StrucmotifUpdate(state, data, index, strucmotifConfig, pool, keys) {
             @Override

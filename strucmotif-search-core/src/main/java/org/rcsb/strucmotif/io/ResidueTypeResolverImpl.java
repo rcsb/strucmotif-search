@@ -99,7 +99,7 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
      */
     public ResidueTypeResolverImpl(StrucmotifConfig strucmotifConfig) {
         this.mapping = initialize(strucmotifConfig);
-        logger.info("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",
+        logger.debug("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",
                 strucmotifConfig.getModifiedResidueStrategy(),
                 mapping.keySet().size(),
                 mapping.values().stream().distinct().count());

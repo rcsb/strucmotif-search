@@ -1,8 +1,4 @@
-package org.rcsb.strucmotif.wip;
-
-import org.rcsb.strucmotif.domain.structure.LabelAtomId;
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
-import org.rcsb.strucmotif.domain.structure.ResidueType;
+package org.rcsb.strucmotif.domain.structure;
 
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -11,7 +7,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
-public class FileBackedStructure implements Structure {
+public class DefaultStructure implements Structure {
     private static final int[] DEFAULT_OFFSET = new int[] { 0 };
     private final String structureIdentifier;
 
@@ -46,30 +42,30 @@ public class FileBackedStructure implements Structure {
     private final int modelledAtomCount;
     private final int instancedAtomCount;
 
-    public FileBackedStructure(String structureIdentifier,
+    public DefaultStructure(String structureIdentifier,
 
-                               // assembly-level data
-                               // all may be null if there's implicitly only assembly "1" and no transformations
-                               String[] assemblyIdentifiers,
-                               int[] assemblyOffsets, // start positions of an assembly in assemblyReferences
-                               String[] assemblyReferences, // tuples of (label_asym_id, transformationIdentifier)
-                               String[] transformationIdentifiers, // resolved identifier names like "Px61"
-                               float[] transformations, // blocks of 16 values in row-major indexing
+                            // assembly-level data
+                            // all may be null if there's implicitly only assembly "1" and no transformations
+                            String[] assemblyIdentifiers,
+                            int[] assemblyOffsets, // start positions of an assembly in assemblyReferences
+                            String[] assemblyReferences, // tuples of (label_asym_id, transformationIdentifier)
+                            String[] transformationIdentifiers, // resolved identifier names like "Px61"
+                            float[] transformations, // blocks of 16 values in row-major indexing
 
-                               // chain-level data
-                               String[] labelAsymIds,
-                               int[] chainOffsets,
+                            // chain-level data
+                            String[] labelAsymIds,
+                            int[] chainOffsets,
 
-                               // residue-level data
-                               short[] labelSeqIds,
-                               int[] residueOffsets,
-                               byte[] residueTypes,
+                            // residue-level data
+                            short[] labelSeqIds,
+                            int[] residueOffsets,
+                            byte[] residueTypes,
 
-                               // atom-level data
-                               byte[] labelAtomIds,
-                               short[] x,
-                               short[] y,
-                               short[] z) {
+                            // atom-level data
+                            byte[] labelAtomIds,
+                            short[] x,
+                            short[] y,
+                            short[] z) {
         this.structureIdentifier = structureIdentifier;
 
         this.assemblyIdentifiers = assemblyIdentifiers;
@@ -320,7 +316,7 @@ public class FileBackedStructure implements Structure {
 
     @Override
     public int getResidueIndex(LabelSelection labelSelection) {
-        return getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getStructOperId(), labelSelection.getLabelSeqId());
+        return getResidueIndex(labelSelection.labelAsymId(), labelSelection.structOperId(), labelSelection.labelSeqId());
     }
 
     @Override
@@ -365,7 +361,7 @@ public class FileBackedStructure implements Structure {
      * @return index of the offset that is the largest value below the key
      */
     static int offsetArrayIndexOf(int[] data, int key) {
-        // this unsafe if elements past the last offset are requested
+        // unsafe if elements past the last offset are requested
         return binarySearch(data, 0, data.length, key);
     }
 
@@ -388,7 +384,7 @@ public class FileBackedStructure implements Structure {
                 return mid; // key found
             }
         }
-        return low - 1;  // key not found.
+        return low - 1;  // key not found
     }
 
     private static void transform(float[] v, float[] m, int offset) {

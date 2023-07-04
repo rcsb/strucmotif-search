@@ -40,7 +40,7 @@ class StructureWriterImplTest {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
+        StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "1exr";
         InputStream inputStream = Helpers.getOriginalBcif(id);
@@ -62,7 +62,7 @@ class StructureWriterImplTest {
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
+        StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
         InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");
@@ -85,7 +85,7 @@ class StructureWriterImplTest {
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.BFACTOR_BELOW_CUTOFF);
         strucmotifConfig.setResidueQualityCutoff(50);
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
+        StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "1exr";
         InputStream inputStream = Helpers.getOriginalBcif(id);
@@ -108,7 +108,7 @@ class StructureWriterImplTest {
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);
         strucmotifConfig.setResidueQualityCutoff(70);
         ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        StructureWriter structureWriter = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
+        StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
         InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");

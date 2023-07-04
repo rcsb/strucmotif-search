@@ -5,20 +5,7 @@ package org.rcsb.strucmotif.domain;
  * @param <F> the first type
  * @param <S> the second type
  */
-public class Pair<F, S> {
-    private final F first;
-    private final S second;
-
-    /**
-     * Construct a pair.
-     * @param first 1st element
-     * @param second 2nd element
-     */
-    public Pair(F first, S second) {
-        this.first = first;
-        this.second = second;
-    }
-
+public record Pair<F, S>(F first, S second) {
     /**
      * The first element.
      * @return the wrapped object

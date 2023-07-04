@@ -10,12 +10,11 @@ import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.bucket.Bucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
-import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
+import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -138,7 +137,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public void insert(ResiduePairDescriptor residuePairDescriptor, Bucket bucket, int batchId) {
+    public void insert(int residuePairDescriptor, InvertedIndexBucket bucket, int batchId) {
         if (bucket.getResiduePairCount() == 0) {
             throw new IllegalStateException("won't write empty bucket for " + residuePairDescriptor);
         }
@@ -246,7 +245,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         return uberbin + "/" + bin + extension;
     }
 
-    private String getFilename(ResiduePairDescriptor residuePairDescriptor, int batchId) {
+    private String getFilename(int residuePairDescriptor, int batchId) {
         return getFilename(residuePairDescriptor) + "." + batchId;
     }
 
@@ -314,7 +313,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         DistanceType d1 = DistanceType.ofIntRepresentation(Integer.parseInt(split[1]));
         DistanceType d2 = DistanceType.ofIntRepresentation(Integer.parseInt(split[2]));
         AngleType a = AngleType.ofIntRepresentation(Integer.parseInt(split[3]));
-        return new ResiduePairDescriptor(residueType1, residueType2, d1, d2, a);
+        return ResiduePairDescriptor.encodeDescriptor(residueType1, residueType2, d1, d2, a);
     }
 
     /**

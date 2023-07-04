@@ -39,11 +39,8 @@ class Demo {
 }
 ```
 
-Usually, non-archived files also lack assembly information. In that case, set `undefined-assemblies` to `true` to allow
-indexing and searching in the deposited coordinates. Hits will be identified by assembly-ID `0`.
-
-Also, you likely want to ignore low-confidence predictions to avoid false-positives as well as to save storage and 
-lower the processing time of queries. Use `residue-quality-strategy` and `residue-quality-cutoff` for that.
+You likely want to ignore low-confidence predictions to avoid false-positives as well as to save storage and lower the 
+processing time of queries. Use `residue-quality-strategy` and `residue-quality-cutoff` for that.
 
 ### Loading from Directory
 It's also possible to index whole directories. The directory will be walked and all CIF/BinaryCIF files will be 

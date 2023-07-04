@@ -13,7 +13,7 @@ public class ModelArchiveKeyExtractor implements KeyExtractor {
 
     @Override
     public String getKey(String resource) {
-//        /path/to/ma-9z55z.cif -> MA-9Z55Z
+        // /path/to/ma-9z55z.cif -> MA-9Z55Z
         String name = resource.contains("/") ? resource.substring(resource.lastIndexOf("/") + 1) : resource;
         return name.replaceAll("(?i)\\.b?cif(?:\\.gz)?", "").toUpperCase();
     }

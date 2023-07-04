@@ -1,7 +1,7 @@
 package org.rcsb.strucmotif.align;
 
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
-import org.rcsb.strucmotif.domain.align.AlignmentResultImpl;
+import org.rcsb.strucmotif.domain.align.DefaultAlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomCorrespondence;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.Pair;
@@ -90,7 +90,7 @@ public class QuaternionAlignmentService implements AlignmentService {
 
         Pair<Transformation, Float> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
 
-        return new AlignmentResultImpl(alignment.getFirst(), alignment.getSecond());
+        return new DefaultAlignmentResult(alignment.getFirst(), alignment.getSecond());
     }
 
     /**

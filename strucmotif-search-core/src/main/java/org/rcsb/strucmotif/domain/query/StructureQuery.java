@@ -48,7 +48,8 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
                           Collection<String> excludedStructures,
                           Collection<ResultsContentType> resultsContentType,
                           StrucmotifConfig strucmotifConfig) {
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
+        ResidueGraph.ResidueGraphOptions options = ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections);
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, options);
 
         // validate graph and reject motifs with dangling residues or multiple fragments
         if (!residueGraph.isConnected()) {

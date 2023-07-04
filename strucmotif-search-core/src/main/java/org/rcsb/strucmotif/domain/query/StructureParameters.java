@@ -14,7 +14,6 @@ public class StructureParameters implements Parameters {
     private final AtomPairingScheme atomPairingScheme;
     private final MotifPruner motifPruner;
     private final int limit;
-    private final boolean undefinedAssemblies;
 
     /**
      * Construct structure parameters.
@@ -25,9 +24,8 @@ public class StructureParameters implements Parameters {
      * @param atomPairingScheme how to pair atoms
      * @param motifPruner how to prune motifs
      * @param resultLimit stop after this many hits
-     * @param undefinedAssemblies allow undefined assemblies in the result set
      */
-    public StructureParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit, boolean undefinedAssemblies) {
+    public StructureParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
@@ -35,7 +33,6 @@ public class StructureParameters implements Parameters {
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
         this.limit = resultLimit;
-        this.undefinedAssemblies = undefinedAssemblies;
     }
 
     /**
@@ -108,13 +105,5 @@ public class StructureParameters implements Parameters {
      */
     public boolean hasLimit() {
         return limit != Integer.MAX_VALUE;
-    }
-
-    /**
-     * Report if undefined assemblies (if they were indexed) can be returned.
-     * @return true if this search will allow undefined assemblies
-     */
-    public boolean isUndefinedAssemblies() {
-        return undefinedAssemblies;
     }
 }

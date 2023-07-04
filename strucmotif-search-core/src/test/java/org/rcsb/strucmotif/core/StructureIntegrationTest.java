@@ -63,7 +63,7 @@ class StructureIntegrationTest {
     @BeforeEach
     public void init() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
         this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
@@ -107,9 +107,9 @@ class StructureIntegrationTest {
         };
 
         StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
+        TargetAssembler targetAssembler = new DefaultTargetAssembler(threadPool, structureIndexProvider);
         AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
-        StrucmotifRuntime strucmotifRuntime = new StrucmotifRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
         this.contextBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig, invertedIndex);
     }
 

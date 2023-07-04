@@ -3,8 +3,6 @@ package org.rcsb.strucmotif.core;
 import org.rcsb.strucmotif.domain.StructureSearchContext;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
-import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -13,7 +11,6 @@ import org.rcsb.strucmotif.domain.query.StructureParameters;
 import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
 import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.result.TargetStructure;
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.io.InvertedIndex;
@@ -27,6 +24,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,8 +32,8 @@ import java.util.stream.Stream;
  * The default strucmotif-search target assembler.
  */
 @Service
-public class TargetAssemblerImpl implements TargetAssembler {
-    private static final Logger logger = LoggerFactory.getLogger(TargetAssemblerImpl.class);
+public class DefaultTargetAssembler implements TargetAssembler {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultTargetAssembler.class);
     private final ThreadPool threadPool;
     private final StructureIndexProvider structureIndexProvider;
 
@@ -45,7 +43,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
      * @param structureIndexProvider maps from structureIdentifiers to indices
      */
     @Autowired
-    public TargetAssemblerImpl(ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
+    public DefaultTargetAssembler(ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
         this.threadPool = threadPool;
         this.structureIndexProvider = structureIndexProvider;
     }
@@ -62,12 +60,11 @@ public class TargetAssemblerImpl implements TargetAssembler {
         int angleTolerance = parameters.getAngleTolerance();
 
         Map<LabelSelection, Set<ResidueType>> labelSelectionExchanges = query.getExchanges();
-        Map<IndexSelection, Set<ResidueType>> exchanges = labelSelectionExchanges.entrySet()
+        Map<Integer, Set<ResidueType>> exchanges = labelSelectionExchanges.entrySet()
                 .stream()
                 .collect(Collectors.toMap(entry -> {
                     LabelSelection labelSelection = entry.getKey();
-                    int residueIndex = queryStructure.getStructure().getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
-                    return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
+                    return queryStructure.getStructure().getResidueIndex(labelSelection);
                 }, Map.Entry::getValue));
 
         Set<Integer> searchSpace = structureIndexProvider.selectByResultsContentType(query.getResultsContentType());
@@ -86,12 +83,13 @@ public class TargetAssemblerImpl implements TargetAssembler {
         for (int i = 0; i < steps; i++) {
             long s = System.nanoTime();
             ResiduePairOccurrence residuePairOccurrence = queryStructure.getResiduePairOccurrences().get(i);
-            ResiduePairDescriptor residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
+            int residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
-            Map<Integer, InvertedIndexResiduePairIdentifier[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
-                    .flatMap(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
-                    .collect(Collectors.toConcurrentMap(Pair::getFirst, Pair::getSecond, TargetAssemblerImpl::concat))).get();
+            Map<Integer, int[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
+                    .mapToObj(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
+                    .flatMap(Function.identity())
+                    .collect(Collectors.toConcurrentMap(Pair::getFirst, Pair::getSecond, DefaultTargetAssembler::concat))).get();
 
             // TODO try to avoid object creation
             // TODO try to consume stream directly
@@ -131,18 +129,20 @@ public class TargetAssemblerImpl implements TargetAssembler {
         result.setNumberOfTargetStructures(structureCount);
     }
 
-    private static <T> T[] concat(T[] first, T[] second) {
-        T[] result = Arrays.copyOf(first, first.length + second.length);
+    private static int[] concat(int[] first, int[] second) {
+        int[] result = Arrays.copyOf(first, first.length + second.length);
         System.arraycopy(second, 0, result, first.length, second.length);
         return result;
     }
 
-    private Stream<Pair<Integer, InvertedIndexResiduePairIdentifier[]>> select(InvertedIndex invertedIndex, ResiduePairDescriptor descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
+    private Stream<Pair<Integer, int[]>> select(InvertedIndex invertedIndex, int descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
+        boolean flipped = ResiduePairDescriptor.isFlipped(descriptor); // TODO make sure bit is set at this point
         // the ugly case which requires the creation of both residuePairs
-        boolean ambiguous = descriptor.isAmbiguous();
+        boolean ambiguous = ResiduePairDescriptor.isAmbiguous(descriptor);
+
         @SuppressWarnings("unchecked")
-        Pair<Integer, InvertedIndexResiduePairIdentifier[]>[] out = new Pair[bucket.getStructureCount()];
+        Pair<Integer, int[]>[] out = new Pair[bucket.getStructureCount()];
 
         int i = 0;
         while (bucket.hasNextStructure()) {
@@ -162,25 +162,34 @@ public class TargetAssemblerImpl implements TargetAssembler {
                 continue;
             }
 
-            int[] occurrencePositions = bucket.getOccurrencePositions();
-            InvertedIndexResiduePairIdentifier[] identifiers;
+            int start = bucket.getStartPosition();
+            int end = bucket.getEndPosition();
+            int n = end - start;
+            int[] identifiers;
             if (ambiguous) {
-                identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length * 2];
+                identifiers = new int[n * 2];
 
-                for (int j = 0; j < occurrencePositions.length; j++) {
-                    int o = occurrencePositions[j];
-                    int indexA = bucket.getIndex(o);
-                    int indexB = bucket.getIndex(o + 1);
-                    String structOperIdA = bucket.getStructOperId(o);
-                    String structOperIdB = bucket.getStructOperId(o + 1);
-                    identifiers[2 * j] = new InvertedIndexResiduePairIdentifier(indexA, indexB, structOperIdA, structOperIdB);
-                    identifiers[2 * j + 1] = new InvertedIndexResiduePairIdentifier(indexB, indexA, structOperIdB, structOperIdA);
+                for (int j = 0; j < n - 1; j = j + 2) {
+                    int index1 = bucket.getResidueIndex(j);
+                    int index2 = bucket.getResidueIndex(j + 1);
+                    identifiers[2 * j] = index1;
+                    identifiers[2 * j + 1] = index2;
+                    identifiers[2 * j + 2] = index2;
+                    identifiers[2 * j + 3] = index1;
                 }
             } else {
-                identifiers = new InvertedIndexResiduePairIdentifier[occurrencePositions.length];
+                identifiers = new int[n];
 
-                for (int j = 0; j < occurrencePositions.length; j++) {
-                    identifiers[j] = createResiduePairIdentifier(bucket, descriptor.isFlipped(), occurrencePositions[j]);
+                for (int j = 0; j < n - 1; j = j + 2) {
+                    int index1 = bucket.getResidueIndex(j);
+                    int index2 = bucket.getResidueIndex(j + 1);
+                    if (flipped) {
+                        identifiers[j] = index2;
+                        identifiers[j + 1] = index1;
+                    } else {
+                        identifiers[j] = index1;
+                        identifiers[j + 1] = index2;
+                    }
                 }
             }
 
@@ -193,15 +202,7 @@ public class TargetAssemblerImpl implements TargetAssembler {
         return Arrays.stream(out).limit(i);
     }
 
-    private InvertedIndexResiduePairIdentifier createResiduePairIdentifier(InvertedIndexBucket bucket, boolean flipped, int i) {
-        if (!flipped) {
-            return new InvertedIndexResiduePairIdentifier(bucket.getIndex(i), bucket.getIndex(i + 1), bucket.getStructOperId(i), bucket.getStructOperId(i + 1));
-        } else {
-            return new InvertedIndexResiduePairIdentifier(bucket.getIndex(i + 1), bucket.getIndex(i), bucket.getStructOperId(i + 1), bucket.getStructOperId(i));
-        }
-    }
-
-    private void consume(StructureSearchContext context, Map<Integer, InvertedIndexResiduePairIdentifier[]> data) throws ExecutionException, InterruptedException {
+    private void consume(StructureSearchContext context, Map<Integer, int[]> data) throws ExecutionException, InterruptedException {
         StructureQuery query = context.getQuery();
         StructureSearchResult result = context.getResult();
         Map<Integer, TargetStructure> targetStructures = result.getTargetStructures();
@@ -220,15 +221,15 @@ public class TargetAssemblerImpl implements TargetAssembler {
             Overlap[] overlapProfile = new Overlap[pathGeneration];
             for (int i = 0; i < pathGeneration; i++) {
                 // defined by query structure, known LabelSelections
-                overlapProfile[i] = Overlap.ofResiduePairIdentifiers((IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(i),
-                        (IndexSelectionResiduePairIdentifier) queryStructure.getResiduePairIdentifiers().get(pathGeneration));
+                overlapProfile[i] = Overlap.ofResiduePairIdentifiers(queryStructure.getResiduePairIdentifiers().get(i),
+                        queryStructure.getResiduePairIdentifiers().get(pathGeneration));
             }
 
             // focus on valid target structures as this set should be smaller
             result.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
                             .parallelStream()
                             .filter(entry -> {
-                                InvertedIndexResiduePairIdentifier[] residuePairIdentifiers = data.get(entry.getKey());
+                                int[] residuePairIdentifiers = data.get(entry.getKey());
                                 // candidate must have valid path to extend from previous generation
                                 if (residuePairIdentifiers == null) {
                                     return false;

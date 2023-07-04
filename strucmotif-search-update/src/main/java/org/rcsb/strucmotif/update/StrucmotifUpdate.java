@@ -6,22 +6,22 @@ import com.google.gson.JsonObject;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.ParsingException;
 import org.rcsb.cif.schema.StandardSchemata;
+import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifFile;
+import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
+import org.rcsb.cif.schema.mm.PdbxStructAssembly;
+import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
+import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.domain.bucket.ResiduePairIdentifierBucket;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.structure.AssemblyInformation;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
-import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
-import org.rcsb.strucmotif.math.Partition;
 import org.rcsb.strucmotif.update.extractor.KeyExtractorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +34,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -51,12 +52,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -97,16 +95,15 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @param structureDataProvider data provider
      * @param invertedIndex inverted index
      * @param strucmotifConfig configs
-     * @param threadPool thread pool
      * @param structureIndexProvider index provider
      */
     @Autowired
-    public StrucmotifUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, StrucmotifConfig strucmotifConfig, ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
+    public StrucmotifUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, StrucmotifConfig strucmotifConfig, StructureIndexProvider structureIndexProvider) {
         this.stateRepository = stateRepository;
         this.structureDataProvider = structureDataProvider;
         this.invertedIndex = invertedIndex;
         this.strucmotifConfig = strucmotifConfig;
-        this.threadPool = threadPool;
+        this.threadPool = new DefaultThreadPool(strucmotifConfig);
         this.structureIndexProvider = structureIndexProvider;
     }
 
@@ -156,7 +153,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                         .collect(Collectors.joining(", ", "[",  requested.size() > 5 ? ", ...]" : "]")));
 
         switch (operation) {
-            case ADD -> add(new Context(getDeltaPlusIdentifiers(requested), parseBatchId()));
+            case ADD -> add(new Context(getDeltaPlusIdentifiers(requested)));
             case REMOVE -> remove(getDeltaMinusIdentifiers(requested));
             case RECOVER -> recover(stateRepository.selectDirty());
         }
@@ -191,48 +188,25 @@ public class StrucmotifUpdate implements CommandLineRunner {
         long target = context.updateItems.size();
         logger.info("{} files to process in total", target);
 
-        Partition<UpdateItem> partitions = new Partition<>(context.updateItems, strucmotifConfig.getUpdateChunkSize());
-        logger.info("Formed {} partitions of {} structures",
-                partitions.size(),
-                strucmotifConfig.getUpdateChunkSize());
-
         Set<String> known = getKnown();
-        boolean needsCommit = false;
 
-        // split into partitions and process
-        for (int i = 0; i < partitions.size(); i++) {
-            context.partitionContext = (i + 1) + " / " + partitions.size();
+        context.structureCounter = new AtomicInteger();
+        threadPool.submit(() -> {
+            context.updateItems.parallelStream().forEach(item -> handleUpdateItem(item, context));
+            return null;
+        }).get();
 
-            List<UpdateItem> partition = partitions.get(i);
-            logger.info("[{}] Start processing partition", context.partitionContext);
-
-            context.structureCounter = new AtomicInteger();
-            context.buffer = new ConcurrentHashMap<>();
-            threadPool.submit(() -> {
-                partition.parallelStream().forEach(item -> handleUpdateItem(item, context));
-                return null;
-            }).get();
-
-            writeTemporaryFiles(context);
-            needsCommit = true;
-
-            int commitInterval = strucmotifConfig.getCommitInterval();
-            if (commitInterval == 1 || (i > 0 && (i + 1) % commitInterval == 0)) {
-                commit(context, known);
-                needsCommit = false;
-            }
-        }
-
-        if (needsCommit) {
-            commit(context, known);
-        }
+        // TODO impl
+        // TODO allow to commit after some interval?
+        // TODO allow to resume after failing?
+        commit(context, known);
     }
 
     private void commit(Context context, Set<String> known) {
         logger.info("Committing data on {} structures", context.processed.size());
         // mark as dirty before index update
         Set<String> dirty = context.processed.stream()
-                .map(StructureInformation::getStructureIdentifier)
+                .map(StructureInformation::structureIdentifier)
                 // ignore items detected as known after reading entry.id (happens when processing URLs)
                 .filter(id -> !known.contains(id))
                 .collect(Collectors.toSet());
@@ -242,11 +216,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // processed contains all StructureIdentifiers + corresponding revision
         stateRepository.insertKnown(context.processed);
-        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::getStructureIdentifier).collect(Collectors.toSet()));
+        stateRepository.deleteDirty(context.processed.stream().map(StructureInformation::structureIdentifier).collect(Collectors.toSet()));
 
         // reset state
         context.processed.clear();
-        context.batchId.set(0);
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {
@@ -263,13 +236,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
                 int count = context.structureCounter.get();
                 String source = item.getUrl() != null ? item.getUrl().toString() : item.getStructureIdentifier();
-                String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + source;
-                logger.warn("[{}] [{}] [try: {} / {}] Failed to download or parse source file - {}",
-                        context.partitionContext,
-                        structureContext,
-                        i,
-                        maxRetries,
-                        e.getMessage());
+                String structureContext = count + " / " + context.updateItems.size() + "] [" + source;
+                logger.warn("[{}] [try: {} / {}] Failed to download or parse source file - {}",
+                        structureContext, i, maxRetries, e.getMessage());
             }
         }
     }
@@ -282,16 +251,27 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
             // get some clean metadata
             MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
+            MmCifBlock block = mmCifFile.getFirstBlock();
 
-            boolean hasRevision = mmCifFile.getFirstBlock().getPdbxAuditRevisionHistory().isDefined();
-            // if revision isn't set (happens e.g. for ModelArchive files) then set to 1.0 by default
-            Revision revision = hasRevision ? new Revision(mmCifFile) : new Revision(1, 0);
-            Map<String, String[]> assemblyInformation = AssemblyInformation.of(mmCifFile);
+            // assert that all categories are present
+            PdbxAuditRevisionHistory revisionHistory = block.getPdbxAuditRevisionHistory();
+            if (!revisionHistory.isDefined()) {
+                throw new IllegalArgumentException("'pdbx_audit_revision_history' is mandatory in input files - rejecting " + structureIdentifier);
+            }
+            int majorRevision = revisionHistory.getMajorRevision().get(revisionHistory.getRowCount());
+            int minorRevision = revisionHistory.getMinorRevision().get(revisionHistory.getRowCount());
+            PdbxStructAssembly pdbxStructAssembly = block.getPdbxStructAssembly();
+            PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
+            PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
+            if (!pdbxStructAssembly.isDefined() || !pdbxStructAssemblyGen.isDefined() || !pdbxStructOperList.isDefined()) {
+                // TODO could allow 'lenient' mode that can be used to index AF data directly
+                throw new IllegalArgumentException("'pdbx_struct_assembly', 'pdbx_struct_assembly_gen', and 'pdbx_struct_oper_list' are mandatory in input files - rejecting " + structureIdentifier);
+            }
 
             // write renumbered structure
-            logger.debug("[{}] Writing renumbered structure file for {}", context.partitionContext, structureIdentifier);
+            logger.debug("[{}] Writing renumbered structure file", structureIdentifier);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
-            context.processed.add(new StructureInformation(structureIdentifier, structureIndex, revision, assemblyInformation));
+            context.processed.add(new StructureInformation(structureIdentifier, structureIndex, majorRevision, minorRevision));
         } catch (IOException e) {
             throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
         } catch (ParsingException e) {
@@ -301,22 +281,21 @@ public class StrucmotifUpdate implements CommandLineRunner {
         int count = context.structureCounter.incrementAndGet();
         String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
 
-        // fails when file is missing (should not happen at this point)
+        // fails when file is missing, expected when e.g. all residues of the file where below the pLDDT threshold
         Structure structure;
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] [{}] No renumbered source file present - Skipping",
-                    context.partitionContext,
-                    structureContext);
+            logger.warn("[{}] No renumbered source file present - Skipping", structureContext);
             return;
         }
 
-        if (structure.getAssemblies().isEmpty()) {
-            logger.warn("[{}] [{}] No assembly information - Ignoring",
-                    context.partitionContext,
-                    structureContext);
-            return;
+        FileWriter indexWriter;
+        try {
+            indexWriter = context.getFileWriter(strucmotifConfig);
+        } catch (IOException e) {
+            logger.warn("Failed to acquire instance of index writer", e);
+            throw new UncheckedIOException(e);
         }
 
         try {
@@ -326,30 +305,22 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
-            threadPool.submit(() -> {
-                residueGraph.residuePairOccurrencesParallel()
-                        .forEach(motifOccurrence -> {
-                            ResiduePairDescriptor motifDescriptor = motifOccurrence.getResiduePairDescriptor();
-                            ResiduePairIdentifier targetIdentifier = motifOccurrence.getResidueIdentifier();
-
-                            Map<Integer, Collection<ResiduePairIdentifier>> groupedTargetIdentifiers = context.buffer.computeIfAbsent(motifDescriptor, k -> Collections.synchronizedMap(new HashMap<>()));
-                            Collection<ResiduePairIdentifier> targetIdentifiers = groupedTargetIdentifiers.computeIfAbsent(structureIndex, k -> Collections.synchronizedSet(new HashSet<>()));
-                            targetIdentifiers.add(targetIdentifier);
+            indexWriter.write(structureIndex + "\n");
+            residueGraph.residuePairOccurrencesSequential()
+                    .forEach(residuePairOccurrence -> {
+                        try {
+                            indexWriter.write(residuePairOccurrence.getResiduePairDescriptor() + " " + residuePairOccurrence.getResiduePairIdentifier() + "\n");
                             structureMotifCounter.incrementAndGet();
-                        });
-                return null;
-            }).get();
-            logger.info("[{}] [{}] Extracted {} residue pairs in {} ms",
-                    context.partitionContext,
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
+            logger.info("[{}] Extracted {} residue pairs in {} ms",
                     structureContext,
                     structureMotifCounter.get(),
                     (System.nanoTime() - start) / 1000 / 1000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
         } catch (Exception e) {
-            logger.warn("[{}] [{}] Residue graph determination failed",
-                    context.partitionContext,
+            logger.warn("[{}] Residue graph determination failed",
                     structureContext,
                     e);
             // fail complete update
@@ -367,42 +338,42 @@ public class StrucmotifUpdate implements CommandLineRunner {
     protected InputStream handleInputStream(UpdateItem item, Context context) throws IOException {
         URL url = item.getUrl();
         if (url != null) {
-            logger.info("[{}] [{}] Processing {}", context.partitionContext, item.getStructureIdentifier(), url);
+            logger.info("[{}] Processing {}", item.getStructureIdentifier(), url);
             return url.openStream();
         }
 
         return structureDataProvider.getOriginalInputStream(item.getStructureIdentifier());
     }
 
-    private void writeTemporaryFiles(Context context) throws ExecutionException, InterruptedException {
-        logger.info("[{}] Writing temporary files for {} residue pair descriptors",
-                context.partitionContext,
-                context.buffer.size());
-
-        final int bufferTotal = context.buffer.size();
-        AtomicInteger bufferCount = new AtomicInteger();
-        threadPool.submit(() -> {
-            context.buffer.keySet().parallelStream().forEach(key -> {
-                Map<Integer, Collection<ResiduePairIdentifier>> value = context.buffer.remove(key);
-                ResiduePairIdentifierBucket output = new ResiduePairIdentifierBucket(value);
-
-                if (bufferCount.incrementAndGet() % 10000 == 0) {
-                    logger.info("[{}] {} / {}",
-                            context.partitionContext,
-                            bufferCount,
-                            bufferTotal);
-                }
-
-                invertedIndex.insert(key, output, context.batchId.get());
-            });
-            return null;
-        }).get();
-
-        context.buffer.clear();
-
-        // increment tmp file counter
-        context.batchId.incrementAndGet();
-    }
+//    private void writeTemporaryFiles(Context context) throws ExecutionException, InterruptedException {
+//        logger.info("[{}] Writing temporary files for {} residue pair descriptors",
+//                context.partitionContext,
+//                context.buffer.size());
+//
+//        final int bufferTotal = context.buffer.size();
+//        AtomicInteger bufferCount = new AtomicInteger();
+//        threadPool.submit(() -> {
+//            context.buffer.keySet().parallelStream().forEach(key -> {
+//                Map<Integer, Collection<ResiduePairIdentifier>> value = context.buffer.remove(key);
+//                ResiduePairIdentifierBucket output = new ResiduePairIdentifierBucket(value);
+//
+//                if (bufferCount.incrementAndGet() % 10000 == 0) {
+//                    logger.info("[{}] {} / {}",
+//                            context.partitionContext,
+//                            bufferCount,
+//                            bufferTotal);
+//                }
+//
+//                invertedIndex.insert(key, output, context.batchId.get());
+//            });
+//            return null;
+//        }).get();
+//
+//        context.buffer.clear();
+//
+//        // increment tmp file counter
+//        context.batchId.incrementAndGet();
+//    }
 
     /**
      * 'REMOVE' operation.
@@ -525,7 +496,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
     private Set<String> getKnown() {
         return stateRepository.selectKnown()
                 .stream()
-                .map(StructureInformation::getStructureIdentifier)
+                .map(StructureInformation::structureIdentifier)
                 .collect(Collectors.toSet());
     }
 
@@ -562,10 +533,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
     private Operation parseOperation(String[] args) {
         return Operation.resolve(args[0]);
-    }
-
-    private AtomicInteger parseBatchId() {
-        return new AtomicInteger();
     }
 
     private static final String PDB_REGEX = "^[1-9][a-zA-Z0-9]{3}$"; // TODO need to revisit for extended PDB-IDs

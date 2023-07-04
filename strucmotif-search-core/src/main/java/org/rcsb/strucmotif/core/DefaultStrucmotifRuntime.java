@@ -13,7 +13,6 @@ import org.rcsb.strucmotif.domain.result.StructureSearchResult;
 import org.rcsb.strucmotif.domain.result.MotifHit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.slf4j.Logger;
@@ -33,13 +32,12 @@ import java.util.stream.Stream;
  * The default strucmotif-search runtime.
  */
 @Service
-public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
-    private static final Logger logger = LoggerFactory.getLogger(StrucmotifRuntimeImpl.class);
+public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultStrucmotifRuntime.class);
     private final TargetAssembler targetAssembler;
     private final ThreadPool threadPool;
     private final StrucmotifConfig strucmotifConfig;
     private final AlignmentService alignmentService;
-    private final AssemblyInformationProvider assemblyInformationProvider;
 
     /**
      * Injectable constructor.
@@ -47,15 +45,13 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
      * @param threadPool thread pool
      * @param strucmotifConfig app config
      * @param alignmentService alignment service
-     * @param assemblyInformationProvider all known assemblies
      */
     @Autowired
-    public StrucmotifRuntimeImpl(TargetAssembler targetAssembler, ThreadPool threadPool, StrucmotifConfig strucmotifConfig, AlignmentService alignmentService, AssemblyInformationProvider assemblyInformationProvider) {
+    public DefaultStrucmotifRuntime(TargetAssembler targetAssembler, ThreadPool threadPool, StrucmotifConfig strucmotifConfig, AlignmentService alignmentService) {
         this.targetAssembler = targetAssembler;
         this.threadPool = threadPool;
         this.strucmotifConfig = strucmotifConfig;
         this.alignmentService = alignmentService;
-        this.assemblyInformationProvider = assemblyInformationProvider;
     }
 
     @Override
@@ -167,7 +163,7 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
 
     private Stream<StructureHit> hits(StructureSearchContext context, HitScorer hitScorer) {
         StructureQuery query = context.getQuery();
-        List<Integer> residueIndexSwaps = query.getQueryStructure().getResidueIndexSwaps();
+        int[] residueIndexSwaps = query.getQueryStructure().getResidueIndexSwaps().stream().mapToInt(Integer::intValue).toArray();
         StructureParameters parameters = query.getParameters();
         StructureIndexProvider structureIndexProvider = context.getStructureIndexProvider();
         StructureDataProvider structureDataProvider = context.getStructureDataProvider();
@@ -179,7 +175,7 @@ public class StrucmotifRuntimeImpl implements StrucmotifRuntime {
                 .flatMap(targetStructure -> {
                     String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
                     Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
-                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, parameters.getRmsdCutoff(), assemblyInformationProvider, parameters.isUndefinedAssemblies());
+                    return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, parameters.getRmsdCutoff());
                 });
     }
 

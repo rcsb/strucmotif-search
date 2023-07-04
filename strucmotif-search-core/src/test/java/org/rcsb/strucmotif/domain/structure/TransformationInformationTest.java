@@ -1,10 +1,9 @@
-package org.rcsb.strucmotif.wip;
+package org.rcsb.strucmotif.domain.structure;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.domain.structure.LabelAtomId;
-import org.rcsb.strucmotif.domain.structure.ResidueType;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;

@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.io;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.structure.Revision;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,12 +12,9 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -29,7 +24,6 @@ import java.util.stream.Stream;
 public class StateRepositoryImpl implements StateRepository {
     private static final Logger logger = LoggerFactory.getLogger(StateRepositoryImpl.class);
     private static final String TOP_LEVEL_DELIMITER = ",";
-    private static final String ASSEMBLY_INFORMATION_DELIMITER = ";";
     private final Path knownPath;
     private final Path dirtyPath;
 
@@ -63,18 +57,7 @@ public class StateRepositoryImpl implements StateRepository {
     protected StructureInformation handleKnownSplit(String[] split) {
         String structureIdentifier = split[0];
         int structureIndex = Integer.parseInt(split[1]);
-        Revision revision = new Revision(Integer.parseInt(split[2]), Integer.parseInt(split[3]));
-        Map<String, String[]> assemblyInformation = IntStream.range(4, split.length)
-                .mapToObj(i -> {
-                    String[] assemblySplit = split[i].split(ASSEMBLY_INFORMATION_DELIMITER);
-                    String assemblyId = assemblySplit[0];
-                    String[] operList = Arrays.stream(assemblySplit, 1, assemblySplit.length)
-                            .toArray(String[]::new);
-                    return new Pair<>(assemblyId, operList);
-                })
-                .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond));
-
-        return new StructureInformation(structureIdentifier, structureIndex, revision, assemblyInformation);
+        return new StructureInformation(structureIdentifier, structureIndex, Integer.parseInt(split[2]), Integer.parseInt(split[3]));
     }
 
     @Override
@@ -101,14 +84,10 @@ public class StateRepositoryImpl implements StateRepository {
         try (FileWriter writer = new FileWriter(knownPath.toFile(), true)) {
             for (StructureInformation addition : additions) {
                 // let's concat externally in case 'append' invocation from multiple threads race
-                String update = addition.getStructureIdentifier() + TOP_LEVEL_DELIMITER +
-                        addition.getStructureIndex() + TOP_LEVEL_DELIMITER +
-                        addition.getRevision().getMajor() + TOP_LEVEL_DELIMITER +
-                        addition.getRevision().getMinor() + TOP_LEVEL_DELIMITER +
-                        addition.getAssemblyInformation().entrySet().stream()
-                                .map(entry -> entry.getKey() + ASSEMBLY_INFORMATION_DELIMITER +
-                                        String.join(ASSEMBLY_INFORMATION_DELIMITER, entry.getValue()))
-                                .collect(Collectors.joining(TOP_LEVEL_DELIMITER)) + "\n";
+                String update = addition.structureIdentifier() + TOP_LEVEL_DELIMITER +
+                        addition.structureIndex() + TOP_LEVEL_DELIMITER +
+                        addition.majorRevision() + TOP_LEVEL_DELIMITER +
+                        addition.minorRevision() + "\n";
                 writer.append(update);
             }
         } catch (IOException e) {

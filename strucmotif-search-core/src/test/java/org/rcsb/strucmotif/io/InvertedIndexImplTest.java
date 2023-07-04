@@ -7,7 +7,7 @@ import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.ThreadPoolImpl;
+import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
@@ -27,7 +27,7 @@ class InvertedIndexImplTest {
     @BeforeEach
     public void init() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
+        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
         invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {

@@ -15,6 +15,7 @@ import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.core.ThreadPool;
+import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
@@ -48,13 +49,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -290,14 +285,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
             return;
         }
 
-        FileWriter indexWriter;
-        try {
-            indexWriter = context.getFileWriter(strucmotifConfig);
-        } catch (IOException e) {
-            logger.warn("Failed to acquire instance of index writer", e);
-            throw new UncheckedIOException(e);
-        }
-
         try {
             long start = System.nanoTime();
             // TODO include whole chain in contact? 'all' is favorable but wastes a lot of space
@@ -305,16 +292,17 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
             // extract motifs
             AtomicInteger structureMotifCounter = new AtomicInteger();
-            indexWriter.write(structureIndex + "\n");
-            residueGraph.residuePairOccurrencesSequential()
-                    .forEach(residuePairOccurrence -> {
-                        try {
-                            indexWriter.write(residuePairOccurrence.getResiduePairDescriptor() + " " + residuePairOccurrence.getResiduePairIdentifier() + "\n");
-                            structureMotifCounter.incrementAndGet();
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    });
+            Map<Integer, List<ResiduePairOccurrence>> output = residueGraph.residuePairOccurrencesSequential()
+                    .collect(Collectors.groupingBy(ResiduePairOccurrence::getResiduePairDescriptor));
+            // TODO write partial outputs
+//                    .forEach(residuePairOccurrence -> {
+//                        try {
+//                            indexWriter.write(residuePairOccurrence.getResiduePairDescriptor() + " " + residuePairOccurrence.getResiduePairIdentifier() + "\n");
+//                            structureMotifCounter.incrementAndGet();
+//                        } catch (IOException e) {
+//                            throw new UncheckedIOException(e);
+//                        }
+//                    });
             logger.info("[{}] Extracted {} residue pairs in {} ms",
                     structureContext,
                     structureMotifCounter.get(),

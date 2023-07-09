@@ -10,11 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -22,41 +18,44 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class Context implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(Context.class);
+    private final String rootPath;
     final List<UpdateItem> updateItems;
     final Set<StructureInformation> processed;
-    final ThreadLocal<FileWriter> fileWriter;
-    final List<FileWriter> globalFileWriterReferences;
+    private final Map<Thread, Map<Integer, FileWriter>> fileWriterReferences;
     AtomicInteger structureCounter;
 
     /**
      * Construct a new update context.
      */
-    public Context(List<UpdateItem> updateItems) {
+    public Context(StrucmotifConfig strucmotifConfig, List<UpdateItem> updateItems) {
+        this.rootPath = strucmotifConfig.getRootPath();
         this.updateItems = updateItems;
         this.processed = Collections.synchronizedSet(new HashSet<>());
-        this.fileWriter = new ThreadLocal<>();
-        this.globalFileWriterReferences = new CopyOnWriteArrayList<>();
+        this.fileWriterReferences = new HashMap<>();
     }
 
-    public FileWriter getFileWriter(StrucmotifConfig strucmotifConfig) throws IOException {
-        FileWriter ref = fileWriter.get();
+    public FileWriter getFileWriter(int residuePairDescriptor) throws IOException {
+        Map<Integer, FileWriter> map = fileWriterReferences.computeIfAbsent(Thread.currentThread(), e -> Collections.synchronizedMap(new HashMap<>()));
+        FileWriter ref = map.get(residuePairDescriptor);
         if (ref != null) {
             return ref;
         }
 
-        Path path = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + Thread.currentThread().getId() + StrucmotifConfig.TMP_EXT);
+        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.INDEX + "-" + Thread.currentThread().getId() + "-" + residuePairDescriptor + StrucmotifConfig.TMP_EXT);
         logger.info("Creating thread-specific index dump at {}", path);
         ref = new FileWriter(path.toFile());
-        fileWriter.set(ref);
-        globalFileWriterReferences.add(ref);
+        map.put(residuePairDescriptor, ref);
         return ref;
     }
 
     @Override
     public void close() throws IOException {
         logger.info("Closing thread-specific index dumps");
-        for (FileWriter fileWriter : globalFileWriterReferences) {
-            fileWriter.close();
+        for (Map<Integer, FileWriter> fileWriters : fileWriterReferences.values()) {
+            for (FileWriter fileWriter : fileWriters.values()) {
+                fileWriter.close();
+            }
         }
+        fileWriterReferences.clear();
     }
 }

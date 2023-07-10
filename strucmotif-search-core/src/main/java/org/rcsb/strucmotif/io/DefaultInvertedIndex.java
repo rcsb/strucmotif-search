@@ -1,14 +1,11 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.ffindex.AppendableFileBundle;
 import org.rcsb.ffindex.FileBundleIO;
 import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.domain.bucket.Bucket;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
@@ -21,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
@@ -31,22 +29,23 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
  * The implementation of the inverted index.
  */
 @Service
-public class InvertedIndexImpl implements InvertedIndex {
-    private static final Logger logger = LoggerFactory.getLogger(InvertedIndexImpl.class);
+public class DefaultInvertedIndex implements InvertedIndex {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultInvertedIndex.class);
     private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getInternalCode, Function.identity()));
     private final String extension;
@@ -56,10 +55,6 @@ public class InvertedIndexImpl implements InvertedIndex {
     private final Path dataPath;
     private final Path indexPath;
     private ReadableFileBundle fileBundle;
-    // 'update' data that holds the partial delta of new data (to be merged into production files)
-    private final Path partialDataPath;
-    private final Path partialIndexPath;
-    private AppendableFileBundle partialFileBundle;
     // paths for 'temporary' bundle written when 'production' data is getting modified
     private final Path temporaryDataPath;
     private final Path temporaryIndexPath;
@@ -69,7 +64,7 @@ public class InvertedIndexImpl implements InvertedIndex {
      * @param threadPool shared pool for parallel operations
      * @param strucmotifConfig the config
      */
-    public InvertedIndexImpl(ThreadPool threadPool, StrucmotifConfig strucmotifConfig) {
+    public DefaultInvertedIndex(ThreadPool threadPool, StrucmotifConfig strucmotifConfig) {
         InvertedIndexBackend invertedIndexBackend = strucmotifConfig.getInvertedIndexBackend();
         this.bucketCodec = invertedIndexBackend.getBucketCodec();
         this.extension = invertedIndexBackend.getExtension();
@@ -77,8 +72,6 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.threadPool = threadPool;
         this.dataPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + StrucmotifConfig.DATA_EXT);
         this.indexPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT);
-        this.partialDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
-        this.partialIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.PARTIAL_EXT);
         this.temporaryDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.TMP_EXT);
         this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
     }
@@ -104,9 +97,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
 
         initializeFileBundle();
-        Files.deleteIfExists(partialDataPath);
-        Files.deleteIfExists(partialIndexPath);
-        initializePartialFileBundle();
+        deletePartialFiles();
         Files.deleteIfExists(temporaryDataPath);
         Files.deleteIfExists(temporaryIndexPath);
     }
@@ -114,9 +105,6 @@ public class InvertedIndexImpl implements InvertedIndex {
     @PreDestroy
     public void tearDown() throws IOException {
         fileBundle.close();
-        partialFileBundle.close();
-        Files.deleteIfExists(partialDataPath);
-        Files.deleteIfExists(partialIndexPath);
         Files.deleteIfExists(temporaryDataPath);
         Files.deleteIfExists(temporaryIndexPath);
     }
@@ -126,30 +114,9 @@ public class InvertedIndexImpl implements InvertedIndex {
         this.fileBundle = FileBundleIO.openBundle(dataPath, indexPath).inReadOnlyMode();
     }
 
-    private void initializePartialFileBundle() throws IOException {
-        logger.debug("Creating partial index file bundle ({}, {})", partialDataPath, partialIndexPath);
-        this.partialFileBundle = FileBundleIO.openBundle(partialDataPath, partialIndexPath).inReadWriteMode();
-    }
-
     private WritableFileBundle initializeTemporaryFileBundle() throws IOException {
         logger.debug("Creating temporary index file bundle ({}, {})", temporaryDataPath, temporaryIndexPath);
         return FileBundleIO.openBundle(temporaryDataPath, temporaryIndexPath).inWriteOnlyMode();
-    }
-
-    @Override
-    public void insert(int residuePairDescriptor, InvertedIndexBucket bucket, int batchId) {
-        if (bucket.getResiduePairCount() == 0) {
-            throw new IllegalStateException("won't write empty bucket for " + residuePairDescriptor);
-        }
-
-        // write a temporary file (appended by the batchId)
-        String filename = getFilename(residuePairDescriptor, batchId);
-        try {
-            ByteBuffer byteBuffer = bucketCodec.encode(bucket);
-            partialFileBundle.writeFile(filename, byteBuffer);
-        } catch (IOException e) {
-            throw new UncheckedIOException("can't write " + filename, e);
-        }
     }
 
     @Override
@@ -162,7 +129,7 @@ public class InvertedIndexImpl implements InvertedIndex {
             // this captures all additional data
             partialFilenames()
                     .forEach(partialFilename -> {
-                        String persistentFilename = partialFilename.substring(0, partialFilename.lastIndexOf("."));
+                        String persistentFilename = partialFilename.split("\\.")[1];
                         Set<String> bin = toMerge.computeIfAbsent(persistentFilename, e -> new HashSet<>());
                         bin.add(partialFilename);
                     });
@@ -179,20 +146,41 @@ public class InvertedIndexImpl implements InvertedIndex {
                             Set<String> sources = entry.getValue();
 
                             try {
-                                Map<Integer, Collection<ResiduePairIdentifier>> merged = new HashMap<>();
+                                List<InvertedIndexBucket> buckets = new ArrayList<>();
                                 // populate with existing data
                                 if (fileBundle.containsFile(destination)) {
-                                    InvertedIndexBucket existing = bucketCodec.decode(fileBundle.readFile(destination));
-                                    addAll(merged, existing, null);
+                                    buckets.add(bucketCodec.decode(fileBundle.readFile(destination)));
                                 }
 
                                 // merge all new, partial data
                                 for (String s : sources) {
-                                    InvertedIndexBucket additions = bucketCodec.decode(partialFileBundle.readFile(s));
-                                    addAll(merged, additions, null);
+                                    Path p = indexPath.resolve(s);
+                                    byte[] bytes = Files.readAllBytes(p);
+                                    buckets.add(bucketCodec.decode(ByteBuffer.wrap(bytes)));
                                 }
 
-                                ByteBuffer output = bucketCodec.encode(new ResiduePairIdentifierBucket(merged));
+                                int structureCount = buckets.stream().mapToInt(InvertedIndexBucket::getStructureCount).sum();
+                                int identifierCount = buckets.stream().mapToInt(InvertedIndexBucket::getResiduePairCount).sum() * 2;
+                                int outerPosition = 0;
+                                int innerPosition = 0;
+                                int[] mergedStructureIndices = new int[structureCount];
+                                int[] mergedPositionOffsets = new int[structureCount];
+                                int[] mergedIdentifierData = new int[identifierCount];
+                                for (InvertedIndexBucket bucket : buckets) {
+                                    System.arraycopy(bucket.getStructureIndexArray(), 0, mergedStructureIndices, outerPosition, bucket.getStructureIndexArray().length);
+
+                                    int[] positionOffsetArray = bucket.getPositionOffsetArray();
+                                    for (int i = 0; i < positionOffsetArray.length; i++) {
+                                        // position offsets must be shifted according to the data already present
+                                        mergedPositionOffsets[outerPosition + i] = positionOffsetArray[i] + innerPosition;
+                                    }
+
+                                    System.arraycopy(bucket.getIdentifierDataArray(), 0, mergedIdentifierData, innerPosition, bucket.getPositionOffsetArray().length);
+                                    outerPosition += bucket.getStructureIndexArray().length;
+                                    innerPosition += bucket.getIdentifierDataArray().length;
+                                }
+
+                                ByteBuffer output = bucketCodec.encode(new InvertedIndexBucket(mergedStructureIndices, mergedPositionOffsets, mergedIdentifierData));
                                 temporaryFileBundle.writeFile(destination, output);
                             } catch (IOException e) {
                                 throw new UncheckedIOException("can't merge " + destination, e);
@@ -203,14 +191,11 @@ public class InvertedIndexImpl implements InvertedIndex {
 
             // delete partial file bundle and swap temporary files with real ones
             fileBundle.close();
-            partialFileBundle.close();
             temporaryFileBundle.close();
             Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
-            Files.deleteIfExists(partialDataPath);
-            Files.deleteIfExists(partialIndexPath);
+            deletePartialFiles();
             initializeFileBundle();
-            initializePartialFileBundle();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         } catch (ExecutionException e) {
@@ -222,7 +207,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
+    public InvertedIndexBucket select(int residuePairDescriptor) {
         String filename = getFilename(residuePairDescriptor);
         if (!fileBundle.containsFile(filename)) {
             return InvertedIndexBucket.EMPTY_BUCKET;
@@ -239,14 +224,8 @@ public class InvertedIndexImpl implements InvertedIndex {
         return fileBundle.readFile(filename);
     }
 
-    private String getFilename(ResiduePairDescriptor residuePairDescriptor) {
-        String bin = residuePairDescriptor.toString();
-        String uberbin = bin.substring(0, 2);
-        return uberbin + "/" + bin + extension;
-    }
-
-    private String getFilename(int residuePairDescriptor, int batchId) {
-        return getFilename(residuePairDescriptor) + "." + batchId;
+    private String getFilename(int residuePairDescriptor) {
+        return residuePairDescriptor + extension;
     }
 
     @Override
@@ -264,7 +243,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                         .peek(path -> progress(counter, 10000, "{} / " + fileCount + " bins of inverted index processed"))
                         .forEach(filename -> {
                             try {
-                                ResiduePairDescriptor residuePairDescriptor = createResiduePairDescriptor(filename);
+                                int residuePairDescriptor = createResiduePairDescriptor(filename);
                                 ByteBuffer byteBuffer = delete(residuePairDescriptor, removals);
 
                                 // result may be empty, don't write anything in that case
@@ -303,17 +282,17 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
     }
 
-    private ResiduePairDescriptor createResiduePairDescriptor(String filename) {
+    private int createResiduePairDescriptor(String filename) {
         String[] filenameSplit = filename.split("/");
         String name = filenameSplit[filenameSplit.length - 1];
 
         String[] split = name.split("\\.")[0].split("-");
-        ResidueType residueType1 = OLC_LOOKUP.getOrDefault(split[0].substring(0, 1), null);
-        ResidueType residueType2 = OLC_LOOKUP.getOrDefault(split[0].substring(1, 2), null);
+        ResidueType r1 = OLC_LOOKUP.getOrDefault(split[0].substring(0, 1), null);
+        ResidueType r2 = OLC_LOOKUP.getOrDefault(split[0].substring(1, 2), null);
         DistanceType d1 = DistanceType.ofIntRepresentation(Integer.parseInt(split[1]));
         DistanceType d2 = DistanceType.ofIntRepresentation(Integer.parseInt(split[2]));
         AngleType a = AngleType.ofIntRepresentation(Integer.parseInt(split[3]));
-        return ResiduePairDescriptor.encodeDescriptor(residueType1, residueType2, d1, d2, a);
+        return ResiduePairDescriptor.encodeDescriptor(r1, r2, d1, d2, a);
     }
 
     /**
@@ -324,7 +303,7 @@ public class InvertedIndexImpl implements InvertedIndex {
      * bucket
      * @throws IOException when encoding fails
      */
-    private ByteBuffer delete(ResiduePairDescriptor residuePairDescriptor, Collection<Integer> removals) throws IOException {
+    private ByteBuffer delete(int residuePairDescriptor, Collection<Integer> removals) throws IOException {
         ByteBuffer byteBuffer = getByteBuffer(getFilename(residuePairDescriptor));
         InvertedIndexBucket bucket = bucketCodec.decode(byteBuffer);
         Set<Integer> structureIndices = bucket.getStructureIndices();
@@ -336,7 +315,7 @@ public class InvertedIndexImpl implements InvertedIndex {
         }
 
         // remove all occurrences of structure identifiers
-        ResiduePairIdentifierBucket filteredBucket = removeByKey(bucket, removals);
+        InvertedIndexBucket filteredBucket = removeByKey(bucket, removals);
         if (filteredBucket == null) {
             return null;
         }
@@ -346,7 +325,7 @@ public class InvertedIndexImpl implements InvertedIndex {
     }
 
     @Override
-    public Set<ResiduePairDescriptor> reportKnownDescriptors() {
+    public Set<Integer> reportKnownDescriptors() {
         return indexFilenames()
                 .parallel()
                 .map(this::createResiduePairDescriptor)
@@ -363,7 +342,7 @@ public class InvertedIndexImpl implements InvertedIndex {
                     .peek(p -> progress(counter, 10000, "{} bins scanned"))
                     .map(this::createResiduePairDescriptor)
                     .map(this::select)
-                    .map(Bucket::getStructureIndices)
+                    .map(InvertedIndexBucket::getStructureIndices)
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet())).get();
         } catch (ExecutionException e) {
@@ -378,29 +357,15 @@ public class InvertedIndexImpl implements InvertedIndex {
         return fileBundle.filenames();
     }
 
-    private Stream<String> partialFilenames() {
-        return partialFileBundle.filenames();
+    private Stream<String> partialFilenames() throws IOException {
+        return Files.list(indexPath)
+                .map(Path::getFileName)
+                .filter(p -> p.startsWith(StrucmotifConfig.INDEX) && p.endsWith(StrucmotifConfig.TMP_EXT))
+                .map(Path::toString);
     }
 
-    private void addAll(Map<Integer, Collection<ResiduePairIdentifier>> map, Bucket bucket, Collection<Integer> ignore) {
-        while (bucket.hasNextStructure()) {
-            bucket.moveStructure();
-            int key = bucket.getStructureIndex();
-            if (ignore != null && ignore.contains(key)) {
-                continue;
-            }
-            if (map.containsKey(key)) {
-                throw new IllegalStateException("Duplicate key: " + key);
-            }
-            Collection<ResiduePairIdentifier> identifiers = map.computeIfAbsent(key, e -> new ArrayList<>());
-
-            while (bucket.hasNextOccurrence()) {
-                bucket.moveOccurrence();
-
-                ResiduePairIdentifier residuePairIdentifier = bucket.getResiduePairIdentifier();
-                identifiers.add(residuePairIdentifier);
-            }
-        }
+    private void deletePartialFiles() throws IOException {
+        partialFilenames().map(indexPath::resolve).map(Path::toFile).forEach(File::delete);
     }
 
     /**
@@ -409,15 +374,44 @@ public class InvertedIndexImpl implements InvertedIndex {
      * @param removals what to remove
      * @return a new bucket that doesn't contain any of the removals
      */
-    private ResiduePairIdentifierBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
-        Map<Integer, Collection<ResiduePairIdentifier>> map = new HashMap<>();
-        addAll(map, bucket, removals);
+    private InvertedIndexBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
+        int[] originalStructureIndices = bucket.getStructureIndexArray();
+        int[] originalPositionOffsets = bucket.getPositionOffsetArray();
+        int[] originalIdentifierData = bucket.getIdentifierDataArray();
+        int originalLength = originalStructureIndices.length;
+        int[] indicesToRemove = IntStream.range(0, originalLength).filter(i -> removals.contains(originalStructureIndices[i])).toArray();
 
-        // report empty maps as null
-        if (map.isEmpty()) {
+        // report empty return as null
+        if (originalLength == indicesToRemove.length) {
             return null;
         }
 
-        return new ResiduePairIdentifierBucket(map);
+        int updatedLength = originalLength - indicesToRemove.length;
+        int[] structureIndices = new int[updatedLength];
+        int[] positionOffsets = new int[updatedLength];
+        int acceptedIdentifierCount = 0;
+        int[] identifierData = new int[originalIdentifierData.length]; // assume worst-case for now
+
+        int outerPos = 0;
+        int identifierPos = 0;
+        int removeIndex = 0;
+        for (int i = 0; i < originalLength; i++) {
+            if (i < indicesToRemove[removeIndex]) {
+                continue;
+            }
+
+            structureIndices[outerPos] = originalStructureIndices[i];
+            positionOffsets[outerPos] = originalPositionOffsets[i];
+            // copy partial range to output array
+            int identifierCopyCount = i + 1 == originalIdentifierData.length ? originalIdentifierData.length : originalIdentifierData[i + 1] - originalIdentifierData[i];
+            System.arraycopy(originalIdentifierData, originalPositionOffsets[i], identifierData, identifierPos, identifierCopyCount);
+
+            outerPos++;
+            identifierPos += identifierCopyCount;
+            removeIndex++;
+        }
+        System.arraycopy(identifierData, 0, identifierData, 0, acceptedIdentifierCount);
+
+        return new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
     }
 }

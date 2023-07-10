@@ -14,7 +14,6 @@ import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.query.ResultsContentType;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.result.StructureHit;
@@ -24,18 +23,16 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
-import org.rcsb.strucmotif.io.AssemblyInformationProvider;
-import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.InvertedIndex;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
-import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.InvertedIndexImpl;
-import org.rcsb.strucmotif.io.StateRepositoryImpl;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
+import org.rcsb.strucmotif.io.DefaultInvertedIndex;
+import org.rcsb.strucmotif.io.DefaultStateRepository;
 import org.rcsb.strucmotif.io.codec.ColferCodec;
 
 import java.io.BufferedReader;
@@ -66,15 +63,15 @@ class StructureIntegrationTest {
         ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
-        this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
+        this.structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
         ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
-        InvertedIndex invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
+        InvertedIndex invertedIndex = new DefaultInvertedIndex(threadPool, strucmotifConfig) {
             @Override
-            public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
-                String filename = residuePairDescriptor.toString().substring(0, 2) + "/" + residuePairDescriptor + ".colf";
+            public InvertedIndexBucket select(int residuePairDescriptor) {
+                String filename = residuePairDescriptor + ".colf";
                 if (!fileBundle.containsFile(filename)) {
                     return InvertedIndexBucket.EMPTY_BUCKET;
                 }
@@ -94,7 +91,7 @@ class StructureIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepository stateRepository = new StateRepositoryImpl(strucmotifConfig) {
+        StateRepository stateRepository = new DefaultStateRepository(strucmotifConfig) {
             @Override
             public Set<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -106,10 +103,9 @@ class StructureIntegrationTest {
             }
         };
 
-        StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
+        StructureIndexProvider structureIndexProvider = new DefaultStructureIndexProvider(stateRepository);
         TargetAssembler targetAssembler = new DefaultTargetAssembler(threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
-        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService);
         this.contextBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig, invertedIndex);
     }
 
@@ -189,7 +185,7 @@ class StructureIntegrationTest {
 
         List<List<Integer>> swaps = response.getHits()
                 .stream()
-                .map(hit -> hit.getLabelSelections().stream().map(LabelSelection::getLabelSeqId).collect(Collectors.toList()))
+                .map(hit -> hit.getLabelSelections().stream().map(LabelSelection::labelSeqId).collect(Collectors.toList()))
                 // check if some elements are unordered
                 .filter(list -> IntStream.range(1, list.size())
                         .map(index -> list.get(index - 1).compareTo(list.get(index)))
@@ -226,8 +222,8 @@ class StructureIntegrationTest {
 
         Collection<String> structures = Set.of("6TNE", "1ZDM");
 
-        List<Map<LabelAtomId, float[]>> forwardResidues = forwardStructure.manifestResidues(forwardLabelSelections);
-        List<Map<LabelAtomId, float[]>> backwardResidues = backwardStructure.manifestResidues(backwardLabelSelections);
+        List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).collect(Collectors.toList());
+        List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).collect(Collectors.toList());
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
         assertEquals(0.57, align.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 

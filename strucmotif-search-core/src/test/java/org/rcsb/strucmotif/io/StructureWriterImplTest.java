@@ -39,7 +39,7 @@ class StructureWriterImplTest {
     void whenWriting1exr_thenContractHonored() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "1exr";
@@ -61,7 +61,7 @@ class StructureWriterImplTest {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";
@@ -84,7 +84,7 @@ class StructureWriterImplTest {
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.BFACTOR_BELOW_CUTOFF);
         strucmotifConfig.setResidueQualityCutoff(50);
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "1exr";
@@ -107,7 +107,7 @@ class StructureWriterImplTest {
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);
         strucmotifConfig.setResidueQualityCutoff(70);
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
         String id = "AF-A0A0R0FWM3-F1";

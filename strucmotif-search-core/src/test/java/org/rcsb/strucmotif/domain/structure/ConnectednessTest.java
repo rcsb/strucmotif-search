@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class ConnectednessTest {
     public void init() {
         strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
-        structureReader = new DefaultStructureReader(new ResidueTypeResolverImpl(strucmotifConfig));
+        structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
     }
 
     @Test

@@ -1,11 +1,6 @@
 package org.rcsb.strucmotif;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.domain.motif.AngleType;
-import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
-import org.rcsb.strucmotif.domain.structure.ResidueType;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,16 +12,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class Helpers {
     public static final float DELTA = 0.001f;
@@ -102,96 +89,12 @@ public class Helpers {
         return Objects.requireNonNull(resourceAsStream, "failed to locate test resource: " + location);
     }
 
-    public static Stream<Integer> honorTolerance(int residuePairDescriptor) {
-        int backboneDistanceTolerance = 1;
-        int sideChainDistanceTolerance = 1;
-        int angleTolerance = 1;
-
-        int residueType1 = (residuePairDescriptor >>> 21) & 0x7F;
-        int residueType2 = (residuePairDescriptor >>> 14) & 0x7F;
-        int backboneDistance = (residuePairDescriptor >>> 9) & 0x1F;
-        int sideChainDistance = (residuePairDescriptor >>> 4) & 0x1F;
-        int angle = residuePairDescriptor & 0x0F;
-        Set<Integer> combinations = new HashSet<>(); // TODO optimize prod function and make sure to use set
-
-        for (int i = -backboneDistanceTolerance; i <= backboneDistanceTolerance; i++) {
-            int ii = backboneDistance + i;
-            if (ii < 0 || ii >= DistanceType.values().length) {
-                continue;
-            }
-
-            for (int j = -sideChainDistanceTolerance; j <= sideChainDistanceTolerance; j++) {
-                int ij = sideChainDistance + j;
-                if (ij < 0 || ij >= DistanceType.values().length) {
-                    continue;
-                }
-
-                for (int k = -angleTolerance; k <= angleTolerance; k++) {
-                    int ik = angle + k;
-                    if (ik < 0 || ik >= AngleType.values().length) {
-                        continue;
-                    }
-
-                    combinations.add(residueType1 << 21 | residueType2 << 14 | ii << 9 | ij << 4 | ik);
-                }
-            }
-        }
-
-        return combinations.stream();
-    }
-
-    public static Stream<ResiduePairDescriptor> honorTolerance(ResiduePairDescriptor residuePairDescriptor) {
-        int alphaCarbonDistanceTolerance = 1;
-        int sideChainDistanceTolerance = 1;
-        int angleTolerance = 1;
-
-        int alphaCarbonDistance = residuePairDescriptor.getBackboneDistance().ordinal();
-        int sideChainDistance = residuePairDescriptor.getSideChainDistance().ordinal();
-        int dihedralAngle = residuePairDescriptor.getAngle().ordinal();
-        List<ResiduePairDescriptor> combinations = new ArrayList<>();
-
-        for (int i = -alphaCarbonDistanceTolerance; i <= alphaCarbonDistanceTolerance; i++) {
-            int ii = alphaCarbonDistance + i;
-            if (ii < 0 || ii >= DistanceType.values().length) {
-                continue;
-            }
-
-            for (int j = -sideChainDistanceTolerance; j <= sideChainDistanceTolerance; j++) {
-                int ij = sideChainDistance + j;
-                if (ij < 0 || ij >= DistanceType.values().length) {
-                    continue;
-                }
-
-                for (int k = -angleTolerance; k <= angleTolerance; k++) {
-                    int ik = dihedralAngle + k;
-                    if (ik < 0 || ik >= AngleType.values().length) {
-                        continue;
-                    }
-
-                    combinations.add(new ResiduePairDescriptor(residuePairDescriptor.getResidueType1(),
-                            residuePairDescriptor.getResidueType2(),
-                            DistanceType.values()[ii],
-                            DistanceType.values()[ij],
-                            AngleType.values()[ik]));
-                }
-            }
-        }
-
-        return combinations.stream();
-    }
-
     public static byte[] convertEnumToByte(Enum<?>... array) {
         byte[] out = new byte[array.length];
         for (int i = 0; i < out.length; i++) {
             out[i] = (byte) array[i].ordinal();
         }
         return out;
-    }
-
-    public static List<LabelSelection> createLabelSelections(String labelAsymId, int... labelSeqIds) {
-        return Arrays.stream(labelSeqIds)
-                .mapToObj(i -> new LabelSelection(labelAsymId, null, i))
-                .collect(Collectors.toList());
     }
 
     public static Path getResourceAsPath(String path) {

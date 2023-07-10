@@ -3,9 +3,8 @@ package org.rcsb.strucmotif.benchmark.io;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.core.DefaultThreadPool;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.io.InvertedIndex;
-import org.rcsb.strucmotif.io.InvertedIndexImpl;
+import org.rcsb.strucmotif.io.DefaultInvertedIndex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,17 +27,17 @@ public class InvertedIndexRunner {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
 
-        InvertedIndex invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig);
-        List<ResiduePairDescriptor> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());
+        InvertedIndex invertedIndex = new DefaultInvertedIndex(threadPool, strucmotifConfig);
+        List<Integer> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());
         List<Long> times = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
             long start = System.nanoTime();
             Collections.shuffle(descriptors);
-            List<ResiduePairDescriptor> selected = descriptors.subList(0, BINS_READ);
+            List<Integer> selected = descriptors.subList(0, BINS_READ);
 
             long c = 0;
-            for (ResiduePairDescriptor descriptor : selected) {
+            for (int descriptor : selected) {
                 c += invertedIndex.select(descriptor).getStructureCount();
 
             }

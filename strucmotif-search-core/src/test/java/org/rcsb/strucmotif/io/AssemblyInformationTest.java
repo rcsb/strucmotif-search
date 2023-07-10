@@ -7,8 +7,6 @@ import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.DefaultStructureReader;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -25,7 +23,7 @@ class AssemblyInformationTest {
 
     @BeforeEach
     public void init() {
-        this.structureReader = new DefaultStructureReader(new ResidueTypeResolverImpl(new StrucmotifConfig()));
+        this.structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(new StrucmotifConfig()));
     }
 
     private static final String DATA_1M4X = """

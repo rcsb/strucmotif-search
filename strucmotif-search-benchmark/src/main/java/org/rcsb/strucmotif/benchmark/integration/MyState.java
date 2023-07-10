@@ -9,9 +9,9 @@ import org.rcsb.strucmotif.domain.motif.MotifDefinition;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @State(Scope.Benchmark)
 public class MyState {
     private final StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-    private final StructureReader structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
+    private final StructureReader structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
     final StructureContextBuilder queryBuilder = Strucmotif.searchForStructures();
     final Map<MotifDefinition, Pair<Structure, List<LabelSelection>>> structureMap;
 

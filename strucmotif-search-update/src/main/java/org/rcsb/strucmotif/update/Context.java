@@ -21,7 +21,7 @@ public class Context implements Closeable {
     private final String rootPath;
     final List<UpdateItem> updateItems;
     final Set<StructureInformation> processed;
-    private final Map<Thread, Map<Integer, FileWriter>> fileWriterReferences;
+    private final Map<Thread, Map<String, FileWriter>> fileWriterReferences;
     AtomicInteger structureCounter;
 
     /**
@@ -34,24 +34,24 @@ public class Context implements Closeable {
         this.fileWriterReferences = new HashMap<>();
     }
 
-    public FileWriter getFileWriter(int residuePairDescriptor) throws IOException {
-        Map<Integer, FileWriter> map = fileWriterReferences.computeIfAbsent(Thread.currentThread(), e -> Collections.synchronizedMap(new HashMap<>()));
-        FileWriter ref = map.get(residuePairDescriptor);
+    public FileWriter getFileWriter(String residuePairDescriptorPrefix) throws IOException {
+        Map<String, FileWriter> map = fileWriterReferences.computeIfAbsent(Thread.currentThread(), e -> Collections.synchronizedMap(new HashMap<>()));
+        FileWriter ref = map.get(residuePairDescriptorPrefix);
         if (ref != null) {
             return ref;
         }
 
-        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.INDEX + "-" + Thread.currentThread().getId() + "-" + residuePairDescriptor + StrucmotifConfig.TMP_EXT);
+        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.INDEX + "." + residuePairDescriptorPrefix + "." + Thread.currentThread().getId() + StrucmotifConfig.TMP_EXT);
         logger.info("Creating thread-specific index dump at {}", path);
         ref = new FileWriter(path.toFile());
-        map.put(residuePairDescriptor, ref);
+        map.put(residuePairDescriptorPrefix, ref);
         return ref;
     }
 
     @Override
     public void close() throws IOException {
         logger.info("Closing thread-specific index dumps");
-        for (Map<Integer, FileWriter> fileWriters : fileWriterReferences.values()) {
+        for (Map<String, FileWriter> fileWriters : fileWriterReferences.values()) {
             for (FileWriter fileWriter : fileWriters.values()) {
                 fileWriter.close();
             }

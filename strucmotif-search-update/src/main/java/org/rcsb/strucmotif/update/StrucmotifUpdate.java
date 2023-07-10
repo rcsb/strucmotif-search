@@ -148,7 +148,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                         .collect(Collectors.joining(", ", "[",  requested.size() > 5 ? ", ...]" : "]")));
 
         switch (operation) {
-            case ADD -> add(new Context(getDeltaPlusIdentifiers(requested)));
+            case ADD -> add(new Context(strucmotifConfig, getDeltaPlusIdentifiers(requested)));
             case REMOVE -> remove(getDeltaMinusIdentifiers(requested));
             case RECOVER -> recover(stateRepository.selectDirty());
         }
@@ -178,8 +178,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @param context the set of UpdateItems to add
      * @throws ExecutionException update failure
      * @throws InterruptedException update failure
+     * @throws IOException writing to index fails
      */
-    public void add(Context context) throws ExecutionException, InterruptedException {
+    public void add(Context context) throws ExecutionException, InterruptedException, IOException {
         long target = context.updateItems.size();
         logger.info("{} files to process in total", target);
 
@@ -191,7 +192,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             return null;
         }).get();
 
-        // TODO impl
+        // flush and close all referenced files
+        context.close();
+
         // TODO allow to commit after some interval?
         // TODO allow to resume after failing?
         commit(context, known);
@@ -290,19 +293,24 @@ public class StrucmotifUpdate implements CommandLineRunner {
             // TODO include whole chain in contact? 'all' is favorable but wastes a lot of space
             ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
 
-            // extract motifs
+            // extract motifs, sort into bins of same prefix
             AtomicInteger structureMotifCounter = new AtomicInteger();
-            Map<Integer, List<ResiduePairOccurrence>> output = residueGraph.residuePairOccurrencesSequential()
-                    .collect(Collectors.groupingBy(ResiduePairOccurrence::getResiduePairDescriptor));
-            // TODO write partial outputs
-//                    .forEach(residuePairOccurrence -> {
-//                        try {
-//                            indexWriter.write(residuePairOccurrence.getResiduePairDescriptor() + " " + residuePairOccurrence.getResiduePairIdentifier() + "\n");
-//                            structureMotifCounter.incrementAndGet();
-//                        } catch (IOException e) {
-//                            throw new UncheckedIOException(e);
-//                        }
-//                    });
+            residueGraph.residuePairOccurrencesSequential()
+                    .collect(Collectors.groupingBy(d -> d.getResidueType1().getInternalCode() + d.getResidueType2().getInternalCode()))
+                    .forEach((k, v) -> {
+                        try {
+                            FileWriter indexWriter = context.getFileWriter(k);
+                            StringBuilder out = new StringBuilder();
+                            out.append(structureIndex).append("\n");
+                            for (ResiduePairOccurrence occurrence : v) {
+                                out.append(occurrence.getResiduePairDescriptor()).append(" ").append(occurrence.getResidueIndex1()).append(" ").append(occurrence.getResidueIndex2()).append("\n");
+                                structureMotifCounter.incrementAndGet();
+                            }
+                            indexWriter.write(out.toString());
+                        } catch (IOException e) {
+                            throw new UncheckedIOException(e);
+                        }
+                    });
             logger.info("[{}] Extracted {} residue pairs in {} ms",
                     structureContext,
                     structureMotifCounter.get(),

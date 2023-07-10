@@ -19,8 +19,8 @@ import java.util.Set;
  * Map-based impl of a structure index provider.
  */
 @Service
-public class StructureIndexProviderImpl implements StructureIndexProvider {
-    private static final Logger logger = LoggerFactory.getLogger(StructureIndexProviderImpl.class);
+public class DefaultStructureIndexProvider implements StructureIndexProvider {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultStructureIndexProvider.class);
     private final Deque<Integer> reuse;
     private int next;
     private final Map<Integer, String> forward;
@@ -33,7 +33,7 @@ public class StructureIndexProviderImpl implements StructureIndexProvider {
      * @param stateRepository data source
      */
     @Autowired
-    public StructureIndexProviderImpl(StateRepository stateRepository) {
+    public DefaultStructureIndexProvider(StateRepository stateRepository) {
         this.reuse = new ArrayDeque<>();
         this.forward = new HashMap<>();
         this.backward = new HashMap<>();

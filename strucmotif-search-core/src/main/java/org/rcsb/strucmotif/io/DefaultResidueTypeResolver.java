@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
  * for non-standard components), the parent component will be used, if none exists the unknown component is returned.
  */
 @Service
-public class ResidueTypeResolverImpl implements ResidueTypeResolver {
-    private static final Logger logger = LoggerFactory.getLogger(ResidueTypeResolverImpl.class);
+public class DefaultResidueTypeResolver implements ResidueTypeResolver {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultResidueTypeResolver.class);
     private static final String MAPPING_FILE = "residue-type-mapping.json";
     private static final Map<String, ResidueType> THREE_LETTER_CODE_MAPPING = Arrays.stream(ResidueType.values())
             .collect(Collectors.toMap(ResidueType::getThreeLetterCode, Function.identity()));
@@ -97,7 +97,7 @@ public class ResidueTypeResolverImpl implements ResidueTypeResolver {
      * Construct an instance.
      * @param strucmotifConfig the global config
      */
-    public ResidueTypeResolverImpl(StrucmotifConfig strucmotifConfig) {
+    public DefaultResidueTypeResolver(StrucmotifConfig strucmotifConfig) {
         this.mapping = initialize(strucmotifConfig);
         logger.debug("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",
                 strucmotifConfig.getModifiedResidueStrategy(),

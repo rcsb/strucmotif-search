@@ -21,8 +21,8 @@ import java.util.stream.Stream;
  * A file-system-based state repository.
  */
 @Service
-public class StateRepositoryImpl implements StateRepository {
-    private static final Logger logger = LoggerFactory.getLogger(StateRepositoryImpl.class);
+public class DefaultStateRepository implements StateRepository {
+    private static final Logger logger = LoggerFactory.getLogger(DefaultStateRepository.class);
     private static final String TOP_LEVEL_DELIMITER = ",";
     private final Path knownPath;
     private final Path dirtyPath;
@@ -31,7 +31,7 @@ public class StateRepositoryImpl implements StateRepository {
      * Construct a state repository instance.
      * @param strucmotifConfig the config
      */
-    public StateRepositoryImpl(StrucmotifConfig strucmotifConfig) {
+    public DefaultStateRepository(StrucmotifConfig strucmotifConfig) {
         Path rootPath = Paths.get(strucmotifConfig.getRootPath());
         this.knownPath = rootPath.resolve(StrucmotifConfig.STATE_KNOWN_LIST);
         this.dirtyPath = rootPath.resolve(StrucmotifConfig.STATE_DIRTY_LIST);

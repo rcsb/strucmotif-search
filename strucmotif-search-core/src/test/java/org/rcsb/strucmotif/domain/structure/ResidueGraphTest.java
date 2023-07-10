@@ -8,7 +8,7 @@ import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.math.Algebra;
 
 import java.io.InputStream;
@@ -43,7 +43,7 @@ class ResidueGraphTest {
     public void init() {
         strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
-        structureReader = new DefaultStructureReader(new ResidueTypeResolverImpl(strucmotifConfig));
+        structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
     }
 
     @Test

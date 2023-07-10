@@ -16,17 +16,15 @@ import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
-import org.rcsb.strucmotif.io.AssemblyInformationProvider;
-import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StateRepository;
-import org.rcsb.strucmotif.io.StateRepositoryImpl;
+import org.rcsb.strucmotif.io.DefaultStateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
-import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -54,8 +52,8 @@ class MotifIntegrationTest {
         ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        this.structureReader = new StructureReaderImpl(residueTypeResolver);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
+        this.structureReader = new DefaultStructureReader(residueTypeResolver);
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
         StructureDataProvider structureDataProvider = Mockito.mock(StructureDataProvider.class);
@@ -65,7 +63,7 @@ class MotifIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepository stateRepository = new StateRepositoryImpl(strucmotifConfig) {
+        StateRepository stateRepository = new DefaultStateRepository(strucmotifConfig) {
             @Override
             public Set<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -77,10 +75,9 @@ class MotifIntegrationTest {
             }
         };
 
-        StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
+        StructureIndexProvider structureIndexProvider = new DefaultStructureIndexProvider(stateRepository);
         TargetAssembler targetAssembler = new DefaultTargetAssembler(threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository);
-        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService);
         this.motifs = new DefaultMotifDefinitionRegistry(structureDataProvider)
                 .enrichMotifDefinitions(this::loadMotif)
                 .stream()
@@ -92,7 +89,7 @@ class MotifIntegrationTest {
     private EnrichedMotifDefinition loadMotif(MotifDefinition motifDefinition) {
         try {
             Structure structure = structureReader.readFromInputStream(getOriginalBcif(motifDefinition.getStructureIdentifier()));
-            List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(motifDefinition.getLabelSelections());
+            List<Map<LabelAtomId, float[]>> residues = motifDefinition.getLabelSelections().stream().map(structure::getResidueIndex).map(structure::manifestResidue).collect(Collectors.toList());
             return new EnrichedMotifDefinition(motifDefinition, structure, residues);
         } catch (UncheckedIOException e) {
             throw new RuntimeException("Structure data for all motifs used during tests must be stored in test/resources/orig/ - missing: " + motifDefinition.getStructureIdentifier(), e);

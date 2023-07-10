@@ -7,8 +7,6 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.DefaultStructureReader;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,7 +22,7 @@ class DefaultStructureReaderTest {
 
     @BeforeEach
     public void init() {
-        this.structureReader = new DefaultStructureReader(new ResidueTypeResolverImpl(new StrucmotifConfig()));
+        this.structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(new StrucmotifConfig()));
     }
 
     @Test

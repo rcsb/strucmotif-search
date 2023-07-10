@@ -9,16 +9,10 @@ import java.util.stream.Stream;
 /**
  * The specification on how to insert and select residue pair occurrences. Update operate is not directly supported
  * (rather invalid/obsolete identifiers have to be removed manually and subsequently the new data can be inserted).
+ * Insert operations are implemented by the update routine. It will place temporary files next to the index files and by
+ * calling {@link #commit()}, these can be added to the index.
  */
 public interface InvertedIndex extends Committable {
-    /**
-     * Insert operation for new data.
-     * @param residuePairDescriptor the bin for which new data should be written
-     * @param residuePairOccurrences the data to append to this bin - keys are pdbIds, values are all words of this descriptor
-     * @param batchId extension of the temporary file to be written
-     */
-    void insert(int residuePairDescriptor, InvertedIndexBucket residuePairOccurrences, int batchId);
-
     /**
      * Perform lookup for a particular bin.
      * @param residuePairDescriptor the bin for which occurrences should the lookup be performed

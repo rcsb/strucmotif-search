@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InvertedIndexImplTest {
     private InvertedIndex invertedIndex;
@@ -30,10 +29,10 @@ class InvertedIndexImplTest {
         ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
-        invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
+        invertedIndex = new DefaultInvertedIndex(threadPool, strucmotifConfig) {
             @Override
-            public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
-                String filename = residuePairDescriptor.toString().substring(0, 2) + "/" + residuePairDescriptor + ".colf";
+            public InvertedIndexBucket select(int residuePairDescriptor) {
+                String filename = residuePairDescriptor + ".colf";
                 if (!fileBundle.containsFile(filename)) {
                     return InvertedIndexBucket.EMPTY_BUCKET;
                 }
@@ -47,7 +46,7 @@ class InvertedIndexImplTest {
         };
     }
 
-    private static final ResiduePairDescriptor BIN_WITH_ASSEMBLY = new ResiduePairDescriptor(ResidueType.ASPARTIC_ACID,
+    private static final int BIN_WITH_ASSEMBLY = ResiduePairDescriptor.encodeDescriptor(ResidueType.ASPARTIC_ACID,
             ResidueType.LYSINE,
             DistanceType.D6,
             DistanceType.D7,
@@ -58,23 +57,15 @@ class InvertedIndexImplTest {
         InvertedIndexBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);
         int structures = 0;
         int occurrences = 0;
-        int nonIdentity = 0;
         while (bucket.hasNextStructure()) {
             bucket.moveStructure();
             structures++;
             while (bucket.hasNextOccurrence()) {
                 bucket.moveOccurrence();
                 occurrences++;
-                if (!bucket.getStructOperId1().equals("1")) {
-                    nonIdentity++;
-                }
-                if (!bucket.getStructOperId2().equals("1")) {
-                    nonIdentity++;
-                }
             }
         }
         assertEquals(13, structures);
         assertEquals(39, occurrences);
-        assertTrue(nonIdentity > 0);
     }
 }

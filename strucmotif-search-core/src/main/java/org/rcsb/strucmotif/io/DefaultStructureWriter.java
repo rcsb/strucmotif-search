@@ -80,7 +80,7 @@ public class DefaultStructureWriter implements StructureWriter {
         this.residueQualityStrategy = strucmotifConfig.getResidueQualityStrategy();
         this.residueQualityCutoff = strucmotifConfig.getResidueQualityCutoff();
         if (residueQualityStrategy == ResidueQualityStrategy.NONE) {
-            logger.info("All valid residues be indexed");
+            logger.info("All valid residues will be indexed");
         } else {
             logger.info("Residues will be filtered by {} with a cutoff of {}", residueQualityStrategy, residueQualityCutoff);
         }

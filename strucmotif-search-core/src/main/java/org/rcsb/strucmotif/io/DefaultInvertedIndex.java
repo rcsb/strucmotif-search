@@ -7,10 +7,6 @@ import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
-import org.rcsb.strucmotif.domain.motif.AngleType;
-import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,13 +25,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -46,8 +43,6 @@ import java.util.stream.Stream;
 @Service
 public class DefaultInvertedIndex implements InvertedIndex {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInvertedIndex.class);
-    private static final Map<String, ResidueType> OLC_LOOKUP = Stream.of(ResidueType.values())
-            .collect(Collectors.toMap(ResidueType::getInternalCode, Function.identity()));
     private final String extension;
     private final BucketCodec bucketCodec;
     private final ThreadPool threadPool;
@@ -55,6 +50,8 @@ public class DefaultInvertedIndex implements InvertedIndex {
     private final Path dataPath;
     private final Path indexPath;
     private ReadableFileBundle fileBundle;
+    // dump of partial files from update
+    private final Path partialPath;
     // paths for 'temporary' bundle written when 'production' data is getting modified
     private final Path temporaryDataPath;
     private final Path temporaryIndexPath;
@@ -70,8 +67,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
         this.extension = invertedIndexBackend.getExtension();
         logger.info("Extension of inverted index files: {}", extension);
         this.threadPool = threadPool;
-        this.dataPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + StrucmotifConfig.DATA_EXT);
-        this.indexPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT);
+        Path rootPath = Paths.get(strucmotifConfig.getRootPath());
+        this.dataPath = rootPath.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.DATA_EXT);
+        this.indexPath = rootPath.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT);
+        this.partialPath = rootPath.resolve(StrucmotifConfig.PARTIAL);
         this.temporaryDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.TMP_EXT);
         this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
     }
@@ -87,6 +86,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
             if (Files.notExists(indexPath)) {
                 Files.createFile(indexPath);
                 logger.debug("Created inverted index index file '{}'", indexPath);
+            }
+            if (Files.notExists(partialPath)) {
+                Files.createDirectories(partialPath);
+                logger.debug("Created inverted index tmp directory '{}'", partialPath);
             }
         } catch (NoSuchFileException e) {
             logger.error("Could not create inverted index file bundle (data path: '{}', index path: '{}') - make sure that '{}' exists and is accessible",
@@ -123,71 +126,22 @@ public class DefaultInvertedIndex implements InvertedIndex {
     public void commit() {
         logger.info("Committing temporary files to index");
         try {
-            // this captures the original data
-            Map<String, Set<String>> toMerge = indexFilenames()
-                    .collect(Collectors.toMap(Function.identity(), v -> new HashSet<>()));
             // this captures all additional data
+            Map<String, Set<String>> toMerge = new HashMap<>();
             partialFilenames()
                     .forEach(partialFilename -> {
-                        String persistentFilename = partialFilename.split("\\.")[1];
+                        String persistentFilename = partialFilename.split("\\.")[0];
                         Set<String> bin = toMerge.computeIfAbsent(persistentFilename, e -> new HashSet<>());
                         bin.add(partialFilename);
                     });
             logger.info("Merging {} bins", toMerge.size());
 
             WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
-            threadPool.submit(() -> {
-                AtomicInteger counter = new AtomicInteger();
-                toMerge.entrySet()
-                        .parallelStream()
-                        .peek(p -> progress(counter, 50000, "{} / " + toMerge.size() + " files merged"))
-                        .forEach(entry -> {
-                            String destination = entry.getKey();
-                            Set<String> sources = entry.getValue();
-
-                            try {
-                                List<InvertedIndexBucket> buckets = new ArrayList<>();
-                                // populate with existing data
-                                if (fileBundle.containsFile(destination)) {
-                                    buckets.add(bucketCodec.decode(fileBundle.readFile(destination)));
-                                }
-
-                                // merge all new, partial data
-                                for (String s : sources) {
-                                    Path p = indexPath.resolve(s);
-                                    byte[] bytes = Files.readAllBytes(p);
-                                    buckets.add(bucketCodec.decode(ByteBuffer.wrap(bytes)));
-                                }
-
-                                int structureCount = buckets.stream().mapToInt(InvertedIndexBucket::getStructureCount).sum();
-                                int identifierCount = buckets.stream().mapToInt(InvertedIndexBucket::getResiduePairCount).sum() * 2;
-                                int outerPosition = 0;
-                                int innerPosition = 0;
-                                int[] mergedStructureIndices = new int[structureCount];
-                                int[] mergedPositionOffsets = new int[structureCount];
-                                int[] mergedIdentifierData = new int[identifierCount];
-                                for (InvertedIndexBucket bucket : buckets) {
-                                    System.arraycopy(bucket.getStructureIndexArray(), 0, mergedStructureIndices, outerPosition, bucket.getStructureIndexArray().length);
-
-                                    int[] positionOffsetArray = bucket.getPositionOffsetArray();
-                                    for (int i = 0; i < positionOffsetArray.length; i++) {
-                                        // position offsets must be shifted according to the data already present
-                                        mergedPositionOffsets[outerPosition + i] = positionOffsetArray[i] + innerPosition;
-                                    }
-
-                                    System.arraycopy(bucket.getIdentifierDataArray(), 0, mergedIdentifierData, innerPosition, bucket.getPositionOffsetArray().length);
-                                    outerPosition += bucket.getStructureIndexArray().length;
-                                    innerPosition += bucket.getIdentifierDataArray().length;
-                                }
-
-                                ByteBuffer output = bucketCodec.encode(new InvertedIndexBucket(mergedStructureIndices, mergedPositionOffsets, mergedIdentifierData));
-                                temporaryFileBundle.writeFile(destination, output);
-                            } catch (IOException e) {
-                                throw new UncheckedIOException("can't merge " + destination, e);
-                            }
-                        });
-                return null;
-            }).get();
+            AtomicInteger counter = new AtomicInteger();
+            toMerge.entrySet()
+                    .stream()
+                    .peek(p -> progress(counter, 1, "[{} / " + toMerge.size() + "] merging super-bin"))
+                    .forEach(b -> mergeSuperBin(b, temporaryFileBundle));
 
             // delete partial file bundle and swap temporary files with real ones
             fileBundle.close();
@@ -198,11 +152,113 @@ public class DefaultInvertedIndex implements InvertedIndex {
             initializeFileBundle();
         } catch (IOException e) {
             throw new UncheckedIOException(e);
+        }
+    }
+
+    private void mergeSuperBin(Map.Entry<String, Set<String>> entry, WritableFileBundle temporaryFileBundle) {
+        Set<String> sources = entry.getValue();
+        Set<Integer> descriptors = sources.stream().flatMapToInt(this::extractDescriptors).boxed().collect(Collectors.toSet());
+
+        try {
+            threadPool.submit(() -> {
+                descriptors.parallelStream().forEach(descriptor -> {
+                    try {
+                        String destination = descriptor + extension;
+                        List<InvertedIndexBucket> buckets = new ArrayList<>();
+                        // populate with existing data
+                        if (fileBundle.containsFile(destination)) {
+                            buckets.add(bucketCodec.decode(fileBundle.readFile(destination)));
+                        }
+
+                        // merge all new, partial data
+                        for (String source : sources) {
+                            AtomicInteger structureIndex = new AtomicInteger(-1);
+                            AtomicBoolean indexAdded = new AtomicBoolean(false);
+                            List<Integer> structureIndices = new ArrayList<>();
+                            List<Integer> positionOffsets = new ArrayList<>();
+                            List<Integer> identifierData = new ArrayList<>();
+                            Files.lines(partialPath.resolve(source)).forEach(l -> {
+                                String[] split = l.split(" ");
+                                if (split.length == 1) {
+                                    structureIndex.set(Integer.parseInt(l));
+                                    return;
+                                }
+                                if (descriptor != Integer.parseInt(split[0])) {
+                                    return;
+                                }
+
+                                if (!indexAdded.get()) {
+                                    structureIndices.add(structureIndex.get());
+                                    indexAdded.set(true);
+                                    positionOffsets.add(identifierData.size());
+                                }
+                                identifierData.add(Integer.parseInt(split[1]));
+                                identifierData.add(Integer.parseInt(split[2]));
+                            });
+
+                            // don't track empty buckets
+                            if (structureIndices.isEmpty()) {
+                                continue;
+                            }
+
+                            buckets.add(new InvertedIndexBucket(structureIndices.stream().mapToInt(Integer::intValue).toArray(),
+                                    positionOffsets.stream().mapToInt(Integer::intValue).toArray(),
+                                    identifierData.stream().mapToInt(Integer::intValue).toArray()));
+                        }
+
+                        int structureCount = buckets.stream().mapToInt(InvertedIndexBucket::getStructureCount).sum();
+                        int identifierCount = buckets.stream().mapToInt(InvertedIndexBucket::getResiduePairCount).sum() * 2;
+                        int outerPosition = 0;
+                        int innerPosition = 0;
+                        int[] mergedStructureIndices = new int[structureCount];
+                        int[] mergedPositionOffsets = new int[structureCount];
+                        int[] mergedIdentifierData = new int[identifierCount];
+                        for (InvertedIndexBucket bucket : buckets) {
+                            System.arraycopy(bucket.getStructureIndexArray(), 0, mergedStructureIndices, outerPosition, bucket.getStructureIndexArray().length);
+
+                            int[] positionOffsetArray = bucket.getPositionOffsetArray();
+                            for (int i = 0; i < positionOffsetArray.length; i++) {
+                                // position offsets must be shifted according to the data already present
+                                mergedPositionOffsets[outerPosition + i] = positionOffsetArray[i] + innerPosition;
+                            }
+
+                            System.arraycopy(bucket.getIdentifierDataArray(), 0, mergedIdentifierData, innerPosition, bucket.getIdentifierDataArray().length);
+                            outerPosition += bucket.getStructureIndexArray().length;
+                            innerPosition += bucket.getIdentifierDataArray().length;
+                        }
+
+                        ByteBuffer output = bucketCodec.encode(new InvertedIndexBucket(mergedStructureIndices, mergedPositionOffsets, mergedIdentifierData));
+                        temporaryFileBundle.writeFile(destination, output);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException("failed to merge " + entry.getKey(), e);
+                    }
+                });
+                return null;
+            }).get();
         } catch (ExecutionException e) {
             throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
+        }
+
+        try {
+            for (String source : sources) {
+                Files.delete(partialPath.resolve(source));
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    private IntStream extractDescriptors(String source) {
+        try {
+            return Files.lines(partialPath.resolve(source))
+                    .map(l -> l.split(" "))
+                    .filter(s -> s.length == 3)
+                    .mapToInt(s -> Integer.parseInt(s[0]));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
@@ -283,16 +339,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
     }
 
     private int createResiduePairDescriptor(String filename) {
-        String[] filenameSplit = filename.split("/");
-        String name = filenameSplit[filenameSplit.length - 1];
-
-        String[] split = name.split("\\.")[0].split("-");
-        ResidueType r1 = OLC_LOOKUP.getOrDefault(split[0].substring(0, 1), null);
-        ResidueType r2 = OLC_LOOKUP.getOrDefault(split[0].substring(1, 2), null);
-        DistanceType d1 = DistanceType.ofIntRepresentation(Integer.parseInt(split[1]));
-        DistanceType d2 = DistanceType.ofIntRepresentation(Integer.parseInt(split[2]));
-        AngleType a = AngleType.ofIntRepresentation(Integer.parseInt(split[3]));
-        return ResiduePairDescriptor.encodeDescriptor(r1, r2, d1, d2, a);
+        return Integer.parseInt(filename.split("\\.")[0]);
     }
 
     /**
@@ -358,14 +405,14 @@ public class DefaultInvertedIndex implements InvertedIndex {
     }
 
     private Stream<String> partialFilenames() throws IOException {
-        return Files.list(indexPath)
+        logger.info("Collecting files at {}", partialPath);
+        return Files.list(partialPath)
                 .map(Path::getFileName)
-                .filter(p -> p.startsWith(StrucmotifConfig.INDEX) && p.endsWith(StrucmotifConfig.TMP_EXT))
                 .map(Path::toString);
     }
 
     private void deletePartialFiles() throws IOException {
-        partialFilenames().map(indexPath::resolve).map(Path::toFile).forEach(File::delete);
+        Files.list(partialPath).map(Path::toFile).forEach(File::delete);
     }
 
     /**

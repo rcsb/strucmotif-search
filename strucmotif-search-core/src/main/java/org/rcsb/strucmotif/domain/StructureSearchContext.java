@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.StrucmotifRuntime;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
 import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * The context when in 'search-for-structures' mode.
@@ -55,7 +57,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
         logger.info("[{}] Query: {} with {}",
                 id,
                 queryStructure.getStructureIdentifier(),
-                queryStructure.getResiduePairIdentifiers());
+                queryStructure.getResiduePairIdentifiers().stream().map(ResiduePairIdentifier::toString).collect(Collectors.toList()));
         logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}, Limit: {}",
                 id,
                 query.getExchanges(),

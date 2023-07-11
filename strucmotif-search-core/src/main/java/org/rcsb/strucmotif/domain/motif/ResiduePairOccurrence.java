@@ -2,7 +2,10 @@ package org.rcsb.strucmotif.domain.motif;
 
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
@@ -93,11 +96,8 @@ public class ResiduePairOccurrence {
 
     @Override
     public String toString() {
-        return "" + getResidueType1().getInternalCode() + getResidueType2().getInternalCode() + "-" +
-                getBackboneDistance().ordinal() + "-" + getSideChainDistance().ordinal() + "-" + getAngle().ordinal() + " -> " +
-                getResidueIndex1() + "-" + getResidueIndex2();
+        return ResiduePairDescriptor.toString(residuePairDescriptor) + " -> " + ResiduePairIdentifier.toString(residuePairIdentifier);
     }
-
 
     /**
      * Traverse all {@link ResiduePairDescriptor} instances which are compatible to this one given the specified
@@ -110,8 +110,8 @@ public class ResiduePairOccurrence {
      */
     public IntStream residuePairDescriptorsByTolerance(int backboneTolerance, int sideChainTolerance, int angleTolerance,
                                                        Map<Integer, Set<ResidueType>> exchanges) {
-        int residueIndex2 = (int) residuePairIdentifier & 0xFF;
-        int residueIndex1 = (int) (residuePairIdentifier >>> 32) & 0xFF;
+        int residueIndex1 = ResiduePairIdentifier.getResidueIndex1(residuePairIdentifier);
+        int residueIndex2 = ResiduePairIdentifier.getResidueIndex2(residuePairIdentifier);
 
         // we assign current component type for components without exchanges
         Set<ResidueType> residueTypes1 = exchanges.getOrDefault(residueIndex1, Set.of(getResidueType1()));

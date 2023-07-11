@@ -35,6 +35,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -139,6 +140,12 @@ public class StrucmotifUpdate implements CommandLineRunner {
             }
         }
 
+        // ensure no partial files linger
+        Path partialPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.PARTIAL);
+        if (Files.exists(partialPath)) {
+            Files.list(partialPath).map(Path::toFile).forEach(File::delete);
+        }
+
         logger.info("Starting update - Operation: {}, {} ids ({})",
                 operation,
                 requested.size(),
@@ -153,6 +160,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
             case RECOVER -> recover(stateRepository.selectDirty());
         }
 
+        if (Files.exists(partialPath)) {
+            Files.list(partialPath).map(Path::toFile).forEach(File::delete);
+            Files.delete(partialPath);
+        }
         logger.info("Finished update operation");
     }
 
@@ -197,7 +208,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // TODO allow to commit after some interval?
         // TODO allow to resume after failing?
-        commit(context, known);
+        if (context.structureCounter.get() > 0) {
+            commit(context, known);
+        }
     }
 
     private void commit(Context context, Set<String> known) {
@@ -256,8 +269,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
             if (!revisionHistory.isDefined()) {
                 throw new IllegalArgumentException("'pdbx_audit_revision_history' is mandatory in input files - rejecting " + structureIdentifier);
             }
-            int majorRevision = revisionHistory.getMajorRevision().get(revisionHistory.getRowCount());
-            int minorRevision = revisionHistory.getMinorRevision().get(revisionHistory.getRowCount());
+            int majorRevision = revisionHistory.getMajorRevision().get(revisionHistory.getRowCount() - 1);
+            int minorRevision = revisionHistory.getMinorRevision().get(revisionHistory.getRowCount() - 1);
             PdbxStructAssembly pdbxStructAssembly = block.getPdbxStructAssembly();
             PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
             PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
@@ -340,36 +353,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         return structureDataProvider.getOriginalInputStream(item.getStructureIdentifier());
     }
-
-//    private void writeTemporaryFiles(Context context) throws ExecutionException, InterruptedException {
-//        logger.info("[{}] Writing temporary files for {} residue pair descriptors",
-//                context.partitionContext,
-//                context.buffer.size());
-//
-//        final int bufferTotal = context.buffer.size();
-//        AtomicInteger bufferCount = new AtomicInteger();
-//        threadPool.submit(() -> {
-//            context.buffer.keySet().parallelStream().forEach(key -> {
-//                Map<Integer, Collection<ResiduePairIdentifier>> value = context.buffer.remove(key);
-//                ResiduePairIdentifierBucket output = new ResiduePairIdentifierBucket(value);
-//
-//                if (bufferCount.incrementAndGet() % 10000 == 0) {
-//                    logger.info("[{}] {} / {}",
-//                            context.partitionContext,
-//                            bufferCount,
-//                            bufferTotal);
-//                }
-//
-//                invertedIndex.insert(key, output, context.batchId.get());
-//            });
-//            return null;
-//        }).get();
-//
-//        context.buffer.clear();
-//
-//        // increment tmp file counter
-//        context.batchId.incrementAndGet();
-//    }
 
     /**
      * 'REMOVE' operation.
@@ -531,7 +514,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         return Operation.resolve(args[0]);
     }
 
-    private static final String PDB_REGEX = "^[1-9][a-zA-Z0-9]{3}$"; // TODO need to revisit for extended PDB-IDs
+    private static final String PDB_REGEX = "^[1-9][a-zA-Z0-9]{3}|PDB_[a-zA-Z0-9]{8}$";
     private static final String CSM_REGEX = "^[a-zA-Z0-9]+_[a-zA-Z0-9]{6,}$"; // pattern used by rcsb.org for computed structure models
     private List<UpdateItem> parseUpdateList(String[] args) throws IOException {
         int offset = 1;

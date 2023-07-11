@@ -1,5 +1,7 @@
 package org.rcsb.strucmotif.domain.structure;
 
+import org.rcsb.strucmotif.io.DefaultStructureReader;
+
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -388,7 +390,10 @@ public class DefaultStructure implements Structure {
     }
 
     private static void transform(float[] v, float[] m, int offset) {
-        // nop on identity matrix
+        // nop on identity matrices
+        if (m == DefaultStructureReader.IDENTITY_TRANSFORM) {
+            return;
+        }
         if (m[offset] == 1.0f && m[offset + 5] == 1.0f && m[offset + 10] == 1.0f) {
             return;
         }

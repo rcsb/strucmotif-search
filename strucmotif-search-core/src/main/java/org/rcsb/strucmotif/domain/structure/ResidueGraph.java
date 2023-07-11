@@ -92,7 +92,7 @@ public class ResidueGraph {
 
         ResidueVectors residueVectors = populateResidueVectors(structure, options);
 
-        this.selectionCount = options.mode == ResidueGraphMode.SELECTION ? options.selections.size() : residueVectors.backboneVectors.length;
+        this.selectionCount = options.mode == ResidueGraphMode.SELECTION ? options.selections.size() : (residueVectors.backboneVectors.length / 3);
         this.residueCount = residueVectors.backboneVectors.length / 3;
         this.pairingCount = fillResidueGrid(structure, residueVectors, strucmotifConfig.getSquaredDistanceCutoff(), options);
     }
@@ -295,7 +295,6 @@ public class ResidueGraph {
         AngleType angle = ResiduePairDescriptor.getAngle(value);
 
         // check if pair needs to be flipped to follow contract
-        // TODO move into occurrence itself?
         if (residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0) {
             return new ResiduePairOccurrence(residueIndex2, residueIndex1, residueType2, residueType1, backboneDistance, sideChainDistance, angle);
         } else {

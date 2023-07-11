@@ -107,7 +107,7 @@ public class DefaultTargetAssembler implements TargetAssembler {
 
             logger.info("[{}] Consumed {} in {} ms - {} valid target structures remaining",
                     context.getId(),
-                    residuePairDescriptor,
+                    ResiduePairDescriptor.toString(residuePairDescriptor),
                     (System.nanoTime() - s) / 1000 / 1000,
                     result.getTargetStructures().size());
 
@@ -137,7 +137,7 @@ public class DefaultTargetAssembler implements TargetAssembler {
 
     private Stream<Pair<Integer, int[]>> select(InvertedIndex invertedIndex, int descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
         InvertedIndexBucket bucket = invertedIndex.select(descriptor);
-        boolean flipped = ResiduePairDescriptor.isFlipped(descriptor); // TODO make sure bit is set at this point
+        boolean flipped = ResiduePairDescriptor.isFlipped(descriptor);
         // the ugly case which requires the creation of both residuePairs
         boolean ambiguous = ResiduePairDescriptor.isAmbiguous(descriptor);
 

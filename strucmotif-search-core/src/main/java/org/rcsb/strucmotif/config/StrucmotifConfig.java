@@ -116,13 +116,17 @@ public class StrucmotifConfig {
      */
     public static final String STATE_DIRTY_LIST = "dirty.list";
     /**
-     * Name of the renumbered directory.
+     * Name of the renumbered bundle.
      */
     public static final String RENUMBERED = "renumbered";
     /**
-     * Name of the inverted index directory.
+     * Name of the inverted index bundle.
      */
     public static final String INDEX = "index";
+    /**
+     * Name of the directory with partial update files.
+     */
+    public static final String PARTIAL = "tmp";
     /**
      * Extension of FFindex data files.
      */
@@ -136,7 +140,7 @@ public class StrucmotifConfig {
      */
     public static final String TMP_EXT = ".wip";
     /**
-     * Extension of temporart inverted index files while updating.
+     * Extension of temporary inverted index files while updating.
      */
     public static final String PARTIAL_EXT = ".partial";
 

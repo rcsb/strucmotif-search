@@ -71,4 +71,12 @@ public class ResiduePairDescriptor {
     public static boolean isFlipped(int descriptor) {
         return (descriptor & FLIPPED_MASK) != 0;
     }
+
+    public static String toString(int descriptor) {
+        return getResidueType1(descriptor).getInternalCode() +
+                getResidueType2(descriptor).getInternalCode() + "-" +
+                getBackboneDistance(descriptor).ordinal() + "-" +
+                getSideChainDistance(descriptor).ordinal() + "-" +
+                getAngle(descriptor).ordinal();
+    }
 }

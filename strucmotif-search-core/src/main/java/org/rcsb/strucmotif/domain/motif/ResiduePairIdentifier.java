@@ -18,4 +18,8 @@ public class ResiduePairIdentifier {
     public static int getResidueIndex2(long residuePairIdentifier) {
         return (int) residuePairIdentifier;
     }
+
+    public static String toString(long residuePairIdentifier) {
+        return getResidueIndex1(residuePairIdentifier) + "-" + getResidueIndex2(residuePairIdentifier);
+    }
 }

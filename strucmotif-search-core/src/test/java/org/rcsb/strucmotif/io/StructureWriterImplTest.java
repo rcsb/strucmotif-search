@@ -57,15 +57,15 @@ class StructureWriterImplTest {
     }
 
     @Test
-    void whenWritingAF_A0A0R0FWM3_F1_thenContractHonored() throws IOException {
+    void whenWritingAFA0A0R0FWM3F1_thenContractHonored() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.NONE);
         ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
-        String id = "AF-A0A0R0FWM3-F1";
-        InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");
+        String id = "AF_AFA0A0R0FWM3F1";
+        InputStream inputStream = Helpers.getResource("orig/" + id + ".bcif");
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
@@ -102,7 +102,7 @@ class StructureWriterImplTest {
     }
 
     @Test
-    void whenWritingAF_A0A0R0FWM3_F1_FilteredByMetric_thenAtomCountDecreased() throws IOException {
+    void whenWritingAFA0A0R0FWM3F1_FilteredByMetric_thenAtomCountDecreased() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
         strucmotifConfig.setResidueQualityStrategy(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF);
@@ -110,8 +110,8 @@ class StructureWriterImplTest {
         ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
 
-        String id = "AF-A0A0R0FWM3-F1";
-        InputStream inputStream = Helpers.getResource("orig/" + id + "-model_v1.cif");
+        String id = "AF_AFA0A0R0FWM3F1";
+        InputStream inputStream = Helpers.getResource("orig/" + id + ".bcif");
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");

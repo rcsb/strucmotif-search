@@ -185,7 +185,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
             MotifSearchResult result = context.getResult();
             List<MotifHit> hits = threadPool.submit(() -> context.getQuery()
                     .getMotifDefinitions()
-                    .parallelStream()
+                    .stream()
                     .flatMap(motif -> {
                         StructureSearchResult subresult = performSearch(context, motif);
                         List<StructureHit> subhits = subresult.getHits();

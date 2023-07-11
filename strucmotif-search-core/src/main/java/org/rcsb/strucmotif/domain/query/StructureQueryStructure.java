@@ -65,7 +65,7 @@ public class StructureQueryStructure implements QueryStructure {
                 .distinct()
                 .collect(Collectors.toList());
 
-        if (residuePairIdentifiers.size() != originalResidues.size()) {
+        if (residueIndices.size() != originalResidues.size()) {
             // this indicates that fewer residues are present in the result than specified by the query
             throw new IllegalQueryDefinitionException("Query violates distance threshold");
         }
@@ -112,9 +112,8 @@ public class StructureQueryStructure implements QueryStructure {
             for (int i = 0; i < sorted.size(); i++) {
                 ResiduePairOccurrence candidateResiduePair = sorted.get(i);
                 long candidateIdentifier = candidateResiduePair.getResiduePairIdentifier();
-                if (sparse.stream()
-                        // check for overlap with already accepted word
-                        .anyMatch(sortedResiduePair -> match(sortedResiduePair.getResiduePairIdentifier(), candidateIdentifier))) {
+                // check for overlap with already accepted word
+                if (sparse.stream().anyMatch(sortedResiduePair -> match(sortedResiduePair.getResiduePairIdentifier(), candidateIdentifier))) {
                     sparse.add(sorted.remove(i));
                     break;
                 }
@@ -140,7 +139,7 @@ public class StructureQueryStructure implements QueryStructure {
         int r12 = ResiduePairIdentifier.getResidueIndex2(sortedWordResiduePairIdentifier);
         int r21 = ResiduePairIdentifier.getResidueIndex1(candidateIdentifier);
         int r22 = ResiduePairIdentifier.getResidueIndex2(candidateIdentifier);
-        return r11 == r21 || r11 == r12 || r12 == r21 || r12 == r22;
+        return r11 == r21 || r11 == r22 || r12 == r21 || r12 == r22;
     }
 
     @Override

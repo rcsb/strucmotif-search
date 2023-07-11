@@ -4,7 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
+import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
@@ -230,12 +234,11 @@ class DefaultStructureReaderTest {
         // GLX at position 5
         assertNotEquals(ResidueType.UNKNOWN_COMPONENT, structure.getResidueType(4));
 
-        // TODO add residue graph back here
-//        ResidueGraph residueGraph = new ResidueGraph(structure, new StrucmotifConfig(), ResidueGraph.ResidueGraphOptions.deposited());
-//        residueGraph.residuePairOccurrencesParallel()
-//                .filter(p -> p.getResidueIdentifier().getIndex1() == 4 || p.getResidueIdentifier().getIndex2() == 4)
-//                .map(ResiduePairOccurrence::getResiduePairDescriptor)
-//                .forEach(d -> assertTrue(d.getResidueType1() == ResidueType.UNKNOWN_AMINO_ACID || d.getResidueType2() == ResidueType.UNKNOWN_AMINO_ACID));
+        ResidueGraph residueGraph = new ResidueGraph(structure, new StrucmotifConfig(), ResidueGraph.ResidueGraphOptions.deposited());
+        residueGraph.residuePairOccurrencesParallel()
+                .filter(p -> p.getResidueIndex1() == 4 || p.getResidueIndex2() == 4)
+                .map(ResiduePairOccurrence::getResiduePairDescriptor)
+                .forEach(d -> assertTrue(ResiduePairDescriptor.getResidueType1(d) == ResidueType.UNKNOWN_AMINO_ACID || ResiduePairDescriptor.getResidueType2(d) == ResidueType.UNKNOWN_AMINO_ACID));
     }
 
     @Test

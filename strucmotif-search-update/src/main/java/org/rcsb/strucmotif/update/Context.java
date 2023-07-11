@@ -41,8 +41,8 @@ public class Context implements Closeable {
             return ref;
         }
 
-        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.INDEX + "." + residuePairDescriptorPrefix + "." + Thread.currentThread().getId() + StrucmotifConfig.TMP_EXT);
-        logger.info("Creating thread-specific index dump at {}", path);
+        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.PARTIAL).resolve(residuePairDescriptorPrefix + "." + Thread.currentThread().getId() + StrucmotifConfig.TMP_EXT);
+        logger.debug("Creating thread-specific index dump at {}", path);
         ref = new FileWriter(path.toFile());
         map.put(residuePairDescriptorPrefix, ref);
         return ref;

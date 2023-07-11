@@ -13,7 +13,7 @@ import org.rcsb.strucmotif.io.ResidueTypeResolver;
 import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.DefaultStateRepository;
-import org.rcsb.strucmotif.io.StructureDataProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 import org.rcsb.strucmotif.io.DefaultStructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureReader;
@@ -42,7 +42,7 @@ class UpdateIntegrationTest {
     private StrucmotifConfig strucmotifConfig;
     private Path path;
     private StateRepository state;
-    private StructureDataProviderImpl data;
+    private DefaultStructureDataProvider data;
     private DefaultInvertedIndex index;
     private StrucmotifUpdate update;
 
@@ -65,7 +65,7 @@ class UpdateIntegrationTest {
         StructureReader reader = new DefaultStructureReader(residueTypeResolver);
         StructureWriter writer = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
         ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
-        this.data = new StructureDataProviderImpl(reader, writer, strucmotifConfig);
+        this.data = new DefaultStructureDataProvider(reader, writer, strucmotifConfig);
         this.index = new DefaultInvertedIndex(threadPool, strucmotifConfig);
 
         init();

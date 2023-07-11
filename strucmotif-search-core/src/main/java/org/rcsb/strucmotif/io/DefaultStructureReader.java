@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.DefaultStructure;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 /**
  * A simple structure reader that parses CIF data into structure instances.
  */
+@Service
 public class DefaultStructureReader implements StructureReader {
     private final ResidueTypeResolver residueTypeResolver;
 
@@ -260,7 +262,7 @@ public class DefaultStructureReader implements StructureReader {
     private static final int[] DEFAULT_ASSEMBLY_OFFSETS = new int[] { 0 };
     private static final String[] DEFAULT_ASSEMBLY_REFERENCES = new String[] { "A", "1" };
     private static final String[] DEFAULT_TRANSFORMATION_IDENTIFIERS = new String[] { "1" };
-    private static final float[] DEFAULT_TRANSFORMATION = new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+    private static final float[] DEFAULT_TRANSFORMATION = IDENTITY_TRANSFORM;
     private static final Map<String, float[]> DEFAULT_STRUCT_OPER_LIST = Map.of(DEFAULT_TRANSFORMATION_IDENTIFIERS[0], DEFAULT_TRANSFORMATION);
     private static final AssemblyInformation DEFAULT_ASSEMBLY_INFORMATION = new AssemblyInformation(DEFAULT_ASSEMBLY_IDENTIFIERS,
             DEFAULT_ASSEMBLY_OFFSETS, DEFAULT_ASSEMBLY_REFERENCES, DEFAULT_TRANSFORMATION_IDENTIFIERS, DEFAULT_TRANSFORMATION);
@@ -329,6 +331,16 @@ public class DefaultStructureReader implements StructureReader {
         // parse transformations
         Map<String, float[]> transformationMap = parseStructOperList(block);
         String[] transformationIdentifiers = transformationMap.keySet().toArray(String[]::new);
+
+        // transformation is just identity
+        if (transformationMap.size() == 1) {
+            return new AssemblyInformation(assemblyIdentifiers,
+                    assemblyOffsets,
+                    assemblyReferences,
+                    transformationIdentifiers,
+                    DEFAULT_TRANSFORMATION);
+        }
+
         float[] transformations = new float[transformationMap.size() * 16];
         int p = 0;
         for (float[] transformation : transformationMap.values()) {

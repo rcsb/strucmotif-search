@@ -8,6 +8,8 @@ import java.io.InputStream;
  * Read structures from CIF files.
  */
 public interface StructureReader {
+    float[] IDENTITY_TRANSFORM = new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+
     /**
      * Read from a InputStream and parse the corresponding Structure.
      * @param inputStream the source

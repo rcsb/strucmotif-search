@@ -16,7 +16,7 @@ public class StrucmotifConfig {
      * index and can appear as search results. Lower values ease storage requirements and improve speed of update
      * operations.
      */
-    private float distanceCutoff = 20;
+    private float distanceCutoff = 15; // TODO set back to 20 once done
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */

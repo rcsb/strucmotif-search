@@ -136,7 +136,12 @@ public class DefaultTargetAssembler implements TargetAssembler {
     }
 
     private Stream<Pair<Integer, int[]>> select(InvertedIndex invertedIndex, int descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
-        InvertedIndexBucket bucket = invertedIndex.select(descriptor);
+        int actualDescriptor = ResiduePairDescriptor.stripFlipBit(descriptor);
+        InvertedIndexBucket bucket = invertedIndex.select(actualDescriptor);
+        if (bucket == InvertedIndexBucket.EMPTY_BUCKET) {
+            return Stream.empty();
+        }
+
         boolean flipped = ResiduePairDescriptor.isFlipped(descriptor);
         // the ugly case which requires the creation of both residuePairs
         boolean ambiguous = ResiduePairDescriptor.isAmbiguous(descriptor);

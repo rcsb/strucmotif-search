@@ -39,7 +39,7 @@ public class ColferCodec implements BucketCodec {
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
-                structureIndices[ai] = (x >> 1) ^ -(x & 1);
+                structureIndices[ai] = x;
             }
             header = byteBuffer.get();
         }
@@ -60,7 +60,7 @@ public class ColferCodec implements BucketCodec {
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
-                positionOffsets[ai] = (x >> 1) ^ -(x & 1);
+                positionOffsets[ai] = x;
             }
             header = byteBuffer.get();
         }
@@ -81,7 +81,7 @@ public class ColferCodec implements BucketCodec {
                     x |= (b & 0x7f) << shift;
                     if (shift == 28 || b >= 0) break;
                 }
-                identifierData[ai] = (x >> 1) ^ -(x & 1);
+                identifierData[ai] = x;
             }
             header = byteBuffer.get();
         }
@@ -119,12 +119,11 @@ public class ColferCodec implements BucketCodec {
         out.write(x);
 
         for (int v : data) {
-            int x1 = v << 1 ^ v >> 31;
-            while ((x1 & ~0x7f) != 0) {
-                out.write(x1 | 0x80);
-                x1 >>>= 7;
+            while (v > 0x7f) {
+                out.write(v | 0x80);
+                v >>>= 7;
             }
-            out.write(x1);
+            out.write(v);
         }
     }
 

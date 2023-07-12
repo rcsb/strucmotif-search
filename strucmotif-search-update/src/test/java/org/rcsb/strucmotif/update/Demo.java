@@ -6,6 +6,7 @@ class Demo {
         StrucmotifUpdate.main(new String[] { "ADD", "full" });
 
         // load some arbitrary (external) structure data like AlphaFold models
+        // TODO these won't actually work, support them and/or choose better examples
         StrucmotifUpdate.main(new String[] {
                 "ADD",
                 "AF-Q76EI6-F1,https://alphafold.ebi.ac.uk/files/AF-Q76EI6-F1-model_v1.cif",

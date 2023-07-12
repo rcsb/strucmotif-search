@@ -13,6 +13,7 @@ import org.rcsb.strucmotif.domain.query.MotifContextBuilder;
 import org.rcsb.strucmotif.domain.result.MotifHit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
@@ -106,12 +107,21 @@ class MotifIntegrationTest {
                 .buildContext()
                 .run();
 
-        assertTrue(result.getHits().size() > 0);
-        MotifHit actual = result.getHits().get(0);
-        MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
-        assertEquals(expected.getMotifIdentifier(), actual.getMotifIdentifier());
-        assertEquals(expected.getLabelSelections(), actual.getLabelSelections());
-        assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.getResidueTypes());
-        assertTrue(actual.getRootMeanSquareDeviation() < 0.001);
+        assertEquals(8, result.getHits().size());
+        for (MotifHit actual : result.getHits()) {
+            MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
+            assertEquals(expected.getMotifIdentifier(), actual.getMotifIdentifier());
+            assertShallowEquals(expected.getLabelSelections(), actual.getLabelSelections());
+            assertEquals(1, actual.getLabelSelections().stream().map(LabelSelection::structOperId).distinct().count());
+            assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.getResidueTypes());
+            assertTrue(actual.getRootMeanSquareDeviation() < 0.001);
+        }
+    }
+
+    private void assertShallowEquals(List<LabelSelection> expected, List<LabelSelection> actual) {
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).labelAsymId(), actual.get(i).labelAsymId());
+            assertEquals(expected.get(i).labelSeqId(), actual.get(i).labelSeqId());
+        }
     }
 }

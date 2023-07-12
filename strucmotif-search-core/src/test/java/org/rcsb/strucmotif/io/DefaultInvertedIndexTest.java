@@ -18,6 +18,7 @@ import org.rcsb.strucmotif.io.codec.ColferCodec;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DefaultInvertedIndexTest {
@@ -66,6 +67,15 @@ class DefaultInvertedIndexTest {
             }
         }
         assertEquals(13, structures);
-        assertEquals(39, occurrences);
+        assertEquals(241, occurrences);
+    }
+
+    @Test
+    void whenSelectingByFlippedDescriptor_thenContentMatchesOriginal() {
+        InvertedIndexBucket original = invertedIndex.select(BIN_WITH_ASSEMBLY);
+        InvertedIndexBucket flipped = invertedIndex.select(BIN_WITH_ASSEMBLY & ~ResiduePairDescriptor.FLIPPED_MASK);
+        assertArrayEquals(original.getStructureIndexArray(), flipped.getStructureIndexArray());
+        assertArrayEquals(original.getPositionOffsetArray(), flipped.getPositionOffsetArray());
+        assertArrayEquals(original.getIdentifierDataArray(), flipped.getIdentifierDataArray());
     }
 }

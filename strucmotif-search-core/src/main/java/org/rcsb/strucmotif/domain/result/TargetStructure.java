@@ -86,11 +86,11 @@ public class TargetStructure {
             p:
             for (int[] path : paths) {
                 // this path must allow for the same overlap profile as query
-                for (int k = 0; k < overlapProfile.length - 1; k = k + 2) {
-                    int previousResidueIndex1 = path[k];
-                    int previousResidueIndex2 = path[k + 1];
+                for (int k = 0; k < overlapProfile.length; k++) {
+                    int previousResidueIndex1 = path[2 * k];
+                    int previousResidueIndex2 = path[2 * k + 1];
 
-                    Overlap queryOverlap = overlapProfile[k / 2];
+                    Overlap queryOverlap = overlapProfile[k];
                     Overlap candidateOverlap = Overlap.ofResiduePairIdentifiers(previousResidueIndex1, previousResidueIndex2, candidateResidueIndex1, candidateResidueIndex2);
                     if (queryOverlap != candidateOverlap) {
                         continue p;
@@ -99,8 +99,8 @@ public class TargetStructure {
 
                 // if loop didn't break: indices are valid extension of this path: propagate to next generation
                 int[] extendedPath = Arrays.copyOf(path, path.length + 2);
-                extendedPath[path.length - 1] = candidateResidueIndex1;
-                extendedPath[path.length] = candidateResidueIndex2;
+                extendedPath[path.length] = candidateResidueIndex1;
+                extendedPath[path.length + 1] = candidateResidueIndex2;
                 extendedPaths.add(extendedPath);
             }
         }

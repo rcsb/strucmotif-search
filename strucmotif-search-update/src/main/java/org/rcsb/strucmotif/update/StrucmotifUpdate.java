@@ -36,10 +36,10 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -141,10 +141,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         // ensure no partial files linger
-        Path partialPath = Paths.get(strucmotifConfig.getRootPath()).resolve(StrucmotifConfig.PARTIAL);
-        if (Files.exists(partialPath)) {
-            Files.list(partialPath).map(Path::toFile).forEach(File::delete);
-        }
+        Files.list(Paths.get(strucmotifConfig.getRootPath()))
+                .filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().endsWith(StrucmotifConfig.TMP_EXT))
+                .map(Path::toFile)
+                .forEach(File::delete);
 
         logger.info("Starting update - Operation: {}, {} ids ({})",
                 operation,
@@ -160,10 +160,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
             case RECOVER -> recover(stateRepository.selectDirty());
         }
 
-        if (Files.exists(partialPath)) {
-            Files.list(partialPath).map(Path::toFile).forEach(File::delete);
-            Files.delete(partialPath);
-        }
         logger.info("Finished update operation");
     }
 
@@ -302,32 +298,58 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         try {
-            long start = System.nanoTime();
+            long startGraph = System.nanoTime();
             // TODO include whole chain in contact? 'all' is favorable but wastes a lot of space
             ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+            logger.info("[{}] Computed residue graph ({} residues, {} pairs) in {} ms",
+                    structureContext,
+                    residueGraph.getResidueCount(),
+                    residueGraph.getPairingCount(),
+                    (System.nanoTime() - startGraph) / 1000 / 1000);
 
             // extract motifs, sort into bins of same prefix
+            long startWrite = System.nanoTime();
+            int magicStructureIndex = structureIndex | 1 << 31;
+            byte[] buffer = new byte[8];
+            OutputStream outputStream = context.getOutputStream();
             AtomicInteger structureMotifCounter = new AtomicInteger();
+            AtomicInteger lastDescriptor = new AtomicInteger(); // 0 is safe as nothing should be AA-0-0-0
             residueGraph.residuePairOccurrencesSequential()
-                    .collect(Collectors.groupingBy(d -> d.getResidueType1().getInternalCode() + d.getResidueType2().getInternalCode()))
-                    .forEach((k, v) -> {
+                    .sorted(Comparator.comparingInt(ResiduePairOccurrence::getResiduePairDescriptor))
+                    .forEach(o -> {
                         try {
-                            FileWriter indexWriter = context.getFileWriter(k);
-                            StringBuilder out = new StringBuilder();
-                            out.append(structureIndex).append("\n");
-                            for (ResiduePairOccurrence occurrence : v) {
-                                out.append(occurrence.getResiduePairDescriptor()).append(" ").append(occurrence.getResidueIndex1()).append(" ").append(occurrence.getResidueIndex2()).append("\n");
-                                structureMotifCounter.incrementAndGet();
+                            int descriptor = o.getResiduePairDescriptor();
+                            if (descriptor != lastDescriptor.get()) {
+                                buffer[0] = (byte) (magicStructureIndex >>> 24);
+                                buffer[1] = (byte) (magicStructureIndex >>> 16);
+                                buffer[2] = (byte) (magicStructureIndex >>> 8);
+                                buffer[3] = (byte) magicStructureIndex;
+                                buffer[4] = (byte) (descriptor >>> 24);
+                                buffer[5] = (byte) (descriptor >>> 16);
+                                buffer[6] = (byte) (descriptor >>> 8);
+                                buffer[7] = (byte) descriptor;
+                                outputStream.write(buffer);
+                                lastDescriptor.set(descriptor);
                             }
-                            indexWriter.write(out.toString());
+                            long identifier = o.getResiduePairIdentifier();
+                            buffer[0] = (byte) (identifier >>> 56);
+                            buffer[1] = (byte) (identifier >>> 48);
+                            buffer[2] = (byte) (identifier >>> 40);
+                            buffer[3] = (byte) (identifier >>> 32);
+                            buffer[4] = (byte) (identifier >>> 24);
+                            buffer[5] = (byte) (identifier >>> 16);
+                            buffer[6] = (byte) (identifier >>> 8);
+                            buffer[7] = (byte) identifier;
+                            outputStream.write(buffer);
+                            structureMotifCounter.incrementAndGet();
                         } catch (IOException e) {
                             throw new UncheckedIOException(e);
                         }
                     });
-            logger.info("[{}] Extracted {} residue pairs in {} ms",
+            logger.info("[{}] Wrote {} residue pairs in {} ms",
                     structureContext,
                     structureMotifCounter.get(),
-                    (System.nanoTime() - start) / 1000 / 1000);
+                    (System.nanoTime() - startWrite) / 1000 / 1000);
         } catch (Exception e) {
             logger.warn("[{}] Residue graph determination failed",
                     structureContext,

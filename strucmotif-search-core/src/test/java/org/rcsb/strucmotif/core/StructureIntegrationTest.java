@@ -207,11 +207,11 @@ class StructureIntegrationTest {
     @Test
     void whenSearchingForModifiedAminoAcids_thenResolvedCorrectly() {
         Structure forwardStructure = structureReader.readFromInputStream(getOriginalBcif("6tne"));
-        List<LabelSelection> forwardLabelSelections = List.of(new LabelSelection("A", "1", 21), // E
-                new LabelSelection("A", "1", 22), // D
-                new LabelSelection("A", "1", 67), // D
-//                new LabelSelection("A", "1", 95), // S // TODO would be nice to support this natively somehow, CB distance is 2
-                new LabelSelection("A", "1", 117)); // K
+        List<LabelSelection> forwardLabelSelections = List.of(new LabelSelection("A", "1", 7), // E
+                new LabelSelection("A", "1", 8), // D
+                new LabelSelection("A", "1", 53), // D
+//                new LabelSelection("A", "1", 81), // S // TODO would be nice to support this natively somehow, CB distance is 2
+                new LabelSelection("A", "1", 103)); // K
 
         Structure backwardStructure = structureReader.readFromInputStream(getOriginalBcif("1zdm"));
         List<LabelSelection> backwardLabelSelections = List.of(new LabelSelection("A", "1", 12), // D
@@ -229,7 +229,7 @@ class StructureIntegrationTest {
 
         StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
                 .buildParameters()
-                .addPositionSpecificExchange(new LabelSelection("A", "1", 21), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 7), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
                 .allowedStructures(structures)
                 .buildContext()
                 .run();

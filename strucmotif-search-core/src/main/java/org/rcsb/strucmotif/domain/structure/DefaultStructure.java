@@ -323,8 +323,12 @@ public class DefaultStructure implements Structure {
 
     @Override
     public LabelSelection getLabelSelection(int residueIndex) {
-        // TODO inline some of the partial mapping work?
-        return new LabelSelection(getLabelAsymId(residueIndex), getTransformationIdentifier(residueIndex), getLabelSeqId(residueIndex));
+        int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
+        int labelAsymIdIndex = instancedChainToLabelAsymIdsIndices[instancedChainIndex];
+        String labelAsymId = labelAsymIds[labelAsymIdIndex];
+        String transformationIdentifier = transformationIdentifiers[instancedChainToTransformationIndices[instancedChainIndex]];
+        int labelSeqId = labelSeqIds[residueIndex - instancedChainOffsets[instancedChainIndex] + chainOffsets[labelAsymIdIndex]];
+        return new LabelSelection(labelAsymId, transformationIdentifier, labelSeqId);
     }
 
     private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId) {

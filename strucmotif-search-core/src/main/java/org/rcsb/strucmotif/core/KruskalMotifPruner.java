@@ -5,11 +5,7 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -21,6 +17,8 @@ public class KruskalMotifPruner implements MotifPruner {
     @Override
     public List<ResiduePairOccurrence> prune(ResidueGraph residueGraph) {
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()
+                // sort all edges by weight
+                .sorted(Comparator.comparingInt(mo -> ResiduePairDescriptor.getBackboneDistance(mo.getResiduePairDescriptor()).ordinal()))
                 .collect(Collectors.toList());
 
         // ignore motifs with <4 identifiers
@@ -34,8 +32,6 @@ public class KruskalMotifPruner implements MotifPruner {
     private List<ResiduePairOccurrence> kruskal(List<ResiduePairOccurrence> residuePairOccurrences) {
         List<Set<Integer>> coveredSelectors = new ArrayList<>();
         List<ResiduePairOccurrence> result = new ArrayList<>();
-        // sort all edges by weight
-        residuePairOccurrences.sort(Comparator.comparingInt(mo -> ResiduePairDescriptor.getBackboneDistance(mo.getResiduePairDescriptor()).ordinal()));
 
         while (!residuePairOccurrences.isEmpty()) {
             ResiduePairOccurrence best = residuePairOccurrences.remove(0);
@@ -48,7 +44,7 @@ public class KruskalMotifPruner implements MotifPruner {
             if (set1 == null || !set1.equals(set2)) {
                 result.add(best);
 
-                Set<Integer> updated = new HashSet<>();
+                Set<Integer> updated = new LinkedHashSet<>();
                 if (set1 != null) {
                     coveredSelectors.remove(set1);
                     updated.addAll(set1);

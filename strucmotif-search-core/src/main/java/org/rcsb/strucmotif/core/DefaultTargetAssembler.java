@@ -5,6 +5,7 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
@@ -225,7 +226,6 @@ public class DefaultTargetAssembler implements TargetAssembler {
             // generate overlap profile
             Overlap[] overlapProfile = new Overlap[pathGeneration];
             for (int i = 0; i < pathGeneration; i++) {
-                // defined by query structure, known LabelSelections
                 overlapProfile[i] = Overlap.ofResiduePairIdentifiers(queryStructure.getResiduePairIdentifiers().get(i),
                         queryStructure.getResiduePairIdentifiers().get(pathGeneration));
             }

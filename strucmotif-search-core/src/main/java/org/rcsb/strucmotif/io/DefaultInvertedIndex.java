@@ -160,7 +160,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 int descriptor = lastDescriptor.get();
                 Map<Integer, Integer> lengthMap = byteCounts.computeIfAbsent(descriptor, e -> new HashMap<>());
                 int structureIndex = lastStructureIndex.get();
-                lengthMap.put(structureIndex, (int) (offset + 8 - startOffsets.get(descriptor).get(structureIndex)));
+                lengthMap.put(structureIndex, (int) (offset - startOffsets.get(descriptor).get(structureIndex)));
             }
             logger.info("Merging data on {} descriptors from {} structures", startOffsets.size(), partialFileMapping.size());
 

@@ -15,6 +15,7 @@ import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.core.ThreadPool;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -314,9 +315,12 @@ public class StrucmotifUpdate implements CommandLineRunner {
             OutputStream outputStream = context.getOutputStream();
             AtomicInteger structureMotifCounter = new AtomicInteger();
             AtomicInteger lastDescriptor = new AtomicInteger(); // 0 is safe as nothing should be AA-0-0-0
+//            Set<String> s = Set.of("EH-6-4-5", "EE-10-8-3", "DE-4-4-2", "DK-7-6-3");
             residueGraph.residuePairOccurrencesSequential()
+//                    .filter(o -> s.contains(ResiduePairDescriptor.toString(o.getResiduePairDescriptor())))
                     .sorted(Comparator.comparingInt(ResiduePairOccurrence::getResiduePairDescriptor))
                     .forEach(o -> {
+//                        System.out.println(o);
                         try {
                             int descriptor = o.getResiduePairDescriptor();
                             if (descriptor != lastDescriptor.get()) {

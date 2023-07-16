@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
@@ -100,8 +101,11 @@ public class StructureQueryStructure implements QueryStructure {
         List<ResiduePairOccurrence> sparse = new ArrayList<>();
         // TODO probably better to use some knowledge here and sort descriptors by "information" (i.e. how rare they are) to do as little work as possible downstream
         List<ResiduePairOccurrence> sorted = residuePairOccurrences.stream()
+                // TODO factor out? come up with better strategy
                 // have pairs with many exchanges last (as they are expensive to evaluate)
-                .sorted(Comparator.comparingInt((ResiduePairOccurrence o) -> exchangeCounts.get(ResiduePairIdentifier.getResidueIndex1(o.getResiduePairIdentifier())) + exchangeCounts.get(ResiduePairIdentifier.getResidueIndex2(o.getResiduePairIdentifier())))
+                .sorted(Comparator.comparingInt((ResiduePairOccurrence o) -> exchangeCounts.get(ResiduePairIdentifier.getResidueIndex1(o.getResiduePairIdentifier())) + exchangeCounts.get(ResiduePairIdentifier.getResidueIndex2(o.getResiduePairIdentifier()))).reversed()
+                        // avoid ambiguous descriptors
+                        .thenComparing(o -> ResiduePairDescriptor.isAmbiguous(o.getResiduePairDescriptor()))
                         // move pairs with many connections to the front
                         .thenComparing((ResiduePairOccurrence o) -> connectionCounts.get(ResiduePairIdentifier.getResidueIndex1(o.getResiduePairIdentifier())) + connectionCounts.get(ResiduePairIdentifier.getResidueIndex2(o.getResiduePairIdentifier()))))
                 .collect(Collectors.toList());

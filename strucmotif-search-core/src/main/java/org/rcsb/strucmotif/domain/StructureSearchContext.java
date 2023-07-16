@@ -57,7 +57,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
         logger.info("[{}] Query: {} with {}",
                 id,
                 queryStructure.getStructureIdentifier(),
-                queryStructure.getResiduePairIdentifiers().stream().map(ResiduePairIdentifier::toString).collect(Collectors.toList()));
+                queryStructure.getResiduePairOccurrences());
         logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}, Limit: {}",
                 id,
                 query.getExchanges(),

@@ -171,7 +171,7 @@ class StructureIntegrationTest {
                 .map(StructureHit::getResidueTypes)
                 .map(a -> a.stream().map(ResidueType::getInternalCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
-                .collect(Collectors.toList());
+                .toList();
 
         assertFalse(observedExchanges.isEmpty(), "didn't observe exchange");
 
@@ -179,7 +179,7 @@ class StructureIntegrationTest {
                 .stream()
                 .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier())
                 .filter(assemblyIdentifier -> !assemblyIdentifier.contains("_1"))
-                .collect(Collectors.toList());
+                .toList();
 
         assertFalse(observedAssemblies.isEmpty(), "didn't observe assemblies");
 
@@ -190,7 +190,7 @@ class StructureIntegrationTest {
                 .filter(list -> IntStream.range(1, list.size())
                         .map(index -> list.get(index - 1).compareTo(list.get(index)))
                         .anyMatch(order -> order > 0))
-                .collect(Collectors.toList());
+                .toList();
 
         assertFalse(swaps.isEmpty(), "didn't observe swaps");
 

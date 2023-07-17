@@ -351,8 +351,8 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
             Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
             // TODO weird on windows
-//            Files.deleteIfExists(partialDataPath);
-//            Files.deleteIfExists(partialIndexPath);
+            Files.deleteIfExists(partialDataPath);
+            Files.deleteIfExists(partialIndexPath);
             initializeFileBundle();
             initializePartialFileBundle();
         } catch (IOException e) {

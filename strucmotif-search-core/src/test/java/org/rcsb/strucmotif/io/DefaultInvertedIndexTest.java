@@ -52,7 +52,6 @@ class DefaultInvertedIndexTest {
             DistanceType.D6,
             DistanceType.D7,
             AngleType.A80);
-
     @Test
     void whenAccessingSpecificBin_thenObserveAssemblies() {
         InvertedIndexBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);

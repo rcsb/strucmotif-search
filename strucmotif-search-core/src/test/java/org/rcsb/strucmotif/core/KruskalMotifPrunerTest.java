@@ -76,7 +76,6 @@ class KruskalMotifPrunerTest {
         assertEquals(3, motifOccurrences.size());
         assertTrue(motifOccurrences.stream()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
-                // .peek(System.out::println)
                 .map(ResiduePairDescriptor::getBackboneDistance)
                 .mapToInt(DistanceType::getIntRepresentation)
                 // maximum alpha carbon distance is 7

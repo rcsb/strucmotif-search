@@ -24,6 +24,7 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -117,9 +118,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
 
     @Override
     public void commit() {
-        // TODO include existing data
         logger.info("Committing temporary files to index");
         try {
+            Set<Integer> existingDescriptors = reportKnownDescriptors();
+
             // this captures all additional data
             List<Path> partials = partialFilenames().collect(Collectors.toList());
             logger.info("Merging partial data from {}", partials);
@@ -158,13 +160,29 @@ public class DefaultInvertedIndex implements InvertedIndex {
 
                 // capture last datum
                 int descriptor = lastDescriptor.get();
+                // files might have been created but no content was written
+                if (descriptor == Integer.MAX_VALUE) {
+                    continue;
+                }
                 Map<Integer, Integer> lengthMap = byteCounts.computeIfAbsent(descriptor, e -> new HashMap<>());
                 int structureIndex = lastStructureIndex.get();
                 lengthMap.put(structureIndex, (int) (offset - startOffsets.get(descriptor).get(structureIndex)));
             }
-            logger.info("Merging data on {} descriptors from {} structures", startOffsets.size(), partialFileMapping.size());
 
             WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
+            Set<Integer> existingOnly = existingDescriptors.stream().filter(i -> !startOffsets.containsKey(i)).collect(Collectors.toSet());
+            if (!existingOnly.isEmpty()) {
+                logger.info("Transferring existing data for {} descriptors", existingOnly.size());
+                ByteBuffer tmp;
+                for (int descriptor : existingOnly) {
+                    String filename = descriptor + extension;
+                    // TODO might exceed limit on memory-mapped regions, possible to harden this? move upstream to FileBundleIO?
+                    tmp = fileBundle.readFile(filename);
+                    temporaryFileBundle.writeFile(filename, tmp);
+                }
+            }
+
+            logger.info("Merging data on {} descriptors from {} structures", startOffsets.size(), partialFileMapping.size());
             AtomicInteger counter = new AtomicInteger();
             startOffsets.entrySet()
                     .parallelStream()
@@ -177,11 +195,35 @@ public class DefaultInvertedIndex implements InvertedIndex {
                         int identifierCount = perStructureStart.keySet().stream().mapToInt(si -> perStructureByteCount.get(si) / 4).sum();
 
                         try {
-                            int[] structureIndices = new int[structureCount];
-                            int[] positionOffsets = new int[structureCount];
-                            int[] identifierData = new int[identifierCount];
+                            int[] structureIndices;
+                            int[] positionOffsets;
+                            int[] identifierData;
                             int outerPos = 0;
                             int innerPos = 0;
+
+                            // check if there's data in production files, if so concat that to the start of the arrays
+                            if (fileBundle.containsFile(descriptor + extension)) {
+                                ByteBuffer byteBuffer = fileBundle.readFile(descriptor + extension);
+                                InvertedIndexBucket existingBucket = bucketCodec.decode(byteBuffer);
+
+                                int existingStructureCount = existingBucket.getStructureIndexArray().length;
+                                int existingIdentifierCount = existingBucket.getIdentifierDataArray().length;
+                                structureIndices = new int[structureCount + existingStructureCount];
+                                positionOffsets = new int[structureCount + existingStructureCount];
+                                identifierData = new int[identifierCount + existingIdentifierCount];
+
+                                System.arraycopy(existingBucket.getStructureIndexArray(), 0, structureIndices, 0, existingStructureCount);
+                                System.arraycopy(existingBucket.getPositionOffsetArray(), 0, positionOffsets, 0, existingStructureCount);
+                                System.arraycopy(existingBucket.getIdentifierDataArray(), 0, identifierData, 0, existingIdentifierCount);
+
+                                // advance positions accordingly
+                                outerPos += existingStructureCount;
+                                innerPos += existingIdentifierCount;
+                            } else {
+                                structureIndices = new int[structureCount];
+                                positionOffsets = new int[structureCount];
+                                identifierData = new int[identifierCount];
+                            }
 
                             for (Map.Entry<Integer, Long> datum : perStructureStart.entrySet()) {
                                 int structureIndex = datum.getKey();
@@ -395,28 +437,27 @@ public class DefaultInvertedIndex implements InvertedIndex {
         int updatedLength = originalLength - indicesToRemove.length;
         int[] structureIndices = new int[updatedLength];
         int[] positionOffsets = new int[updatedLength];
-        int acceptedIdentifierCount = 0;
         int[] identifierData = new int[originalIdentifierData.length]; // assume worst-case for now
 
         int outerPos = 0;
         int identifierPos = 0;
         int removeIndex = 0;
         for (int i = 0; i < originalLength; i++) {
-            if (i < indicesToRemove[removeIndex]) {
+            if (removeIndex < indicesToRemove.length && i == indicesToRemove[removeIndex]) {
+                removeIndex++;
                 continue;
             }
 
             structureIndices[outerPos] = originalStructureIndices[i];
-            positionOffsets[outerPos] = originalPositionOffsets[i];
+            positionOffsets[outerPos] = identifierPos;
             // copy partial range to output array
-            int identifierCopyCount = i + 1 == originalIdentifierData.length ? originalIdentifierData.length : originalIdentifierData[i + 1] - originalIdentifierData[i];
+            int identifierCopyCount = (i + 1 == originalPositionOffsets.length ? originalIdentifierData.length : originalPositionOffsets[i + 1]) - originalPositionOffsets[i];
             System.arraycopy(originalIdentifierData, originalPositionOffsets[i], identifierData, identifierPos, identifierCopyCount);
 
             outerPos++;
             identifierPos += identifierCopyCount;
-            removeIndex++;
         }
-        System.arraycopy(identifierData, 0, identifierData, 0, acceptedIdentifierCount);
+        identifierData = Arrays.copyOf(identifierData, identifierPos);
 
         return new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
     }

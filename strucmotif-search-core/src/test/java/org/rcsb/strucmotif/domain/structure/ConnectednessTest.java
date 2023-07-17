@@ -101,7 +101,6 @@ public class ConnectednessTest {
                 .mapToObj(structure::manifestResidue)
                 .collect(Collectors.toList());
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
-        residueGraph.residuePairOccurrencesSequential().forEach(System.out::println);
         assertFalse(residueGraph.isConnected());
     }
 }

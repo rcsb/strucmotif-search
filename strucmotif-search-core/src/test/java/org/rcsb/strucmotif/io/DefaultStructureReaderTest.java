@@ -12,6 +12,7 @@ import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -258,5 +259,12 @@ class DefaultStructureReaderTest {
             }
         }
         assertTrue(i1 < i2);
+    }
+
+    @Test
+    void whenReadingFileWithoutAssemblyInformation_thenFallback() {
+        Structure structure = structureReader.readFromInputStream(Helpers.getResource("cif/AF-Q76EI6-F1-model_v4.cif"));
+        assertArrayEquals(new String[] { "A", "1" }, structure.getReferencedChainInstances("1"));
+        assertArrayEquals(new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 }, structure.getTransformation("1"));
     }
 }

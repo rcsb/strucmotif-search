@@ -5,7 +5,6 @@ import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
@@ -176,8 +175,8 @@ public class DefaultTargetAssembler implements TargetAssembler {
                 identifiers = new int[n * 2];
 
                 for (int j = 0; j < n - 1; j = j + 2) {
-                    int index1 = bucket.getResidueIndex(j);
-                    int index2 = bucket.getResidueIndex(j + 1);
+                    int index1 = bucket.getResidueIndex(start + j);
+                    int index2 = bucket.getResidueIndex(start + j + 1);
                     identifiers[2 * j] = index1;
                     identifiers[2 * j + 1] = index2;
                     identifiers[2 * j + 2] = index2;
@@ -187,8 +186,8 @@ public class DefaultTargetAssembler implements TargetAssembler {
                 identifiers = new int[n];
 
                 for (int j = 0; j < n - 1; j = j + 2) {
-                    int index1 = bucket.getResidueIndex(j);
-                    int index2 = bucket.getResidueIndex(j + 1);
+                    int index1 = bucket.getResidueIndex(start + j);
+                    int index2 = bucket.getResidueIndex(start + j + 1);
                     if (flipped) {
                         identifiers[j] = index2;
                         identifiers[j + 1] = index1;

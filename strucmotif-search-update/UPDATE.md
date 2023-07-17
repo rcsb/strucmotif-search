@@ -63,18 +63,18 @@ might require a full load.
 | `ambiguous-monomer-strategy` | How to resolve ASX and GLX? | `TYPE` |
 | `ccd-url` | URL to the chemical component dictionary | wwPDB |
 | `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
-| `commit-interval` | How many chunks to process before committing to index | `25` |
+| `commit-interval` | How many entries to process before committing to index | `250,000` |
 | `data-source` | Path to local CIF archive | cif-fetch-url |
 | `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `20` |
 | `download-tries` | Number of tries to download structure data during update | `3` |
-| `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
+| `missing-assembly-strategy` | How to handle missing assembly information | `WARN` |
+| `missing-revision-strategy` | How to handle missing revision history | `WARN` |
 | `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
 | `number-threads` | Number of worker threads | available processors |
 | `residue-quality-cutoff` | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0` |
 | `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `qa_metric_local_above_cutoff` |
 | `root-path` | Path where data files will be written | `/opt/data/` |
 | `support-d-amino-acids` | Map D-amino acids to their L-counterpart | `true` |
-| `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `2400` |
 
 Configure by placing your `application.properties` on the classpath. All properties specific to this project must be
 prefixed with `strucmotif.`.

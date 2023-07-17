@@ -16,11 +16,11 @@ public class StrucmotifConfig {
      * index and can appear as search results. Lower values ease storage requirements and improve speed of update
      * operations.
      */
-    private float distanceCutoff = 15; // TODO set back to 20 once done
+    private float distanceCutoff = 20;
     /**
      * The root directory where optimized BinaryCIF data will be written.
      */
-    private String rootPath = "/Users/ashas/stoff/";
+    private String rootPath = "/opt/data/";
     /**
      * Optional path to a local collection of structure data. This will be used during update operations. If not set or
      * not valid, corresponding data will be fetched from <code>bcif-fetch-url</code>. <code>{id}</code> refers to the
@@ -35,7 +35,7 @@ public class StrucmotifConfig {
      * Hard limit on the number of results returned. Will stop jobs when this number of hits has been accepted. Acts as
      * a safeguard against too simple queries that will return an overwhelming number of results.
      */
-    private int maxResults = 50000;
+    private int maxResults = 50_000;
     /**
      * How many decimal places to report for scores.
      */
@@ -45,16 +45,11 @@ public class StrucmotifConfig {
      */
     private int decimalPlacesMatrix = 3;
     /**
-     * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
-     * speed substantially. A value of 400 works good with 12 GB of heap, the higher the faster.
-     */
-    private int updateChunkSize = 1600;
-    /**
      * The batch size during app initialization. Only relevant if `in-memory-strategy` is set to `heap`. The specified
      * number of structures will be loaded into memory before logging process. This mainly serves as checkpoint during
      * initialization.
      */
-    private int loadingChunkSize = 12800;
+    private int loadingChunkSize = 250_000;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -93,7 +88,7 @@ public class StrucmotifConfig {
      * How often are files committed to the inverted index during update. This is the interval between dumping residue
      * pairs into temporary files and compacting these temporary files and actually adding them to the real index file.
      */
-    private int commitInterval = 16;
+    private int commitInterval = 250_000;
     /**
      * URL of the Chemical Component Dictionary.
      */
@@ -107,6 +102,14 @@ public class StrucmotifConfig {
      * Specify whether to map GLX and ASX to their respective amide, acid, or the unknown amino acid.
      */
     private AmbiguousMonomerStrategy ambiguousMonomerStrategy = AmbiguousMonomerStrategy.TYPE;
+    /**
+     * Behavior if revision history in source CIF file is undefined.
+     */
+    private MissingCategoryStrategy missingRevisionStrategy = MissingCategoryStrategy.WARN;
+    /**
+     * Behavior if assembly information in source CIF file is undefined.
+     */
+    private MissingCategoryStrategy missingAssemblyStrategy = MissingCategoryStrategy.WARN;
     /**
      * List of all identifiers ever registered.
      */
@@ -123,10 +126,6 @@ public class StrucmotifConfig {
      * Name of the inverted index bundle.
      */
     public static final String INDEX = "index";
-    /**
-     * Name of the directory with partial update files.
-     */
-    public static final String PARTIAL = "tmp";
     /**
      * Extension of FFindex data files.
      */
@@ -258,22 +257,6 @@ public class StrucmotifConfig {
      */
     public void setDecimalPlacesMatrix(int decimalPlacesMatrix) {
         this.decimalPlacesMatrix = decimalPlacesMatrix;
-    }
-
-    /**
-     * How many structures to process before flushing to inverted index.
-     * @return an int
-     */
-    public int getUpdateChunkSize() {
-        return updateChunkSize;
-    }
-
-    /**
-     * Set how many structures to process before flushing to inverted index.
-     * @param updateChunkSize an int
-     */
-    public void setUpdateChunkSize(int updateChunkSize) {
-        this.updateChunkSize = updateChunkSize;
     }
 
     /**
@@ -494,5 +477,37 @@ public class StrucmotifConfig {
      */
     public void setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy ambiguousMonomerStrategy) {
         this.ambiguousMonomerStrategy = ambiguousMonomerStrategy;
+    }
+
+    /**
+     * Get the behavior upon missing revision information.
+     * @return ignore/warn/fail
+     */
+    public MissingCategoryStrategy getMissingRevisionStrategy() {
+        return missingRevisionStrategy;
+    }
+
+    /**
+     * Change the behavior upon missing revision information.
+     * @param missingRevisionStrategy ignore/warn/fail
+     */
+    public void setMissingRevisionStrategy(MissingCategoryStrategy missingRevisionStrategy) {
+        this.missingRevisionStrategy = missingRevisionStrategy;
+    }
+
+    /**
+     * Get the behavior upon missing assembly information.
+     * @return ignore/warn/fail
+     */
+    public MissingCategoryStrategy getMissingAssemblyStrategy() {
+        return missingAssemblyStrategy;
+    }
+
+    /**
+     * Change the behavior upon missing assembly information.
+     * @param missingAssemblyStrategy ignore/warn/fail
+     */
+    public void setMissingAssemblyStrategy(MissingCategoryStrategy missingAssemblyStrategy) {
+        this.missingAssemblyStrategy = missingAssemblyStrategy;
     }
 }

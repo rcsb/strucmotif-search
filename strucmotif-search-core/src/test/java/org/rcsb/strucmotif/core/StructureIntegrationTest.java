@@ -164,7 +164,7 @@ class StructureIntegrationTest {
 
         StructureSearchResult response = buildParameters.buildContext().run();
 
-        assertEquals(422, response.getHits().size());
+        assertEquals(798, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()

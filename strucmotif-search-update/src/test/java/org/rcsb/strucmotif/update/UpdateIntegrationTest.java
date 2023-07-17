@@ -50,7 +50,6 @@ class UpdateIntegrationTest {
     public void setup() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
         // ensure merging and side-by-side temporary files happen
-        strucmotifConfig.setUpdateChunkSize(1);
         strucmotifConfig.setCommitInterval(1);
         strucmotifConfig.setInvertedIndexBackend(InvertedIndexBackend.COLFER);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");

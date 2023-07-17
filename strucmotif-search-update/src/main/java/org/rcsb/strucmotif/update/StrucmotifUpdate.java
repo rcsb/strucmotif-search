@@ -15,7 +15,6 @@ import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -24,6 +23,7 @@ import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
+import org.rcsb.strucmotif.math.Partition;
 import org.rcsb.strucmotif.update.extractor.KeyExtractorFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,10 +142,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         // ensure no partial files linger
-        Files.list(Paths.get(strucmotifConfig.getRootPath()))
-                .filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().endsWith(StrucmotifConfig.TMP_EXT))
-                .map(Path::toFile)
-                .forEach(File::delete);
+        deletePartialFiles();
 
         logger.info("Starting update - Operation: {}, {} ids ({})",
                 operation,
@@ -160,6 +157,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             case REMOVE -> remove(getDeltaMinusIdentifiers(requested));
             case RECOVER -> recover(stateRepository.selectDirty());
         }
+
+        // ensure no partial files files
+        deletePartialFiles();
 
         logger.info("Finished update operation");
     }
@@ -192,26 +192,42 @@ public class StrucmotifUpdate implements CommandLineRunner {
         long target = context.updateItems.size();
         logger.info("{} files to process in total", target);
 
+        Partition<UpdateItem> partitions = new Partition<>(context.updateItems, strucmotifConfig.getCommitInterval());
+        if (partitions.size() > 1) {
+            logger.info("Formed {} partitions of {} structures", partitions.size(), strucmotifConfig.getCommitInterval());
+        }
+
         Set<String> known = getKnown();
+        boolean needsCommit = false;
 
-        context.structureCounter = new AtomicInteger();
-        threadPool.submit(() -> {
-            context.updateItems.parallelStream().forEach(item -> handleUpdateItem(item, context));
-            return null;
-        }).get();
+        // split into partitions and process
+        for (int i = 0; i < partitions.size(); i++) {
+            List<UpdateItem> partition = partitions.get(i);
+            context.partitionSize = partition.size();
+            context.partitionContext = (i + 1) + " / " + partitions.size();
+            context.structureCounter = new AtomicInteger();
+            threadPool.submit(() -> {
+                partition.parallelStream().forEach(item -> handleUpdateItem(item, context));
+                return null;
+            }).get();
+            needsCommit = true;
 
-        // flush and close all referenced files
-        context.close();
+            if (context.structureCounter.get() > 0) {
+                commit(context, known);
+                needsCommit = false;
+            }
+        }
 
-        // TODO allow to commit after some interval?
-        // TODO allow to resume after failing?
-        if (context.structureCounter.get() > 0) {
+        if (needsCommit) {
             commit(context, known);
         }
     }
 
-    private void commit(Context context, Set<String> known) {
+    private void commit(Context context, Set<String> known) throws IOException {
         logger.info("Committing data on {} structures", context.processed.size());
+        // flush per-thread streams
+        context.flush();
+
         // mark as dirty before index update
         Set<String> dirty = context.processed.stream()
                 .map(StructureInformation::structureIdentifier)
@@ -228,6 +244,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         // reset state
         context.processed.clear();
+        context.close();
     }
 
     private void handleUpdateItem(UpdateItem item, Context context) {
@@ -244,9 +261,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
                 int count = context.structureCounter.get();
                 String source = item.getUrl() != null ? item.getUrl().toString() : item.getStructureIdentifier();
-                String structureContext = count + " / " + context.updateItems.size() + "] [" + source;
-                logger.warn("[{}] [try: {} / {}] Failed to download or parse source file - {}",
-                        structureContext, i, maxRetries, e.getMessage());
+                String structureContext = count + " / " + context.partitionSize + "] [" + source;
+                logger.warn("[{}] [{}] [try: {} / {}] Failed to download or parse source file - {}",
+                        context.partitionContext, structureContext, i, maxRetries, e.getMessage());
             }
         }
     }
@@ -263,21 +280,31 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
             // assert that all categories are present
             PdbxAuditRevisionHistory revisionHistory = block.getPdbxAuditRevisionHistory();
-            if (!revisionHistory.isDefined()) {
-                throw new IllegalArgumentException("'pdbx_audit_revision_history' is mandatory in input files - rejecting " + structureIdentifier);
+            int majorRevision = 1;
+            int minorRevision = 0;
+            if (revisionHistory.isDefined()) {
+                majorRevision = revisionHistory.getMajorRevision().get(revisionHistory.getRowCount() - 1);
+                minorRevision = revisionHistory.getMinorRevision().get(revisionHistory.getRowCount() - 1);
+            } else {
+                switch (strucmotifConfig.getMissingRevisionStrategy()) {
+                    case IGNORE -> {}
+                    case WARN -> logger.warn("[{}] [{}] 'pdbx_audit_revision_history' is undefined, defaulting to 1.0", context.partitionContext, structureIdentifier);
+                    case FAIL -> throw new IllegalArgumentException("'pdbx_audit_revision_history' is mandatory in input files - rejecting " + structureIdentifier);
+                }
             }
-            int majorRevision = revisionHistory.getMajorRevision().get(revisionHistory.getRowCount() - 1);
-            int minorRevision = revisionHistory.getMinorRevision().get(revisionHistory.getRowCount() - 1);
             PdbxStructAssembly pdbxStructAssembly = block.getPdbxStructAssembly();
             PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
             PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
             if (!pdbxStructAssembly.isDefined() || !pdbxStructAssemblyGen.isDefined() || !pdbxStructOperList.isDefined()) {
-                // TODO could allow 'lenient' mode that can be used to index AF data directly
-                throw new IllegalArgumentException("'pdbx_struct_assembly', 'pdbx_struct_assembly_gen', and 'pdbx_struct_oper_list' are mandatory in input files - rejecting " + structureIdentifier);
+                switch (strucmotifConfig.getMissingAssemblyStrategy()) {
+                    case IGNORE -> {}
+                    case WARN -> logger.warn("[{}] [{}] 'pdbx_struct_assembly', 'pdbx_struct_assembly_gen', or 'pdbx_struct_oper_list' are undefined", context.partitionContext, structureIdentifier);
+                    case FAIL -> throw new IllegalArgumentException("'pdbx_struct_assembly', 'pdbx_struct_assembly_gen', and 'pdbx_struct_oper_list' are mandatory in input files - rejecting " + structureIdentifier);
+                }
             }
 
             // write renumbered structure
-            logger.debug("[{}] Writing renumbered structure file", structureIdentifier);
+            logger.debug("[{}] [{}] Writing renumbered structure file", context.partitionContext, structureIdentifier);
             structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
             context.processed.add(new StructureInformation(structureIdentifier, structureIndex, majorRevision, minorRevision));
         } catch (IOException e) {
@@ -287,14 +314,14 @@ public class StrucmotifUpdate implements CommandLineRunner {
         }
 
         int count = context.structureCounter.incrementAndGet();
-        String structureContext = count + " / " + strucmotifConfig.getUpdateChunkSize() + "] [" + structureIdentifier;
+        String structureContext = count + " / " + context.partitionSize + "] [" + structureIdentifier;
 
         // fails when file is missing, expected when e.g. all residues of the file where below the pLDDT threshold
         Structure structure;
         try {
             structure = structureDataProvider.readRenumbered(structureIdentifier);
         } catch (UncheckedIOException e) {
-            logger.warn("[{}] No renumbered source file present - Skipping", structureContext);
+            logger.warn("[{}] [{}] No renumbered source file present - Skipping", context.partitionContext, structureContext);
             return;
         }
 
@@ -302,7 +329,8 @@ public class StrucmotifUpdate implements CommandLineRunner {
             long startGraph = System.nanoTime();
             // TODO include whole chain in contact? 'all' is favorable but wastes a lot of space
             ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
-            logger.info("[{}] Computed residue graph ({} residues, {} pairs) in {} ms",
+            logger.info("[{}] [{}] Computed residue graph ({} residues, {} pairs) in {} ms",
+                    context.partitionContext,
                     structureContext,
                     residueGraph.getResidueCount(),
                     residueGraph.getPairingCount(),
@@ -315,12 +343,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             OutputStream outputStream = context.getOutputStream();
             AtomicInteger structureMotifCounter = new AtomicInteger();
             AtomicInteger lastDescriptor = new AtomicInteger(); // 0 is safe as nothing should be AA-0-0-0
-//            Set<String> s = Set.of("EH-6-4-5", "EE-10-8-3", "DE-4-4-2", "DK-7-6-3");
             residueGraph.residuePairOccurrencesSequential()
-//                    .filter(o -> s.contains(ResiduePairDescriptor.toString(o.getResiduePairDescriptor())))
                     .sorted(Comparator.comparingInt(ResiduePairOccurrence::getResiduePairDescriptor))
                     .forEach(o -> {
-//                        System.out.println(o);
                         try {
                             int descriptor = o.getResiduePairDescriptor();
                             if (descriptor != lastDescriptor.get()) {
@@ -350,12 +375,14 @@ public class StrucmotifUpdate implements CommandLineRunner {
                             throw new UncheckedIOException(e);
                         }
                     });
-            logger.info("[{}] Wrote {} residue pairs in {} ms",
+            logger.info("[{}] [{}] Wrote {} residue pairs in {} ms",
+                    context.partitionContext,
                     structureContext,
                     structureMotifCounter.get(),
                     (System.nanoTime() - startWrite) / 1000 / 1000);
         } catch (Exception e) {
-            logger.warn("[{}] Residue graph determination failed",
+            logger.error("[{}] [{}] Residue graph determination failed",
+                    context.partitionContext,
                     structureContext,
                     e);
             // fail complete update
@@ -401,9 +428,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     .map(structureIndexProvider::selectStructureIndex)
                     .collect(Collectors.toSet());
             if (!mapped.isEmpty()) {
-                logger.info("Removing {} structures from inverted index", mapped.size());
                 invertedIndex.delete(mapped);
-                logger.debug("Done removing structures from inverted index");
             }
         }
 
@@ -420,8 +445,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
      */
     public List<UpdateItem> getAllIdentifiers(String mode) throws IOException {
         logger.info("Retrieving current {} entry list from RCSB PDB Search API", mode);
+        URL url = composeSearchUrl(mode);
+        logger.info("URL: {}", url);
         List<UpdateItem> out = new ArrayList<>();
-        try (InputStream inputStream = composeSearchUrl(mode).openStream()) {
+        try (InputStream inputStream = url.openStream()) {
             JsonElement jsonElement = new Gson().fromJson(new InputStreamReader(inputStream), JsonElement.class);
             JsonObject jsonObject = jsonElement.getAsJsonObject();
 
@@ -438,26 +465,26 @@ public class StrucmotifUpdate implements CommandLineRunner {
             default -> throw new UnsupportedOperationException(mode + " is not yet implemented");
         };
 
-        String query = URLEncoder.encode("{\n" +
-                "  \"query\": {\n" +
-                        "    \"type\": \"terminal\",\n" +
-                        "    \"label\": \"text\",\n" +
-                        "    \"service\": \"text\",\n" +
-                        "    \"parameters\": {\n" +
-                        "      \"attribute\": \"rcsb_entry_container_identifiers.entry_id\",\n" +
-                        "      \"operator\": \"exists\",\n" +
-                        "      \"negation\": false\n" +
-                        "    }\n" +
-                        "  },\n" +
-                        "  \"return_type\": \"entry\",\n" +
-                        "  \"request_options\": {\n" +
-                        "    \"results_content_type\": [\n" +
-                        types +
-                        "    ],\n" +
-                        "    \"return_all_hits\": true,\n" +
-                        "    \"results_verbosity\": \"compact\"\n" +
-                        "  }\n" +
-                        "}", StandardCharsets.UTF_8);
+        String query = URLEncoder.encode("""
+                {
+                  "query": {
+                    "type": "terminal",
+                    "label": "text",
+                    "service": "text",
+                    "parameters": {
+                      "attribute": "rcsb_entry_container_identifiers.entry_id",
+                      "operator": "exists",
+                      "negation": false
+                    }
+                  },
+                  "return_type": "entry",
+                  "request_options": {
+                    "results_content_type": [{types}],
+                    "return_all_hits": true,
+                    "results_verbosity": "compact"
+                  }
+                }
+                """.replace("{types}", types), StandardCharsets.UTF_8);
         return new URL("https://search.rcsb.org/rcsbsearch/v2/query?json=" + query);
     }
 
@@ -579,5 +606,12 @@ public class StrucmotifUpdate implements CommandLineRunner {
         Collections.shuffle(requested);
 
         return requested;
+    }
+
+    private void deletePartialFiles() throws IOException {
+        Files.list(Paths.get(strucmotifConfig.getRootPath()))
+                .filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().endsWith(StrucmotifConfig.TMP_EXT))
+                .map(Path::toFile)
+                .forEach(File::delete);
     }
 }

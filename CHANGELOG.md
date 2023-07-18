@@ -15,9 +15,12 @@ Unreleased
 
 ### Breaking changes
 - switch to Java 17
+- changes to binary format of inverted index
+- changes to structure information written to BinaryCIF files
 - rename `MotifSearchQuery` -> `MotifQuery` (to align with `StructureQuery`)
-- drop support for structures without assembly information (fix at source if needed)
 - coordinate precision is not configurable anymore (now always 1 decimal place)
+- renames default/standard implementations from `ServiceImpl` to `DefaultService`
+- migrate to records where sensible
 
 strucmotif-search 0.18.1
 -------------

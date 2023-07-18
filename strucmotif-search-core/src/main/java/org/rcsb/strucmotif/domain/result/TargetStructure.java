@@ -155,7 +155,7 @@ public class TargetStructure {
 
                     AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));
                     // filter away high-RMSD hits
-                    if (alignmentResult.getRootMeanSquareDeviation() >= rmsdCutoff) {
+                    if (alignmentResult.rmsd() >= rmsdCutoff) {
                         return null;
                     }
 
@@ -163,8 +163,8 @@ public class TargetStructure {
                             entry.getKey(),
                             labelSelections,
                             Arrays.asList(residueTypes),
-                            alignmentResult.getRootMeanSquareDeviation(),
-                            alignmentResult.getTransformation());
+                            alignmentResult.rmsd(),
+                            alignmentResult.transformation());
                 })
                 .filter(Objects::nonNull);
     }
@@ -172,7 +172,7 @@ public class TargetStructure {
     private int[] orderResidueIndices(int[] identifiers, int[] residueIndexSwaps) {
         try {
             // ensure correct 'human-readable' order of residues
-            int[] shuffledResidueIndices = Arrays.stream(identifiers).distinct().toArray(); // TODO correct?
+            int[] shuffledResidueIndices = Arrays.stream(identifiers).distinct().toArray();
 
             return IntStream.of(residueIndexSwaps)
                     .map(i -> shuffledResidueIndices[i])

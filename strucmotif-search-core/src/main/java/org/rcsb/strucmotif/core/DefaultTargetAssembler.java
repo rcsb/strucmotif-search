@@ -89,10 +89,8 @@ public class DefaultTargetAssembler implements TargetAssembler {
             Map<Integer, int[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                     .mapToObj(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
                     .flatMap(Function.identity())
-                    .collect(Collectors.toConcurrentMap(Pair::getFirst, Pair::getSecond, DefaultTargetAssembler::concat))).get();
+                    .collect(Collectors.toConcurrentMap(Pair::first, Pair::second, DefaultTargetAssembler::concat))).get();
 
-            // TODO try to avoid object creation
-            // TODO try to consume stream directly
             consume(context, residuePairIdentifiers);
 
             // update allowed set for next iteration

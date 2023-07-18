@@ -3,7 +3,6 @@ package org.rcsb.strucmotif.domain.structure;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.motif.*;
 import org.rcsb.strucmotif.math.Algebra;
 import org.slf4j.Logger;
@@ -97,9 +96,7 @@ public class ResidueGraph {
         this.pairingCount = fillResidueGrid(structure, residueVectors, strucmotifConfig.getSquaredDistanceCutoff(), options);
     }
 
-    static record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors,
-                                 float[] normalVectors) {
-    }
+    static record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors, float[] normalVectors) {}
 
     private ResidueVectors populateResidueVectors(Structure structure, ResidueGraphOptions options) {
         int valid = 0;
@@ -347,13 +344,12 @@ public class ResidueGraph {
         List<float[]> coords = List.of(n, ca, c);
         float[] v = Algebra.centroid3d(coords);
 
-        // TODO change this to flat array?
-        Transformation transformation = QuaternionAlignmentService.align(coords, v, REFERENCE_BACKBONE, REFERENCE_CENTROID).getFirst();
-        Algebra.multiply4d(v, transformation.getTransformationMatrix(), REFERENCE_CB);
+        float[] transformation = QuaternionAlignmentService.align(coords, v, REFERENCE_BACKBONE, REFERENCE_CENTROID).first();
+        Algebra.multiply4d(v, transformation, REFERENCE_CB);
         return v;
     }
 
-    private float distanceSquared3d(float[] vectors, int i, int j) {
+    static float distanceSquared3d(float[] vectors, int i, int j) {
         i *= 3;
         j *= 3;
         float dx = vectors[i] - vectors[j];
@@ -411,8 +407,8 @@ public class ResidueGraph {
         visited.add(currentNode);
 
         for (Pair<Integer, Integer> edge : edges) {
-            int node1 = edge.getFirst();
-            int node2 = edge.getSecond();
+            int node1 = edge.first();
+            int node2 = edge.second();
             if (currentNode != node1 && currentNode != node2) {
                 continue;
             }

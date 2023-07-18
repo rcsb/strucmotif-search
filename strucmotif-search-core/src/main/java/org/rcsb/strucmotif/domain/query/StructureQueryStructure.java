@@ -1,7 +1,6 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
@@ -10,11 +9,9 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,28 +85,10 @@ public class StructureQueryStructure implements QueryStructure {
      * @return a filtered collection of residue pair occurrences
      */
     private List<ResiduePairOccurrence> getPathOfConnectedResiduePairs(List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
-        Map<Integer, Integer> exchangeCounts = residuePairOccurrences.stream()
-                .flatMapToInt(ResiduePairOccurrence::residueIndices)
-                .distinct()
-                .boxed()
-                .collect(Collectors.toMap(Function.identity(), i -> exchangeCount(i, exchanges)));
-        Map<Integer, Long> connectionCounts = residuePairOccurrences.stream()
-                .flatMapToInt(ResiduePairOccurrence::residueIndices)
-                .boxed()
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<ResiduePairOccurrence> sorted = ResiduePairOccurrence.sort(residuePairOccurrences);
 
-        List<ResiduePairOccurrence> sparse = new ArrayList<>();
-        // TODO probably better to use some knowledge here and sort descriptors by "information" (i.e. how rare they are) to do as little work as possible downstream
-        List<ResiduePairOccurrence> sorted = residuePairOccurrences.stream()
-                // TODO factor out? come up with better strategy
-                // have pairs with many exchanges last (as they are expensive to evaluate)
-                .sorted(Comparator.comparingInt((ResiduePairOccurrence o) -> exchangeCounts.get(ResiduePairIdentifier.getResidueIndex1(o.getResiduePairIdentifier())) + exchangeCounts.get(ResiduePairIdentifier.getResidueIndex2(o.getResiduePairIdentifier()))).reversed()
-                        // avoid ambiguous descriptors
-                        .thenComparing(o -> ResiduePairDescriptor.isAmbiguous(o.getResiduePairDescriptor()))
-                        // move pairs with many connections to the front
-                        .thenComparing((ResiduePairOccurrence o) -> connectionCounts.get(ResiduePairIdentifier.getResidueIndex1(o.getResiduePairIdentifier())) + connectionCounts.get(ResiduePairIdentifier.getResidueIndex2(o.getResiduePairIdentifier()))))
-                .collect(Collectors.toList());
         // assign 'random' word as start
+        List<ResiduePairOccurrence> sparse = new ArrayList<>();
         sparse.add(sorted.remove(0));
 
         while (!sorted.isEmpty()) {
@@ -125,11 +104,6 @@ public class StructureQueryStructure implements QueryStructure {
         }
 
         return sparse;
-    }
-
-    private int exchangeCount(int residueIndex, Map<LabelSelection, Set<ResidueType>> exchanges) {
-        LabelSelection labelSelection = structure.getLabelSelection(residueIndex);
-        return (exchanges.containsKey(labelSelection) ? exchanges.get(labelSelection).size() : 0);
     }
 
     /**

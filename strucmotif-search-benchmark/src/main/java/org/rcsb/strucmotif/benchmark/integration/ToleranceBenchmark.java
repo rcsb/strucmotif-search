@@ -96,7 +96,7 @@ public class ToleranceBenchmark {
 
     private StructureSearchResult run(MotifDefinition motif, int tolerance, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        StructureContextBuilder.OptionalBuilderStep builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+        StructureContextBuilder.OptionalBuilderStep builder = state.queryBuilder.defineByStructureAndSelection(structure.first(), structure.second())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
                 .backboneDistanceTolerance(tolerance)

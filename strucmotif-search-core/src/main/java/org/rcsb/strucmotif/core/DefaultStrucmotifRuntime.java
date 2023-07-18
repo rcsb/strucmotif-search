@@ -275,9 +275,9 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
     private MotifHit createSubhit(MotifDefinition motifDefinition, StructureHit structureHit) {
         return new MotifHit(motifDefinition.getMotifIdentifier(),
-                structureHit.getLabelSelections(),
-                structureHit.getResidueTypes(),
-                structureHit.getRootMeanSquareDeviation(),
-                structureHit.getTransformation());
+                structureHit.labelSelections(),
+                structureHit.residueTypes(),
+                structureHit.rootMeanSquareDeviation(),
+                structureHit.transformation());
     }
 }

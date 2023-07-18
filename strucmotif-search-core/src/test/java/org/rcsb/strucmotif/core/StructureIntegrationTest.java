@@ -168,7 +168,7 @@ class StructureIntegrationTest {
 
         List<String> observedExchanges = response.getHits()
                 .stream()
-                .map(StructureHit::getResidueTypes)
+                .map(StructureHit::residueTypes)
                 .map(a -> a.stream().map(ResidueType::getInternalCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
                 .toList();
@@ -177,7 +177,7 @@ class StructureIntegrationTest {
 
         List<String> observedAssemblies = response.getHits()
                 .stream()
-                .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier())
+                .map(hit -> hit.structureIdentifier() + "_" + hit.assemblyIdentifier())
                 .filter(assemblyIdentifier -> !assemblyIdentifier.contains("_1"))
                 .toList();
 
@@ -185,7 +185,7 @@ class StructureIntegrationTest {
 
         List<List<Integer>> swaps = response.getHits()
                 .stream()
-                .map(hit -> hit.getLabelSelections().stream().map(LabelSelection::labelSeqId).collect(Collectors.toList()))
+                .map(hit -> hit.labelSelections().stream().map(LabelSelection::labelSeqId).collect(Collectors.toList()))
                 // check if some elements are unordered
                 .filter(list -> IntStream.range(1, list.size())
                         .map(index -> list.get(index - 1).compareTo(list.get(index)))
@@ -196,7 +196,7 @@ class StructureIntegrationTest {
 
         // print all results
         assertTrue(response.getHits().stream()
-                .map(StructureHit::getRootMeanSquareDeviation)
+                .map(StructureHit::rootMeanSquareDeviation)
                 .anyMatch(s -> s < 0.5), "no low-RMSD hits observed");
     }
 
@@ -225,7 +225,7 @@ class StructureIntegrationTest {
         List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).collect(Collectors.toList());
         List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).collect(Collectors.toList());
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
-        assertEquals(0.57, align.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
+        assertEquals(0.57, align.rmsd(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 
         StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
                 .buildParameters()
@@ -234,7 +234,7 @@ class StructureIntegrationTest {
                 .buildContext()
                 .run();
         assertEquals(3, forwardResult.getHits().size());
-        assertTrue(forwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("1ZDM")));
+        assertTrue(forwardResult.getHits().stream().anyMatch(h -> h.structureIdentifier().equals("1ZDM")));
 
         StructureSearchResult backwardResult = contextBuilder.defineByStructureAndSelection(backwardStructure, backwardLabelSelections)
                 .buildParameters()
@@ -242,9 +242,9 @@ class StructureIntegrationTest {
                 .allowedStructures(structures)
                 .buildContext()
                 .run();
-        assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.getStructureIdentifier() + h.getLabelSelections()).distinct().count(), "there are duplicate hits");
+        assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.structureIdentifier() + h.labelSelections()).distinct().count(), "there are duplicate hits");
         assertEquals(3, backwardResult.getHits().size());
-        assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("6TNE")));
+        assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.structureIdentifier().equals("6TNE")));
     }
 
     /**

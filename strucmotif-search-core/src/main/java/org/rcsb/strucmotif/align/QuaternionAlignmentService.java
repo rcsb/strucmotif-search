@@ -1,11 +1,9 @@
 package org.rcsb.strucmotif.align;
 
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
-import org.rcsb.strucmotif.domain.align.DefaultAlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomCorrespondence;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.math.Algebra;
 import org.springframework.stereotype.Service;
@@ -20,6 +18,8 @@ import java.util.Objects;
  */
 @Service
 public class QuaternionAlignmentService implements AlignmentService {
+    private static final float[] IDENTITY_MATRIX_3D = new float[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
+
     @Override
     public AlignmentResult align(List<Map<LabelAtomId, float[]>> reference, List<Map<LabelAtomId, float[]>> candidate, AtomPairingScheme atomPairingScheme) {
         // validate parameters
@@ -88,9 +88,9 @@ public class QuaternionAlignmentService implements AlignmentService {
         List<float[]> candidatePoints = atomCorrespondence.getCenteredCandidateVectors();
         float[] candidateCentroid = atomCorrespondence.getCandidateCentroid();
 
-        Pair<Transformation, Float> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
+        Pair<float[], Float> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
 
-        return new DefaultAlignmentResult(alignment.getFirst(), alignment.getSecond());
+        return new AlignmentResult(alignment.first(), alignment.second());
     }
 
     /**
@@ -102,8 +102,8 @@ public class QuaternionAlignmentService implements AlignmentService {
      * @return pair of transformation and RMSD
      */
     @SuppressWarnings("Duplicates")
-    public static Pair<Transformation, Float> align(List<float[]> referencePoints, float[] referenceCentroid, List<float[]> candidatePoints, float[] candidateCentroid) {
-        float[][] rot = new float[3][3];
+    public static Pair<float[], Float> align(List<float[]> referencePoints, float[] referenceCentroid, List<float[]> candidatePoints, float[] candidateCentroid) {
+        float[] rot = new float[9];
 
         // inner product
         double g1 = 0.0;
@@ -337,7 +337,7 @@ public class QuaternionAlignmentService implements AlignmentService {
 
                     if (qsqr < evecprec) {
                         /* if qsqr is still too small, return the identity matrix. */
-                        rot = Transformation.IDENTITY_MATRIX_3D;
+                        rot = IDENTITY_MATRIX_3D;
                     }
                 }
             }
@@ -360,21 +360,21 @@ public class QuaternionAlignmentService implements AlignmentService {
             yz = q3 * q4;
             ax = q1 * q2;
 
-            rot[0][0] = (float) (a2 + x2 - y2 - z2);
-            rot[0][1] = (float) (2 * (xy + az));
-            rot[0][2] = (float) (2 * (zx - ay));
-            rot[1][0] = (float) (2 * (xy - az));
-            rot[1][1] = (float) (a2 - x2 + y2 - z2);
-            rot[1][2] = (float) (2 * (yz + ax));
-            rot[2][0] = (float) (2 * (zx + ay));
-            rot[2][1] = (float) (2 * (yz - ax));
-            rot[2][2] = (float) (a2 - x2 - y2 + z2);
+            rot[0] = (float) (a2 + x2 - y2 - z2);
+            rot[1] = (float) (2 * (xy + az));
+            rot[2] = (float) (2 * (zx - ay));
+            rot[3] = (float) (2 * (xy - az));
+            rot[4] = (float) (a2 - x2 + y2 - z2);
+            rot[5] = (float) (2 * (yz + ax));
+            rot[6] = (float) (2 * (zx + ay));
+            rot[7] = (float) (2 * (yz - ax));
+            rot[8] = (float) (a2 - x2 - y2 + z2);
         }
 
         Algebra.multiply3d(candidateCentroid, Algebra.transpose3d(rot), candidateCentroid);
         float[] translation = new float[3];
         Algebra.subtract3d(translation, referenceCentroid, candidateCentroid);
-        float[][] transformation = Algebra.composeTransformationMatrix(rot, translation);
-        return new Pair<>(Transformation.of(transformation), (float) rms);
+        float[] transformation = Algebra.composeTransformationMatrix(rot, translation);
+        return new Pair<>(transformation, (float) rms);
     }
 }

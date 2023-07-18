@@ -197,7 +197,7 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
             return;
         }
 
-        // TODO add off-heap strategy
+        // TODO add off-heap strategy?
         if (strategy == InMemoryStrategy.HEAP) {
             logger.info("Structure data will be kept in memory - start loading...");
 
@@ -221,7 +221,7 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
                 // this will run on strucmotif-instances only: let's ignore thread-parameter
                 Map<String, Structure> buffer = partition.parallelStream()
                         .map(this::loadRenumberedStructurePair)
-                        .collect(Collectors.toConcurrentMap(Pair::getFirst, Pair::getSecond));
+                        .collect(Collectors.toConcurrentMap(Pair::first, Pair::second));
 
                 this.structureCache.putAll(buffer);
             }

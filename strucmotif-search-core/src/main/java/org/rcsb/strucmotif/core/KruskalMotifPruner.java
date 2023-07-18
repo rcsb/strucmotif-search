@@ -1,6 +1,5 @@
 package org.rcsb.strucmotif.core;
 
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.springframework.stereotype.Service;
@@ -17,8 +16,7 @@ public class KruskalMotifPruner implements MotifPruner {
     @Override
     public List<ResiduePairOccurrence> prune(ResidueGraph residueGraph) {
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()
-                // sort all edges by weight
-                .sorted(Comparator.comparingInt(mo -> ResiduePairDescriptor.getBackboneDistance(mo.getResiduePairDescriptor()).ordinal()))
+                .sorted(ResiduePairOccurrence.INFORMATIVENESS_COMPARATOR)
                 .collect(Collectors.toList());
 
         // ignore motifs with <4 identifiers

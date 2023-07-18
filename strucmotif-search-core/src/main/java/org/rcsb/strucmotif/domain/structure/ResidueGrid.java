@@ -210,7 +210,7 @@ public class ResidueGrid {
             for (int i : indices) {
                 for (int j : other.indices) {
                     if (j > i) {
-                        float squaredDistance = distanceSquared3d(backboneVectors, i, j);
+                        float squaredDistance = ResidueGraph.distanceSquared3d(backboneVectors, i, j);
                         if (squaredDistance < squaredCutoff) {
                             contacts.add(new ResidueContact(i, j, (float) Math.sqrt(squaredDistance)));
                         }
@@ -218,16 +218,6 @@ public class ResidueGrid {
                 }
             }
             return contacts;
-        }
-
-        private float distanceSquared3d(float[] vectors, int i, int j) {
-            i *= 3;
-            j *= 3;
-            float dx = vectors[i] - vectors[j];
-            float dy = vectors[i + 1] - vectors[j + 1];
-            float dz = vectors[i + 2] - vectors[j + 2];
-
-            return dx * dx + dy * dy + dz * dz;
         }
     }
 

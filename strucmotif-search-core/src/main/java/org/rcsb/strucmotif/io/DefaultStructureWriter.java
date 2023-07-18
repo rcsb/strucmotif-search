@@ -20,7 +20,6 @@ import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.config.ResidueQualityStrategy;
-import org.rcsb.strucmotif.domain.Transformation;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.PolymerType;
@@ -60,6 +59,7 @@ import java.util.Set;
 @Service
 public class DefaultStructureWriter implements StructureWriter {
     private static final Logger logger = LoggerFactory.getLogger(DefaultStructureWriter.class);
+    private static final String DEFAULT_OPERATOR = "1";
     private final CifOptions options;
     private final ResidueQualityStrategy residueQualityStrategy;
     private final double residueQualityCutoff;
@@ -99,7 +99,8 @@ public class DefaultStructureWriter implements StructureWriter {
         MmCifBlockBuilder outputBuilder = CifBuilder.enterFile(StandardSchemata.MMCIF)
                 .enterBlock(pdbId.toUpperCase());
 
-        if (pdbxStructAssembly.isDefined() && pdbxStructAssemblyGen.isDefined() && pdbxStructOperList.isDefined()) {
+        // only write explicit assembly info if not the "default" of assembly 1 and identity transform
+        if (pdbxStructAssemblyGen.getRowCount() > 1 || pdbxStructOperList.getRowCount() > 1) {
             outputBuilder.addCategory(pdbxStructAssembly);
             outputBuilder.addCategory(pdbxStructAssemblyGen);
             outputBuilder.addCategory(pdbxStructOperList);
@@ -157,7 +158,7 @@ public class DefaultStructureWriter implements StructureWriter {
             }
 
             // skip residues without CA or CB (or equivalent)
-            if (!validResidues.contains(new LabelSelection(currentLabelAsymId, Transformation.DEFAULT_OPERATOR, currentLabelSeqId))) {
+            if (!validResidues.contains(new LabelSelection(currentLabelAsymId, DEFAULT_OPERATOR, currentLabelSeqId))) {
                 continue;
             }
 
@@ -245,7 +246,7 @@ public class DefaultStructureWriter implements StructureWriter {
                 }
             }
 
-            LabelSelection labelSelection = new LabelSelection(labelAsymId, Transformation.DEFAULT_OPERATOR, labelSeqId);
+            LabelSelection labelSelection = new LabelSelection(labelAsymId, DEFAULT_OPERATOR, labelSeqId);
             ResidueType residueType = residueTypeResolver.selectResidueType(atomSite.getLabelCompId().get(row));
             // don't write/index any unknown components (some will still pass this check due to microheterogenity like B-2 in 1aw8)
             if (residueType == ResidueType.UNKNOWN_COMPONENT) {

@@ -132,16 +132,16 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
 
     @Override
     protected String composeOutput(MotifHit hit) {
-        float[] original = hit.getTransformation().getFlattenedTransformation();
+        float[] original = hit.transformation();
         List<Float> matrix = new ArrayList<>();
         for (float v : original) {
             matrix.add(truncate(v, config.getDecimalPlacesMatrix()));
         }
 
-        return hit.getMotifIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                truncate(hit.getRootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
-                toString(hit.getLabelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
-                toString(hit.getResidueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
+        return hit.motifIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                truncate(hit.rootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.labelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.residueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();
     }
 

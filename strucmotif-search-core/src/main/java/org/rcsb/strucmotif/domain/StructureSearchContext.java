@@ -2,7 +2,6 @@ package org.rcsb.strucmotif.domain;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.core.StrucmotifRuntime;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.query.StructureParameters;
 import org.rcsb.strucmotif.domain.query.StructureQueryStructure;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * The context when in 'search-for-structures' mode.
@@ -124,17 +122,17 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
 
     @Override
     protected String composeOutput(StructureHit hit) {
-        float[] original = hit.getTransformation().getFlattenedTransformation();
+        float[] original = hit.transformation();
         List<Float> matrix = new ArrayList<>();
         for (float v : original) {
             matrix.add(truncate(v, config.getDecimalPlacesMatrix()));
         }
 
-        return hit.getStructureIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                hit.getAssemblyIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                truncate(hit.getRootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
-                toString(hit.getLabelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
-                toString(hit.getResidueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
+        return hit.structureIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                hit.assemblyIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                truncate(hit.rootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.labelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.residueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();
     }
 

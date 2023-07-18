@@ -110,11 +110,11 @@ class MotifIntegrationTest {
         assertEquals(8, result.getHits().size());
         for (MotifHit actual : result.getHits()) {
             MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
-            assertEquals(expected.getMotifIdentifier(), actual.getMotifIdentifier());
-            assertShallowEquals(expected.getLabelSelections(), actual.getLabelSelections());
-            assertEquals(1, actual.getLabelSelections().stream().map(LabelSelection::structOperId).distinct().count());
-            assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.getResidueTypes());
-            assertTrue(actual.getRootMeanSquareDeviation() < 0.001);
+            assertEquals(expected.getMotifIdentifier(), actual.motifIdentifier());
+            assertShallowEquals(expected.getLabelSelections(), actual.labelSelections());
+            assertEquals(1, actual.labelSelections().stream().map(LabelSelection::structOperId).distinct().count());
+            assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.residueTypes());
+            assertTrue(actual.rootMeanSquareDeviation() < 0.001);
         }
     }
 

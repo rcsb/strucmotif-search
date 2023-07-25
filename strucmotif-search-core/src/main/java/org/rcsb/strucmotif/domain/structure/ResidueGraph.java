@@ -29,9 +29,19 @@ public class ResidueGraph {
          */
         DEPOSITED,
         /**
-         * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * Reports contacts between deposited coordinates as well as all residues that are in contact with the deposited
+         * chain(s). This is a superset of `DEPOSITED`.
          */
-        DEPOSITED_AND_CONTACTS,
+        RESIDUES_IN_CONTACT,
+        /**
+         * Report contacts between deposited coordinates as well as all chains that are in contact with the deposited
+         * chain(s). This is a superset of `RESIDUES_IN_CONTACT`.
+         */
+        CHAINS_IN_CONTACT,
+        /**
+         * Absolutely everything.
+         */
+        ALL,
         /**
          * Report contacts within a specific assembly.
          */
@@ -56,11 +66,30 @@ public class ResidueGraph {
 
         /**
          * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * Only includes residues in contact.
          *
          * @return the corresponding options
          */
-        public static ResidueGraphOptions depositedAndContacts() {
-            return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED_AND_CONTACTS, null, null, null);
+        public static ResidueGraphOptions residuesInContact() {
+            return new ResidueGraphOptions(ResidueGraphMode.RESIDUES_IN_CONTACT, null, null, null);
+        }
+
+        /**
+         * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * Considers all residues in contact and expands this selection to the whole chain.
+         *
+         * @return the corresponding options
+         */
+        public static ResidueGraphOptions chainsInContact() {
+            return new ResidueGraphOptions(ResidueGraphMode.CHAINS_IN_CONTACT, null, null, null);
+        }
+
+        /**
+         * Index everything, this will bring in a lot of redundancy when many transformed copies of a chain are present.
+         * @return the corresponding option
+         */
+        public static ResidueGraphOptions all() {
+            return new ResidueGraphOptions(ResidueGraphMode.ALL, null, null, null);
         }
 
         /**
@@ -113,6 +142,15 @@ public class ResidueGraph {
                 int residueIndex = structure.getResidueIndex(labelSelection);
                 residueIndices[i] = residueIndex;
             }
+        } else if (options.mode == ResidueGraphMode.DEPOSITED) {
+            int j = 0;
+            for (int i = 0; i < structure.getInstancedResidueCount(); i++) {
+                if (!structure.getTransformationIdentifier(i).equals("1")) {
+                    continue;
+                }
+                residueIndices[j++] = i;
+            }
+            residueIndices = Arrays.copyOf(residueIndices, j);
         } else {
             for (int i = 0; i < structure.getInstancedResidueCount(); i++) {
                 residueIndices[i] = i;
@@ -172,7 +210,7 @@ public class ResidueGraph {
         // track the first occurrence of each chain and consider that 'deposited'
         Set<String> acceptedChains = new HashSet<>();
         Set<String> acceptedTransformationIdentifiers = new HashSet<>();
-        if (mode == ResidueGraphMode.DEPOSITED || mode == ResidueGraphMode.DEPOSITED_AND_CONTACTS) {
+        if (mode == ResidueGraphMode.DEPOSITED || mode == ResidueGraphMode.RESIDUES_IN_CONTACT || mode == ResidueGraphMode.CHAINS_IN_CONTACT) {
             for (String assemblyIdentifier : structure.getAssemblyIdentifiers()) {
                 String[] referencedChainInstances = structure.getReferencedChainInstances(assemblyIdentifier);
                 for (int i = 0; i < referencedChainInstances.length - 1; i = i + 2) {
@@ -185,7 +223,7 @@ public class ResidueGraph {
             }
 
             // need 2nd pass to find all chain instances in contact with instances accepted in the 1st pass
-            if (mode == ResidueGraphMode.DEPOSITED_AND_CONTACTS) {
+            if (mode == ResidueGraphMode.CHAINS_IN_CONTACT) {
                 Set<String> additions = new HashSet<>();
                 for (ResidueGrid.ResidueContact residueContact : contacts) {
                     // must contain 'dominant' chain instance
@@ -206,6 +244,13 @@ public class ResidueGraph {
             String[] requestedChains = structure.getReferencedChainInstances(options.assemblyIdentifier);
             for (int i = 0; i < requestedChains.length - 1; i = i + 2) {
                 acceptedTransformationIdentifiers.add(requestedChains[i] + "_" + requestedChains[i + 1]);
+            }
+        } else if (mode == ResidueGraphMode.ALL) {
+            for (String assemblyIdentifier : structure.getAssemblyIdentifiers()) {
+                String[] referencedChainInstances = structure.getReferencedChainInstances(assemblyIdentifier);
+                for (int i = 0; i < referencedChainInstances.length - 1; i = i + 2) {
+                    acceptedTransformationIdentifiers.add(referencedChainInstances[i] + "_" + referencedChainInstances[i + 1]);
+                }
             }
         }
 

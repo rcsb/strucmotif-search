@@ -53,7 +53,7 @@ class ResidueGraphTest {
         for (String perm : perms) {
             InputStream resource = getResource("cif/1acj-" + perm + ".cif");
             Structure structure = structureReader.readFromInputStream(resource);
-            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
             Set<String> descriptors = residueGraph.residuePairOccurrencesSequential()
                     .peek(o -> assertFalse(o.getBackboneDistance() == DistanceType.D0 || o.getSideChainDistance() == DistanceType.D0, "Has zero-distance contacts"))
                     .map(o -> o.getBackboneDistance().ordinal() + "-" + o.getSideChainDistance().ordinal() + "-" + o.getAngle().ordinal())
@@ -69,7 +69,7 @@ class ResidueGraphTest {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3vvk"));
         assertEquals(1556, structure.getModelledResidueCount());
         assertEquals(1556, structure.getInstancedResidueCount());
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
         assertEquals(1556, residueGraph.getResidueCount());
 
         long c = residueGraph.residuePairOccurrencesSequential()
@@ -86,7 +86,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingRenumbered1dsd_then8ValidInChainC() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1dsd"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         List<String> o = residueGraph.residuePairOccurrencesSequential()
                 .flatMapToInt(ResiduePairOccurrence::residueIndices)
@@ -110,7 +110,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingOriginal200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
         assertEquals(6393, residueGraph.residuePairOccurrencesParallel()
@@ -131,7 +131,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingOriginalStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1acj"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
         assertEquals(64246, residueGraph.residuePairOccurrencesParallel()
@@ -152,7 +152,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingRenumbered200l_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("200l"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
         assertEquals(6393,  residueGraph.residuePairOccurrencesParallel()
@@ -173,7 +173,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingRenumberedStructureWithAssemblies_thenCountsMatch() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("1acj"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         assertTrue(residueGraph.residuePairOccurrencesSequential().noneMatch(d -> d.getBackboneDistance() == DistanceType.D0 || d.getSideChainDistance() == DistanceType.D0), "Has zero-distance contacts");
         assertEquals(64246, residueGraph.residuePairOccurrencesParallel()
@@ -197,7 +197,7 @@ class ResidueGraphTest {
         ResidueGraph residueGraphDeposited = new ResidueGraph(structure, strucmotifConfig, deposited());
         int pairingsDeposited = residueGraphDeposited.getPairingCount();
 
-        ResidueGraph residueGraphContacts = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraphContacts = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
         int pairingsContacts = residueGraphContacts.getPairingCount();
 
         ResidueGraph residueGraphAssembly = new ResidueGraph(structure, strucmotifConfig, assembly("1"));
@@ -224,7 +224,7 @@ class ResidueGraphTest {
     void whenArginineTweezers_thenReportMotifsInNonIdentityAssemblies() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("4ob8"));
         Set<Integer> residuePairDescriptors = OCCURRENCE.residuePairDescriptorsByTolerance(1, 1, 1, Collections.emptyMap()).boxed().collect(Collectors.toSet());
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         List<Integer> identifiers = residueGraph.residuePairOccurrencesParallel()
                 .filter(wordOccurrence -> residuePairDescriptors.contains(wordOccurrence.getResiduePairDescriptor()))
@@ -238,7 +238,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingRNA_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7els"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         assertTrue(residueGraph.getPairingCount() > 0);
     }
@@ -246,7 +246,7 @@ class ResidueGraphTest {
     @Test
     void whenReadingStructureWithoutIdentityOper_thenContactsFound() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("7a3x"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
 
         assertTrue(residueGraph.getPairingCount() > 0);
     }

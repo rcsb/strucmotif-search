@@ -88,7 +88,7 @@ public class StrucmotifConfig {
      * How often are files committed to the inverted index during update. This is the interval between dumping residue
      * pairs into temporary files and compacting these temporary files and actually adding them to the real index file.
      */
-    private int commitInterval = 250_000;
+    private int commitInterval = 50_000;
     /**
      * URL of the Chemical Component Dictionary.
      */
@@ -110,6 +110,10 @@ public class StrucmotifConfig {
      * Behavior if assembly information in source CIF file is undefined.
      */
     private MissingCategoryStrategy missingAssemblyStrategy = MissingCategoryStrategy.WARN;
+    /**
+     * Which residue contacts to index.
+     */
+    private ResidueGraphStrategy residueGraphStrategy = ResidueGraphStrategy.RESIDUES_IN_CONTACT;
     /**
      * List of all identifiers ever registered.
      */
@@ -509,5 +513,21 @@ public class StrucmotifConfig {
      */
     public void setMissingAssemblyStrategy(MissingCategoryStrategy missingAssemblyStrategy) {
         this.missingAssemblyStrategy = missingAssemblyStrategy;
+    }
+
+    /**
+     * Which residue pairs to index?
+     * @return deposited or residues/chains in contact
+     */
+    public ResidueGraphStrategy getResidueGraphStrategy() {
+        return residueGraphStrategy;
+    }
+
+    /**
+     * Change what residue pairs to index.
+     * @param residueGraphStrategy either consider deposited coordinates or contacts with transformed residues/chains
+     */
+    public void setResidueGraphStrategy(ResidueGraphStrategy residueGraphStrategy) {
+        this.residueGraphStrategy = residueGraphStrategy;
     }
 }

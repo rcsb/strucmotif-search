@@ -71,6 +71,7 @@ might require a full load.
 | `missing-revision-strategy` | How to handle missing revision history | `WARN` |
 | `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
 | `number-threads` | Number of worker threads | available processors |
+| `residue-pair-strategy` | How to index transformed residues? | `RESIDUES_IN_CONTACT` |
 | `residue-quality-cutoff` | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0` |
 | `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `qa_metric_local_above_cutoff` |
 | `root-path` | Path where data files will be written | `/opt/data/` |

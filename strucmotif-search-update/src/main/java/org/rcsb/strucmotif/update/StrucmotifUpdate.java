@@ -57,8 +57,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.depositedAndContacts;
-
 /**
  * Runs strucmotif updates from the command-line.
  */
@@ -85,6 +83,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
     private final StrucmotifConfig strucmotifConfig;
     private final ThreadPool threadPool;
     private final StructureIndexProvider structureIndexProvider;
+    private final ResidueGraph.ResidueGraphOptions residueGraphOptions;
 
     /**
      * Injectable constructor.
@@ -102,6 +101,13 @@ public class StrucmotifUpdate implements CommandLineRunner {
         this.strucmotifConfig = strucmotifConfig;
         this.threadPool = new DefaultThreadPool(strucmotifConfig);
         this.structureIndexProvider = structureIndexProvider;
+        switch (strucmotifConfig.getResidueGraphStrategy()) {
+            case DEPOSITED -> this.residueGraphOptions = ResidueGraph.ResidueGraphOptions.deposited();
+            case RESIDUES_IN_CONTACT -> this.residueGraphOptions = ResidueGraph.ResidueGraphOptions.residuesInContact();
+            case CHAINS_IN_CONTACT -> this.residueGraphOptions = ResidueGraph.ResidueGraphOptions.chainsInContact();
+            case ALL -> this.residueGraphOptions = ResidueGraph.ResidueGraphOptions.all();
+            default -> throw new IllegalArgumentException("Don't know how to handle " + strucmotifConfig.getResidueGraphStrategy());
+        }
     }
 
     /**
@@ -327,8 +333,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
         try {
             long startGraph = System.nanoTime();
-            // TODO include whole chain in contact? 'all' is favorable but wastes a lot of space
-            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, depositedAndContacts());
+            ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, residueGraphOptions);
             logger.info("[{}] [{}] Computed residue graph ({} residues, {} pairs) in {} ms",
                     context.partitionContext,
                     structureContext,

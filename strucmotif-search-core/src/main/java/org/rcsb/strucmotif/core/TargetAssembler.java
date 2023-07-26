@@ -2,8 +2,6 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.domain.StructureSearchContext;
 
-import java.util.concurrent.ExecutionException;
-
 /**
  * Where the magic happens. Lookup all word occurrences which need to be fulfilled and combine them in the most
  * efficient way.
@@ -16,8 +14,6 @@ public interface TargetAssembler {
      * Search: i.e. find all paths through all target structures which reasonably resemble the structure of the query
      * motif.
      * @param context the container to work on
-     * @throws ExecutionException thrown by multi-threading impl
-     * @throws InterruptedException thrown by multi-threading impl
      */
-    void assemble(StructureSearchContext context) throws ExecutionException, InterruptedException; // TODO rework handling of nested/parallel exceptions
+    void assemble(StructureSearchContext context);
 }

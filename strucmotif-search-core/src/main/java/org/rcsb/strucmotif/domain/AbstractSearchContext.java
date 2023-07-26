@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
 
 /**
@@ -34,12 +36,14 @@ public abstract class AbstractSearchContext<P extends Parameters, S extends Quer
      * The identifier of this context.
      */
     protected final String id;
+    private final ForkJoinPool executorService;
 
     /**
      * Create a context, will assign a reasonable identifier.
      */
     protected AbstractSearchContext() {
         this.id = String.valueOf(hashCode());
+        this.executorService = new ForkJoinPool();
     }
 
     @Override
@@ -63,6 +67,11 @@ public abstract class AbstractSearchContext<P extends Parameters, S extends Quer
                 throw new UncheckedIOException(e);
             }
         });
+    }
+
+    @Override
+    public ExecutorService getExecutorService() {
+        return executorService;
     }
 
     /**

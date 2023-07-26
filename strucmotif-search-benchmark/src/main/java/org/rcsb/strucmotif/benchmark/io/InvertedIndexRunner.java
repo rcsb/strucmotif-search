@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.benchmark.io;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.io.InvertedIndex;
 import org.rcsb.strucmotif.io.DefaultInvertedIndex;
 import org.slf4j.Logger;
@@ -25,9 +23,8 @@ public class InvertedIndexRunner {
      */
     public static void main(String[] args) {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
 
-        InvertedIndex invertedIndex = new DefaultInvertedIndex(threadPool, strucmotifConfig);
+        InvertedIndex invertedIndex = new DefaultInvertedIndex(strucmotifConfig);
         List<Integer> descriptors = new ArrayList<>(invertedIndex.reportKnownDescriptors());
         List<Long> times = new ArrayList<>();
 

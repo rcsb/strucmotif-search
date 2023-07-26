@@ -50,7 +50,6 @@ class MotifIntegrationTest {
     @BeforeEach
     public void init() {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
         ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
@@ -77,8 +76,8 @@ class MotifIntegrationTest {
         };
 
         StructureIndexProvider structureIndexProvider = new DefaultStructureIndexProvider(stateRepository);
-        TargetAssembler targetAssembler = new DefaultTargetAssembler(threadPool, structureIndexProvider);
-        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService);
+        TargetAssembler targetAssembler = new DefaultTargetAssembler(structureIndexProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, strucmotifConfig, alignmentService);
         this.motifs = new DefaultMotifDefinitionRegistry(structureDataProvider)
                 .enrichMotifDefinitions(this::loadMotif)
                 .stream()

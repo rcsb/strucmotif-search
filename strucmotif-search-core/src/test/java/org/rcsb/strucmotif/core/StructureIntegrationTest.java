@@ -60,7 +60,6 @@ class StructureIntegrationTest {
     @BeforeEach
     public void init() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
         this.structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
@@ -68,7 +67,7 @@ class StructureIntegrationTest {
 
         ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
-        InvertedIndex invertedIndex = new DefaultInvertedIndex(threadPool, strucmotifConfig) {
+        InvertedIndex invertedIndex = new DefaultInvertedIndex(strucmotifConfig) {
             @Override
             public InvertedIndexBucket select(int residuePairDescriptor) {
                 String filename = residuePairDescriptor + ".colf";
@@ -104,8 +103,8 @@ class StructureIntegrationTest {
         };
 
         StructureIndexProvider structureIndexProvider = new DefaultStructureIndexProvider(stateRepository);
-        TargetAssembler targetAssembler = new DefaultTargetAssembler(threadPool, structureIndexProvider);
-        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, threadPool, strucmotifConfig, alignmentService);
+        TargetAssembler targetAssembler = new DefaultTargetAssembler(structureIndexProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, strucmotifConfig, alignmentService);
         this.contextBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig, invertedIndex);
     }
 

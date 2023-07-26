@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -35,21 +34,18 @@ import java.util.stream.Stream;
 public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
     private static final Logger logger = LoggerFactory.getLogger(DefaultStrucmotifRuntime.class);
     private final TargetAssembler targetAssembler;
-    private final ThreadPool threadPool;
     private final StrucmotifConfig strucmotifConfig;
     private final AlignmentService alignmentService;
 
     /**
      * Injectable constructor.
      * @param targetAssembler target assembler
-     * @param threadPool thread pool
      * @param strucmotifConfig app config
      * @param alignmentService alignment service
      */
     @Autowired
-    public DefaultStrucmotifRuntime(TargetAssembler targetAssembler, ThreadPool threadPool, StrucmotifConfig strucmotifConfig, AlignmentService alignmentService) {
+    public DefaultStrucmotifRuntime(TargetAssembler targetAssembler, StrucmotifConfig strucmotifConfig, AlignmentService alignmentService) {
         this.targetAssembler = targetAssembler;
-        this.threadPool = threadPool;
         this.strucmotifConfig = strucmotifConfig;
         this.alignmentService = alignmentService;
     }
@@ -71,8 +67,6 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
             result.setHits(hits);
             result.getTimings().queryStop();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -97,8 +91,6 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
             int hits = consumeHits(context, consumer);
             logHitTimings(context.getId(), hits, result.getTimings().getScoreHitsTime());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -118,7 +110,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
         return rootCause;
     }
 
-    private List<StructureHit> scoreHits(StructureSearchContext context) throws ExecutionException, InterruptedException {
+    private List<StructureHit> scoreHits(StructureSearchContext context) {
         StructureQuery query = context.getQuery();
         StructureParameters parameters = query.getParameters();
         StructureSearchResult result = context.getResult();
@@ -129,15 +121,15 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                 parameters.getAtomPairingScheme(),
                 alignmentService);
 
-        List<StructureHit> hits = threadPool.submit(() -> hits(context, hitScorer)
+        List<StructureHit> hits = hits(context, hitScorer)
                 .limit(limit)
-                .collect(Collectors.toList())).get();
+                .collect(Collectors.toList());
 
         result.getTimings().scoreHitsStop();
         return hits;
     }
 
-    private int consumeHits(StructureSearchContext context, Consumer<StructureHit> consumer) throws ExecutionException, InterruptedException {
+    private int consumeHits(StructureSearchContext context, Consumer<StructureHit> consumer) {
         StructureQuery query = context.getQuery();
         StructureParameters parameters = query.getParameters();
         StructureSearchResult result = context.getResult();
@@ -148,14 +140,11 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                 parameters.getAtomPairingScheme(),
                 alignmentService);
 
-        threadPool.submit(() -> {
-            hits(context, hitScorer)
-                    .forEach(hit -> {
-                        hits.incrementAndGet();
-                        consumer.accept(hit);
-                    });
-            return null;
-        }).get();
+        hits(context, hitScorer)
+                .forEach(hit -> {
+                    hits.incrementAndGet();
+                    consumer.accept(hit);
+                });
 
         result.getTimings().scoreHitsStop();
         return hits.get();
@@ -183,9 +172,9 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
     public void performSearch(MotifSearchContext context) {
         try {
             MotifSearchResult result = context.getResult();
-            List<MotifHit> hits = threadPool.submit(() -> context.getQuery()
+            List<MotifHit> hits = context.getQuery()
                     .getMotifDefinitions()
-                    .stream()
+                    .parallelStream()
                     .flatMap(motif -> {
                         StructureSearchResult subresult = performSearch(context, motif);
                         List<StructureHit> subhits = subresult.getHits();
@@ -197,13 +186,11 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                                 .stream()
                                 .map(h -> createSubhit(motif, h));
                     })
-                    .collect(Collectors.toList())).get();
+                    .collect(Collectors.toList());
             result.setHits(hits);
             result.getTimings().queryStop();
 
             logHitTimings(context.getId(), hits.size(), result.getTimings().getQueryTime());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -232,8 +219,6 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
             int hits = consumeHits(context, consumer);
 
             logHitTimings(context.getId(), hits, result.getTimings().getQueryTime());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
@@ -244,30 +229,27 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
         }
     }
 
-    private int consumeHits(MotifSearchContext context, Consumer<MotifHit> consumer) throws ExecutionException, InterruptedException {
+    private int consumeHits(MotifSearchContext context, Consumer<MotifHit> consumer) {
         MotifSearchResult result = context.getResult();
         AtomicInteger hits = new AtomicInteger();
 
-        threadPool.submit(() -> {
-            context.getQuery()
-                    .getMotifDefinitions()
-                    .parallelStream()
-                    .forEach(motif -> {
-                        StructureSearchResult subresult = performSearch(context, motif);
-                        List<StructureHit> subhits = subresult.getHits();
-                        if (subhits.isEmpty()) return;
+        context.getQuery()
+                .getMotifDefinitions()
+                .parallelStream()
+                .forEach(motif -> {
+                    StructureSearchResult subresult = performSearch(context, motif);
+                    List<StructureHit> subhits = subresult.getHits();
+                    if (subhits.isEmpty()) return;
 
-                        int subhitCount = subhits.size();
-                        logger.info("[{}] {} occurrences of {} found", context.getId(), subhitCount, motif.getMotifIdentifier());
-                        hits.addAndGet(subhitCount);
-                        // if there are hits: move them to parent
-                        subresult.getHits()
-                                .stream()
-                                .map(h -> createSubhit(motif, h))
-                                .forEach(consumer);
-                    });
-            return null;
-        }).get();
+                    int subhitCount = subhits.size();
+                    logger.info("[{}] {} occurrences of {} found", context.getId(), subhitCount, motif.getMotifIdentifier());
+                    hits.addAndGet(subhitCount);
+                    // if there are hits: move them to parent
+                    subresult.getHits()
+                            .stream()
+                            .map(h -> createSubhit(motif, h))
+                            .forEach(consumer);
+                });
 
         result.getTimings().queryStop();
         return hits.get();

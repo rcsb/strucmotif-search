@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,22 +33,19 @@ import java.util.stream.Stream;
 @Service
 public class DefaultTargetAssembler implements TargetAssembler {
     private static final Logger logger = LoggerFactory.getLogger(DefaultTargetAssembler.class);
-    private final ThreadPool threadPool;
     private final StructureIndexProvider structureIndexProvider;
 
     /**
      * Injectable constructor.
-     * @param threadPool thread pool
      * @param structureIndexProvider maps from structureIdentifiers to indices
      */
     @Autowired
-    public DefaultTargetAssembler(ThreadPool threadPool, StructureIndexProvider structureIndexProvider) {
-        this.threadPool = threadPool;
+    public DefaultTargetAssembler(StructureIndexProvider structureIndexProvider) {
         this.structureIndexProvider = structureIndexProvider;
     }
 
     @Override
-    public void assemble(StructureSearchContext context) throws ExecutionException, InterruptedException {
+    public void assemble(StructureSearchContext context) {
         StructureQuery query = context.getQuery();
         StructureQueryStructure queryStructure = query.getQueryStructure();
         StructureParameters parameters = query.getParameters();
@@ -86,10 +82,10 @@ public class DefaultTargetAssembler implements TargetAssembler {
             int residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
-            Map<Integer, int[]> residuePairIdentifiers = threadPool.submit(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
+            Map<Integer, int[]> residuePairIdentifiers = residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                     .mapToObj(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
                     .flatMap(Function.identity())
-                    .collect(Collectors.toConcurrentMap(Pair::first, Pair::second, DefaultTargetAssembler::concat))).get();
+                    .collect(Collectors.toConcurrentMap(Pair::first, Pair::second, DefaultTargetAssembler::concat));
 
             consume(context, residuePairIdentifiers);
 
@@ -205,7 +201,7 @@ public class DefaultTargetAssembler implements TargetAssembler {
         return Arrays.stream(out).limit(i);
     }
 
-    private void consume(StructureSearchContext context, Map<Integer, int[]> data) throws ExecutionException, InterruptedException {
+    private void consume(StructureSearchContext context, Map<Integer, int[]> data) {
         StructureQuery query = context.getQuery();
         StructureSearchResult result = context.getResult();
         Map<Integer, TargetStructure> targetStructures = result.getTargetStructures();
@@ -228,20 +224,20 @@ public class DefaultTargetAssembler implements TargetAssembler {
             }
 
             // focus on valid target structures as this set should be smaller
-            result.setTargetStructures(threadPool.submit(() -> targetStructures.entrySet()
-                            .parallelStream()
-                            .filter(entry -> {
-                                int[] residuePairIdentifiers = data.get(entry.getKey());
-                                // candidate must have valid path to extend from previous generation
-                                if (residuePairIdentifiers == null) {
-                                    return false;
-                                }
+            Map<Integer, TargetStructure> updated = targetStructures.entrySet()
+                    .parallelStream()
+                    .filter(entry -> {
+                        int[] residuePairIdentifiers = data.get(entry.getKey());
+                        // candidate must have valid path to extend from previous generation
+                        if (residuePairIdentifiers == null) {
+                            return false;
+                        }
 
-                                // append target structure by whatever the new target identifiers for this structure have to offer
-                                return entry.getValue().consume(residuePairIdentifiers, overlapProfile);
-                            })
-                            .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue)))
-                    .get());
+                        // append target structure by whatever the new target identifiers for this structure have to offer
+                        return entry.getValue().consume(residuePairIdentifiers, overlapProfile);
+                    })
+                    .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+            result.setTargetStructures(updated);
         }
     }
 }

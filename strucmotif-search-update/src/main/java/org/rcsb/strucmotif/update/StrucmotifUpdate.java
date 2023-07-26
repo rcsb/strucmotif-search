@@ -13,8 +13,6 @@ import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.DefaultThreadPool;
-import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
@@ -52,7 +50,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -81,7 +78,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
     private final StructureDataProvider structureDataProvider;
     private final InvertedIndex invertedIndex;
     private final StrucmotifConfig strucmotifConfig;
-    private final ThreadPool threadPool;
     private final StructureIndexProvider structureIndexProvider;
     private final ResidueGraph.ResidueGraphOptions residueGraphOptions;
 
@@ -99,7 +95,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
         this.structureDataProvider = structureDataProvider;
         this.invertedIndex = invertedIndex;
         this.strucmotifConfig = strucmotifConfig;
-        this.threadPool = new DefaultThreadPool(strucmotifConfig);
         this.structureIndexProvider = structureIndexProvider;
         switch (strucmotifConfig.getResidueGraphStrategy()) {
             case DEPOSITED -> this.residueGraphOptions = ResidueGraph.ResidueGraphOptions.deposited();
@@ -190,11 +185,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
     /**
      * The 'ADD' operation.
      * @param context the set of UpdateItems to add
-     * @throws ExecutionException update failure
-     * @throws InterruptedException update failure
      * @throws IOException writing to index fails
      */
-    public void add(Context context) throws ExecutionException, InterruptedException, IOException {
+    public void add(Context context) throws IOException {
         long target = context.updateItems.size();
         logger.info("{} files to process in total", target);
 
@@ -212,10 +205,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             context.partitionSize = partition.size();
             context.partitionContext = (i + 1) + " / " + partitions.size();
             context.structureCounter = new AtomicInteger();
-            threadPool.submit(() -> {
-                partition.parallelStream().forEach(item -> handleUpdateItem(item, context));
-                return null;
-            }).get();
+            partition.parallelStream().forEach(item -> handleUpdateItem(item, context));
             needsCommit = true;
 
             if (context.structureCounter.get() > 0) {

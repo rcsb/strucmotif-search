@@ -12,6 +12,8 @@ import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 
 import java.nio.file.Path;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 
 /**
@@ -90,4 +92,6 @@ public interface SearchContext<P extends Parameters, S extends QueryStructure, H
      * @return an inverted index
      */
     InvertedIndex getInvertedIndex();
+
+    ExecutorService getExecutorService();
 }

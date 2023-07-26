@@ -5,8 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.io.DefaultInvertedIndex;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
@@ -63,9 +61,8 @@ class UpdateIntegrationTest {
         ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
         StructureReader reader = new DefaultStructureReader(residueTypeResolver);
         StructureWriter writer = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
-        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         this.data = new DefaultStructureDataProvider(reader, writer, strucmotifConfig);
-        this.index = new DefaultInvertedIndex(threadPool, strucmotifConfig);
+        this.index = new DefaultInvertedIndex(strucmotifConfig);
 
         init();
     }

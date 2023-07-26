@@ -6,8 +6,6 @@ import org.rcsb.ffindex.FileBundleIO;
 import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.DefaultThreadPool;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
@@ -27,10 +25,9 @@ class DefaultInvertedIndexTest {
     @BeforeEach
     public void init() throws IOException {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new DefaultThreadPool(strucmotifConfig);
         ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
-        invertedIndex = new DefaultInvertedIndex(threadPool, strucmotifConfig) {
+        invertedIndex = new DefaultInvertedIndex(strucmotifConfig) {
             @Override
             public InvertedIndexBucket select(int residuePairDescriptor) {
                 String filename = residuePairDescriptor + ".colf";

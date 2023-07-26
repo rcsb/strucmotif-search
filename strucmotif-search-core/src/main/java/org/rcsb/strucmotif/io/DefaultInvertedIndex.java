@@ -5,7 +5,6 @@ import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
 import org.slf4j.Logger;
@@ -30,7 +29,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,7 +44,6 @@ public class DefaultInvertedIndex implements InvertedIndex {
     private static final byte MAGIC = (byte) (1 << 7);
     private final String extension;
     private final BucketCodec bucketCodec;
-    private final ThreadPool threadPool;
     // 'production' data that can be queried
     private final Path rootPath;
     private final Path dataPath;
@@ -58,15 +55,13 @@ public class DefaultInvertedIndex implements InvertedIndex {
 
     /**
      * Construct an inverted index instance.
-     * @param threadPool shared pool for parallel operations
      * @param strucmotifConfig the config
      */
-    public DefaultInvertedIndex(ThreadPool threadPool, StrucmotifConfig strucmotifConfig) {
+    public DefaultInvertedIndex(StrucmotifConfig strucmotifConfig) {
         InvertedIndexBackend invertedIndexBackend = strucmotifConfig.getInvertedIndexBackend();
         this.bucketCodec = invertedIndexBackend.getBucketCodec();
         this.extension = invertedIndexBackend.getExtension();
         logger.info("Extension of inverted index files: {}", extension);
-        this.threadPool = threadPool;
         this.rootPath = Paths.get(strucmotifConfig.getRootPath());
         this.dataPath = rootPath.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.DATA_EXT);
         this.indexPath = rootPath.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT);
@@ -298,27 +293,24 @@ public class DefaultInvertedIndex implements InvertedIndex {
             WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
             AtomicInteger counter = new AtomicInteger();
             // walk whole lookup
-            threadPool.submit(() -> {
-                indexFilenames()
-                        .parallel()
-                        .peek(path -> progress(counter, 10000, "{} / " + fileCount + " bins of inverted index processed"))
-                        .forEach(filename -> {
-                            try {
-                                int residuePairDescriptor = createResiduePairDescriptor(filename);
-                                ByteBuffer byteBuffer = delete(residuePairDescriptor, removals);
+            indexFilenames()
+                    .parallel()
+                    .peek(path -> progress(counter, 10000, "{} / " + fileCount + " bins of inverted index processed"))
+                    .forEach(filename -> {
+                        try {
+                            int residuePairDescriptor = createResiduePairDescriptor(filename);
+                            ByteBuffer byteBuffer = delete(residuePairDescriptor, removals);
 
-                                // result may be empty, don't write anything in that case
-                                if (byteBuffer == null) {
-                                    return;
-                                }
-
-                                temporaryFileBundle.writeFile(filename, byteBuffer);
-                            } catch (IOException e) {
-                                throw new UncheckedIOException("can't process " + filename, e);
+                            // result may be empty, don't write anything in that case
+                            if (byteBuffer == null) {
+                                return;
                             }
-                        });
-                return null;
-            }).get();
+
+                            temporaryFileBundle.writeFile(filename, byteBuffer);
+                        } catch (IOException e) {
+                            throw new UncheckedIOException("can't process " + filename, e);
+                        }
+                    });
 
             // swap new and old files
             fileBundle.close();
@@ -326,11 +318,6 @@ public class DefaultInvertedIndex implements InvertedIndex {
             Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
             initializeFileBundle();
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -386,23 +373,16 @@ public class DefaultInvertedIndex implements InvertedIndex {
 
     @Override
     public Set<Integer> reportKnownKeys() {
-        try {
-            logger.info("Collecting all known keys in bundle ({}, {})", dataPath, indexPath);
-            AtomicInteger counter = new AtomicInteger();
-            return threadPool.submit(() -> indexFilenames()
-                    .parallel()
-                    .peek(p -> progress(counter, 10000, "{} bins scanned"))
-                    .map(this::createResiduePairDescriptor)
-                    .map(this::select)
-                    .map(InvertedIndexBucket::getStructureIndices)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet())).get();
-        } catch (ExecutionException e) {
-            throw new RuntimeException("Parallel operation failed - Thread raised exception", e);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Parallel operation failed - Thread was interrupted", e);
-        }
+        logger.info("Collecting all known keys in bundle ({}, {})", dataPath, indexPath);
+        AtomicInteger counter = new AtomicInteger();
+        return indexFilenames()
+                .parallel()
+                .peek(p -> progress(counter, 10000, "{} bins scanned"))
+                .map(this::createResiduePairDescriptor)
+                .map(this::select)
+                .map(InvertedIndexBucket::getStructureIndices)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 
     private Stream<String> indexFilenames() {

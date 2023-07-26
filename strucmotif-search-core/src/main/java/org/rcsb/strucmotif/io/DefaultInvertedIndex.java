@@ -122,12 +122,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
             logger.info("Merging partial data from {}", partials);
             // key: structure index, value: source/partial file
             Map<Integer, RandomAccessFile> partialFileMapping = new HashMap<>();
-            // outer key: residue pair descriptor, inner key: structure index
-            // first 40 bits of value: block index of start position (*8 to get actual byte position)
-            // last 24 bits of value: number of occurrences (*8 to get actual byte count)
-            Map<Integer, Map<Integer, Long>> offsets = new HashMap<>();
+            // outer key: residue pair descriptor, inner key: structure index, value: begin of data in corresponding file
+            Map<Integer, Map<Integer, Long>> startOffsets = new HashMap<>();
+            Map<Integer, Map<Integer, Integer>> byteCounts = new HashMap<>();
             byte[] readBuffer = new byte[BUFFER_SIZE];
-            // TODO not particularly memory-efficient
             for (Path p : partials) {
                 RandomAccessFile file = new RandomAccessFile(p.toFile(), "r");
                 AtomicInteger lastDescriptor = new AtomicInteger(Integer.MAX_VALUE);
@@ -135,22 +133,21 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 long offset = 0L;
                 int read;
                 while ((read = file.read(readBuffer)) > 0) {
-                    for (int i = 0; i < read - 7; i = i + 8, offset++) {
+                    for (int i = 0; i < read - 7; i = i + 8, offset = offset + 8) {
                         if ((readBuffer[i] & MAGIC) == 0) {
                             continue;
                         }
                         if (lastDescriptor.get() != Integer.MAX_VALUE) {
                             int descriptor = lastDescriptor.get();
-                            Map<Integer, Long> map = offsets.computeIfAbsent(descriptor, e -> new HashMap<>());
+                            Map<Integer, Integer> lengthMap = byteCounts.computeIfAbsent(descriptor, e -> new HashMap<>());
                             int structureIndex = lastStructureIndex.get();
-                            int length = (int) (offset - (offsets.get(descriptor).get(structureIndex) >>> 40));
-                            map.compute(structureIndex, (k, v) -> v | length);
+                            lengthMap.put(structureIndex, (int) (offset - startOffsets.get(descriptor).get(structureIndex)));
                         }
                         int structureIndex = (readBuffer[i] & ~MAGIC & 0xFF) << 24 | (readBuffer[i + 1] & 0xFF) << 16 | (readBuffer[i + 2] & 0xFF) << 8 | (readBuffer[i + 3] & 0xFF);
                         partialFileMapping.put(structureIndex, file);
                         int descriptor = (readBuffer[i + 4] & 0xFF) << 24 | (readBuffer[i + 5] & 0xFF) << 16 | (readBuffer[i + 6] & 0xFF) << 8 | (readBuffer[i + 7] & 0xFF);
-                        Map<Integer, Long> map = offsets.computeIfAbsent(descriptor, e -> new HashMap<>());
-                        map.put(structureIndex, (offset + 1) << 40); // identifier data will start in next block
+                        Map<Integer, Long> startMap = startOffsets.computeIfAbsent(descriptor, e -> new HashMap<>());
+                        startMap.put(structureIndex, offset + 8); // identifier data will start in next block
                         lastDescriptor.set(descriptor);
                         lastStructureIndex.set(structureIndex);
                     }
@@ -162,14 +159,13 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 if (descriptor == Integer.MAX_VALUE) {
                     continue;
                 }
-                Map<Integer, Long> map = offsets.computeIfAbsent(descriptor, e -> new HashMap<>());
+                Map<Integer, Integer> lengthMap = byteCounts.computeIfAbsent(descriptor, e -> new HashMap<>());
                 int structureIndex = lastStructureIndex.get();
-                int length = (int) (offset - (offsets.get(descriptor).get(structureIndex) >>> 40));
-                map.compute(structureIndex, (k, v) -> v | length);
+                lengthMap.put(structureIndex, (int) (offset - startOffsets.get(descriptor).get(structureIndex)));
             }
 
             WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
-            Set<Integer> existingOnly = existingDescriptors.stream().filter(i -> !offsets.containsKey(i)).collect(Collectors.toSet());
+            Set<Integer> existingOnly = existingDescriptors.stream().filter(i -> !startOffsets.containsKey(i)).collect(Collectors.toSet());
             if (!existingOnly.isEmpty()) {
                 logger.info("Transferring existing data for {} descriptors", existingOnly.size());
                 ByteBuffer tmp;
@@ -181,16 +177,17 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 }
             }
 
-            logger.info("Merging data on {} descriptors from {} structures", offsets.size(), partialFileMapping.size());
+            logger.info("Merging data on {} descriptors from {} structures", startOffsets.size(), partialFileMapping.size());
             AtomicInteger counter = new AtomicInteger();
-            offsets.entrySet()
+            startOffsets.entrySet()
                     .parallelStream()
-                    .peek(p -> progress(counter, 1000, "[{} / " + offsets.size() + "] compacting descriptor data"))
+                    .peek(p -> progress(counter, 1000, "[{} / " + startOffsets.size() + "] compacting descriptor data"))
                     .forEach(entry -> {
                         int descriptor = entry.getKey();
-                        Map<Integer, Long> map = entry.getValue();
-                        int structureCount = map.size();
-                        int identifierCount = map.values().stream().mapToInt(o -> (int) (o & 0x100000) * 2).sum();
+                        Map<Integer, Long> perStructureStart = entry.getValue();
+                        Map<Integer, Integer> perStructureByteCount = byteCounts.get(descriptor);
+                        int structureCount = perStructureStart.size();
+                        int identifierCount = perStructureStart.keySet().stream().mapToInt(si -> perStructureByteCount.get(si) / 4).sum();
 
                         try {
                             int[] structureIndices;
@@ -223,16 +220,16 @@ public class DefaultInvertedIndex implements InvertedIndex {
                                 identifierData = new int[identifierCount];
                             }
 
-                            for (Map.Entry<Integer, Long> datum : map.entrySet()) {
+                            for (Map.Entry<Integer, Long> datum : perStructureStart.entrySet()) {
                                 int structureIndex = datum.getKey();
                                 structureIndices[outerPos] = structureIndex;
                                 positionOffsets[outerPos] = innerPos;
 
                                 RandomAccessFile sourceFile = partialFileMapping.get(structureIndex);
-                                long o = map.get(structureIndex);
-                                int perStructureIdentifierCount = (int) (o & 0x100000) * 2;
-                                ByteBuffer buffer = ByteBuffer.allocate(perStructureIdentifierCount * 4);
-                                sourceFile.getChannel().read(buffer, o >>> 40);
+                                int n = perStructureByteCount.get(structureIndex);
+                                int perStructureIdentifierCount = n / 4;
+                                ByteBuffer buffer = ByteBuffer.allocate(n);
+                                sourceFile.getChannel().read(buffer, perStructureStart.get(structureIndex));
                                 buffer.rewind();
                                 for (int i = 0; i < perStructureIdentifierCount; i++) {
                                     identifierData[innerPos + i] = buffer.getInt();

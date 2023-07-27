@@ -13,6 +13,7 @@ public class MotifParameters implements Parameters {
     private final float rmsdCutoff;
     private final AtomPairingScheme atomPairingScheme;
     private final MotifPruner motifPruner;
+    private final int timeout;
 
     /**
      * Construct motif parameters.
@@ -22,14 +23,16 @@ public class MotifParameters implements Parameters {
      * @param rmsdCutoff maximum RMSD
      * @param atomPairingScheme how to pair atoms
      * @param motifPruner how to prune motifs
+     * @param timeout timeout in ms
      */
-    public MotifParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner) {
+    public MotifParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int timeout) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
         this.rmsdCutoff = rmsdCutoff;
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
+        this.timeout = timeout;
     }
 
     /**
@@ -86,5 +89,15 @@ public class MotifParameters implements Parameters {
      */
     public MotifPruner getMotifPruner() {
         return motifPruner;
+    }
+
+    @Override
+    public int getTimeout() {
+        return timeout;
+    }
+
+    @Override
+    public boolean hasTimeout() {
+        return timeout != Integer.MAX_VALUE;
     }
 }

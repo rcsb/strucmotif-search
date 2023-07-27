@@ -156,6 +156,7 @@ public class StructureContextBuilder implements ContextBuilder {
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
         private int limit;
+        private int timeout;
         private Set<PositionSpecificExchange> upstreamExchanges;
 
         MandatoryBuilderStep(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
@@ -171,53 +172,34 @@ public class StructureContextBuilder implements ContextBuilder {
             // defines the 'default' motif pruning strategy
             this.motifPruner = StructureContextBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
+            this.timeout = strucmotifConfig.getQueryTimeout();
         }
 
-        /**
-         * Specify the backbone distance tolerance (default: 1).
-         * @param backboneDistanceTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the side-chain distance tolerance (default: 1).
-         * @param sideChainDistanceTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the angle tolerance (default: 1).
-         * @param angleTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
 
-        /**
-         * Filter hits based on RMSD. Only relevant when scoring strategy involves alignment.
-         * @param rmsdCutoff the RMSD cutoff above which hits are filtered
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 
-        /**
-         * Controls which atoms will be considered for alignment. Only relevant when scoring scheme is alignment-based.
-         * @param atomPairingScheme how to pair atoms for alignment routine
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
@@ -257,6 +239,12 @@ public class StructureContextBuilder implements ContextBuilder {
             return this;
         }
 
+        @Override
+        public MandatoryBuilderStep timeout(int ms) {
+            this.timeout = ms;
+            return this;
+        }
+
         /**
          * Allow setting downstream exchanges via upstream definition.
          * @param upstreamExchanges exchanges from a motif definition
@@ -274,7 +262,8 @@ public class StructureContextBuilder implements ContextBuilder {
                     rmsdCutoff,
                     atomPairingScheme,
                     motifPruner,
-                    limit);
+                    limit,
+                    timeout);
             return new OptionalBuilderStep(structureIdentifier, structure, labelSelections, residues, parameters, upstreamExchanges);
         }
     }

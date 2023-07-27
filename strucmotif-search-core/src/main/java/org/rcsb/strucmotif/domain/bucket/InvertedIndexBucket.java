@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
  * Represents a single file of the inverted index (e.g., AL-4-5-4). This file keeps track of all structures that contain
  * occurrences of the corresponding descriptor.
  */
-public class InvertedIndexBucket {
+public class InvertedIndexBucket implements Bucket {
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     /**
      * An empty bucket which will refuse to iterate on structures or occurrences.
@@ -72,43 +72,30 @@ public class InvertedIndexBucket {
         this.lastPosition = hasNextStructure() ? positionOffsets[structurePointer + 1] : identifierData.length;
     }
 
-    /**
-     * All structures that contain occurrences of this descriptor.
-     * @return a collection of structure indices
-     */
+    @Override
     public Set<Integer> getStructureIndices() {
         return Arrays.stream(structureIndices)
                 .boxed()
                 .collect(Collectors.toSet());
     }
 
-    /**
-     * True if there is another structure after the current one.
-     * @return a boolean
-     */
+    @Override
     public boolean hasNextStructure() {
         return structurePointer + 1 < positionOffsets.length;
     }
 
-    /**
-     * True if there is another occurrence after the current one.
-     * @return a boolean
-     */
+    @Override
     public boolean hasNextOccurrence() {
         return positionPointer + 2 < lastPosition;
     }
 
-    /**
-     * Advance to the next structure, only safe if {@link #hasNextStructure()} is true.
-     */
+    @Override
     public void moveStructure() {
         structurePointer++;
         syncStructureState();
     }
 
-    /**
-     * Advance to the next structure, only safe if {@link #hasNextOccurrence()} is true.
-     */
+    @Override
     public void moveOccurrence() {
         positionPointer += 2;
         if (positionPointer > lastPosition) {
@@ -116,61 +103,41 @@ public class InvertedIndexBucket {
         }
     }
 
-    /**
-     * The number of structures that contain this descriptor.
-     * @return an int
-     */
+    @Override
     public int getStructureCount() {
         return structureIndices.length;
     }
 
-    /**
-     * The total number of residue pairs registered in this bucket.
-     * @return an int
-     */
+    @Override
     public int getResiduePairCount() {
         return identifierData.length / 2;
     }
 
-    /**
-     * The current structure index.
-     * @return a structure index
-     */
+    @Override
     public int getStructureIndex() {
         return structureIndices[structurePointer];
     }
 
-    /**
-     * Convenience method that gives access to the current identifier represented by a long.
-     * @return the current residue indices
-     */
+    @Override
     public long getResiduePairIdentifier() {
         return ResiduePairIdentifier.encodeIdentifier(identifierData[positionPointer], identifierData[positionPointer + 1]);
-    }
-
-    public int getResidueIndex1() {
-        return identifierData[positionPointer];
-    }
-
-    public int getResidueIndex2() {
-        return identifierData[positionPointer + 1];
     }
 
     public int getResidueIndex(int pos) {
         return identifierData[pos];
     }
 
-    /**
-     * Move iterators back to start positions.
-     */
+    @Override
     public void reset() {
         structurePointer = -1;
     }
 
+    @Override
     public int getStartPosition() {
         return positionOffsets[structurePointer];
     }
 
+    @Override
     public int getEndPosition() {
         return lastPosition;
     }

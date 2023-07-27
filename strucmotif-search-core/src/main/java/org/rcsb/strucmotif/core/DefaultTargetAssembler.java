@@ -82,10 +82,10 @@ public class DefaultTargetAssembler implements TargetAssembler {
             int residuePairDescriptor = residuePairOccurrence.getResiduePairDescriptor();
 
             // sort into target structures
-            Map<Integer, int[]> residuePairIdentifiers = residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
+            Map<Integer, int[]> residuePairIdentifiers = context.tryExecute(() -> residuePairOccurrence.residuePairDescriptorsByTolerance(backboneDistanceTolerance, sideChainDistanceTolerance, angleTolerance, exchanges)
                     .mapToObj(descriptor -> select(invertedIndex, descriptor, searchSpace, allowed, ignored))
                     .flatMap(Function.identity())
-                    .collect(Collectors.toConcurrentMap(Pair::first, Pair::second, DefaultTargetAssembler::concat));
+                    .collect(Collectors.toConcurrentMap(Pair::first, Pair::second, DefaultTargetAssembler::concat)));
 
             consume(context, residuePairIdentifiers);
 
@@ -224,7 +224,7 @@ public class DefaultTargetAssembler implements TargetAssembler {
             }
 
             // focus on valid target structures as this set should be smaller
-            Map<Integer, TargetStructure> updated = targetStructures.entrySet()
+            Map<Integer, TargetStructure> updated = context.tryExecute(() -> targetStructures.entrySet()
                     .parallelStream()
                     .filter(entry -> {
                         int[] residuePairIdentifiers = data.get(entry.getKey());
@@ -236,7 +236,7 @@ public class DefaultTargetAssembler implements TargetAssembler {
                         // append target structure by whatever the new target identifiers for this structure have to offer
                         return entry.getValue().consume(residuePairIdentifiers, overlapProfile);
                     })
-                    .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue));
+                    .collect(Collectors.toConcurrentMap(Map.Entry::getKey, Map.Entry::getValue)));
             result.setTargetStructures(updated);
         }
     }

@@ -64,6 +64,15 @@ public interface Bucket {
      */
     void reset();
 
-    int getResidueIndex1(int i);
-    int getResidueIndex2(int i);
+    /**
+     * Get the current occurrence start position associated with the current position pointer.
+     * @return an int
+     */
+    int getStartPosition();
+
+    /**
+     * Get the current occurrence end position associated with the current position pointer.
+     * @return an int
+     */
+    int getEndPosition();
 }

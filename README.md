@@ -123,13 +123,16 @@ Strucmotif.detectMotifs()
 ## Configuration
 | Property     | Action | Default Value/Behavior |
 | -----------  | ------ | ------- |
+| `ccd-url` | URL to the chemical component dictionary | wwPDB |
 | `decimal-places-score` | Number of decimal places reported for scores | `2` |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3` |
 | `in-memory-strategy` | Preload structure data for increased performance? | `off` |
 | `loading-chunk-size` | Batch size when holding structure data in memory | `250,000` |
 | `max-results` | Maximum number of results that will be returned | `50,000` |
 | `max-motif-size` | Maximum number of residues that may define a motif | `10` |
-| `number-threads` | Number of worker threads | available processors |
+| `per-query-threads` | Number of worker threads per query | available processors |
+| `query-timeout` | Interrupt queries after `n` milliseconds | `none` |
+| `root-path` | Path where data files will be written | `/opt/data/` |
 
 Configure by placing your `application.properties` on the classpath. All properties specific to this project must be 
 prefixed with `strucmotif.`.

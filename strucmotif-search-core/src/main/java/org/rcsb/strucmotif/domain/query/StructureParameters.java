@@ -14,6 +14,7 @@ public class StructureParameters implements Parameters {
     private final AtomPairingScheme atomPairingScheme;
     private final MotifPruner motifPruner;
     private final int limit;
+    private final int timeout;
 
     /**
      * Construct structure parameters.
@@ -24,8 +25,9 @@ public class StructureParameters implements Parameters {
      * @param atomPairingScheme how to pair atoms
      * @param motifPruner how to prune motifs
      * @param resultLimit stop after this many hits
+     * @param timeout timeout in ms
      */
-    public StructureParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit) {
+    public StructureParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit, int timeout) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
@@ -33,6 +35,7 @@ public class StructureParameters implements Parameters {
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
         this.limit = resultLimit;
+        this.timeout = timeout;
     }
 
     /**
@@ -105,5 +108,15 @@ public class StructureParameters implements Parameters {
      */
     public boolean hasLimit() {
         return limit != Integer.MAX_VALUE;
+    }
+
+    @Override
+    public int getTimeout() {
+        return timeout;
+    }
+
+    @Override
+    public boolean hasTimeout() {
+        return timeout != Integer.MAX_VALUE;
     }
 }

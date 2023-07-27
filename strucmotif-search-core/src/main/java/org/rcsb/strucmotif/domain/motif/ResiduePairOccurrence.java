@@ -20,15 +20,36 @@ public class ResiduePairOccurrence {
     private final long residuePairIdentifier;
     private final int residuePairDescriptor;
 
+    /**
+     * Construct an occurrence, a pair of identifier and its descriptor.
+     * @param residuePairIdentifier both residue indices encoded as long
+     * @param residuePairDescriptor all properties encoded as int
+     */
     public ResiduePairOccurrence(long residuePairIdentifier, int residuePairDescriptor) {
         this.residuePairIdentifier = residuePairIdentifier;
         this.residuePairDescriptor = residuePairDescriptor;
     }
 
+    /**
+     * Construct an occurrence, a pair of identifier and its descriptor.
+     * @param residueIndex1 1st index
+     * @param residueIndex2 2nd index
+     * @param residueType1 1st type
+     * @param residueType2 2nd type
+     * @param backboneDistance backbone distance type
+     * @param sideChainDistance side-chain distance type
+     * @param angle angle type
+     */
     public ResiduePairOccurrence(int residueIndex1, int residueIndex2, ResidueType residueType1, ResidueType residueType2, DistanceType backboneDistance, DistanceType sideChainDistance, AngleType angle) {
         this(ResiduePairIdentifier.encodeIdentifier(residueIndex1, residueIndex2), ResiduePairDescriptor.encodeDescriptor(residueType1.ordinal(), residueType2.ordinal(), backboneDistance.ordinal(), sideChainDistance.ordinal(), angle.ordinal()));
     }
 
+    /**
+     * Sort a list of occurrences and move the ones that are most restrictive and/or most cheap to evaluate to the
+     * front.
+     * @param residuePairOccurrences ordered list of occurrences
+     * @return the same list, ordered
+     */
     public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences) {
         return residuePairOccurrences.stream()
                 .sorted(INFORMATIVENESS_COMPARATOR)
@@ -43,26 +64,50 @@ public class ResiduePairOccurrence {
         return residuePairDescriptor;
     }
 
+    /**
+     * Extract the 1st residue type.
+     * @return residue type
+     */
     public ResidueType getResidueType1() {
         return ResiduePairDescriptor.getResidueType1(residuePairDescriptor);
     }
 
+    /**
+     * Extract the 2nd residue type.
+     * @return residue type
+     */
     public ResidueType getResidueType2() {
         return ResiduePairDescriptor.getResidueType2(residuePairDescriptor);
     }
 
+    /**
+     * Extract the backbone distance type.
+     * @return distance type
+     */
     public DistanceType getBackboneDistance() {
         return ResiduePairDescriptor.getBackboneDistance(residuePairDescriptor);
     }
 
+    /**
+     * Extract the side-chain distance type.
+     * @return distance type
+     */
     public DistanceType getSideChainDistance() {
         return ResiduePairDescriptor.getSideChainDistance(residuePairDescriptor);
     }
 
+    /**
+     * Extract the angle type.
+     * @return angle type
+     */
     public AngleType getAngle() {
         return ResiduePairDescriptor.getAngle(residuePairDescriptor);
     }
 
+    /**
+     * Report the identifiers as encoded long.
+     * @return long representing both residue indices
+     */
     public long getResiduePairIdentifier() {
         return residuePairIdentifier;
     }

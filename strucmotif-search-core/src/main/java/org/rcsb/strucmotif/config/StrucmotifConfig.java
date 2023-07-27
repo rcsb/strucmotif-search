@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
- * All properties used throughout the strucmotif-search application.
+ * All properties used throughout the strucmotif-search application. Everything must be prefixed with `strucmotif.` in
+ * the properties file. Specify properties in kebab-case.
  */
 @Configuration
 @EnableConfigurationProperties
@@ -28,9 +29,9 @@ public class StrucmotifConfig {
      */
     private String dataSource = "/opt/pdb/{middle}/{id}.bcif.gz";
     /**
-     * How many threads should be used during multi-threaded operations (update, path assembly, structure reading).
+     * How many threads should be used during multi-threaded operations of a query.
      */
-    private int numberThreads = Runtime.getRuntime().availableProcessors();
+    private int perQueryThreads = Runtime.getRuntime().availableProcessors();
     /**
      * Hard limit on the number of results returned. Will stop jobs when this number of hits has been accepted. Acts as
      * a safeguard against too simple queries that will return an overwhelming number of results.
@@ -114,6 +115,10 @@ public class StrucmotifConfig {
      * Which residue contacts to index.
      */
     private ResidueGraphStrategy residueGraphStrategy = ResidueGraphStrategy.RESIDUES_IN_CONTACT;
+    /**
+     * Timeout queries after this many milliseconds. Set to Integer.MAX_VALUE to not enforce any timeout.
+     */
+    private int queryTimeout = Integer.MAX_VALUE;
     /**
      * List of all identifiers ever registered.
      */
@@ -203,16 +208,16 @@ public class StrucmotifConfig {
      * How many threads to use?
      * @return an int
      */
-    public int getNumberThreads() {
-        return numberThreads;
+    public int getPerQueryThreads() {
+        return perQueryThreads;
     }
 
     /**
      * Set how many threads to use?
-     * @param numberThreads an int greater than 0
+     * @param perQueryThreads an int greater than 0
      */
-    public void setNumberThreads(int numberThreads) {
-        this.numberThreads = numberThreads;
+    public void setPerQueryThreads(int perQueryThreads) {
+        this.perQueryThreads = perQueryThreads;
     }
 
     /**
@@ -529,5 +534,21 @@ public class StrucmotifConfig {
      */
     public void setResidueGraphStrategy(ResidueGraphStrategy residueGraphStrategy) {
         this.residueGraphStrategy = residueGraphStrategy;
+    }
+
+    /**
+     * Reports the query timeout value.
+     * @return timeout in milliseconds
+     */
+    public int getQueryTimeout() {
+        return queryTimeout;
+    }
+
+    /**
+     * Configure queries to timeout after n milliseconds by throwing a {@link java.util.concurrent.TimeoutException}.
+     * @param queryTimeout the desired the timeout
+     */
+    public void setQueryTimeout(int queryTimeout) {
+        this.queryTimeout = queryTimeout;
     }
 }

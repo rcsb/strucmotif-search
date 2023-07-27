@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 
 /**
@@ -40,6 +41,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
      * @param query the actual query
      */
     public StructureSearchContext(StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, StructureQuery query) {
+        super(new ForkJoinPool(strucmotifConfig.getPerQueryThreads()));
         this.runtime = strucmotifRuntime;
         this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;

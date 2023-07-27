@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 
+/**
+ * Structure as parsed from a CIF file.
+ */
 public class DefaultStructure implements Structure {
     private static final int[] DEFAULT_OFFSET = new int[] { 0 };
     private final String structureIdentifier;
@@ -44,6 +47,24 @@ public class DefaultStructure implements Structure {
     private final int modelledAtomCount;
     private final int instancedAtomCount;
 
+    /**
+     * Construct a structure using a bunch of arrays composed by a parser.
+     * @param structureIdentifier the structure id
+     * @param assemblyIdentifiers assembly identifiers
+     * @param assemblyOffsets reference positions where assemblies start
+     * @param assemblyReferences tuples of (chain name, transform name)
+     * @param transformationIdentifiers transform names
+     * @param transformations transforms
+     * @param labelAsymIds chain identifiers
+     * @param chainOffsets residue positions where chains start
+     * @param labelSeqIds sequence positions
+     * @param residueOffsets atom positions where residues start
+     * @param residueTypes per-residue components
+     * @param labelAtomIds atom names
+     * @param x coords
+     * @param y coords
+     * @param z coords
+     */
     public DefaultStructure(String structureIdentifier,
 
                             // assembly-level data

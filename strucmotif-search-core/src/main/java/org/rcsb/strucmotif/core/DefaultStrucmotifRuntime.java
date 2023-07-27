@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.align.AlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.SearchContext;
 import org.rcsb.strucmotif.domain.StructureSearchContext;
 import org.rcsb.strucmotif.domain.MotifSearchContext;
 import org.rcsb.strucmotif.domain.motif.EnrichedMotifDefinition;
@@ -22,6 +23,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -52,29 +57,24 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
     @Override
     public void performSearch(StructureSearchContext context) {
-        try {
-            StructureSearchResult result = context.getResult();
+        runTimeoutAware(context, () -> performSearchInternal(context));
+    }
 
-            // get all valid targets
-            targetAssembler.assemble(context);
+    private void performSearchInternal(StructureSearchContext context) {
+        StructureSearchResult result = context.getResult();
 
-            List<StructureHit> hits = scoreHits(context);
-            logHitTimings(context.getId(), hits.size(), result.getTimings().getScoreHitsTime());
+        // get all valid targets
+        targetAssembler.assemble(context);
 
-            // dereference target structure map
-            result.getTargetStructures().clear();
-            result.setTargetStructures(null);
+        List<StructureHit> hits = scoreHits(context);
+        logHitTimings(context.getId(), hits.size(), result.getTimings().getScoreHitsTime());
 
-            result.setHits(hits);
-            result.getTimings().queryStop();
-        } catch (Exception e) {
-            // unwrap specific exceptions
-            Throwable t = unwrapException(e);
-            if (t instanceof IllegalQueryDefinitionException) {
-                throw (IllegalQueryDefinitionException) t;
-            }
-            throw new RuntimeException(e);
-        }
+        // dereference target structure map
+        result.getTargetStructures().clear();
+        result.setTargetStructures(null);
+
+        result.setHits(hits);
+        result.getTimings().queryStop();
     }
 
     private void logHitTimings(String ctx, int count, long time) {
@@ -83,31 +83,17 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
     @Override
     public void performSearch(StructureSearchContext context, Consumer<StructureHit> consumer) {
-        try {
-            StructureSearchResult result = context.getResult();
-
-            // get all valid targets
-            targetAssembler.assemble(context);
-
-            int hits = consumeHits(context, consumer);
-            logHitTimings(context.getId(), hits, result.getTimings().getScoreHitsTime());
-        } catch (Exception e) {
-            // unwrap specific exceptions
-            Throwable t = unwrapException(e);
-            if (t instanceof IllegalQueryDefinitionException) {
-                throw (IllegalQueryDefinitionException) t;
-            }
-            throw new RuntimeException(e);
-        }
+        runTimeoutAware(context, () -> performSearchInternal(context, consumer));
     }
 
-    private static Throwable unwrapException(Throwable throwable) {
-        Objects.requireNonNull(throwable);
-        Throwable rootCause = throwable;
-        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
-            rootCause = rootCause.getCause();
-        }
-        return rootCause;
+    private void performSearchInternal(StructureSearchContext context, Consumer<StructureHit> consumer) {
+        StructureSearchResult result = context.getResult();
+
+        // get all valid targets
+        targetAssembler.assemble(context);
+
+        int hits = consumeHits(context, consumer);
+        logHitTimings(context.getId(), hits, result.getTimings().getScoreHitsTime());
     }
 
     private List<StructureHit> scoreHits(StructureSearchContext context) {
@@ -157,7 +143,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
         StructureIndexProvider structureIndexProvider = context.getStructureIndexProvider();
         StructureDataProvider structureDataProvider = context.getStructureDataProvider();
 
-        return context.getResult()
+        return context.tryExecute(() -> context.getResult()
                 .getTargetStructures()
                 .values()
                 .parallelStream()
@@ -165,43 +151,38 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                     String structureIdentifier = structureIndexProvider.selectStructureIdentifier(targetStructure.getStructureIndex());
                     Structure structure = structureDataProvider.readRenumbered(structureIdentifier);
                     return targetStructure.paths(residueIndexSwaps, structure, structureIdentifier, hitScorer, parameters.getRmsdCutoff());
-                });
+                }));
     }
 
     @Override
     public void performSearch(MotifSearchContext context) {
-        try {
-            MotifSearchResult result = context.getResult();
-            List<MotifHit> hits = context.getQuery()
-                    .getMotifDefinitions()
-                    .parallelStream()
-                    .flatMap(motif -> {
-                        StructureSearchResult subresult = performSearch(context, motif);
-                        List<StructureHit> subhits = subresult.getHits();
-                        if (subhits.isEmpty()) return Stream.empty();
-
-                        logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motif.getMotifIdentifier());
-                        // if there are hits: move them to parent
-                        return subresult.getHits()
-                                .stream()
-                                .map(h -> createSubhit(motif, h));
-                    })
-                    .collect(Collectors.toList());
-            result.setHits(hits);
-            result.getTimings().queryStop();
-
-            logHitTimings(context.getId(), hits.size(), result.getTimings().getQueryTime());
-        } catch (Exception e) {
-            // unwrap specific exceptions
-            Throwable t = unwrapException(e);
-            if (t instanceof IllegalQueryDefinitionException) {
-                throw (IllegalQueryDefinitionException) t;
-            }
-            throw new RuntimeException(e);
-        }
+        runTimeoutAware(context, () -> performSearchInternal(context));
     }
 
-    private StructureSearchResult performSearch(MotifSearchContext context, EnrichedMotifDefinition motifDefinition) {
+    private void performSearchInternal(MotifSearchContext context) {
+        MotifSearchResult result = context.getResult();
+        List<MotifHit> hits = context.tryExecute(() -> context.getQuery()
+                .getMotifDefinitions()
+                .parallelStream()
+                .flatMap(motif -> {
+                    StructureSearchResult subresult = performSearchInternal(context, motif);
+                    List<StructureHit> subhits = subresult.getHits();
+                    if (subhits.isEmpty()) return Stream.empty();
+
+                    logger.info("[{}] {} occurrences of {} found", context.getId(), subhits.size(), motif.getMotifIdentifier());
+                    // if there are hits: move them to parent
+                    return subresult.getHits()
+                            .stream()
+                            .map(h -> createSubhit(motif, h));
+                })
+                .collect(Collectors.toList()));
+        result.setHits(hits);
+        result.getTimings().queryStop();
+
+        logHitTimings(context.getId(), hits.size(), result.getTimings().getQueryTime());
+    }
+
+    private StructureSearchResult performSearchInternal(MotifSearchContext context, EnrichedMotifDefinition motifDefinition) {
         StructureSearchContext subcontext = context.createSubcontext(motifDefinition);
         logger.info("[{}] Evaluating {} in subquery [{}]", context.getId(), motifDefinition.getMotifIdentifier(), subcontext.getId());
 
@@ -213,43 +194,41 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
     @Override
     public void performSearch(MotifSearchContext context, Consumer<MotifHit> consumer) {
-        try {
-            MotifSearchResult result = context.getResult();
+        runTimeoutAware(context, () -> performSearchInternal(context, consumer));
+    }
 
-            int hits = consumeHits(context, consumer);
+    private void performSearchInternal(MotifSearchContext context, Consumer<MotifHit> consumer) {
+        MotifSearchResult result = context.getResult();
 
-            logHitTimings(context.getId(), hits, result.getTimings().getQueryTime());
-        } catch (Exception e) {
-            // unwrap specific exceptions
-            Throwable t = unwrapException(e);
-            if (t instanceof IllegalQueryDefinitionException) {
-                throw (IllegalQueryDefinitionException) t;
-            }
-            throw new RuntimeException(e);
-        }
+        int hits = consumeHits(context, consumer);
+
+        logHitTimings(context.getId(), hits, result.getTimings().getQueryTime());
     }
 
     private int consumeHits(MotifSearchContext context, Consumer<MotifHit> consumer) {
         MotifSearchResult result = context.getResult();
         AtomicInteger hits = new AtomicInteger();
 
-        context.getQuery()
-                .getMotifDefinitions()
-                .parallelStream()
-                .forEach(motif -> {
-                    StructureSearchResult subresult = performSearch(context, motif);
-                    List<StructureHit> subhits = subresult.getHits();
-                    if (subhits.isEmpty()) return;
+        context.tryExecute(() -> {
+            context.getQuery()
+                    .getMotifDefinitions()
+                    .parallelStream()
+                    .forEach(motif -> {
+                        StructureSearchResult subresult = performSearchInternal(context, motif);
+                        List<StructureHit> subhits = subresult.getHits();
+                        if (subhits.isEmpty()) return;
 
-                    int subhitCount = subhits.size();
-                    logger.info("[{}] {} occurrences of {} found", context.getId(), subhitCount, motif.getMotifIdentifier());
-                    hits.addAndGet(subhitCount);
-                    // if there are hits: move them to parent
-                    subresult.getHits()
-                            .stream()
-                            .map(h -> createSubhit(motif, h))
-                            .forEach(consumer);
-                });
+                        int subhitCount = subhits.size();
+                        logger.info("[{}] {} occurrences of {} found", context.getId(), subhitCount, motif.getMotifIdentifier());
+                        hits.addAndGet(subhitCount);
+                        // if there are hits: move them to parent
+                        subresult.getHits()
+                                .stream()
+                                .map(h -> createSubhit(motif, h))
+                                .forEach(consumer);
+                    });
+            return null;
+        });
 
         result.getTimings().queryStop();
         return hits.get();
@@ -261,5 +240,50 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                 structureHit.residueTypes(),
                 structureHit.rootMeanSquareDeviation(),
                 structureHit.transformation());
+    }
+
+    void runTimeoutAware(SearchContext<?, ?, ?> context, Runnable work) {
+        if (context.isDone()) {
+            throw new IllegalStateException("Queries can only be run once, either access results or create a new query");
+        }
+
+        boolean hasTimeout = context.getQuery().getParameters().hasTimeout();
+        int timeout = context.getQuery().getParameters().getTimeout();
+        ExecutorService executorService = context.getExecutorService();
+        Future<?> future = executorService.submit(work);
+
+        try {
+            if (hasTimeout) {
+                future.get(timeout, TimeUnit.MILLISECONDS);
+            } else {
+                future.get();
+            }
+            executorService.shutdown();
+        } catch (TimeoutException e) {
+            future.cancel(true);
+            logger.error("Query was interrupted because it exceeded the timeout of {} ms", timeout);
+            throw new QueryTimeoutException("Query was interrupted because it exceeded the timeout of " + timeout + " ms, try simplifying your query e.g. by removing exchanges");
+        } catch (Exception e) {
+            // unwrap specific exceptions
+            Throwable t = unwrapException(e);
+            if (t instanceof IllegalQueryDefinitionException) {
+                throw (IllegalQueryDefinitionException) t;
+            }
+            throw new QueryExecutionException("The query failed unexpectedly", e);
+        } finally {
+            if (!executorService.isShutdown()) {
+                executorService.shutdownNow();
+            }
+            context.markAsDone();
+        }
+    }
+
+    private static Throwable unwrapException(Throwable throwable) {
+        Objects.requireNonNull(throwable);
+        Throwable rootCause = throwable;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
     }
 }

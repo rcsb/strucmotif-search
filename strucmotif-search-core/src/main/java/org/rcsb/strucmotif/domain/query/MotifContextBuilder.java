@@ -143,6 +143,7 @@ public class MotifContextBuilder implements ContextBuilder {
         private float rmsdCutoff;
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
+        private int timeout;
 
         MandatoryBuilderStep(String structureIdentifier, Structure structure, Set<EnrichedMotifDefinition> motifDefinitions, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider) {
             this.structureIdentifier = structureIdentifier;
@@ -158,73 +159,46 @@ public class MotifContextBuilder implements ContextBuilder {
             this.atomPairingScheme = AtomPairingScheme.SIDE_CHAIN;
             // defines the 'default' motif pruning strategy
             this.motifPruner = MotifContextBuilder.this.kruskalMotifPruner;
+            this.timeout = strucmotifConfig.getQueryTimeout();
         }
 
-        /**
-         * Specify the backbone distance tolerance (default: 1).
-         * @param backboneDistanceTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the side-chain distance tolerance (default: 1).
-         * @param sideChainDistanceTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the angle tolerance (default: 1).
-         * @param angleTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
 
-        /**
-         * Filter hits based on RMSD. Only relevant when scoring strategy involves alignment.
-         * @param rmsdCutoff the RMSD cutoff above which hits are filtered
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 
-        /**
-         * Controls which atoms will be considered for alignment. Only relevant when scoring scheme is alignment-based.
-         * @param atomPairingScheme how to pair atoms for alignment routine
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
         }
 
-        /**
-         * Specify the motif pruning strategy.
-         * @param motifPruner the implementation to prune motifs
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep motifPruningStrategy(MotifPruner motifPruner) {
             this.motifPruner = motifPruner;
             return this;
         }
 
-        /**
-         * Specify the motif pruning strategy.
-         * @param motifPruningStrategy the strategy to prune motifs
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep motifPruningStrategy(MotifPruningStrategy motifPruningStrategy) {
             switch (motifPruningStrategy) {
                 case KRUSKAL -> this.motifPruner = MotifContextBuilder.this.kruskalMotifPruner;
@@ -235,13 +209,20 @@ public class MotifContextBuilder implements ContextBuilder {
         }
 
         @Override
+        public MandatoryBuilderStep timeout(int ms) {
+            this.timeout = ms;
+            return this;
+        }
+
+        @Override
         public OptionalBuilderStep buildParameters() {
             MotifParameters parameters = new MotifParameters(backboneDistanceTolerance,
                     sideChainDistanceTolerance,
                     angleTolerance,
                     rmsdCutoff,
                     atomPairingScheme,
-                    motifPruner);
+                    motifPruner,
+                    timeout);
             return new OptionalBuilderStep(structureIdentifier, structure, motifDefinitions, invertedIndex, structureIndexProvider, structureDataProvider, parameters);
         }
     }

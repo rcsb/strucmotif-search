@@ -27,6 +27,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
      * @param query the actual query
      */
     public MotifSearchContext(StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, MotifQuery query) {
+        super(new ForkJoinPool(strucmotifConfig.getPerQueryThreads()));
         this.runtime = strucmotifRuntime;
         this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;
@@ -163,6 +165,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
                 parentParameters.getRmsdCutoff(),
                 parentParameters.getAtomPairingScheme(),
                 parentParameters.getMotifPruner(),
+                Integer.MAX_VALUE,
                 Integer.MAX_VALUE);
 
         Map<LabelSelection, Set<ResidueType>> exchanges = motifDefinition.getPositionSpecificExchanges()

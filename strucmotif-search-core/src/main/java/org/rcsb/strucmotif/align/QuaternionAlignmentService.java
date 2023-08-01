@@ -39,7 +39,7 @@ public class QuaternionAlignmentService implements AlignmentService {
      * points are expected to be equal of size. Furthermore, centroids have to be computed externally and points must be
      * centered.
      *
-     * <p>base on code from: https://theobald.brandeis.edu/qcp/qcprot.c
+     * <p>base on code from: <a href="https://theobald.brandeis.edu/qcp/qcprot.c">https://theobald.brandeis.edu/qcp/qcprot.c</a>
      *
      * <p>Douglas L. Theobald (2005)
      * "Rapid calculation of RMSD using a quaternion-based characteristic

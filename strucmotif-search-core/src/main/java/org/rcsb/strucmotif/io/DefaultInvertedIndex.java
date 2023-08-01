@@ -388,8 +388,12 @@ public class DefaultInvertedIndex implements InvertedIndex {
 
     private Stream<Path> partialFilenames() throws IOException {
         logger.info("Collecting partial files at {}", rootPath);
-        return Files.list(rootPath)
-                .filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().toString().endsWith(StrucmotifConfig.TMP_EXT));
+        List<Path> out;
+        try (Stream<Path> paths = Files.list(rootPath)) {
+            out = paths.filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().toString().endsWith(StrucmotifConfig.TMP_EXT))
+                    .collect(Collectors.toList());
+        }
+        return out.stream();
     }
 
     private void deletePartialFiles() throws IOException {

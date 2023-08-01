@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.rcsb.ffindex.FileBundleIO;
 import org.rcsb.ffindex.ReadableFileBundle;
@@ -55,6 +53,7 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 class StructureIntegrationTest {
     private StrucmotifConfig strucmotifConfig;
     private StructureReader structureReader;
+    private ReadableFileBundle fileBundle;
     private StructureContextBuilder contextBuilder;
 
     @BeforeEach
@@ -65,7 +64,7 @@ class StructureIntegrationTest {
         this.structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
-        ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
+        this.fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
         InvertedIndex invertedIndex = new DefaultInvertedIndex(strucmotifConfig) {
             @Override
@@ -106,6 +105,11 @@ class StructureIntegrationTest {
         TargetAssembler targetAssembler = new DefaultTargetAssembler(structureIndexProvider);
         StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, strucmotifConfig, alignmentService);
         this.contextBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig, invertedIndex);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        fileBundle.close();
     }
 
     @Test

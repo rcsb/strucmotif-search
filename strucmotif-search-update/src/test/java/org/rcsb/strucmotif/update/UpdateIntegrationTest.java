@@ -85,10 +85,11 @@ class UpdateIntegrationTest {
     @AfterEach
     public void teardown() throws IOException {
         logger.info("Deleting tmp dir at {}", path);
-        Files.walk(path)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+        try (Stream<Path> paths = Files.walk(path)) {
+            paths.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
     }
 
     private String[] toArgs(Operation operation, List<TestCases> cases) {

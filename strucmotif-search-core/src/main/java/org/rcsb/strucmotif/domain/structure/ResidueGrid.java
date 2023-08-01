@@ -7,7 +7,7 @@ import java.util.List;
  * Efficiently determine residues in contacts by a spatial hashing approach. Adapted to code to be inline with other
  * classes, removed support for 2nd set of atoms, only consider alpha carbons (and equivalents) for computation.
  *
- * see: https://github.com/biojava/biojava/blob/master/biojava-structure/src/main/java/org/biojava/nbio/structure/contact/Grid.java
+ * see: <a href="https://github.com/biojava/biojava/blob/master/biojava-structure/src/main/java/org/biojava/nbio/structure/contact/Grid.java">Grid.java</a>
  * original author: Jose M. Duarte &lt;jose.duarte@rcsb.org&gt;
  */
 public class ResidueGrid {

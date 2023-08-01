@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.util.InputMismatchException;
 
 /**
- * Serializes and deserializes buckets with a custom colfer implementation. See https://github.com/pascaldekloe/colfer.
+ * Serializes and deserializes buckets with a custom colfer implementation. See <a href="https://github.com/pascaldekloe/colfer">colfer</a>.
  */
 public class ColferCodec implements BucketCodec {
     private static final int[] EMPTY_INT_ARRAY = new int[0];

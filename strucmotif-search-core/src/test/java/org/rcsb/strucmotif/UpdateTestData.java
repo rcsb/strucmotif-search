@@ -10,6 +10,7 @@ import org.rcsb.strucmotif.io.StructureWriter;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -18,6 +19,7 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class UpdateTestData {
     private static final Path updateRoot;
@@ -40,32 +42,36 @@ public class UpdateTestData {
     }
 
     private static void updateOriginalBcif(Path path) throws IOException {
-        Files.list(path).forEach(p -> {
-            String fileName = p.getFileName().toString();
-            System.out.println("Updating original: " + fileName);
-            download("https://models.rcsb.org/" + fileName, p);
-        });
+        try (Stream<Path> paths = Files.list(path)) {
+            paths.forEach(p -> {
+                String fileName = p.getFileName().toString();
+                System.out.println("Updating original: " + fileName);
+                download("https://models.rcsb.org/" + fileName, p);
+            });
+        }
     }
 
     private static void updateRenumberedBcif(Path path) throws IOException {
-        Files.list(path).forEach(p -> {
-            String fileName = p.getFileName().toString();
-            System.out.println("Updating renumbered: " + fileName);
+        try (Stream<Path> paths = Files.list(path)) {
+            paths.forEach(p -> {
+                String fileName = p.getFileName().toString();
+                System.out.println("Updating renumbered: " + fileName);
 
-            try {
-                MmCifFile cif = CifIO.readFromURL(new URL("https://models.rcsb.org/" + fileName)).as(StandardSchemata.MMCIF);
-                byte[] bytes = structureWriter.write(cif);
-                Files.write(p, bytes);
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
+                try {
+                    MmCifFile cif = CifIO.readFromURL(new URL("https://models.rcsb.org/" + fileName)).as(StandardSchemata.MMCIF);
+                    byte[] bytes = structureWriter.write(cif);
+                    Files.write(p, bytes);
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        }
     }
 
     private static void download(String sourceUrl, Path dest) {
-        try {
-            ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(sourceUrl).openStream());
-            FileChannel outputChannel = new FileOutputStream(dest.toFile()).getChannel();
+        try (ReadableByteChannel readableByteChannel = Channels.newChannel(new URL(sourceUrl).openStream());
+             FileOutputStream outputStream = new FileOutputStream(dest.toFile());
+             FileChannel outputChannel = outputStream.getChannel()) {
             outputChannel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
         } catch (IOException e) {
             throw new UncheckedIOException(e);

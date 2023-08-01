@@ -19,7 +19,7 @@ class ResiduePairOccurrenceTest {
 
         List<Integer> out = occurrence.residuePairDescriptorsByTolerance(1, 1, 1, exchanges)
                 .boxed()
-                .collect(Collectors.toList());
+                .toList();
 
         assertEquals(out.stream().distinct().count(), out.size(), "There are duplicates");
         assertEquals(2, out.stream().map(ResiduePairDescriptor::getResidueType2).distinct().count(), "Didn't observe exchange");

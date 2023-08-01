@@ -70,7 +70,7 @@ public class StructureQueryStructure implements QueryStructure {
 
         List<Integer> originalResidueIndices = originalLabelSelections.stream()
                 .map(structure::getResidueIndex)
-                .collect(Collectors.toList());
+                .toList();
         this.residueIndexSwaps = originalResidueIndices.stream()
                 .map(residueIndices::indexOf)
                 .collect(Collectors.toList());

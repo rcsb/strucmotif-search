@@ -197,7 +197,6 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
             return;
         }
 
-        // TODO add off-heap strategy?
         if (strategy == InMemoryStrategy.HEAP) {
             logger.info("Structure data will be kept in memory - start loading...");
 
@@ -350,7 +349,7 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
             temporaryFileBundle.close();
             Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
-            // TODO weird on windows
+            // this fails on Windows as mmap'ed files can't be properly closed
             Files.deleteIfExists(partialDataPath);
             Files.deleteIfExists(partialIndexPath);
             initializeFileBundle();

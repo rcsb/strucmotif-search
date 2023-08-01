@@ -52,7 +52,7 @@ public class ResidueGraph {
         SELECTION
     }
 
-    public static record ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier,
+    public record ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier,
                                              List<Map<LabelAtomId, float[]>> residues,
                                              List<LabelSelection> selections) {
         /**
@@ -125,7 +125,7 @@ public class ResidueGraph {
         this.pairingCount = fillResidueGrid(structure, residueVectors, strucmotifConfig.getSquaredDistanceCutoff(), options);
     }
 
-    static record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors, float[] normalVectors) {}
+    record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors, float[] normalVectors) {}
 
     private ResidueVectors populateResidueVectors(Structure structure, ResidueGraphOptions options) {
         int valid = 0;

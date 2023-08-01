@@ -8,11 +8,14 @@ import org.rcsb.strucmotif.io.DefaultStructureReader;
 
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.*;
 import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.all;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.chainsInContact;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.deposited;
+import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.residuesInContact;
 
 public class ResidueGraphOptionTest {
     private static final float TEST_DISTANCE_CUTOFF = 20;

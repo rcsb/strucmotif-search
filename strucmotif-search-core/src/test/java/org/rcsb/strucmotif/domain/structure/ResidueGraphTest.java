@@ -80,7 +80,7 @@ class ResidueGraphTest {
 
         // this is a structure with distinct chains in altlocs
         // currently, there is no support for altlocs (especially of this nature) - thus, many weird words will be reported - that's okay for now
-        assertEquals(6, c, "Less than the expected number of chains, only saw: " + residueGraph.residuePairOccurrencesSequential().flatMapToInt(ResiduePairOccurrence::residueIndices).mapToObj(structure::getLabelAsymId).distinct().collect(Collectors.toList()));
+        assertEquals(6, c, "Less than the expected number of chains, only saw: " + residueGraph.residuePairOccurrencesSequential().flatMapToInt(ResiduePairOccurrence::residueIndices).mapToObj(structure::getLabelAsymId).distinct().toList());
     }
 
     @Test

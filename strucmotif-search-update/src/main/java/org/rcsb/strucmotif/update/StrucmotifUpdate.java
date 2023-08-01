@@ -335,7 +335,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
             long startWrite = System.nanoTime();
             int magicStructureIndex = structureIndex | 1 << 31;
             byte[] buffer = new byte[8];
-            OutputStream outputStream = context.getOutputStream();
             AtomicInteger structureMotifCounter = new AtomicInteger();
             AtomicInteger lastDescriptor = new AtomicInteger(); // 0 is safe as nothing should be AA-0-0-0
             residueGraph.residuePairOccurrencesSequential()
@@ -343,6 +342,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     .forEach(o -> {
                         try {
                             int descriptor = o.getResiduePairDescriptor();
+                            OutputStream outputStream = context.getOutputStream(descriptor);
                             if (descriptor != lastDescriptor.get()) {
                                 buffer[0] = (byte) (magicStructureIndex >>> 24);
                                 buffer[1] = (byte) (magicStructureIndex >>> 16);
@@ -604,9 +604,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
     }
 
     private void deletePartialFiles() throws IOException {
-        Files.list(Paths.get(strucmotifConfig.getRootPath()))
-                .filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().endsWith(StrucmotifConfig.TMP_EXT))
+        try (Stream<Path> paths = Files.list(Paths.get(strucmotifConfig.getRootPath()))) {
+            paths.filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().endsWith(StrucmotifConfig.TMP_EXT))
                 .map(Path::toFile)
                 .forEach(File::delete);
+        }
     }
 }

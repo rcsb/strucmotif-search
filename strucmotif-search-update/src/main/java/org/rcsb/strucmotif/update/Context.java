@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.update;
 
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class Context implements Closeable, Flushable {
     final Set<StructureInformation> processed;
     int partitionSize;
     String partitionContext;
-    private final Map<Thread, OutputStream> outputStreams;
+    private final Map<String, OutputStream> outputStreams;
     private final List<Path> outputPaths;
     AtomicInteger structureCounter;
 
@@ -44,16 +45,21 @@ public class Context implements Closeable, Flushable {
         this.outputPaths = new CopyOnWriteArrayList<>();
     }
 
-    public OutputStream getOutputStream() throws IOException {
-        OutputStream ref = outputStreams.get(Thread.currentThread());
+    private String getPrefix(int descriptor) {
+        return ResiduePairDescriptor.getResidueType1(descriptor).getInternalCode() + ResiduePairDescriptor.getResidueType2(descriptor).getInternalCode();
+    }
+
+    public OutputStream getOutputStream(int descriptor) throws IOException {
+        String key = Thread.currentThread().getId() + "-" + getPrefix(descriptor);
+        OutputStream ref = outputStreams.get(key);
         if (ref != null) {
             return ref;
         }
 
-        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.INDEX + "." + Thread.currentThread().getId() + StrucmotifConfig.TMP_EXT);
+        Path path = Paths.get(rootPath).resolve(StrucmotifConfig.INDEX + "." + key + StrucmotifConfig.TMP_EXT);
         logger.debug("Creating thread-specific index dump at {}", path);
         ref = new BufferedOutputStream(new FileOutputStream(path.toFile()), BUFFER_SIZE);
-        outputStreams.put(Thread.currentThread(), ref);
+        outputStreams.put(key, ref);
         outputPaths.add(path);
         return ref;
     }

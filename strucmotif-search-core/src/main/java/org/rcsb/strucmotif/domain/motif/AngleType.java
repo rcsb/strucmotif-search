@@ -47,6 +47,8 @@ public enum AngleType {
      */
     A180;
 
+    public static final AngleType[] values = values(); // caching this
+
     /**
      * Width of an angle bin.
      */
@@ -69,10 +71,10 @@ public enum AngleType {
         int i = Math.round(angle / BIN_SIZE);
         if (i < 0) {
             return AngleType.A0;
-        } else if (i >= AngleType.values().length) {
+        } else if (i >= values.length) {
             return AngleType.A180;
         } else {
-            return AngleType.values()[i];
+            return values[i];
         }
     }
 
@@ -82,6 +84,6 @@ public enum AngleType {
      * @return the corresponding bin
      */
     public static AngleType ofIntRepresentation(int ordinal) {
-        return AngleType.values()[Algebra.capToInterval(0, ordinal, values().length)];
+        return values[Algebra.capToInterval(0, ordinal, values.length)];
     }
 }

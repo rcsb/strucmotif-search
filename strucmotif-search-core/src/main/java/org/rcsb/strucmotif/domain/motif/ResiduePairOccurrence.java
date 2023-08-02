@@ -179,19 +179,19 @@ public class ResiduePairOccurrence {
 
         for (int i = -backboneTolerance; i <= backboneTolerance; i++) {
             int ii = backboneDistance + i;
-            if (ii < 0 || ii >= DistanceType.values().length) {
+            if (ii < 0 || ii >= DistanceType.values.length) {
                 continue;
             }
 
             for (int j = -sideChainTolerance; j <= sideChainTolerance; j++) {
                 int ij = sideChainDistance + j;
-                if (ij < 0 || ij >= DistanceType.values().length) {
+                if (ij < 0 || ij >= DistanceType.values.length) {
                     continue;
                 }
 
                 for (int k = -angleTolerance; k <= angleTolerance; k++) {
                     int ik = angle + k;
-                    if (ik < 0 || ik >= AngleType.values().length) {
+                    if (ik < 0 || ik >= AngleType.values.length) {
                         continue;
                     }
 

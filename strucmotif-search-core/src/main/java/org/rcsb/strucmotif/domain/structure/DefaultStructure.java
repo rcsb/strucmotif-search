@@ -257,7 +257,7 @@ public class DefaultStructure implements Structure {
     @Override
     public ResidueType getResidueType(int residueIndex) {
         int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
-        return ResidueType.values()[residueTypes[residueIndex - instancedChainOffsets[instancedChainIndex] + chainOffsets[instancedChainToLabelAsymIdsIndices[instancedChainIndex]]]];
+        return ResidueType.values[residueTypes[residueIndex - instancedChainOffsets[instancedChainIndex] + chainOffsets[instancedChainToLabelAsymIdsIndices[instancedChainIndex]]]];
     }
 
     @Override
@@ -267,7 +267,7 @@ public class DefaultStructure implements Structure {
             int offsetStart = residueOffsets[residueIndex];
             int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[residueIndex + 1];
             for (int j = offsetStart; j < offsetEnd; j++) {
-                LabelAtomId labelAtomId = LabelAtomId.values()[labelAtomIds[j]];
+                LabelAtomId labelAtomId = LabelAtomId.values[labelAtomIds[j]];
                 // ignore 'non-standard' atoms
                 if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
                     continue;
@@ -287,7 +287,7 @@ public class DefaultStructure implements Structure {
         int offsetEnd = modelledResidueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[modelledResidueIndex + 1];
 
         for (int j = offsetStart; j < offsetEnd; j++) {
-            LabelAtomId labelAtomId = LabelAtomId.values()[labelAtomIds[j]];
+            LabelAtomId labelAtomId = LabelAtomId.values[labelAtomIds[j]];
             // ignore 'non-standard' atoms
             if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
                 continue;

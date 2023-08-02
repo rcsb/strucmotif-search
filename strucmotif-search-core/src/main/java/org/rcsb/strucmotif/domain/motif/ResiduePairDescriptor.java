@@ -71,7 +71,7 @@ public class ResiduePairDescriptor {
      * @return the 1st type
      */
     public static ResidueType getResidueType1(int descriptor) {
-        return ResidueType.values()[descriptor >>> 22 & 0x3F];
+        return ResidueType.values[descriptor >>> 22 & 0x3F];
     }
 
     /**
@@ -80,7 +80,7 @@ public class ResiduePairDescriptor {
      * @return the 2nd type
      */
     public static ResidueType getResidueType2(int descriptor) {
-        return ResidueType.values()[descriptor >>> 16 & 0x3F];
+        return ResidueType.values[descriptor >>> 16 & 0x3F];
     }
 
     /**
@@ -89,7 +89,7 @@ public class ResiduePairDescriptor {
      * @return the backbone distance type
      */
     public static DistanceType getBackboneDistance(int descriptor) {
-        return DistanceType.values()[descriptor >>> 9 & 0x1F];
+        return DistanceType.values[descriptor >>> 9 & 0x1F];
     }
 
     /**
@@ -98,7 +98,7 @@ public class ResiduePairDescriptor {
      * @return the side-chain distance type
      */
     public static DistanceType getSideChainDistance(int descriptor) {
-        return DistanceType.values()[descriptor >>> 4 & 0x1F];
+        return DistanceType.values[descriptor >>> 4 & 0x1F];
     }
 
     /**
@@ -107,7 +107,7 @@ public class ResiduePairDescriptor {
      * @return the angle type
      */
     public static AngleType getAngle(int descriptor) {
-        return AngleType.values()[descriptor & 0x0F];
+        return AngleType.values[descriptor & 0x0F];
     }
 
     /**

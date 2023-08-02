@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.*;
@@ -18,7 +18,8 @@ import static org.rcsb.strucmotif.math.Algebra.*;
 public class ResidueGraph {
     private static final Logger logger = LoggerFactory.getLogger(ResidueGraph.class);
     private final Structure structure;
-    private Map<Long, Short> data;
+    private long[] keys;
+    private short[] values;
     private final int selectionCount;
     private final int residueCount;
     private final int pairingCount;
@@ -255,7 +256,9 @@ public class ResidueGraph {
         }
 
         int contactCount = 0;
-        this.data = new LinkedHashMap<>();
+        int base = 64;
+        this.keys = new long[base];
+        this.values = new short[base];
         for (ResidueGrid.ResidueContact residueContact : contacts) {
             int i = residueContact.i();
             int j = residueContact.j();
@@ -285,14 +288,28 @@ public class ResidueGraph {
             DistanceType sideChainDistance = DistanceType.ofDistance((float) Math.sqrt(distanceSquared3d(residueVectors.sideChainVectors, i, j)));
             AngleType angle = AngleType.ofAngle(angle(residueVectors.normalVectors, i, j));
 
+            ensureCapacity(contactCount);
             // jam all values into a single short
-            long key = ResiduePairIdentifier.encodeIdentifier(residueIndex1, residueIndex2);
-            short value = ResiduePairDescriptor.encodeDescriptor(backboneDistance, sideChainDistance, angle);
-            data.put(key, value);
+            keys[contactCount] = ResiduePairIdentifier.encodeIdentifier(residueIndex1, residueIndex2);
+            values[contactCount] = ResiduePairDescriptor.encodeDescriptor(backboneDistance, sideChainDistance, angle);
 
             contactCount++;
         }
+
+        trim(contactCount);
         return contactCount;
+    }
+
+    private void ensureCapacity(int contactCount) {
+        if (contactCount >= keys.length) {
+            keys = Arrays.copyOf(keys, keys.length * 2);
+            values = Arrays.copyOf(values, keys.length * 2);
+        }
+    }
+
+    private void trim(int contactCount) {
+        keys = Arrays.copyOf(keys, contactCount);
+        values = Arrays.copyOf(values, contactCount);
     }
 
     public int getSelectionCount() {
@@ -307,31 +324,25 @@ public class ResidueGraph {
         return pairingCount;
     }
 
-    public LongStream pairingsSequential() {
-        return data.keySet().stream().mapToLong(l -> l);
-    }
-
-    public LongStream pairingsParallel() {
-        return data.keySet().parallelStream().mapToLong(l -> l);
-    }
-
     public Stream<ResiduePairOccurrence> residuePairOccurrencesSequential() {
-        return pairingsSequential()
+        return IntStream.range(0, pairingCount)
                 .mapToObj(this::createResiduePairOccurrence);
     }
 
     public Stream<ResiduePairOccurrence> residuePairOccurrencesParallel() {
-        return pairingsParallel()
+        return IntStream.range(0, pairingCount)
+                .parallel()
                 .mapToObj(this::createResiduePairOccurrence);
     }
 
-    private ResiduePairOccurrence createResiduePairOccurrence(long residuePairIdentifier) {
-        int residueIndex1 = ResiduePairIdentifier.getResidueIndex1(residuePairIdentifier);
-        int residueIndex2 = ResiduePairIdentifier.getResidueIndex2(residuePairIdentifier);
+    private ResiduePairOccurrence createResiduePairOccurrence(int i) {
+        long k = keys[i];
+        int residueIndex1 = ResiduePairIdentifier.getResidueIndex1(k);
+        int residueIndex2 = ResiduePairIdentifier.getResidueIndex2(k);
         ResidueType residueType1 = structure.getResidueType(residueIndex1);
         ResidueType residueType2 = structure.getResidueType(residueIndex2);
 
-        short value = data.get(residuePairIdentifier);
+        short value = values[i];
         DistanceType backboneDistance = ResiduePairDescriptor.getBackboneDistance(value);
         DistanceType sideChainDistance = ResiduePairDescriptor.getSideChainDistance(value);
         AngleType angle = ResiduePairDescriptor.getAngle(value);
@@ -437,11 +448,11 @@ public class ResidueGraph {
                 .map(o -> new Pair<>(o.getResidueIndex1(), o.getResidueIndex2()))
                 .collect(Collectors.toSet());
 
-        if (data.isEmpty()) {
+        if (pairingCount == 0) {
             return false;
         }
 
-        int random = ResiduePairIdentifier.getResidueIndex1(data.keySet().iterator().next());
+        int random = ResiduePairIdentifier.getResidueIndex1(keys[0]);
         dfs(random, edges, visited);
 
         logger.debug("Checked for connectedness in {} ms", (System.nanoTime() - start) * 0.001 * 0.001);

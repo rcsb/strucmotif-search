@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class DefaultResidueTypeResolver implements ResidueTypeResolver {
     private static final Logger logger = LoggerFactory.getLogger(DefaultResidueTypeResolver.class);
     private static final String MAPPING_FILE = "residue-type-mapping.json";
-    private static final Map<String, ResidueType> THREE_LETTER_CODE_MAPPING = Arrays.stream(ResidueType.values())
+    private static final Map<String, ResidueType> THREE_LETTER_CODE_MAPPING = Arrays.stream(ResidueType.values)
             .collect(Collectors.toMap(ResidueType::getThreeLetterCode, Function.identity()));
     private static final Map<String, ResidueType> AMBIGUOUS_TO_TYPE = Map.of(
             "ASX", ResidueType.UNKNOWN_AMINO_ACID,

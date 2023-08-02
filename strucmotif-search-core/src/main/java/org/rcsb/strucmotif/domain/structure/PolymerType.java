@@ -1,5 +1,7 @@
 package org.rcsb.strucmotif.domain.structure;
 
+import org.rcsb.strucmotif.domain.motif.AngleType;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -41,6 +43,8 @@ public enum PolymerType {
      */
     UNKNOWN_POLYMER(Collections.emptySet());
 
+    public static final PolymerType[] values = values(); // caching this
+
     private final Set<String> typeNames;
 
     PolymerType(Set<String> typeNames) {
@@ -55,7 +59,7 @@ public enum PolymerType {
         return typeNames;
     }
 
-    private static final Map<String, PolymerType> MAPPING = Arrays.stream(PolymerType.values())
+    private static final Map<String, PolymerType> MAPPING = Arrays.stream(PolymerType.values)
             .flatMap(t -> t.getTypeNames().stream().map(n -> Map.entry(n, t)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 

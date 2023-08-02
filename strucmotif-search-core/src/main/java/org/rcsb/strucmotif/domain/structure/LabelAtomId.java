@@ -1,5 +1,7 @@
 package org.rcsb.strucmotif.domain.structure;
 
+import org.rcsb.strucmotif.domain.motif.AngleType;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
@@ -282,6 +284,8 @@ public enum LabelAtomId {
      */
     UNKNOWN_ATOM("?");
 
+    public static final LabelAtomId[] values = values(); // caching this
+
     private final String labelAtomId;
 
     LabelAtomId(String labelAtomId) {
@@ -296,7 +300,7 @@ public enum LabelAtomId {
         return labelAtomId;
     }
 
-    private static final Map<String, LabelAtomId> MAPPING = Arrays.stream(LabelAtomId.values())
+    private static final Map<String, LabelAtomId> MAPPING = Arrays.stream(LabelAtomId.values)
             .collect(Collectors.toMap(LabelAtomId::getLabelAtomId, Function.identity()));
     /**
      * Resolve a label_atom_id.

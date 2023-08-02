@@ -135,6 +135,8 @@ public enum DistanceType {
      */
     D31; // this is the hard-limit for the distance between pairs
 
+    public static final DistanceType[] values = values(); // caching this
+
     /**
      * Width of a distance bin.
      */
@@ -157,10 +159,10 @@ public enum DistanceType {
         int i = Math.round(distance / BIN_SIZE);
         if (i < 0) {
             return DistanceType.D0;
-        } else if (i >= DistanceType.values().length) {
+        } else if (i >= values.length) {
             return DistanceType.D31;
         } else {
-            return DistanceType.values()[i];
+            return values[i];
         }
     }
 
@@ -170,6 +172,6 @@ public enum DistanceType {
      * @return the corresponding bin
      */
     public static DistanceType ofIntRepresentation(int ordinal) {
-        return DistanceType.values()[Algebra.capToInterval(0, ordinal, values().length)];
+        return values[Algebra.capToInterval(0, ordinal, values.length)];
     }
 }

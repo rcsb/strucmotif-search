@@ -15,8 +15,8 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -25,6 +25,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,8 +41,8 @@ import java.util.stream.Stream;
 @Service
 public class DefaultInvertedIndex implements InvertedIndex {
     private static final Logger logger = LoggerFactory.getLogger(DefaultInvertedIndex.class);
-    private static final int BUFFER_SIZE = 65536;
     private static final byte MAGIC = (byte) (1 << 7);
+    private static final int EMPTY_INT = Integer.MAX_VALUE;
     private final String extension;
     private final BucketCodec bucketCodec;
     // 'production' data that can be queried
@@ -115,137 +116,133 @@ public class DefaultInvertedIndex implements InvertedIndex {
     public void commit() {
         logger.info("Committing temporary files to index");
         try {
-            Set<Integer> existingDescriptors = reportKnownDescriptors();
+            Set<Integer> unchangedDescriptors = Collections.synchronizedSet(reportKnownDescriptors());
 
             // this captures all additional data
             List<Path> partials = partialFilenames().collect(Collectors.toList());
-            logger.info("Merging partial data from {}", partials);
-            // key: structure index, value: source/partial file
-            Map<Integer, RandomAccessFile> partialFileMapping = new HashMap<>();
-            // outer key: residue pair descriptor, inner key: structure index, value: begin of data in corresponding file
-            Map<Integer, Map<Integer, Long>> startOffsets = new HashMap<>();
-            Map<Integer, Map<Integer, Integer>> byteCounts = new HashMap<>();
-            byte[] readBuffer = new byte[BUFFER_SIZE];
-            for (Path p : partials) {
-                RandomAccessFile file = new RandomAccessFile(p.toFile(), "r");
-                AtomicInteger lastDescriptor = new AtomicInteger(Integer.MAX_VALUE);
-                AtomicInteger lastStructureIndex = new AtomicInteger(Integer.MAX_VALUE);
-                long offset = 0L;
-                int read;
-                while ((read = file.read(readBuffer)) > 0) {
-                    for (int i = 0; i < read - 7; i = i + 8, offset = offset + 8) {
-                        if ((readBuffer[i] & MAGIC) == 0) {
-                            continue;
-                        }
-                        if (lastDescriptor.get() != Integer.MAX_VALUE) {
-                            int descriptor = lastDescriptor.get();
-                            Map<Integer, Integer> lengthMap = byteCounts.computeIfAbsent(descriptor, e -> new HashMap<>());
-                            int structureIndex = lastStructureIndex.get();
-                            lengthMap.put(structureIndex, (int) (offset - startOffsets.get(descriptor).get(structureIndex)));
-                        }
-                        int structureIndex = (readBuffer[i] & ~MAGIC & 0xFF) << 24 | (readBuffer[i + 1] & 0xFF) << 16 | (readBuffer[i + 2] & 0xFF) << 8 | (readBuffer[i + 3] & 0xFF);
-                        partialFileMapping.put(structureIndex, file);
-                        int descriptor = (readBuffer[i + 4] & 0xFF) << 24 | (readBuffer[i + 5] & 0xFF) << 16 | (readBuffer[i + 6] & 0xFF) << 8 | (readBuffer[i + 7] & 0xFF);
-                        Map<Integer, Long> startMap = startOffsets.computeIfAbsent(descriptor, e -> new HashMap<>());
-                        startMap.put(structureIndex, offset + 8); // identifier data will start in next block
-                        lastDescriptor.set(descriptor);
-                        lastStructureIndex.set(structureIndex);
-                    }
-                }
+            Map<String, List<Path>> sortedByPrefix = partials.stream().collect(Collectors.groupingBy(p -> p.getFileName().toString().split("-")[1].split("\\.")[0]));
 
-                // capture last datum
-                int descriptor = lastDescriptor.get();
-                // files might have been created but no content was written
-                if (descriptor == Integer.MAX_VALUE) {
-                    continue;
-                }
-                Map<Integer, Integer> lengthMap = byteCounts.computeIfAbsent(descriptor, e -> new HashMap<>());
-                int structureIndex = lastStructureIndex.get();
-                lengthMap.put(structureIndex, (int) (offset - startOffsets.get(descriptor).get(structureIndex)));
+            logger.info("Merging partial data from {}", partials);
+            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
+            AtomicInteger pathCounter = new AtomicInteger(1);
+            for (List<Path> paths : sortedByPrefix.values()) {
+                progress(pathCounter, 5, "Prefixes processed");
+                // outer key: descriptor, inner key: structure index, value: positional data
+                Map<Integer, Map<Integer, int[]>> data = Collections.synchronizedMap(new HashMap<>());
+
+                paths.parallelStream().forEach(p -> {
+                    try {
+                        int currentStructureIndex = EMPTY_INT;
+                        int currentDescriptor = EMPTY_INT;
+                        int[] array = new int[1024];
+                        int arrayPos = 0;
+                        byte[] bytes = Files.readAllBytes(p);
+                        for (int i = 0; i < bytes.length - 7; i = i + 8) {
+                            if ((bytes[i] & MAGIC) != 0) {
+                                // looking at metadata
+                                if (currentDescriptor != EMPTY_INT) {
+                                    int[] actual = Arrays.copyOf(array, arrayPos);
+                                    Map<Integer, int[]> map = data.computeIfAbsent(currentDescriptor, e -> Collections.synchronizedMap(new HashMap<>()));
+                                    map.put(currentStructureIndex, actual);
+                                    // no need to clear out array, will write over old data
+                                    arrayPos = 0;
+                                }
+                                currentStructureIndex = (bytes[i] & ~MAGIC & 0xFF) << 24 | (bytes[i + 1] & 0xFF) << 16 | (bytes[i + 2] & 0xFF) << 8 | (bytes[i + 3] & 0xFF);
+                                currentDescriptor = (bytes[i + 4] & 0xFF) << 24 | (bytes[i + 5] & 0xFF) << 16 | (bytes[i + 6] & 0xFF) << 8 | (bytes[i + 7] & 0xFF);
+                            } else {
+                                // looking at payload
+                                if (arrayPos >= array.length) {
+                                    array = Arrays.copyOf(array, array.length * 2);
+                                }
+                                array[arrayPos++] = (bytes[i] & 0xFF) << 24 | (bytes[i + 1] & 0xFF) << 16 | (bytes[i + 2] & 0xFF) << 8 | (bytes[i + 3] & 0xFF);
+                                array[arrayPos++] = (bytes[i + 4] & 0xFF) << 24 | (bytes[i + 5] & 0xFF) << 16 | (bytes[i + 6] & 0xFF) << 8 | (bytes[i + 7] & 0xFF);
+                            }
+                        }
+
+                        if (currentDescriptor == Integer.MAX_VALUE) {
+                            return;
+                        }
+
+                        // capture last datum
+                        int[] actual = Arrays.copyOf(array, arrayPos);
+                        Map<Integer, int[]> map = data.computeIfAbsent(currentDescriptor, e -> Collections.synchronizedMap(new HashMap<>()));
+                        map.put(currentStructureIndex, actual);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
+
+                data.entrySet().parallelStream().forEach(entry -> {
+                    // tracking unchanged descriptors to copy them over from prod data at the very end
+                    unchangedDescriptors.remove(entry.getKey());
+
+                    int descriptor = entry.getKey();
+                    Map<Integer, int[]> perStructureData = entry.getValue();
+                    int structureCount = perStructureData.size();
+                    int identifierCount = perStructureData.values().stream().mapToInt(Array::getLength).sum();
+
+                    try {
+                        int[] structureIndices;
+                        int[] positionOffsets;
+                        int[] identifierData;
+                        int outerPos = 0;
+                        int innerPos = 0;
+
+                        // check if there's data in production files, if so concat that to the start of the arrays
+                        if (fileBundle.containsFile(descriptor + extension)) {
+                            ByteBuffer byteBuffer = fileBundle.readFile(descriptor + extension);
+                            InvertedIndexBucket existingBucket = bucketCodec.decode(byteBuffer);
+
+                            int existingStructureCount = existingBucket.getStructureIndexArray().length;
+                            int existingIdentifierCount = existingBucket.getIdentifierDataArray().length;
+                            structureIndices = new int[structureCount + existingStructureCount];
+                            positionOffsets = new int[structureCount + existingStructureCount];
+                            identifierData = new int[identifierCount + existingIdentifierCount];
+
+                            System.arraycopy(existingBucket.getStructureIndexArray(), 0, structureIndices, 0, existingStructureCount);
+                            System.arraycopy(existingBucket.getPositionOffsetArray(), 0, positionOffsets, 0, existingStructureCount);
+                            System.arraycopy(existingBucket.getIdentifierDataArray(), 0, identifierData, 0, existingIdentifierCount);
+
+                            // advance positions accordingly
+                            outerPos += existingStructureCount;
+                            innerPos += existingIdentifierCount;
+                        } else {
+                            structureIndices = new int[structureCount];
+                            positionOffsets = new int[structureCount];
+                            identifierData = new int[identifierCount];
+                        }
+
+                        for (Map.Entry<Integer, int[]> datum : perStructureData.entrySet()) {
+                            int structureIndex = datum.getKey();
+                            structureIndices[outerPos] = structureIndex;
+                            positionOffsets[outerPos] = innerPos;
+
+                            int[] array = datum.getValue();
+                            System.arraycopy(array, 0, identifierData, innerPos, array.length);
+
+                            outerPos++;
+                            innerPos += array.length;
+                        }
+
+                        InvertedIndexBucket bucket = new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
+                        ByteBuffer out = bucketCodec.encode(bucket);
+                        temporaryFileBundle.writeFile(descriptor + extension, out);
+                    } catch (IOException e) {
+                        throw new UncheckedIOException(e);
+                    }
+                });
             }
 
-            WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
-            Set<Integer> existingOnly = existingDescriptors.stream().filter(i -> !startOffsets.containsKey(i)).collect(Collectors.toSet());
-            if (!existingOnly.isEmpty()) {
-                logger.info("Transferring existing data for {} descriptors", existingOnly.size());
+            if (!unchangedDescriptors.isEmpty()) {
+                logger.info("Transferring existing data for {} descriptors", unchangedDescriptors.size());
                 ByteBuffer tmp;
-                for (int descriptor : existingOnly) {
+                for (int descriptor : unchangedDescriptors) {
                     String filename = descriptor + extension;
                     // this should stay below the limit on memory-mapped regions as most descriptors will need an update
                     tmp = fileBundle.readFile(filename);
                     temporaryFileBundle.writeFile(filename, tmp);
                 }
             }
-
-            logger.info("Merging data on {} descriptors from {} structures", startOffsets.size(), partialFileMapping.size());
-            AtomicInteger counter = new AtomicInteger();
-            startOffsets.entrySet()
-                    .parallelStream()
-                    .peek(p -> progress(counter, 1000, "[{} / " + startOffsets.size() + "] compacting descriptor data"))
-                    .forEach(entry -> {
-                        int descriptor = entry.getKey();
-                        Map<Integer, Long> perStructureStart = entry.getValue();
-                        Map<Integer, Integer> perStructureByteCount = byteCounts.get(descriptor);
-                        int structureCount = perStructureStart.size();
-                        int identifierCount = perStructureStart.keySet().stream().mapToInt(si -> perStructureByteCount.get(si) / 4).sum();
-
-                        try {
-                            int[] structureIndices;
-                            int[] positionOffsets;
-                            int[] identifierData;
-                            int outerPos = 0;
-                            int innerPos = 0;
-
-                            // check if there's data in production files, if so concat that to the start of the arrays
-                            if (fileBundle.containsFile(descriptor + extension)) {
-                                ByteBuffer byteBuffer = fileBundle.readFile(descriptor + extension);
-                                InvertedIndexBucket existingBucket = bucketCodec.decode(byteBuffer);
-
-                                int existingStructureCount = existingBucket.getStructureIndexArray().length;
-                                int existingIdentifierCount = existingBucket.getIdentifierDataArray().length;
-                                structureIndices = new int[structureCount + existingStructureCount];
-                                positionOffsets = new int[structureCount + existingStructureCount];
-                                identifierData = new int[identifierCount + existingIdentifierCount];
-
-                                System.arraycopy(existingBucket.getStructureIndexArray(), 0, structureIndices, 0, existingStructureCount);
-                                System.arraycopy(existingBucket.getPositionOffsetArray(), 0, positionOffsets, 0, existingStructureCount);
-                                System.arraycopy(existingBucket.getIdentifierDataArray(), 0, identifierData, 0, existingIdentifierCount);
-
-                                // advance positions accordingly
-                                outerPos += existingStructureCount;
-                                innerPos += existingIdentifierCount;
-                            } else {
-                                structureIndices = new int[structureCount];
-                                positionOffsets = new int[structureCount];
-                                identifierData = new int[identifierCount];
-                            }
-
-                            for (Map.Entry<Integer, Long> datum : perStructureStart.entrySet()) {
-                                int structureIndex = datum.getKey();
-                                structureIndices[outerPos] = structureIndex;
-                                positionOffsets[outerPos] = innerPos;
-
-                                RandomAccessFile sourceFile = partialFileMapping.get(structureIndex);
-                                int n = perStructureByteCount.get(structureIndex);
-                                int perStructureIdentifierCount = n / 4;
-                                ByteBuffer buffer = ByteBuffer.allocate(n);
-                                sourceFile.getChannel().read(buffer, perStructureStart.get(structureIndex));
-                                buffer.rewind();
-                                for (int i = 0; i < perStructureIdentifierCount; i++) {
-                                    identifierData[innerPos + i] = buffer.getInt();
-                                }
-
-                                outerPos++;
-                                innerPos += perStructureIdentifierCount;
-                            }
-
-                            InvertedIndexBucket bucket = new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
-                            ByteBuffer out = bucketCodec.encode(bucket);
-                            temporaryFileBundle.writeFile(descriptor + extension, out);
-                        } catch (IOException e) {
-                            throw new UncheckedIOException(e);
-                        }
-                    });
 
             // delete partial file bundle and swap temporary files with real ones
             fileBundle.close();

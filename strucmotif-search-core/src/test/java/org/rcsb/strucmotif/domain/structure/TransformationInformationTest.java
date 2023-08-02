@@ -6,9 +6,9 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.NoSuchElementException;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
 
 public class TransformationInformationTest {
@@ -175,14 +175,15 @@ public class TransformationInformationTest {
     void whenSecondInterwovenAssembly_thenResiduesMapCorrectly() {
         Structure structure = structureReader.readFromInputStream(getRenumberedBcif("3uud"));
 
-        // TODO worth it to deduplicate these? right now they will get indexed multiple times
         int firstResidueChainA = 499;
         assertEquals("2", structure.getAssemblyIdentifier(firstResidueChainA));
         assertEquals(4, structure.getLabelSeqId(firstResidueChainA));
         assertEquals("A", structure.getLabelAsymId(firstResidueChainA));
         assertEquals("1" , structure.getTransformationIdentifier(firstResidueChainA));
-        // TODO these can't be differentiated from the first copy -- add assembly param?
         assertEquals(0, structure.getResidueIndex("A", "1", 4));
+        assertEquals(0, structure.getResidueIndex("1", "A", "1", 4));
+        assertEquals(499, structure.getResidueIndex("2", "A", "1", 4));
+        assertThrows(NoSuchElementException.class, () -> structure.getResidueIndex("3", "A", "1", 4), "Chain 'A' doesn't occur in assembly '3'");
 
         int lastResidueChainA = 740;
         assertEquals("2", structure.getAssemblyIdentifier(lastResidueChainA));

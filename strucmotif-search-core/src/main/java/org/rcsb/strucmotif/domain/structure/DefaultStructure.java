@@ -327,7 +327,21 @@ public class DefaultStructure implements Structure {
 
     @Override
     public int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId) {
-        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId);
+        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId, 0);
+        return getResidueIndex(labelAsymId, labelSeqId, instancedChainIndex);
+    }
+
+    @Override
+    public int getResidueIndex(String assemblyIdentifier, String labelAsymId, String structOperId, int labelSeqId) {
+        int assemblyIndex = indexOf(assemblyIdentifiers, assemblyIdentifier);
+        if (assemblyIndex < 0) {
+            throw new NoSuchElementException("Didn't find assembly '" + assemblyIdentifier + "'");
+        }
+        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId, assemblyOffsets[assemblyIndex]);
+        return getResidueIndex(labelAsymId, labelSeqId, instancedChainIndex);
+    }
+
+    private int getResidueIndex(String labelAsymId, int labelSeqId, int instancedChainIndex) {
         int chainIndex = instancedChainToLabelAsymIdsIndices[instancedChainIndex];
         int chainEnd = chainIndex == chainOffsets.length - 1 ? labelSeqIds.length : chainOffsets[chainIndex + 1];
         int residueIndex = Arrays.binarySearch(labelSeqIds, chainOffsets[chainIndex], chainEnd, (short) labelSeqId);
@@ -343,6 +357,11 @@ public class DefaultStructure implements Structure {
     }
 
     @Override
+    public int getResidueIndex(String assemblyIdentifier, LabelSelection labelSelection) {
+        return getResidueIndex(assemblyIdentifier, labelSelection.labelAsymId(), labelSelection.structOperId(), labelSelection.labelSeqId());
+    }
+
+    @Override
     public LabelSelection getLabelSelection(int residueIndex) {
         int instancedChainIndex = offsetArrayIndexOf(instancedChainOffsets, residueIndex);
         int labelAsymIdIndex = instancedChainToLabelAsymIdsIndices[instancedChainIndex];
@@ -352,9 +371,9 @@ public class DefaultStructure implements Structure {
         return new LabelSelection(labelAsymId, transformationIdentifier, labelSeqId);
     }
 
-    private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId) {
+    private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId, int start) {
         int chainIndex = -1;
-        for (int i = 0; i < assemblyReferences.length - 1; i = i + 2) {
+        for (int i = start; i < assemblyReferences.length - 1; i = i + 2) {
             if (assemblyReferences[i].equals(labelAsymId) && assemblyReferences[i + 1].equals(structOperId)) {
                 chainIndex = i / 2;
                 break;

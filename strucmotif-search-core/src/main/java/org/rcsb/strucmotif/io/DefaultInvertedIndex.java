@@ -171,7 +171,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 ByteBuffer tmp;
                 for (int descriptor : existingOnly) {
                     String filename = descriptor + extension;
-                    // TODO might exceed limit on memory-mapped regions, possible to harden this? move upstream to FileBundleIO?
+                    // this should stay below the limit on memory-mapped regions as most descriptors will need an update
                     tmp = fileBundle.readFile(filename);
                     temporaryFileBundle.writeFile(filename, tmp);
                 }

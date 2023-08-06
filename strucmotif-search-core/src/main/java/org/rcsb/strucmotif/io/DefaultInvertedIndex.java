@@ -15,22 +15,15 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.io.UncheckedIOException;
 import java.lang.reflect.Array;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.channels.FileChannel;
+import java.nio.file.*;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -233,20 +226,25 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 });
             }
 
+            fileBundle.close();
+            temporaryFileBundle.close();
+
             if (!unchangedDescriptors.isEmpty()) {
                 logger.info("Transferring existing data for {} descriptors", unchangedDescriptors.size());
-                ByteBuffer tmp;
-                for (int descriptor : unchangedDescriptors) {
-                    String filename = descriptor + extension;
-                    // this should stay below the limit on memory-mapped regions as most descriptors will need an update
-                    tmp = fileBundle.readFile(filename);
-                    temporaryFileBundle.writeFile(filename, tmp);
-                }
+                Set<String> update = unchangedDescriptors.stream().map(desc -> desc + extension).collect(Collectors.toSet());
+                Path selectDataPath = temporaryDataPath.resolveSibling("select.data");
+                Path selectIndexPath = temporaryIndexPath.resolveSibling("select.ffindex");
+                Files.createFile(selectDataPath);
+                Files.createFile(selectIndexPath);
+
+                selectFromBundle(dataPath, indexPath, selectDataPath, selectIndexPath, update);
+                FileBundleIO.mergeBundles(temporaryDataPath, temporaryIndexPath, selectDataPath, selectIndexPath);
+
+                Files.deleteIfExists(selectDataPath);
+                Files.deleteIfExists(selectIndexPath);
             }
 
             // delete partial file bundle and swap temporary files with real ones
-            fileBundle.close();
-            temporaryFileBundle.close();
             Files.move(temporaryDataPath, dataPath, StandardCopyOption.REPLACE_EXISTING);
             Files.move(temporaryIndexPath, indexPath, StandardCopyOption.REPLACE_EXISTING);
             deletePartialFiles();
@@ -254,6 +252,42 @@ public class DefaultInvertedIndex implements InvertedIndex {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    // TODO move to ffindex-java at some point
+    record Entry(String filename, long offset, int length) {}
+
+    private static List<Entry> parseEntries(Path indexPath) throws IOException {
+        try (Stream<String> lines = Files.lines(indexPath)) {
+            return lines.map(line -> line.split("\t"))
+                    .map(split -> new Entry(split[0], Long.parseLong(split[1]), Integer.parseInt(split[2])))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    public static void selectFromBundle(Path dataPath, Path indexPath, Path outputDataPath, Path outputIndexPath, Set<String> selectedFiles) throws IOException {
+        List<Entry> originalEntries = parseEntries(indexPath);
+        Map<String, Entry> selectedEntries = originalEntries.stream().filter(e -> selectedFiles.contains(e.filename())).collect(Collectors.toMap(Entry::filename, Function.identity()));
+        if (selectedEntries.size() != selectedFiles.size()) {
+            throw new IllegalStateException("There are missing files in the source bundle - won't manipulate");
+        }
+
+        long updatedOffset = 0L;
+        StringJoiner updatedIndex = new StringJoiner("\n");
+        try (RandomAccessFile originalDataFile = new RandomAccessFile(dataPath.toFile(), "r");
+             FileChannel originalData = originalDataFile.getChannel();
+             RandomAccessFile additionsDataFile = new RandomAccessFile(outputDataPath.toFile(), "rw");
+             FileChannel additionsData = additionsDataFile.getChannel()) {
+            for (String filename : selectedFiles) {
+                Entry entry = selectedEntries.get(filename);
+                ByteBuffer buffer = ByteBuffer.allocate(entry.length());
+                originalData.read(buffer, entry.offset());
+                additionsData.write(buffer);
+                updatedIndex.add(entry.filename() + "\t" + updatedOffset + "\t" + entry.length());
+                updatedOffset += entry.offset();
+            }
+        }
+        Files.writeString(outputIndexPath, updatedIndex.toString());
     }
 
     @Override

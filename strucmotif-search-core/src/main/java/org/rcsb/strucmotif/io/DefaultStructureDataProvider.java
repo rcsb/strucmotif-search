@@ -134,6 +134,10 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
         return new ByteArrayInputStream(out);
     }
 
+    /**
+     * Life-cycle operation that runs as part of the initialization.
+     * @throws IOException IO operation failed
+     */
     @PostConstruct
     public void setUp() throws IOException {
         try {
@@ -164,6 +168,10 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
         initializeRenumberedStructureCache();
     }
 
+    /**
+     * Life-cycle operation that runs during cleanup.
+     * @throws IOException IO operation failed
+     */
     @PreDestroy
     public void tearDown() throws IOException {
         fileBundle.close();

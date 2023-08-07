@@ -18,6 +18,12 @@ public class InvertedIndexRunner {
     private static final int BINS_READ = 100;
 
     /**
+     * Default constructor.
+     */
+    public InvertedIndexRunner() {
+    }
+
+    /**
      * Entry point.
      * @param args nothing
      */

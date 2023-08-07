@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
  * Represents a single file of the inverted index (e.g., AL-4-5-4). This file keeps track of all structures that contain
  * occurrences of the corresponding descriptor.
  */
-public class InvertedIndexBucket implements Bucket {
+public class ArrayBucket implements Bucket {
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     /**
      * An empty bucket which will refuse to iterate on structures or occurrences.
      */
-    public static final InvertedIndexBucket EMPTY_BUCKET = new InvertedIndexBucket(EMPTY_INT_ARRAY, EMPTY_INT_ARRAY, EMPTY_INT_ARRAY) {
+    public static final ArrayBucket EMPTY_BUCKET = new ArrayBucket(EMPTY_INT_ARRAY, EMPTY_INT_ARRAY, EMPTY_INT_ARRAY) {
         @Override
         public boolean hasNextStructure() {
             return false;
@@ -44,7 +44,7 @@ public class InvertedIndexBucket implements Bucket {
      * @param positionOffsets positional offsets, same length as structureIndices
      * @param identifierData identifiers data as encoded (int, int) tuples
      */
-    public InvertedIndexBucket(int[] structureIndices, int[] positionOffsets, int[] identifierData) {
+    public ArrayBucket(int[] structureIndices, int[] positionOffsets, int[] identifierData) {
         this.structureIndices = structureIndices;
         this.positionOffsets = positionOffsets;
         this.identifierData = identifierData;
@@ -52,14 +52,26 @@ public class InvertedIndexBucket implements Bucket {
         this.structurePointer = -1;
     }
 
+    /**
+     * Access to the structure index array.
+     * @return an int[]
+     */
     public int[] getStructureIndexArray() {
         return structureIndices;
     }
 
+    /**
+     * Access to the position offset array.
+     * @return an int[]
+     */
     public int[] getPositionOffsetArray() {
         return positionOffsets;
     }
 
+    /**
+     * Access to the actual data array.
+     * @return an int[]
+     */
     public int[] getIdentifierDataArray() {
         return identifierData;
     }
@@ -123,6 +135,11 @@ public class InvertedIndexBucket implements Bucket {
         return ResiduePairIdentifier.encodeIdentifier(identifierData[positionPointer], identifierData[positionPointer + 1]);
     }
 
+    /**
+     * Direct access into the identifier array by a given index.
+     * @param pos array index
+     * @return the identifier at that position
+     */
     public int getResidueIndex(int pos) {
         return identifierData[pos];
     }

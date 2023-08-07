@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * The results of a search run.
+ * @param <H> hit type
  */
 public interface SearchResult<H extends Hit> {
     /**

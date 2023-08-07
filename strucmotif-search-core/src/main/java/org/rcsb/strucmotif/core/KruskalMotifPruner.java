@@ -13,6 +13,12 @@ import java.util.stream.Collectors;
  */
 @Service
 public class KruskalMotifPruner implements MotifPruner {
+    /**
+     * Default constructor.
+     */
+    public KruskalMotifPruner() {
+    }
+
     @Override
     public List<ResiduePairOccurrence> prune(ResidueGraph residueGraph) {
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()

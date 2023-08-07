@@ -155,7 +155,7 @@ public class TargetStructure {
 
                     AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));
                     // filter away high-RMSD hits
-                    if (alignmentResult.rmsd() >= rmsdCutoff) {
+                    if (alignmentResult.rootMeanSquareDeviation() >= rmsdCutoff) {
                         return null;
                     }
 
@@ -163,7 +163,7 @@ public class TargetStructure {
                             entry.getKey(),
                             labelSelections,
                             Arrays.asList(residueTypes),
-                            alignmentResult.rmsd(),
+                            alignmentResult.rootMeanSquareDeviation(),
                             alignmentResult.transformation());
                 })
                 .filter(Objects::nonNull);

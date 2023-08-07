@@ -6,7 +6,7 @@ import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -63,6 +63,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
         this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
     }
 
+    /**
+     * Life-cycle operation that runs as part of the initialization.
+     * @throws IOException IO operation failed
+     */
     @PostConstruct
     public void setUp() throws IOException {
         try {
@@ -88,6 +92,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
         Files.deleteIfExists(temporaryIndexPath);
     }
 
+    /**
+     * Life-cycle operation that runs during cleanup.
+     * @throws IOException IO operation failed
+     */
     @PreDestroy
     public void tearDown() throws IOException {
         fileBundle.close();
@@ -184,7 +192,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                         // check if there's data in production files, if so concat that to the start of the arrays
                         if (fileBundle.containsFile(descriptor + extension)) {
                             ByteBuffer byteBuffer = fileBundle.readFile(descriptor + extension);
-                            InvertedIndexBucket existingBucket = bucketCodec.decode(byteBuffer);
+                            ArrayBucket existingBucket = bucketCodec.decode(byteBuffer);
 
                             int existingStructureCount = existingBucket.getStructureIndexArray().length;
                             int existingIdentifierCount = existingBucket.getIdentifierDataArray().length;
@@ -217,7 +225,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                             innerPos += array.length;
                         }
 
-                        InvertedIndexBucket bucket = new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
+                        ArrayBucket bucket = new ArrayBucket(structureIndices, positionOffsets, identifierData);
                         ByteBuffer out = bucketCodec.encode(bucket);
                         temporaryFileBundle.writeFile(descriptor + extension, out);
                     } catch (IOException e) {
@@ -265,7 +273,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
         }
     }
 
-    public static void selectFromBundle(Path dataPath, Path indexPath, Path outputDataPath, Path outputIndexPath, Set<String> selectedFiles) throws IOException {
+    private static void selectFromBundle(Path dataPath, Path indexPath, Path outputDataPath, Path outputIndexPath, Set<String> selectedFiles) throws IOException {
         List<Entry> originalEntries = parseEntries(indexPath);
         Map<String, Entry> selectedEntries = originalEntries.stream().filter(e -> selectedFiles.contains(e.filename())).collect(Collectors.toMap(Entry::filename, Function.identity()));
         if (selectedEntries.size() != selectedFiles.size()) {
@@ -292,10 +300,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
     }
 
     @Override
-    public InvertedIndexBucket select(int residuePairDescriptor) {
+    public ArrayBucket select(int residuePairDescriptor) {
         String filename = getFilename(residuePairDescriptor);
         if (!fileBundle.containsFile(filename)) {
-            return InvertedIndexBucket.EMPTY_BUCKET;
+            return ArrayBucket.EMPTY_BUCKET;
         }
 
         try {
@@ -373,7 +381,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
      */
     private ByteBuffer delete(int residuePairDescriptor, Collection<Integer> removals) throws IOException {
         ByteBuffer byteBuffer = getByteBuffer(getFilename(residuePairDescriptor));
-        InvertedIndexBucket bucket = bucketCodec.decode(byteBuffer);
+        ArrayBucket bucket = bucketCodec.decode(byteBuffer);
         Set<Integer> structureIndices = bucket.getStructureIndices();
 
         // if no entry would be removed: don't bother and return
@@ -383,7 +391,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
         }
 
         // remove all occurrences of structure identifiers
-        InvertedIndexBucket filteredBucket = removeByKey(bucket, removals);
+        ArrayBucket filteredBucket = removeByKey(bucket, removals);
         if (filteredBucket == null) {
             return null;
         }
@@ -409,7 +417,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 .peek(p -> progress(counter, 10000, "{} bins scanned"))
                 .map(this::createResiduePairDescriptor)
                 .map(this::select)
-                .map(InvertedIndexBucket::getStructureIndices)
+                .map(ArrayBucket::getStructureIndices)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
@@ -437,7 +445,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
      * @param removals what to remove
      * @return a new bucket that doesn't contain any of the removals
      */
-    private InvertedIndexBucket removeByKey(InvertedIndexBucket bucket, Collection<Integer> removals) {
+    private ArrayBucket removeByKey(ArrayBucket bucket, Collection<Integer> removals) {
         int[] originalStructureIndices = bucket.getStructureIndexArray();
         int[] originalPositionOffsets = bucket.getPositionOffsetArray();
         int[] originalIdentifierData = bucket.getIdentifierDataArray();
@@ -474,6 +482,6 @@ public class DefaultInvertedIndex implements InvertedIndex {
         }
         identifierData = Arrays.copyOf(identifierData, identifierPos);
 
-        return new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
+        return new ArrayBucket(structureIndices, positionOffsets, identifierData);
     }
 }

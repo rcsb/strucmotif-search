@@ -6,6 +6,12 @@ package org.rcsb.strucmotif.update.extractor;
 public class ModelArchiveKeyExtractor implements KeyExtractor {
     private static final String NAMESPACE = "MA-";
 
+    /**
+     * Default constructor.
+     */
+    public ModelArchiveKeyExtractor() {
+    }
+
     @Override
     public String getNameSpace() {
         return NAMESPACE;

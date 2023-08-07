@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 
@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  * 'detect-motif' mode (see {@link org.rcsb.strucmotif.domain.query.MotifContextBuilder}).
  */
 public class SingleStructureInvertedIndex implements InvertedIndex {
-    private final Map<Integer, InvertedIndexBucket> index;
+    private final Map<Integer, ArrayBucket> index;
 
     /**
      * Create an inverted index based on this graph.
@@ -26,7 +26,7 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
                  .collect(Collectors.groupingBy(ResiduePairOccurrence::getResiduePairDescriptor, Collectors.collectingAndThen(Collectors.toList(), this::toInvertedIndexBucket)));
     }
 
-    private InvertedIndexBucket toInvertedIndexBucket(List<ResiduePairOccurrence> residuePairOccurrences) {
+    private ArrayBucket toInvertedIndexBucket(List<ResiduePairOccurrence> residuePairOccurrences) {
         int[] structureIndices = new int[] { 0 };
         int[] positionOffsets = new int[] { 0 };
         int[] positionData = new int[residuePairOccurrences.size() * 2];
@@ -37,7 +37,7 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
             positionData[2 * i + 1] = occurrence.getResidueIndex2();
         }
 
-        return new InvertedIndexBucket(structureIndices, positionOffsets, positionData);
+        return new ArrayBucket(structureIndices, positionOffsets, positionData);
     }
 
     @Override
@@ -46,8 +46,8 @@ public class SingleStructureInvertedIndex implements InvertedIndex {
     }
 
     @Override
-    public InvertedIndexBucket select(int residuePairDescriptor) {
-        return index.getOrDefault(residuePairDescriptor, InvertedIndexBucket.EMPTY_BUCKET);
+    public ArrayBucket select(int residuePairDescriptor) {
+        return index.getOrDefault(residuePairDescriptor, ArrayBucket.EMPTY_BUCKET);
     }
 
     @Override

@@ -10,7 +10,7 @@ import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 import org.rcsb.strucmotif.domain.query.ResultsContentType;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
@@ -68,10 +68,10 @@ class StructureIntegrationTest {
         ColferCodec bucketCodec = new ColferCodec();
         InvertedIndex invertedIndex = new DefaultInvertedIndex(strucmotifConfig) {
             @Override
-            public InvertedIndexBucket select(int residuePairDescriptor) {
+            public ArrayBucket select(int residuePairDescriptor) {
                 String filename = residuePairDescriptor + ".colf";
                 if (!fileBundle.containsFile(filename)) {
-                    return InvertedIndexBucket.EMPTY_BUCKET;
+                    return ArrayBucket.EMPTY_BUCKET;
                 }
 
                 try {
@@ -228,7 +228,7 @@ class StructureIntegrationTest {
         List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).collect(Collectors.toList());
         List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).collect(Collectors.toList());
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
-        assertEquals(0.57, align.rmsd(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
+        assertEquals(0.57, align.rootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 
         StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
                 .buildParameters()

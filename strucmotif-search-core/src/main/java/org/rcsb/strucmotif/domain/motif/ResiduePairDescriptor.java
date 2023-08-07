@@ -15,7 +15,11 @@ import org.rcsb.strucmotif.domain.structure.ResidueType;
  * The 32-bit descriptors will use their 4th bit to store metadata (M) that tracks whether the identifier is flipped.
  */
 public class ResiduePairDescriptor {
-    public static final int FLIPPED_MASK = 1 << 28; // 4-th bit from the left active
+    static final int FLIPPED_MASK = 1 << 28; // 4-th bit from the left active
+
+    private ResiduePairDescriptor() {
+        // deny
+    }
 
     /**
      * Encode (backboneDistance, sideChainDistance, angle) as short.

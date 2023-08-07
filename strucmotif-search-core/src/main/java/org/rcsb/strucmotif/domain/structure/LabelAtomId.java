@@ -282,7 +282,10 @@ public enum LabelAtomId {
      */
     UNKNOWN_ATOM("?");
 
-    public static final LabelAtomId[] values = values(); // caching this
+    /**
+     * Cached values of this enum. Don't manipulate this array of things will burn.
+     */
+    public static final LabelAtomId[] values = values();
 
     private final String labelAtomId;
 

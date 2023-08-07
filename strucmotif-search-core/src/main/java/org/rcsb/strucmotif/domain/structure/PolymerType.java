@@ -41,7 +41,10 @@ public enum PolymerType {
      */
     UNKNOWN_POLYMER(Collections.emptySet());
 
-    public static final PolymerType[] values = values(); // caching this
+    /**
+     * Cached values of this enum. Don't manipulate this array of things will burn.
+     */
+    public static final PolymerType[] values = values();
 
     private final Set<String> typeNames;
 

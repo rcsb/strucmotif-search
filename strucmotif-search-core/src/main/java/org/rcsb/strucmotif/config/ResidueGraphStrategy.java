@@ -1,5 +1,8 @@
 package org.rcsb.strucmotif.config;
 
+/**
+ * Controls what residue pairs get detected.
+ */
 public enum ResidueGraphStrategy {
     /**
      * Only report contacts of deposited coordinates.

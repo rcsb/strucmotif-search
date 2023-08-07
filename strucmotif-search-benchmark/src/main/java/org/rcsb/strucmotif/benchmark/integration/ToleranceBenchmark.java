@@ -29,6 +29,12 @@ import java.util.Set;
 @State(Scope.Benchmark)
 public class ToleranceBenchmark {
     /**
+     * Default constructor.
+     */
+    public ToleranceBenchmark() {
+    }
+
+    /**
      * Tolerance values to evaluate.
      */
     @Param({"1", "2", "3"})

@@ -114,6 +114,7 @@ public interface SearchContext<P extends Parameters, S extends QueryStructure, H
 
     /**
      * Execute an async task and hide all the boilerplate handling of interrupts etc.
+     * @param task work to do
      * @param <R> anticipated result
      * @return the response
      */

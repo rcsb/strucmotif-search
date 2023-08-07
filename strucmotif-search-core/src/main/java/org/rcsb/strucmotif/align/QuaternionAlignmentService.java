@@ -20,6 +20,12 @@ import java.util.Objects;
 public class QuaternionAlignmentService implements AlignmentService {
     private static final float[] IDENTITY_MATRIX_3D = new float[] { 1, 0, 0, 0, 1, 0, 0, 0, 1 };
 
+    /**
+     * Default constructor.
+     */
+    public QuaternionAlignmentService() {
+    }
+
     @Override
     public AlignmentResult align(List<Map<LabelAtomId, float[]>> reference, List<Map<LabelAtomId, float[]>> candidate, AtomPairingScheme atomPairingScheme) {
         // validate parameters

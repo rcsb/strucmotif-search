@@ -6,7 +6,7 @@ import org.rcsb.ffindex.FileBundleIO;
 import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.strucmotif.Helpers;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
@@ -29,10 +29,10 @@ class DefaultInvertedIndexTest {
         ColferCodec bucketCodec = new ColferCodec();
         invertedIndex = new DefaultInvertedIndex(strucmotifConfig) {
             @Override
-            public InvertedIndexBucket select(int residuePairDescriptor) {
+            public ArrayBucket select(int residuePairDescriptor) {
                 String filename = residuePairDescriptor + ".colf";
                 if (!fileBundle.containsFile(filename)) {
-                    return InvertedIndexBucket.EMPTY_BUCKET;
+                    return ArrayBucket.EMPTY_BUCKET;
                 }
 
                 try {
@@ -51,7 +51,7 @@ class DefaultInvertedIndexTest {
             AngleType.A80);
     @Test
     void whenAccessingSpecificBin_thenObserveAssemblies() {
-        InvertedIndexBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);
+        ArrayBucket bucket = invertedIndex.select(BIN_WITH_ASSEMBLY);
         int structures = 0;
         int occurrences = 0;
         while (bucket.hasNextStructure()) {
@@ -68,8 +68,8 @@ class DefaultInvertedIndexTest {
 
     @Test
     void whenSelectingByFlippedDescriptor_thenContentMatchesOriginal() {
-        InvertedIndexBucket original = invertedIndex.select(BIN_WITH_ASSEMBLY);
-        InvertedIndexBucket flipped = invertedIndex.select(BIN_WITH_ASSEMBLY & ~ResiduePairDescriptor.FLIPPED_MASK);
+        ArrayBucket original = invertedIndex.select(BIN_WITH_ASSEMBLY);
+        ArrayBucket flipped = invertedIndex.select(BIN_WITH_ASSEMBLY & ~(1 << 28));
         assertArrayEquals(original.getStructureIndexArray(), flipped.getStructureIndexArray());
         assertArrayEquals(original.getPositionOffsetArray(), flipped.getPositionOffsetArray());
         assertArrayEquals(original.getIdentifierDataArray(), flipped.getIdentifierDataArray());

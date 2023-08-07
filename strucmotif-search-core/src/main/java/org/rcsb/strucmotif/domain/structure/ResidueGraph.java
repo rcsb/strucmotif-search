@@ -15,6 +15,9 @@ import java.util.stream.Stream;
 
 import static org.rcsb.strucmotif.math.Algebra.*;
 
+/**
+ * Detects residue-residue interactions.
+ */
 public class ResidueGraph {
     private static final Logger logger = LoggerFactory.getLogger(ResidueGraph.class);
     private final Structure structure;
@@ -24,6 +27,9 @@ public class ResidueGraph {
     private final int residueCount;
     private final int pairingCount;
 
+    /**
+     * Controls how to define contacts.
+     */
     public enum ResidueGraphMode {
         /**
          * Only report contacts of deposited coordinates.
@@ -53,9 +59,16 @@ public class ResidueGraph {
         SELECTION
     }
 
+    /**
+     * Detailed options for the definition of contacts.
+     * @param mode global mode
+     * @param assemblyIdentifier if assembly-based: which assembly to index
+     * @param residues if selection-based: which residues to index
+     * @param selections if selection-based: coords of residues
+     */
     public record ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier,
-                                             List<Map<LabelAtomId, float[]>> residues,
-                                             List<LabelSelection> selections) {
+                                      List<Map<LabelAtomId, float[]>> residues,
+                                      List<LabelSelection> selections) {
         /**
          * Only report contacts of deposited coordinates.
          *
@@ -116,6 +129,12 @@ public class ResidueGraph {
         }
     }
 
+    /**
+     * Construct a graph.
+     * @param structure structure to evaluate
+     * @param strucmotifConfig global config
+     * @param options graph options
+     */
     public ResidueGraph(Structure structure, StrucmotifConfig strucmotifConfig, ResidueGraphOptions options) {
         this.structure = structure;
 
@@ -312,23 +331,43 @@ public class ResidueGraph {
         values = Arrays.copyOf(values, contactCount);
     }
 
+    /**
+     * Number of selected residues (if any).
+     * @return an int
+     */
     public int getSelectionCount() {
         return selectionCount;
     }
 
+    /**
+     * Number of referenced residues (i.e., the valid/accepted residues).
+     * @return an int
+     */
     public int getResidueCount() {
         return residueCount;
     }
 
+    /**
+     * Number of observed contacts.
+     * @return an int
+     */
     public int getPairingCount() {
         return pairingCount;
     }
 
+    /**
+     * Traverse all residue pairs.
+     * @return a Stream
+     */
     public Stream<ResiduePairOccurrence> residuePairOccurrencesSequential() {
         return IntStream.range(0, pairingCount)
                 .mapToObj(this::createResiduePairOccurrence);
     }
 
+    /**
+     * Traverse all residue pairs.
+     * @return a Stream
+     */
     public Stream<ResiduePairOccurrence> residuePairOccurrencesParallel() {
         return IntStream.range(0, pairingCount)
                 .parallel()

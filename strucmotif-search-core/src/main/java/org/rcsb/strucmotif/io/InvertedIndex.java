@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io;
 
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 
 import java.util.Collection;
 import java.util.Set;
@@ -18,7 +18,7 @@ public interface InvertedIndex extends Committable {
      * @param residuePairDescriptor the bin for which occurrences should the lookup be performed
      * @return a {@link Stream} of all occurrences, grouped by their structure identifier
      */
-    InvertedIndexBucket select(int residuePairDescriptor);
+    ArrayBucket select(int residuePairDescriptor);
 
     /**
      * Removes all information on a set of structures from the index.

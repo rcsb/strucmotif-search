@@ -153,6 +153,12 @@ public class StrucmotifConfig {
     public static final String PARTIAL_EXT = ".partial";
 
     /**
+     * Default constructor.
+     */
+    public StrucmotifConfig() {
+    }
+
+    /**
      * Maximum distance of residue pairs.
      * @return threshold in Angstrom
      */

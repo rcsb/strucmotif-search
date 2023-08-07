@@ -5,6 +5,9 @@ import java.util.Objects;
 /**
  * Identifies a residue unambiguously by label_asym_id, struct_oper_id, and label_seq_id. Basically, the 'natural' way
  * to reference residues.
+ * @param labelAsymId the chain of interest
+ * @param structOperId the operation of interest
+ * @param labelSeqId the sequence position of interest
  */
 public record LabelSelection(String labelAsymId, String structOperId, int labelSeqId) {
     @Override

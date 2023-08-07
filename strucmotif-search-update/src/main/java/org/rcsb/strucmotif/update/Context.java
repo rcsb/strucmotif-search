@@ -36,6 +36,8 @@ public class Context implements Closeable, Flushable {
 
     /**
      * Construct a new update context.
+     * @param strucmotifConfig global config
+     * @param updateItems update list
      */
     public Context(StrucmotifConfig strucmotifConfig, List<UpdateItem> updateItems) {
         this.rootPath = strucmotifConfig.getRootPath();
@@ -49,6 +51,12 @@ public class Context implements Closeable, Flushable {
         return ResiduePairDescriptor.getResidueType1(descriptor).getInternalCode() + ResiduePairDescriptor.getResidueType2(descriptor).getInternalCode();
     }
 
+    /**
+     * Get an output stream that a thread can use to dump data.
+     * @param descriptor the descriptor to write
+     * @return a new or previously created output stream that is specific to this thread
+     * @throws IOException IO operation failed
+     */
     public OutputStream getOutputStream(int descriptor) throws IOException {
         String key = Thread.currentThread().getId() + "-" + getPrefix(descriptor);
         OutputStream ref = outputStreams.get(key);

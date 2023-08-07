@@ -435,6 +435,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
     /**
      * Reports all structures currently present in the PDB archive.
+     * @param mode what data (pdb/csm) to include
      * @return collection of update items
      * @throws IOException connection failure
      */

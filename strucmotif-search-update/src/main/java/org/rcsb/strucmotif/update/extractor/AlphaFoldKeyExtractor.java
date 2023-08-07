@@ -6,6 +6,12 @@ package org.rcsb.strucmotif.update.extractor;
 public class AlphaFoldKeyExtractor implements KeyExtractor {
     private static final String NAMESPACE = "AF-";
 
+    /**
+     * Default constructor.
+     */
+    public AlphaFoldKeyExtractor() {
+    }
+
     @Override
     public String getNameSpace() {
         return NAMESPACE;

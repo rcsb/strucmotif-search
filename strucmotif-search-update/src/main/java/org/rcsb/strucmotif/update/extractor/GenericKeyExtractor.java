@@ -6,6 +6,12 @@ package org.rcsb.strucmotif.update.extractor;
 public class GenericKeyExtractor implements KeyExtractor {
     private static final String NAMESPACE = "";
 
+    /**
+     * Default constructor.
+     */
+    public GenericKeyExtractor() {
+    }
+
     @Override
     public String getNameSpace() {
         return NAMESPACE;

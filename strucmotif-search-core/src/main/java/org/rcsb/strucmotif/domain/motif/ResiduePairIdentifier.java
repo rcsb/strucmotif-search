@@ -7,6 +7,10 @@ package org.rcsb.strucmotif.domain.motif;
  * <pre>AAAAAAAA AAAAAAAA AAAAAAAA AAAAAAAA BBBBBBBB BBBBBBBB BBBBBBBB BBBBBBBB</pre>
  */
 public class ResiduePairIdentifier {
+    private ResiduePairIdentifier() {
+        // deny
+    }
+
     /**
      * Encode (residueIndex1, residueIndex2) as long.
      * @param residueIndex1 1st index

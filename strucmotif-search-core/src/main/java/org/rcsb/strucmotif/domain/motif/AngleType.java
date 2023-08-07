@@ -47,7 +47,10 @@ public enum AngleType {
      */
     A180;
 
-    public static final AngleType[] values = values(); // caching this
+    /**
+     * Cached values of this enum. Don't manipulate this array of things will burn.
+     */
+    public static final AngleType[] values = values();
 
     /**
      * Width of an angle bin.

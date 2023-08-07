@@ -2,7 +2,7 @@ package org.rcsb.strucmotif.core;
 
 import org.rcsb.strucmotif.domain.StructureSearchContext;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 import org.rcsb.strucmotif.domain.motif.Overlap;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
@@ -131,8 +131,8 @@ public class DefaultTargetAssembler implements TargetAssembler {
 
     private Stream<Pair<Integer, int[]>> select(InvertedIndex invertedIndex, int descriptor, Set<Integer> searchSpace, Set<Integer> allowed, Set<Integer> ignored) {
         int actualDescriptor = ResiduePairDescriptor.stripFlipBit(descriptor);
-        InvertedIndexBucket bucket = invertedIndex.select(actualDescriptor);
-        if (bucket == InvertedIndexBucket.EMPTY_BUCKET) {
+        ArrayBucket bucket = invertedIndex.select(actualDescriptor);
+        if (bucket == ArrayBucket.EMPTY_BUCKET) {
             return Stream.empty();
         }
 

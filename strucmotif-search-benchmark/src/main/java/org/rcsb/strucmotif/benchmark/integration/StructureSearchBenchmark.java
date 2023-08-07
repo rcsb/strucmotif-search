@@ -25,6 +25,12 @@ import java.util.Set;
  */
 public class StructureSearchBenchmark {
     /**
+     * Default constructor.
+     */
+    public StructureSearchBenchmark() {
+    }
+
+    /**
      * A benchmark.
      * @param blackhole consume results (avoid dead-code elimination)
      * @param state state

@@ -6,7 +6,16 @@ import org.springframework.boot.diagnostics.FailureAnalysis;
 
 import java.nio.file.NoSuchFileException;
 
+/**
+ * Provides better error messages when data files are missing.
+ */
 public class NoSuchFileFailureAnalyzer extends AbstractFailureAnalyzer<UnsatisfiedDependencyException> {
+    /**
+     * Default constructor.
+     */
+    public NoSuchFileFailureAnalyzer() {
+    }
+
     @Override
     protected FailureAnalysis analyze(Throwable rootFailure, UnsatisfiedDependencyException cause) {
         Throwable mostSpecific = cause.getMostSpecificCause();

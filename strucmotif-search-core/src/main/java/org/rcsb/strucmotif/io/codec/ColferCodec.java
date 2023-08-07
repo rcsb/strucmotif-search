@@ -1,6 +1,6 @@
 package org.rcsb.strucmotif.io.codec;
 
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -14,9 +14,14 @@ import java.util.InputMismatchException;
 public class ColferCodec implements BucketCodec {
     private static final int[] EMPTY_INT_ARRAY = new int[0];
 
+    /**
+     * Default constructor.
+     */
+    public ColferCodec() {}
+
     @Override
     @SuppressWarnings("Duplicates")
-    public InvertedIndexBucket decode(ByteBuffer byteBuffer) {
+    public ArrayBucket decode(ByteBuffer byteBuffer) {
         int[] structureIndices = EMPTY_INT_ARRAY;
         int[] positionOffsets = EMPTY_INT_ARRAY;
         int[] identifierData = EMPTY_INT_ARRAY;
@@ -90,7 +95,7 @@ public class ColferCodec implements BucketCodec {
             throw new InputMismatchException("colfer: unknown header at byte " + (byteBuffer.position() - 1));
         }
 
-        return new InvertedIndexBucket(structureIndices, positionOffsets, identifierData);
+        return new ArrayBucket(structureIndices, positionOffsets, identifierData);
     }
 
     private void encodeInternal(ByteArrayOutputStream out, int[] structureIndices, int[] positionOffset, int[] identifierData) throws IOException {
@@ -128,7 +133,7 @@ public class ColferCodec implements BucketCodec {
     }
 
     @Override
-    public ByteBuffer encode(InvertedIndexBucket bucket) throws IOException {
+    public ByteBuffer encode(ArrayBucket bucket) throws IOException {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             encodeInternal(outputStream, bucket.getStructureIndexArray(), bucket.getPositionOffsetArray(), bucket.getIdentifierDataArray());
             return ByteBuffer.wrap(outputStream.toByteArray());

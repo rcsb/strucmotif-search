@@ -46,6 +46,7 @@ public abstract class AbstractSearchContext<P extends Parameters, S extends Quer
 
     /**
      * Create a context, will assign a reasonable identifier.
+     * @param executorService will run associated tasks
      */
     protected AbstractSearchContext(ExecutorService executorService) {
         this.id = String.valueOf(hashCode());

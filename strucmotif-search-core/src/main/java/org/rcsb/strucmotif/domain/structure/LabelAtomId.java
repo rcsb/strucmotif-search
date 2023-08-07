@@ -1,7 +1,5 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import org.rcsb.strucmotif.domain.motif.AngleType;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;

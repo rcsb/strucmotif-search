@@ -10,7 +10,6 @@ import org.rcsb.strucmotif.io.StructureWriter;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.channels.Channels;

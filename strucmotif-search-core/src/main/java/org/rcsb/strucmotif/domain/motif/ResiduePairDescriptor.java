@@ -143,7 +143,7 @@ public class ResiduePairDescriptor {
     }
 
     /**
-     * Pretty-print an short descriptor.
+     * Pretty-print a short descriptor.
      * @param descriptor short descriptor
      * @return human-readable String
      */

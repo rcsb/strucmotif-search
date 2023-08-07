@@ -127,7 +127,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
             WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
             AtomicInteger pathCounter = new AtomicInteger(1);
             for (List<Path> paths : sortedByPrefix.values()) {
-                progress(pathCounter, 5, "{} / " + sortedByPrefix.size() + " prefixes processed");
+                progress(pathCounter, 10, "{} / " + sortedByPrefix.size() + " prefixes processed");
                 // outer key: descriptor, inner key: structure index, value: positional data
                 Map<Integer, Map<Integer, int[]>> data = Collections.synchronizedMap(new HashMap<>());
 

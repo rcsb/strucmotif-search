@@ -50,7 +50,7 @@ public class StrucmotifConfig {
      * number of structures will be loaded into memory before logging process. This mainly serves as checkpoint during
      * initialization.
      */
-    private int loadingChunkSize = 250_000;
+    private int loadingChunkSize = 200_000;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -89,7 +89,7 @@ public class StrucmotifConfig {
      * How often are files committed to the inverted index during update. This is the interval between dumping residue
      * pairs into temporary files and compacting these temporary files and actually adding them to the real index file.
      */
-    private int commitInterval = 50_000;
+    private int commitInterval = 200_000;
     /**
      * URL of the Chemical Component Dictionary.
      */

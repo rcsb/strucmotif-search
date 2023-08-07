@@ -132,7 +132,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
 
         return hit.structureIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
                 hit.assemblyIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                truncate(hit.rootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
+                truncate(hit.rmsd(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(hit.labelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(hit.residueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();

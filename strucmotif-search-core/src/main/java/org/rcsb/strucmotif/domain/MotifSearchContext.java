@@ -141,7 +141,7 @@ public class MotifSearchContext extends AbstractSearchContext<MotifParameters, M
         }
 
         return hit.motifIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                truncate(hit.rootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
+                truncate(hit.rmsd(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(hit.labelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(hit.residueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();

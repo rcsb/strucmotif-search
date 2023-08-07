@@ -12,10 +12,10 @@ import java.util.List;
  * @param assemblyIdentifier the assembly ID
  * @param labelSelections selections for each matched residue
  * @param residueTypes mapped residue types
- * @param rootMeanSquareDeviation the alignment score
+ * @param rmsd the alignment score
  * @param transformation the transformation determined by the alignment
  */
-public record StructureHit(String structureIdentifier, String assemblyIdentifier, List<LabelSelection> labelSelections, List<ResidueType> residueTypes, float rootMeanSquareDeviation, float[] transformation) implements Hit {
+public record StructureHit(String structureIdentifier, String assemblyIdentifier, List<LabelSelection> labelSelections, List<ResidueType> residueTypes, float rmsd, float[] transformation) implements Hit {
     @Override
     public String toString() {
         return "StructureHit{" +
@@ -23,7 +23,7 @@ public record StructureHit(String structureIdentifier, String assemblyIdentifier
                 ", assemblyIdentifier='" + assemblyIdentifier + '\'' +
                 ", labelSelections=" + labelSelections +
                 ", residueTypes=" + residueTypes +
-                ", rootMeanSquareDeviation=" + rootMeanSquareDeviation +
+                ", rmsd=" + rmsd +
                 ", transformation=" + Arrays.toString(transformation) +
                 '}';
     }

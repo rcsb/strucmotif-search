@@ -199,7 +199,7 @@ class StructureIntegrationTest {
 
         // print all results
         assertTrue(response.getHits().stream()
-                .map(StructureHit::rootMeanSquareDeviation)
+                .map(StructureHit::rmsd)
                 .anyMatch(s -> s < 0.5), "no low-RMSD hits observed");
     }
 
@@ -228,7 +228,7 @@ class StructureIntegrationTest {
         List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).collect(Collectors.toList());
         List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).collect(Collectors.toList());
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
-        assertEquals(0.57, align.rootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
+        assertEquals(0.57, align.rmsd(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 
         StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
                 .buildParameters()

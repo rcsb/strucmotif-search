@@ -113,7 +113,7 @@ class MotifIntegrationTest {
             assertShallowEquals(expected.getLabelSelections(), actual.labelSelections());
             assertEquals(1, actual.labelSelections().stream().map(LabelSelection::structOperId).distinct().count());
             assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.residueTypes());
-            assertTrue(actual.rootMeanSquareDeviation() < 0.001);
+            assertTrue(actual.rmsd() < 0.001);
         }
     }
 

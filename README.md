@@ -94,7 +94,7 @@ Strucmotif.searchForStructures()
         .map(hit -> hit.structureIdentifier() + "_" + 
                     hit.assemblyIdentifier() + " @ " + 
                     hit.labelSelections() + " - RMSD: " +
-                    hit.rootMeanSquareDeviation())
+                    hit.rmsd())
         .forEach(System.out::println);
 ```
 
@@ -116,7 +116,7 @@ Strucmotif.detectMotifs()
         .stream()
         .map(hit -> hit.motifIdentifier() + " @ " +
                     hit.labelSelections() + " - RMSD: " +
-                    hit.rootMeanSquareDeviation())
+                    hit.rmsd())
         .forEach(System.out::println);
 ```
 

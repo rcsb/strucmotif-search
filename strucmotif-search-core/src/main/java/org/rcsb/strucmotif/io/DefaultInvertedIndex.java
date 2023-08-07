@@ -119,7 +119,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
             WritableFileBundle temporaryFileBundle = initializeTemporaryFileBundle();
             AtomicInteger pathCounter = new AtomicInteger(1);
             for (List<Path> paths : sortedByPrefix.values()) {
-                progress(pathCounter, 5, "Prefixes processed");
+                progress(pathCounter, 5, "{} / " + sortedByPrefix.size() + " prefixes processed");
                 // outer key: descriptor, inner key: structure index, value: positional data
                 Map<Integer, Map<Integer, int[]>> data = Collections.synchronizedMap(new HashMap<>());
 
@@ -282,9 +282,10 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 Entry entry = selectedEntries.get(filename);
                 ByteBuffer buffer = ByteBuffer.allocate(entry.length());
                 originalData.read(buffer, entry.offset());
+                buffer.rewind();
                 additionsData.write(buffer);
                 updatedIndex.add(entry.filename() + "\t" + updatedOffset + "\t" + entry.length());
-                updatedOffset += entry.offset();
+                updatedOffset += entry.length();
             }
         }
         Files.writeString(outputIndexPath, updatedIndex.toString());
@@ -418,7 +419,6 @@ public class DefaultInvertedIndex implements InvertedIndex {
     }
 
     private Stream<Path> partialFilenames() throws IOException {
-        logger.info("Collecting partial files at {}", rootPath);
         List<Path> out;
         try (Stream<Path> paths = Files.list(rootPath)) {
             out = paths.filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().toString().endsWith(StrucmotifConfig.TMP_EXT))

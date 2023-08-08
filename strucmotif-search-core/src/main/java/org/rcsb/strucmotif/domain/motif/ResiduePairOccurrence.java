@@ -53,7 +53,8 @@ public class ResiduePairOccurrence {
     public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences) {
         return residuePairOccurrences.stream()
                 .sorted(INFORMATIVENESS_COMPARATOR)
-                .toList();
+                // can't be toList() as manipulation will happen downstream
+                .collect(Collectors.toList());
     }
 
     /**

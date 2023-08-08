@@ -127,7 +127,7 @@ Strucmotif.detectMotifs()
 | `decimal-places-score`  | Number of decimal places reported for scores                 | `2`                    |
 | `decimal-places-matrix` | Number of decimal places reported in transformation matrices | `3`                    |
 | `in-memory-strategy`    | Preload structure data for increased performance?            | `off`                  |
-| `loading-chunk-size`    | Batch size when holding structure data in memory             | `250,000`              |
+| `loading-chunk-size`    | Batch size when holding structure data in memory             | `200,000`              |
 | `max-results`           | Maximum number of results that will be returned              | `50,000`               |
 | `max-motif-size`        | Maximum number of residues that may define a motif           | `10`                   |
 | `per-query-threads`     | Number of worker threads per query                           | available processors   |

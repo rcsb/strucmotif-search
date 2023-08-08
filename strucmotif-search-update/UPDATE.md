@@ -63,7 +63,7 @@ might require a full load.
 | `ambiguous-monomer-strategy` | How to resolve ASX and GLX?                                                           | `TYPE`                         |
 | `ccd-url`                    | URL to the chemical component dictionary                                              | wwPDB                          |
 | `cif-fetch-url`              | URL template for (Binary)CIF download                                                 | RCSB PDB BinaryCIF             |
-| `commit-interval`            | How many entries to process before committing to index                                | `250,000`                      |
+| `commit-interval`            | How many entries to process before committing to index                                | `200,000`                      |
 | `data-source`                | Path to local CIF archive                                                             | cif-fetch-url                  |
 | `distance-cutoff`            | Maximum distance between alpha carbons that will be indexed in Å                      | `20`                           |
 | `download-tries`             | Number of tries to download structure data during update                              | `3`                            |
@@ -78,3 +78,8 @@ might require a full load.
 
 Configure by placing your `application.properties` on the classpath. All properties specific to this project must be
 prefixed with `strucmotif.`.
+
+Indexing is a resource-intensive process. Indexing 1.2 million entries takes about a day and a half using 8 cores. The 
+default values work well with 50 GB of heap. The resulting files (index, structure data, metadata) are about 200 GB in 
+size. During indexing temporary files are created and index files may be duplicated at some point. 500 GB of available 
+disk space are recommended to run the update from scratch.

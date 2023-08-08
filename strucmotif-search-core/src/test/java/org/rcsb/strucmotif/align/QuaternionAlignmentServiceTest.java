@@ -72,8 +72,8 @@ class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{15.040, 16.074, 14.408, 16.171, 19.584f, 18.902, 17.996}));
 
         List<Integer> indices = List.of(0, 1, 2, 3, 4, 5, 6);
-        List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
-        List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).collect(Collectors.toList());
+        List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).toList();
+        List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).toList();
         AlignmentResult alignmentResult = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
         assertEquals(0.719106, alignmentResult.rmsd(), Helpers.RELAXED_DELTA);
     }
@@ -97,7 +97,7 @@ class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{42.405, 48.266, 42.050}));
 
         List<Integer> indices = List.of(0, 1, 2);
-        List<Map<LabelAtomId, float[]>> residues = indices.stream().map(structure::manifestResidue).collect(Collectors.toList());
+        List<Map<LabelAtomId, float[]>> residues = indices.stream().map(structure::manifestResidue).toList();
         AlignmentResult alignment11 = alignmentService.align(residues, residues, AtomPairingScheme.ALL);
 
         double rmsd11 = alignment11.rmsd();
@@ -143,8 +143,8 @@ class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{-6.159, -9.119, -7.073}));
 
         List<Integer> indices = List.of(0, 1, 2);
-        List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).collect(Collectors.toList());
-        List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).collect(Collectors.toList());
+        List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure1::manifestResidue).toList();
+        List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure2::manifestResidue).toList();
         AlignmentResult alignment12 = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
 
         double rmsd12 = alignment12.rmsd();
@@ -190,8 +190,8 @@ class QuaternionAlignmentServiceTest {
                 Helpers.convertCoordsToShort(new double[]{22.583, 20.326, 17.386}));
 
         List<Integer> indices = List.of(0, 1, 2);
-        List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure3::manifestResidue).collect(Collectors.toList());
-        List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure4::manifestResidue).collect(Collectors.toList());
+        List<Map<LabelAtomId, float[]>> residues1 = indices.stream().map(structure3::manifestResidue).toList();
+        List<Map<LabelAtomId, float[]>> residues2 = indices.stream().map(structure4::manifestResidue).toList();
         AlignmentResult alignment34 = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
 
         double rmsd34 = alignment34.rmsd();
@@ -210,13 +210,13 @@ class QuaternionAlignmentServiceTest {
                 .map(id -> id.split("-"))
                 .map(split -> structure1.getResidueIndex(split[0], "1", Integer.parseInt(split[1])))
                 .map(structure1::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         Structure structure2 = structureReader.readFromInputStream(getOriginalBcif("3pei"));
         List<Map<LabelAtomId, float[]>> residues2 = Stream.of("A-251", "A-256", "A-274", "A-333", "A-335")
                 .map(id -> id.split("-"))
                 .map(split -> structure2.getResidueIndex(split[0], "1", Integer.parseInt(split[1])))
                 .map(structure2::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
         assertEquals(3.167, result.rmsd(), Helpers.DELTA);
@@ -232,7 +232,7 @@ class QuaternionAlignmentServiceTest {
                 .map(structure1::manifestResidue)
                 // manually filter away ambiguous atoms of GLU
                 .map(map -> map.entrySet().stream().filter(entry -> !ambiguous.contains(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
-                .collect(Collectors.toList());
+                .toList();
         Structure structure2 = structureReader.readFromInputStream(getOriginalBcif("3pei"));
         List<Map<LabelAtomId, float[]>> residues2 = Stream.of("A-251", "A-256", "A-274", "A-333", "A-335")
                 .map(id -> id.split("-"))
@@ -240,7 +240,7 @@ class QuaternionAlignmentServiceTest {
                 .map(structure2::manifestResidue)
                 // manually filter away ambiguous atoms of GLU
                 .map(map -> map.entrySet().stream().filter(entry -> !ambiguous.contains(entry.getKey())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)))
-                .collect(Collectors.toList());
+                .toList();
 
         AlignmentResult result = alignmentService.align(residues1, residues2, AtomPairingScheme.ALL);
         assertEquals(2.211, result.rmsd(), Helpers.RELAXED_DELTA);

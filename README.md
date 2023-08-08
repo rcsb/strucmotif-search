@@ -145,7 +145,7 @@ Details can be found in:
 [UPDATE.md](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md)
 
 ## Implementation Details
-### Addressing Atoms
+### Addressing Residues
 Two address schemes exist. `LabelSelection` is a high-level, object-based way of referencing individual residues. It 
 uses a combination of mmCIF properties, namely `label_asym_id`, `struct_oper_id`, and `label_seq_id`:
 ```java
@@ -157,6 +157,31 @@ layout rather, all encountered residues are addressed by their index. Chain boun
 for assemblies are honored as they occur in the source file and merely increment the counter.
 Additional work is done to preserve information on chains and assemblies. Chain and operator names as well as boundaries
 are stored in memory and can be used to reconstruct `LabelSelection` instances if needed.
+
+Residue pairs are identified by pairs of these `int` values. They can be stored as `long` value by chaining together 1st
+and 2nd value.
+
+### Residue Pair Descriptor
+Residue pair descriptors capture the `label_comp_id` of both interacting residue, their backbone distance, their 
+side-chain distance, and the angle defined between both.
+
+These values are the Cartesian product of ResidueType (A, 36 states, 6 bits) x ResidueType (B, 36 states, 6 bits) x 
+DistanceType (C, 32 states, 5 bits) x DistanceType (D, 32 states, 5 bits) x AngleType (E, 10 states, 4 bits) and are 
+stored in an unsigned 32-bit integer. The 32-bit descriptors will use their 4th bit to store metadata (M) that tracks 
+whether the identifier is flipped.
+
+```
+XXXMAAAA AABBBBBB XXCCCCCD DDDDEEEE
+```
+
+A second flavor exists that only tracks DistanceType x DistanceType x AngleType and can be held in an unsigned 16-bit 
+short.
+
+```
+XXCCCCCD DDDDEEEE
+```
+
+Convenience functions to work with these descriptors are provided in the `ResiduePairDescriptor` class.
 
 ## Related Projects
 - [ciftools-java](https://github.com/rcsb/ciftools-java): mmCIF parsing and BinaryCIF implementation

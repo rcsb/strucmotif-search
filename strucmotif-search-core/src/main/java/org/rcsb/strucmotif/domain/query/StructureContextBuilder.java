@@ -103,7 +103,7 @@ public class StructureContextBuilder implements ContextBuilder {
             List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                     .mapToInt(structure::getResidueIndex)
                     .mapToObj(structure::manifestResidue)
-                    .collect(Collectors.toList());
+                    .toList();
 
             if (residues.size() > strucmotifConfig.getMaxMotifSize()) {
                 throw new IllegalArgumentException("maximum motif size is " + strucmotifConfig.getMaxMotifSize() + " - " +
@@ -127,7 +127,7 @@ public class StructureContextBuilder implements ContextBuilder {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
         List<LabelSelection> labelSelections = structure.modelledResidueIndices()
                 .mapToObj(structure::getLabelSelection)
-                .collect(Collectors.toList());
+                .toList();
         return defineByStructureAndSelection(structure, labelSelections);
     }
 

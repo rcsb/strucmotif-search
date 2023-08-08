@@ -452,7 +452,7 @@ public class DefaultStructureReader implements StructureReader {
 
         return COMMA_PATTERN.splitAsStream(prepared)
                 .flatMap(this::extractTransformationRanges)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static final Pattern RANGE_PATTERN = Pattern.compile("-");

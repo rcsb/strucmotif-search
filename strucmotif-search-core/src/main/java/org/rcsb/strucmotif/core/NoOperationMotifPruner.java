@@ -22,6 +22,6 @@ public class NoOperationMotifPruner implements MotifPruner {
     public List<ResiduePairOccurrence> prune(ResidueGraph residueGraph) {
         return residueGraph.residuePairOccurrencesSequential()
                 .sorted(ResiduePairOccurrence.INFORMATIVENESS_COMPARATOR)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

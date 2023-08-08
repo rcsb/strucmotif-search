@@ -45,7 +45,7 @@ class KruskalMotifPrunerTest {
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::getResidueIndex)
                 .map(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
@@ -68,7 +68,7 @@ class KruskalMotifPrunerTest {
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
                 .map(structure::getResidueIndex)
                 .map(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);

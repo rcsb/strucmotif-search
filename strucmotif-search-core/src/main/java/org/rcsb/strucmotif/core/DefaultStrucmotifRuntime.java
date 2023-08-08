@@ -109,7 +109,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
         List<StructureHit> hits = hits(context, hitScorer)
                 .limit(limit)
-                .collect(Collectors.toList());
+                .toList();
 
         result.getTimings().scoreHitsStop();
         return hits;
@@ -175,7 +175,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                             .stream()
                             .map(h -> createSubhit(motif, h));
                 })
-                .collect(Collectors.toList()));
+                .toList());
         result.setHits(hits);
         result.getTimings().queryStop();
 

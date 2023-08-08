@@ -136,7 +136,7 @@ public enum DistanceType {
     D31; // this is the hard-limit for the distance between pairs
 
     /**
-     * Cached values of this enum. Don't manipulate this array of things will burn.
+     * Cached values of this enum. Don't manipulate this array or things will burn.
      */
     public static final DistanceType[] values = values();
 

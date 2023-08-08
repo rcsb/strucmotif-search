@@ -39,7 +39,7 @@ public class ConnectednessTest {
         List<Map<LabelAtomId, float[]>> res = sel.stream()
                 .mapToInt(structure::getResidueIndex)
                 .mapToObj(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertTrue(residueGraph.isConnected());
     }
@@ -64,7 +64,7 @@ public class ConnectednessTest {
         List<Map<LabelAtomId, float[]>> res = sel.stream()
                 .mapToInt(structure::getResidueIndex)
                 .mapToObj(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertFalse(residueGraph.isConnected());
     }
@@ -83,7 +83,7 @@ public class ConnectednessTest {
         List<Map<LabelAtomId, float[]>> res = sel.stream()
                 .mapToInt(structure::getResidueIndex)
                 .mapToObj(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertFalse(residueGraph.isConnected());
     }
@@ -99,7 +99,7 @@ public class ConnectednessTest {
         List<Map<LabelAtomId, float[]>> res = sel.stream()
                 .mapToInt(structure::getResidueIndex)
                 .mapToObj(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertFalse(residueGraph.isConnected());
     }

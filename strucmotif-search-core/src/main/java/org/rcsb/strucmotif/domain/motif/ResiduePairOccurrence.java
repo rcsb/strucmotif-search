@@ -53,7 +53,7 @@ public class ResiduePairOccurrence {
     public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences) {
         return residuePairOccurrences.stream()
                 .sorted(INFORMATIVENESS_COMPARATOR)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -263,7 +263,8 @@ public class ResiduePairOccurrence {
     }
 
     /**
-     * Tries to sort occurrences so that the most informative ones occur first. Not optimized.
+     * Tries to sort occurrences so that the most informative ones occur first.
+     * TODO optimize
      */
     public static final Comparator<? super ResiduePairOccurrence> INFORMATIVENESS_COMPARATOR =
             Comparator.comparingInt((ResiduePairOccurrence o) -> ResiduePairDescriptor.getBackboneDistance(o.getResiduePairDescriptor()).ordinal())

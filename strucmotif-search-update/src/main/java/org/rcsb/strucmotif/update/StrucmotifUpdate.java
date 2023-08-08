@@ -497,7 +497,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         } else {
             return requested.stream()
                     .filter(item -> !known.contains(item.getStructureIdentifier()))
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 
@@ -517,7 +517,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                     .collect(Collectors.toSet());
             return known.stream()
                     .filter(unwrapped::contains)
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 
@@ -576,7 +576,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             try (Stream<Path> paths = Files.walk(Paths.get(ids[offset]))) {
                 requested = paths.filter(path -> STRUCTURE_EXTENSIONS.stream().anyMatch(ext -> path.toFile().getName().toLowerCase().endsWith(ext)))
                         .map(this::mapFile)
-                        .collect(Collectors.toList());
+                        .toList();
             }
         } else {
             requested = Arrays.stream(ids)
@@ -597,7 +597,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                             throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-digit-entryId}' or '${identifier},${url}'");
                         }
                     })
-                    .collect(Collectors.toList());
+                    .toList();
         }
         Collections.shuffle(requested);
 

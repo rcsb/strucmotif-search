@@ -148,7 +148,7 @@ public class DefaultMotifDefinitionRegistry implements MotifDefinitionRegistry {
                 .stream()
                 .mapToInt(structure::getResidueIndex)
                 .mapToObj(structure::manifestResidue)
-                .collect(Collectors.toList());
+                .toList();
         return new EnrichedMotifDefinition(motifDefinition, structure, residues);
     }
 

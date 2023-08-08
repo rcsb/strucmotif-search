@@ -51,17 +51,17 @@ public class StructureQueryStructure implements QueryStructure {
         this.residuePairOccurrences = connectedResiduePairs;
         this.residuePairIdentifiers = connectedResiduePairs.stream()
                 .map(ResiduePairOccurrence::getResiduePairIdentifier)
-                .collect(Collectors.toList());
+                .toList();
         this.residuePairDescriptors = connectedResiduePairs.stream()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
-                .collect(Collectors.toList());
+                .toList();
 
         // explode query into motifs and get entities by that - this provides the correct order of entities so that the
         // alignment routine does not have to care about finding correspondence
         this.residueIndices = residuePairIdentifiers.stream()
                 .flatMap(i -> Stream.of(ResiduePairIdentifier.getResidueIndex1(i), ResiduePairIdentifier.getResidueIndex2(i)))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
         if (residueIndices.size() != originalResidues.size()) {
             // this indicates that fewer residues are present in the result than specified by the query
@@ -73,7 +73,7 @@ public class StructureQueryStructure implements QueryStructure {
                 .toList();
         this.residueIndexSwaps = originalResidueIndices.stream()
                 .map(residueIndices::indexOf)
-                .collect(Collectors.toList());
+                .toList();
         this.residues = originalResidues;
     }
 

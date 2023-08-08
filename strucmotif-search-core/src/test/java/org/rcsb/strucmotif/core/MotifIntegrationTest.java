@@ -89,7 +89,11 @@ class MotifIntegrationTest {
     private EnrichedMotifDefinition loadMotif(MotifDefinition motifDefinition) {
         try {
             Structure structure = structureReader.readFromInputStream(getOriginalBcif(motifDefinition.getStructureIdentifier()));
-            List<Map<LabelAtomId, float[]>> residues = motifDefinition.getLabelSelections().stream().map(structure::getResidueIndex).map(structure::manifestResidue).collect(Collectors.toList());
+            List<Map<LabelAtomId, float[]>> residues = motifDefinition.getLabelSelections()
+                    .stream()
+                    .map(structure::getResidueIndex)
+                    .map(structure::manifestResidue)
+                    .toList();
             return new EnrichedMotifDefinition(motifDefinition, structure, residues);
         } catch (UncheckedIOException e) {
             throw new RuntimeException("Structure data for all motifs used during tests must be stored in test/resources/orig/ - missing: " + motifDefinition.getStructureIdentifier(), e);

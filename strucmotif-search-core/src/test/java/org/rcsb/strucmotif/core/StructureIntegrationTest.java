@@ -188,7 +188,7 @@ class StructureIntegrationTest {
 
         List<List<Integer>> swaps = response.getHits()
                 .stream()
-                .map(hit -> hit.labelSelections().stream().map(LabelSelection::labelSeqId).collect(Collectors.toList()))
+                .map(hit -> hit.labelSelections().stream().map(LabelSelection::labelSeqId).toList())
                 // check if some elements are unordered
                 .filter(list -> IntStream.range(1, list.size())
                         .map(index -> list.get(index - 1).compareTo(list.get(index)))
@@ -225,8 +225,8 @@ class StructureIntegrationTest {
 
         Collection<String> structures = Set.of("6TNE", "1ZDM");
 
-        List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).collect(Collectors.toList());
-        List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).collect(Collectors.toList());
+        List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).toList();
+        List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).toList();
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
         assertEquals(0.57, align.rmsd(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 

@@ -120,7 +120,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
             Set<Integer> unchangedDescriptors = Collections.synchronizedSet(reportKnownDescriptors());
 
             // this captures all additional data
-            List<Path> partials = partialFilenames().collect(Collectors.toList());
+            List<Path> partials = partialFilenames().toList();
             Map<String, List<Path>> sortedByPrefix = partials.stream().collect(Collectors.groupingBy(p -> p.getFileName().toString().split("-")[1].split("\\.")[0]));
 
             logger.info("Merging partial data from {}", partials);
@@ -269,7 +269,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
         try (Stream<String> lines = Files.lines(indexPath)) {
             return lines.map(line -> line.split("\t"))
                     .map(split -> new Entry(split[0], Long.parseLong(split[1]), Integer.parseInt(split[2])))
-                    .collect(Collectors.toList());
+                    .toList();
         }
     }
 
@@ -430,7 +430,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
         List<Path> out;
         try (Stream<Path> paths = Files.list(rootPath)) {
             out = paths.filter(p -> p.getFileName().toString().startsWith(StrucmotifConfig.INDEX) && p.getFileName().toString().endsWith(StrucmotifConfig.TMP_EXT))
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return out.stream();
     }

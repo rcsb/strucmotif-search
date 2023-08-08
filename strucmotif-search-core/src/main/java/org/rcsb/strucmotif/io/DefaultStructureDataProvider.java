@@ -209,7 +209,7 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
             logger.info("Structure data will be kept in memory - start loading...");
 
             this.caching = true;
-            List<String> filenames = fileBundle.filenames().collect(Collectors.toList());
+            List<String> filenames = fileBundle.filenames().toList();
             long start = System.nanoTime();
             this.structureCache = new HashMap<>();
 

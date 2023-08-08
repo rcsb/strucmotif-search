@@ -23,7 +23,7 @@ public class KruskalMotifPruner implements MotifPruner {
     public List<ResiduePairOccurrence> prune(ResidueGraph residueGraph) {
         List<ResiduePairOccurrence> residuePairOccurrences = residueGraph.residuePairOccurrencesSequential()
                 .sorted(ResiduePairOccurrence.INFORMATIVENESS_COMPARATOR)
-                .collect(Collectors.toList());
+                .toList();
 
         // ignore motifs with <4 identifiers
         if (residueGraph.getResidueCount() < 4) {

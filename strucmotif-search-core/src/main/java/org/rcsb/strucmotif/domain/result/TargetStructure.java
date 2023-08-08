@@ -130,7 +130,7 @@ public class TargetStructure {
         int[] residueIndices = orderResidueIndices(residuePairIdentifiers, residueIndexSwaps);
         List<LabelSelection> labelSelections = IntStream.of(residueIndices)
                 .mapToObj(structure::getLabelSelection)
-                .collect(Collectors.toList());
+                .toList();
 
         // determine all assembly ids that these selections appears in
         int residueCount = labelSelections.size();

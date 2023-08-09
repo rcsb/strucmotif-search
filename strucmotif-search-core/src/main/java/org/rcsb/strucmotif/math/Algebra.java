@@ -85,14 +85,14 @@ public class Algebra {
      * @param m the 3x3 matrix
      * @param v the vector
      */
-    public static void multiply3d(float[] out, float[][] m, float[] v) {
+    public static void multiply3d(float[] out, float[] m, float[] v) {
         float x = v[0];
         float y = v[1];
         float z = v[2];
 
-        out[0] = m[0][0] * x + m[1][0] * y + m[2][0] * z;
-        out[1] = m[0][1] * x + m[1][1] * y + m[2][1] * z;
-        out[2] = m[0][2] * x + m[1][2] * y + m[2][2] * z;
+        out[0] = m[0] * x + m[3] * y + m[6] * z;
+        out[1] = m[1] * x + m[4] * y + m[7] * z;
+        out[2] = m[2] * x + m[5] * y + m[8] * z;
     }
 
 
@@ -190,65 +190,60 @@ public class Algebra {
     }
 
     /**
-     * Left-multiplies a 3D vector with a 4x4 matrix.
+     * Left-multiplies a 3D vector with a flat 4x4 matrix.
      * @param out the output
-     * @param m the 4x4 matrix
+     * @param m the flat 4x4 matrix
      * @param v the vector
      */
-    public static void multiply4d(float[] out, float[][] m, float[] v) {
+    public static void multiply4d(float[] out, float[] m, float[] v) {
         float x = v[0];
         float y = v[1];
         float z = v[2];
 
-        out[0] = m[0][0] * x + m[0][1] * y + m[0][2] * z + m[0][3];
-        out[1] = m[1][0] * x + m[1][1] * y + m[1][2] * z + m[1][3];
-        out[2] = m[2][0] * x + m[2][1] * y + m[2][2] * z + m[2][3];
+        out[0] = m[0] * x + m[1] * y + m[2] * z + m[3];
+        out[1] = m[4] * x + m[5] * y + m[6] * z + m[7];
+        out[2] = m[8] * x + m[9] * y + m[10] * z + m[11];
     }
 
     /**
-     * Multiplies 2 4x4 matrices. Does not manipulate original matrices.
-     * @param matrix4d1 first matrix
-     * @param matrix4d2 second matrix
-     * @return the resulting 4x4 matrix
+     * Multiplies 2 flat 4x4 matrices. Does not manipulate original matrices.
+     * @param a first matrix
+     * @param b second matrix
+     * @return the resulting flat 4x4 matrix
      */
-    public static float[][] multiply4d(float[][] matrix4d1, float[][] matrix4d2) {
-        return new float[][] {{
-            matrix4d1[0][0] * matrix4d2[0][0] + matrix4d1[0][1] * matrix4d2[1][0] +
-                    matrix4d1[0][2] * matrix4d2[2][0] + matrix4d1[0][3] * matrix4d2[3][0],
-            matrix4d1[0][0] * matrix4d2[0][1] + matrix4d1[0][1] * matrix4d2[1][1] +
-                    matrix4d1[0][2] * matrix4d2[2][1] + matrix4d1[0][3] * matrix4d2[3][1],
-            matrix4d1[0][0] * matrix4d2[0][2] + matrix4d1[0][1] * matrix4d2[1][2] +
-                    matrix4d1[0][2] * matrix4d2[2][2] + matrix4d1[0][3] * matrix4d2[3][2],
-            matrix4d1[0][0] * matrix4d2[0][3] + matrix4d1[0][1] * matrix4d2[1][3] +
-                    matrix4d1[0][2] * matrix4d2[2][3] + matrix4d1[0][3] * matrix4d2[3][3]
-        }, {
-            matrix4d1[1][0] * matrix4d2[0][0] + matrix4d1[1][1] * matrix4d2[1][0] +
-                    matrix4d1[1][2] * matrix4d2[2][0] + matrix4d1[1][3] * matrix4d2[3][0],
-            matrix4d1[1][0] * matrix4d2[0][1] + matrix4d1[1][1] * matrix4d2[1][1] +
-                    matrix4d1[1][2] * matrix4d2[2][1] + matrix4d1[1][3] * matrix4d2[3][1],
-            matrix4d1[1][0] * matrix4d2[0][2] + matrix4d1[1][1] * matrix4d2[1][2] +
-                    matrix4d1[1][2] * matrix4d2[2][2] + matrix4d1[1][3] * matrix4d2[3][2],
-            matrix4d1[1][0] * matrix4d2[0][3] + matrix4d1[1][1] * matrix4d2[1][3] +
-                    matrix4d1[1][2] * matrix4d2[2][3] + matrix4d1[1][3] * matrix4d2[3][3]
-        }, {
-            matrix4d1[2][0] * matrix4d2[0][0] + matrix4d1[2][1] * matrix4d2[1][0] +
-                    matrix4d1[2][2] * matrix4d2[2][0] + matrix4d1[2][3] * matrix4d2[3][0],
-            matrix4d1[2][0] * matrix4d2[0][1] + matrix4d1[2][1] * matrix4d2[1][1] +
-                    matrix4d1[2][2] * matrix4d2[2][1] + matrix4d1[2][3] * matrix4d2[3][1],
-            matrix4d1[2][0] * matrix4d2[0][2] + matrix4d1[2][1] * matrix4d2[1][2] +
-                    matrix4d1[2][2] * matrix4d2[2][2] + matrix4d1[2][3] * matrix4d2[3][2],
-            matrix4d1[2][0] * matrix4d2[0][3] + matrix4d1[2][1] * matrix4d2[1][3] +
-                    matrix4d1[2][2] * matrix4d2[2][3] + matrix4d1[2][3] * matrix4d2[3][3]
-        }, {
-            matrix4d1[3][0] * matrix4d2[0][0] + matrix4d1[3][1] * matrix4d2[1][0] +
-                    matrix4d1[3][2] * matrix4d2[2][0] + matrix4d1[3][3] * matrix4d2[3][0],
-            matrix4d1[3][0] * matrix4d2[0][1] + matrix4d1[3][1] * matrix4d2[1][1] +
-                    matrix4d1[3][2] * matrix4d2[2][1] + matrix4d1[3][3] * matrix4d2[3][1],
-            matrix4d1[3][0] * matrix4d2[0][2] + matrix4d1[3][1] * matrix4d2[1][2] +
-                    matrix4d1[3][2] * matrix4d2[2][2] + matrix4d1[3][3] * matrix4d2[3][2],
-            matrix4d1[3][0] * matrix4d2[0][3] + matrix4d1[3][1] * matrix4d2[1][3] +
-                    matrix4d1[3][2] * matrix4d2[2][3] + matrix4d1[3][3] * matrix4d2[3][3]
-        }};
+    public static float[] multiply4d(float[] a, float[] b) {
+        float a00 = a[0], a01 = a[1], a02 = a[2], a03 = a[3],
+                a10 = a[4], a11 = a[5], a12 = a[6], a13 = a[7],
+                a20 = a[8], a21 = a[9], a22 = a[10], a23 = a[11],
+                a30 = a[12], a31 = a[13], a32 = a[14], a33 = a[15];
+        float[] out = new float[16];
+
+        // Cache only the current line of the second matrix
+        float b0 = b[0], b1 = b[1], b2 = b[2], b3 = b[3];
+        out[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        out[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        out[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        out[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        b0 = b[4]; b1 = b[5]; b2 = b[6]; b3 = b[7];
+        out[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        out[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        out[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        out[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        b0 = b[8]; b1 = b[9]; b2 = b[10]; b3 = b[11];
+        out[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        out[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        out[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        out[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        b0 = b[12]; b1 = b[13]; b2 = b[14]; b3 = b[15];
+        out[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+        out[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+        out[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+        out[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+        return out;
     }
 
     /**
@@ -256,30 +251,26 @@ public class Algebra {
      * @param rot the original matrix
      * @return a new, transposed matrix
      */
-    public static float[][] transpose3d(float[][] rot) {
-        return new float[][] {
-                { rot[0][0], rot[1][0], rot[2][0] },
-                { rot[0][1], rot[1][1], rot[2][1] },
-                { rot[0][2], rot[1][2], rot[2][2] }
+    public static float[] transpose3d(float[] rot) {
+        return new float[] {
+                rot[0], rot[3], rot[6],
+                rot[1], rot[4], rot[7],
+                rot[2], rot[5], rot[8]
         };
     }
 
     /**
      * Combine a rotation matrix and a translation vector into a 4x4 transformation matrix.
-     * @param rotation3x3 a 3x3 rotation matrix
-     * @param translation3d a 3-element translation vector
+     * @param rotation9 a flat rotation matrix
+     * @param translation3 a 3-element translation vector
      * @return a transformation matrix
      */
-    public static float[][] composeTransformationMatrix(float[][] rotation3x3, float[] translation3d) {
-        float[][] matrix = new float[4][];
-
-        for (int i = 0; i < 3; i++) {
-            matrix[i] = new float[4];
-            System.arraycopy(rotation3x3[i], 0, matrix[i], 0, 3);
-            matrix[i][3] = translation3d[i];
-        }
-        matrix[3] = new float[] { 0, 0, 0, 1 };
-
-        return matrix;
+    public static float[] composeTransformationMatrix(float[] rotation9, float[] translation3) {
+        return new float[] {
+                rotation9[0], rotation9[1], rotation9[2], translation3[0],
+                rotation9[3], rotation9[4], rotation9[5], translation3[1],
+                rotation9[6], rotation9[7], rotation9[8], translation3[2],
+                0, 0, 0, 1
+        };
     }
 }

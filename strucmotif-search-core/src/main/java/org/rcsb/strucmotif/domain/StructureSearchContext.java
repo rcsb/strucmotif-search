@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 
 /**
@@ -40,6 +41,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
      * @param query the actual query
      */
     public StructureSearchContext(StrucmotifRuntime strucmotifRuntime, StrucmotifConfig strucmotifConfig, InvertedIndex invertedIndex, StructureIndexProvider structureIndexProvider, StructureDataProvider structureDataProvider, StructureQuery query) {
+        super(new ForkJoinPool(strucmotifConfig.getPerQueryThreads()));
         this.runtime = strucmotifRuntime;
         this.config = strucmotifConfig;
         this.invertedIndex = invertedIndex;
@@ -55,7 +57,7 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
         logger.info("[{}] Query: {} with {}",
                 id,
                 queryStructure.getStructureIdentifier(),
-                queryStructure.getIndexSelections());
+                queryStructure.getResiduePairOccurrences());
         logger.info("[{}] Exchanges: {}, Tolerances: [{}, {}, {}], Atom Pairing Scheme: {}, RMSD Cutoff: {}, Limit: {}",
                 id,
                 query.getExchanges(),
@@ -122,17 +124,17 @@ public class StructureSearchContext extends AbstractSearchContext<StructureParam
 
     @Override
     protected String composeOutput(StructureHit hit) {
-        float[] original = hit.getTransformation().getFlattenedTransformation();
+        float[] original = hit.transformation();
         List<Float> matrix = new ArrayList<>();
         for (float v : original) {
             matrix.add(truncate(v, config.getDecimalPlacesMatrix()));
         }
 
-        return hit.getStructureIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                hit.getAssemblyIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
-                truncate(hit.getRootMeanSquareDeviation(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
-                toString(hit.getLabelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
-                toString(hit.getResidueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
+        return hit.structureIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                hit.assemblyIdentifier() + AbstractSearchContext.COLUMN_DELIMITER +
+                truncate(hit.rmsd(), config.getDecimalPlacesScore()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.labelSelections()) + AbstractSearchContext.COLUMN_DELIMITER +
+                toString(hit.residueTypes()) + AbstractSearchContext.COLUMN_DELIMITER +
                 toString(matrix) + System.lineSeparator();
     }
 

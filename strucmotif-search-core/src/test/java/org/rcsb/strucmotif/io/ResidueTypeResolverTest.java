@@ -24,38 +24,38 @@ class ResidueTypeResolverTest {
         StrucmotifConfig none = new StrucmotifConfig();
         none.setModifiedResidueStrategy(ModifiedResidueStrategy.NONE);
         none.setSupportDAminoAcids(false);
-        this.noneResolver = new ResidueTypeResolverImpl(none);
+        this.noneResolver = new DefaultResidueTypeResolver(none);
 
         StrucmotifConfig noneButD = new StrucmotifConfig();
         noneButD.setModifiedResidueStrategy(ModifiedResidueStrategy.NONE);
         noneButD.setSupportDAminoAcids(true);
-        this.noneButDResolver = new ResidueTypeResolverImpl(noneButD);
+        this.noneButDResolver = new DefaultResidueTypeResolver(noneButD);
 
         StrucmotifConfig internal = new StrucmotifConfig();
         internal.setModifiedResidueStrategy(ModifiedResidueStrategy.INTERNAL);
         internal.setSupportDAminoAcids(true);
-        this.internalResolver = new ResidueTypeResolverImpl(internal);
+        this.internalResolver = new DefaultResidueTypeResolver(internal);
 
         StrucmotifConfig internalButNoD = new StrucmotifConfig();
         internalButNoD.setModifiedResidueStrategy(ModifiedResidueStrategy.INTERNAL);
         internalButNoD.setSupportDAminoAcids(false);
-        this.internalButNoDResolver = new ResidueTypeResolverImpl(internalButNoD);
+        this.internalButNoDResolver = new DefaultResidueTypeResolver(internalButNoD);
 
         StrucmotifConfig ambiguousUnknown = new StrucmotifConfig();
         ambiguousUnknown.setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy.UNKNOWN_COMPONENT);
-        this.ambiguousUnknownResolver = new ResidueTypeResolverImpl(ambiguousUnknown);
+        this.ambiguousUnknownResolver = new DefaultResidueTypeResolver(ambiguousUnknown);
 
         StrucmotifConfig ambiguousType = new StrucmotifConfig();
         ambiguousType.setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy.TYPE);
-        this.ambiguousTypeResolver = new ResidueTypeResolverImpl(ambiguousType);
+        this.ambiguousTypeResolver = new DefaultResidueTypeResolver(ambiguousType);
 
         StrucmotifConfig ambiguousAcid = new StrucmotifConfig();
         ambiguousAcid.setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy.ACID);
-        this.ambiguousAcidResolver = new ResidueTypeResolverImpl(ambiguousAcid);
+        this.ambiguousAcidResolver = new DefaultResidueTypeResolver(ambiguousAcid);
 
         StrucmotifConfig ambiguousAmide = new StrucmotifConfig();
         ambiguousAmide.setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy.AMIDE);
-        this.ambiguousAmideResolver = new ResidueTypeResolverImpl(ambiguousAmide);
+        this.ambiguousAmideResolver = new DefaultResidueTypeResolver(ambiguousAmide);
     }
 
     @Test

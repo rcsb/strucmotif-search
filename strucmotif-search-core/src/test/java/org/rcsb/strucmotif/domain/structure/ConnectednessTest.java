@@ -3,9 +3,9 @@ package org.rcsb.strucmotif.domain.structure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +23,7 @@ public class ConnectednessTest {
     public void init() {
         strucmotifConfig = new StrucmotifConfig();
         strucmotifConfig.setDistanceCutoff(TEST_DISTANCE_CUTOFF);
-        strucmotifConfig.setUndefinedAssemblies(false);
-        structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
+        structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
     }
 
     @Test
@@ -36,15 +35,18 @@ public class ConnectednessTest {
                 new LabelSelection("A", "2", 343), // 317, LEU
                 new LabelSelection("A", "2", 347)  // 321, MET
         );
-        List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
-        ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
+        List<Map<LabelAtomId, float[]>> res = sel.stream()
+                .mapToInt(structure::getResidueIndex)
+                .mapToObj(structure::manifestResidue)
+                .toList();
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertTrue(residueGraph.isConnected());
     }
 
     @Test
     void whenStandardFullStructure_thenTrueReturned() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("200l"));
-        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.all());
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.deposited());
         assertTrue(residueGraph.isConnected());
     }
 
@@ -58,8 +60,11 @@ public class ConnectednessTest {
                 new LabelSelection("A", "2", 347), // 321, MET
                 new LabelSelection("A", "2", 369)  // 373, GLU
         );
-        List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
-        ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
+        List<Map<LabelAtomId, float[]>> res = sel.stream()
+                .mapToInt(structure::getResidueIndex)
+                .mapToObj(structure::manifestResidue)
+                .toList();
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertFalse(residueGraph.isConnected());
     }
 
@@ -74,8 +79,11 @@ public class ConnectednessTest {
                 new LabelSelection("A", "2", 369), // 373, GLU
                 new LabelSelection("A", "2", 370)  // 374, GLY
         );
-        List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
-        ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
+        List<Map<LabelAtomId, float[]>> res = sel.stream()
+                .mapToInt(structure::getResidueIndex)
+                .mapToObj(structure::manifestResidue)
+                .toList();
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertFalse(residueGraph.isConnected());
     }
 
@@ -87,8 +95,11 @@ public class ConnectednessTest {
                 new LabelSelection("A", "1", 349),
                 new LabelSelection("A", "1", 398)
         );
-        List<Map<LabelAtomId, float[]>> res = structure.manifestResidues(sel);
-        ResidueGraph residueGraph = new ResidueGraph(structure, sel, res, strucmotifConfig);
+        List<Map<LabelAtomId, float[]>> res = sel.stream()
+                .mapToInt(structure::getResidueIndex)
+                .mapToObj(structure::manifestResidue)
+                .toList();
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(res, sel));
         assertFalse(residueGraph.isConnected());
     }
 }

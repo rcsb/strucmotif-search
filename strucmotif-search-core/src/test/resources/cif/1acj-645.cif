@@ -2,6 +2,38 @@ data_1ACJ
 #
 _entry.id   1ACJ
 #
+_pdbx_struct_assembly.id                   1
+_pdbx_struct_assembly.details              author_and_software_defined_assembly
+_pdbx_struct_assembly.method_details       PISA
+_pdbx_struct_assembly.oligomeric_details   dimeric
+_pdbx_struct_assembly.oligomeric_count     2
+#
+_pdbx_struct_assembly_gen.assembly_id       1
+_pdbx_struct_assembly_gen.oper_expression   1,2
+_pdbx_struct_assembly_gen.asym_id_list      A,B,C
+#
+loop_
+_pdbx_struct_oper_list.id
+_pdbx_struct_oper_list.type
+_pdbx_struct_oper_list.name
+_pdbx_struct_oper_list.symmetry_operation
+_pdbx_struct_oper_list.matrix[1][1]
+_pdbx_struct_oper_list.matrix[1][2]
+_pdbx_struct_oper_list.matrix[1][3]
+_pdbx_struct_oper_list.vector[1]
+_pdbx_struct_oper_list.matrix[2][1]
+_pdbx_struct_oper_list.matrix[2][2]
+_pdbx_struct_oper_list.matrix[2][3]
+_pdbx_struct_oper_list.vector[2]
+_pdbx_struct_oper_list.matrix[3][1]
+_pdbx_struct_oper_list.matrix[3][2]
+_pdbx_struct_oper_list.matrix[3][3]
+_pdbx_struct_oper_list.vector[3]
+1 'identity operation'         1_555 x,y,z    1.0000000000  0.0000000000 0.0000000000 0.0000000000 0.0000000000 1.0000000000
+0.0000000000 0.0000000000 0.0000000000 0.0000000000 1.0000000000  0.0000000000
+2 'crystal symmetry operation' 4_556 y,x,-z+1 -0.5000000000 0.8660254038 0.0000000000 0.0000000000 0.8660254038 0.5000000000
+0.0000000000 0.0000000000 0.0000000000 0.0000000000 -1.0000000000 138.1000000000
+#
 loop_
 _atom_site.group_PDB
 _atom_site.id

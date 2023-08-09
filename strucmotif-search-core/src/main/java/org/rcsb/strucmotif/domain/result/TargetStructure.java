@@ -4,25 +4,20 @@ import org.rcsb.strucmotif.core.HitScorer;
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.core.TargetAssembler;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
-import org.rcsb.strucmotif.domain.motif.InvertedIndexResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.Overlap;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
-import org.rcsb.strucmotif.io.AssemblyInformationProvider;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -34,26 +29,26 @@ import java.util.stream.Stream;
  * omits stale paths as greedily as possible. Realized with help of a {@link TargetAssembler}.
  * For efficiency, one target structures handles all potential paths in a structure.
  * <p>
- * The constructor and {@link TargetStructure#consume(InvertedIndexResiduePairIdentifier[], Overlap[])} iteratively builds up paths
+ * The constructor and {@link TargetStructure#consume(int[], Overlap[])} iteratively builds up paths
  * until all paths are either ruled out or sufficient resemblance of the query motif is observed.
  */
 public class TargetStructure {
     private final int structureIndex;
     // non-final fields to achieve the lazy behavior - tread lightly
-    private List<InvertedIndexResiduePairIdentifier[]> paths;
+    private List<int[]> paths;
 
     /**
      * Construct a target structure instance.
      * @param structureIndex its identifier
      * @param residuePairIdentifiers all first-generation residue pairs
      */
-    public TargetStructure(int structureIndex, InvertedIndexResiduePairIdentifier[] residuePairIdentifiers) {
+    public TargetStructure(int structureIndex, int[] residuePairIdentifiers) {
         this.structureIndex = structureIndex;
         // each target identifier is the first step of a potential path in this target structure
         // we use an ArrayList because for subsequent iterations we don't know the size ahead of time
-        this.paths = new ArrayList<>(residuePairIdentifiers.length);
-        for (InvertedIndexResiduePairIdentifier residuePairIdentifier : residuePairIdentifiers) {
-            paths.add(new InvertedIndexResiduePairIdentifier[] { residuePairIdentifier });
+        this.paths = new ArrayList<>(residuePairIdentifiers.length / 2);
+        for (int i = 0; i < residuePairIdentifiers.length - 1; i = i + 2) {
+            paths.add(new int[] { residuePairIdentifiers[i], residuePairIdentifiers[i + 1] });
         }
     }
 
@@ -80,29 +75,32 @@ public class TargetStructure {
      * @param overlapProfile query motif overlap profile - needed to ensure compatibility
      * @return true if this target still contains at least one valid path
      */
-    public boolean consume(InvertedIndexResiduePairIdentifier[] residuePairIdentifiers, Overlap[] overlapProfile) {
-        List<InvertedIndexResiduePairIdentifier[]> extendedPaths = new ArrayList<>();
+    public boolean consume(int[] residuePairIdentifiers, Overlap[] overlapProfile) {
+        List<int[]> extendedPaths = new ArrayList<>();
 
         // for each possibly extending candidate:
-        for (InvertedIndexResiduePairIdentifier candidateResiduePairIdentifier : residuePairIdentifiers) {
+        for (int i = 0; i < residuePairIdentifiers.length - 1; i = i + 2) {
+            int candidateResidueIndex1 = residuePairIdentifiers[i];
+            int candidateResidueIndex2 = residuePairIdentifiers[i  +1];
             // form cartesian product with each possible path to extend:
             p:
-            for (InvertedIndexResiduePairIdentifier[] path : paths) {
+            for (int[] path : paths) {
                 // this path must allow for the same overlap profile as query
                 for (int k = 0; k < overlapProfile.length; k++) {
-                    InvertedIndexResiduePairIdentifier previousResiduePairIdentifier = path[k];
+                    int previousResidueIndex1 = path[2 * k];
+                    int previousResidueIndex2 = path[2 * k + 1];
 
                     Overlap queryOverlap = overlapProfile[k];
-                    Overlap candidateOverlap = Overlap.ofResiduePairIdentifiers(previousResiduePairIdentifier, candidateResiduePairIdentifier);
+                    Overlap candidateOverlap = Overlap.ofResiduePairIdentifiers(previousResidueIndex1, previousResidueIndex2, candidateResidueIndex1, candidateResidueIndex2);
                     if (queryOverlap != candidateOverlap) {
                         continue p;
                     }
                 }
 
-                // if loop didn't break: residuePairIdentifier is valid extension of this path: propagate to next
-                // generation
-                InvertedIndexResiduePairIdentifier[] extendedPath = Arrays.copyOf(path, path.length + 1);
-                extendedPath[path.length] = candidateResiduePairIdentifier;
+                // if loop didn't break: indices are valid extension of this path: propagate to next generation
+                int[] extendedPath = Arrays.copyOf(path, path.length + 2);
+                extendedPath[path.length] = candidateResidueIndex1;
+                extendedPath[path.length + 1] = candidateResidueIndex2;
                 extendedPaths.add(extendedPath);
             }
         }
@@ -122,43 +120,23 @@ public class TargetStructure {
      * @param structureIdentifier the structureIdentifier
      * @param hitScorer the hit scorer
      * @param rmsdCutoff what hits to ignore
-     * @param assemblyInformationProvider provides prepared assembly information
-     * @param undefinedAssemblies allow hits without assembly?
      * @return a stream of lists containing residues (in correspondence with the query)
      */
-    public Stream<StructureHit> paths(List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
-        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, structureIdentifier, hitScorer, rmsdCutoff, assemblyInformationProvider, undefinedAssemblies));
+    public Stream<StructureHit> paths(int[] residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff) {
+        return paths.stream().flatMap(p -> createHits(p, residueIndexSwaps, structure, structureIdentifier, hitScorer, rmsdCutoff));
     }
 
-    private Stream<StructureHit> createHits(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff, AssemblyInformationProvider assemblyInformationProvider, boolean undefinedAssemblies) {
-        List<IndexSelection> indexSelections = orderIndexSelections(identifiers, residueIndexSwaps);
-        List<LabelSelection> labelSelections = indexSelections.stream()
-                .map(indexSelection -> {
-                    LabelSelection labelSelection = structure.getLabelSelection(indexSelection.getIndex());
-                    return new LabelSelection(labelSelection.getLabelAsymId(), indexSelection.getStructOperId(), labelSelection.getLabelSeqId());
-                })
-                .collect(Collectors.toList());
+    private Stream<StructureHit> createHits(int[] residuePairIdentifiers, int[] residueIndexSwaps, Structure structure, String structureIdentifier, HitScorer hitScorer, float rmsdCutoff) {
+        int[] residueIndices = orderResidueIndices(residuePairIdentifiers, residueIndexSwaps);
+        List<LabelSelection> labelSelections = IntStream.of(residueIndices)
+                .mapToObj(structure::getLabelSelection)
+                .toList();
 
-        // determine all assembly ids that this collection of label selections appears in
+        // determine all assembly ids that these selections appears in
         int residueCount = labelSelections.size();
-        // this is the inverted mapping from opers to assemblies that contain this expression - can't use structure map here
-        Map<String, Set<String>> assemblyMap = assemblyInformationProvider.selectAssemblyMap(structureIdentifier);
-        Map<String, Long> assemblyCounts;
-
-        if (assemblyMap.isEmpty()) {
-            // only allow hits in 'default'/fallback assembly if flag active and actually no information present
-            if (!undefinedAssemblies) {
-                return Stream.empty();
-            }
-
-            assemblyCounts = Map.of(assemblyInformationProvider.getUndefinedAssemblyIdentifier(), (long) residueCount);
-        } else {
-            assemblyCounts = labelSelections.stream()
-                    .map(labelSelection -> labelSelection.getLabelAsymId() + "_" + labelSelection.getStructOperId())
-                    .map(assemblyMap::get)
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        }
+        Map<String, Long> assemblyCounts = IntStream.of(residueIndices)
+                .mapToObj(structure::getAssemblyIdentifier)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         return assemblyCounts.entrySet()
                 .stream()
@@ -170,15 +148,14 @@ public class TargetStructure {
                     Map<LabelAtomId, float[]>[] residues = new Map[residueCount];
 
                     for (int i = 0; i < residueCount; i++) {
-                        IndexSelection indexSelection = indexSelections.get(i);
-                        int index = indexSelection.getIndex();
-                        residueTypes[i] = structure.getResidueType(index);
-                        residues[i] = structure.manifestResidue(index, indexSelection.getStructOperId());
+                        int residueIndex = residueIndices[i];
+                        residueTypes[i] = structure.getResidueType(residueIndex);
+                        residues[i] = structure.manifestResidue(residueIndex);
                     }
 
                     AlignmentResult alignmentResult = hitScorer.alignToReference(Arrays.asList(residues));
                     // filter away high-RMSD hits
-                    if (alignmentResult.getRootMeanSquareDeviation() >= rmsdCutoff) {
+                    if (alignmentResult.rmsd() >= rmsdCutoff) {
                         return null;
                     }
 
@@ -186,23 +163,20 @@ public class TargetStructure {
                             entry.getKey(),
                             labelSelections,
                             Arrays.asList(residueTypes),
-                            alignmentResult.getRootMeanSquareDeviation(),
-                            alignmentResult.getTransformation());
+                            alignmentResult.rmsd(),
+                            alignmentResult.transformation());
                 })
                 .filter(Objects::nonNull);
     }
 
-    private List<IndexSelection> orderIndexSelections(ResiduePairIdentifier[] identifiers, List<Integer> residueIndexSwaps) {
+    private int[] orderResidueIndices(int[] identifiers, int[] residueIndexSwaps) {
         try {
             // ensure correct 'human-readable' order of residues
-            List<IndexSelection> shuffledIndexSelections = Arrays.stream(identifiers)
-                    .flatMap(ResiduePairIdentifier::indexSelections)
-                    .distinct()
-                    .collect(Collectors.toList());
+            int[] shuffledResidueIndices = Arrays.stream(identifiers).distinct().toArray();
 
-            return residueIndexSwaps.stream()
-                    .map(shuffledIndexSelections::get)
-                    .collect(Collectors.toList());
+            return IntStream.of(residueIndexSwaps)
+                    .map(i -> shuffledResidueIndices[i])
+                    .toArray();
         } catch (IndexOutOfBoundsException e) {
             // this indicates that fewer residues are present in the result than specified by the query
             throw new IllegalQueryDefinitionException("Query violates distance threshold");

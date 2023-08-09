@@ -25,6 +25,12 @@ import java.util.Set;
  */
 public class StructureSearchBenchmark {
     /**
+     * Default constructor.
+     */
+    public StructureSearchBenchmark() {
+    }
+
+    /**
      * A benchmark.
      * @param blackhole consume results (avoid dead-code elimination)
      * @param state state
@@ -91,7 +97,7 @@ public class StructureSearchBenchmark {
 
     private StructureSearchResult run(MotifDefinition motif, MyState state) {
         Pair<Structure, List<LabelSelection>> structure = state.structureMap.get(motif);
-        StructureContextBuilder.OptionalBuilderStep builder = state.queryBuilder.defineByStructureAndSelection(structure.getFirst(), structure.getSecond())
+        StructureContextBuilder.OptionalBuilderStep builder = state.queryBuilder.defineByStructureAndSelection(structure.first(), structure.second())
                 .atomPairingScheme(AtomPairingScheme.ALL)
                 .rmsdCutoff(2.0f)
                 .buildParameters();

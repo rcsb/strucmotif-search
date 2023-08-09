@@ -1,8 +1,11 @@
 package org.rcsb.strucmotif.domain;
 
+import org.rcsb.strucmotif.core.QueryExecutionException;
 import org.rcsb.strucmotif.domain.query.Parameters;
 import org.rcsb.strucmotif.domain.query.QueryStructure;
 import org.rcsb.strucmotif.domain.result.Hit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -13,6 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Collection;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 /**
@@ -22,6 +28,7 @@ import java.util.stream.Collectors;
  * @param <H> the result hit type
  */
 public abstract class AbstractSearchContext<P extends Parameters, S extends QueryStructure, H extends Hit> implements SearchContext<P, S, H> {
+    private static final Logger logger = LoggerFactory.getLogger(AbstractSearchContext.class);
     /**
      * The delimiter between columns.
      */
@@ -34,12 +41,17 @@ public abstract class AbstractSearchContext<P extends Parameters, S extends Quer
      * The identifier of this context.
      */
     protected final String id;
+    private boolean done;
+    private final ExecutorService executorService;
 
     /**
      * Create a context, will assign a reasonable identifier.
+     * @param executorService will run associated tasks
      */
-    protected AbstractSearchContext() {
+    protected AbstractSearchContext(ExecutorService executorService) {
         this.id = String.valueOf(hashCode());
+        this.done = false;
+        this.executorService = executorService;
     }
 
     @Override
@@ -63,6 +75,35 @@ public abstract class AbstractSearchContext<P extends Parameters, S extends Quer
                 throw new UncheckedIOException(e);
             }
         });
+    }
+
+    @Override
+    public void markAsDone() {
+        done = true;
+    }
+
+    @Override
+    public boolean isDone() {
+        return done;
+    }
+
+    @Override
+    public ExecutorService getExecutorService() {
+        return executorService;
+    }
+
+    @Override
+    public <R> R tryExecute(Callable<R> task) {
+        try {
+            return executorService.submit(task).get();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            logger.warn("Async task was interrupted", e);
+            throw new QueryExecutionException("Async task was interrupted");
+        } catch (ExecutionException e) {
+            logger.warn("Async task failed to execute", e);
+            throw new QueryExecutionException("Async task failed to execute");
+        }
     }
 
     /**

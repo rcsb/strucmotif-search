@@ -14,7 +14,7 @@ public class StructureParameters implements Parameters {
     private final AtomPairingScheme atomPairingScheme;
     private final MotifPruner motifPruner;
     private final int limit;
-    private final boolean undefinedAssemblies;
+    private final int timeout;
 
     /**
      * Construct structure parameters.
@@ -25,9 +25,9 @@ public class StructureParameters implements Parameters {
      * @param atomPairingScheme how to pair atoms
      * @param motifPruner how to prune motifs
      * @param resultLimit stop after this many hits
-     * @param undefinedAssemblies allow undefined assemblies in the result set
+     * @param timeout timeout in ms
      */
-    public StructureParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit, boolean undefinedAssemblies) {
+    public StructureParameters(int backboneDistanceTolerance, int sideChainDistanceTolerance, int angleTolerance, float rmsdCutoff, AtomPairingScheme atomPairingScheme, MotifPruner motifPruner, int resultLimit, int timeout) {
         this.backboneDistanceTolerance = backboneDistanceTolerance;
         this.sideChainDistanceTolerance = sideChainDistanceTolerance;
         this.angleTolerance = angleTolerance;
@@ -35,7 +35,7 @@ public class StructureParameters implements Parameters {
         this.atomPairingScheme = atomPairingScheme;
         this.motifPruner = motifPruner;
         this.limit = resultLimit;
-        this.undefinedAssemblies = undefinedAssemblies;
+        this.timeout = timeout;
     }
 
     /**
@@ -110,11 +110,13 @@ public class StructureParameters implements Parameters {
         return limit != Integer.MAX_VALUE;
     }
 
-    /**
-     * Report if undefined assemblies (if they were indexed) can be returned.
-     * @return true if this search will allow undefined assemblies
-     */
-    public boolean isUndefinedAssemblies() {
-        return undefinedAssemblies;
+    @Override
+    public int getTimeout() {
+        return timeout;
+    }
+
+    @Override
+    public boolean hasTimeout() {
+        return timeout != Integer.MAX_VALUE;
     }
 }

@@ -100,7 +100,10 @@ public class StructureContextBuilder implements ContextBuilder {
      */
     public MandatoryBuilderStep defineByStructureAndSelection(Structure structure, List<LabelSelection> labelSelections) {
         try {
-            List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(labelSelections);
+            List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
+                    .mapToInt(structure::getResidueIndex)
+                    .mapToObj(structure::manifestResidue)
+                    .toList();
 
             if (residues.size() > strucmotifConfig.getMaxMotifSize()) {
                 throw new IllegalArgumentException("maximum motif size is " + strucmotifConfig.getMaxMotifSize() + " - " +
@@ -122,10 +125,9 @@ public class StructureContextBuilder implements ContextBuilder {
      */
     public MandatoryBuilderStep defineByFile(InputStream inputStream) {
         Structure structure = structureDataProvider.readFromInputStream(inputStream);
-        List<LabelSelection> labelSelections = structure.getLabelSelections()
-                .stream()
-                .map(l -> new LabelSelection(l.getLabelAsymId(), "1", l.getLabelSeqId()))
-                .collect(Collectors.toList());
+        List<LabelSelection> labelSelections = structure.modelledResidueIndices()
+                .mapToObj(structure::getLabelSelection)
+                .toList();
         return defineByStructureAndSelection(structure, labelSelections);
     }
 
@@ -154,7 +156,7 @@ public class StructureContextBuilder implements ContextBuilder {
         private AtomPairingScheme atomPairingScheme;
         private MotifPruner motifPruner;
         private int limit;
-        private boolean undefinedAssemblies;
+        private int timeout;
         private Set<PositionSpecificExchange> upstreamExchanges;
 
         MandatoryBuilderStep(String structureIdentifier, Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues) {
@@ -170,54 +172,34 @@ public class StructureContextBuilder implements ContextBuilder {
             // defines the 'default' motif pruning strategy
             this.motifPruner = StructureContextBuilder.this.kruskalMotifPruner;
             this.limit = Integer.MAX_VALUE;
-            this.undefinedAssemblies = false;
+            this.timeout = strucmotifConfig.getQueryTimeout();
         }
 
-        /**
-         * Specify the backbone distance tolerance (default: 1).
-         * @param backboneDistanceTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep backboneDistanceTolerance(int backboneDistanceTolerance) {
             this.backboneDistanceTolerance = backboneDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the side-chain distance tolerance (default: 1).
-         * @param sideChainDistanceTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep sideChainDistanceTolerance(int sideChainDistanceTolerance) {
             this.sideChainDistanceTolerance = sideChainDistanceTolerance;
             return this;
         }
 
-        /**
-         * Specify the angle tolerance (default: 1).
-         * @param angleTolerance an int
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep angleTolerance(int angleTolerance) {
             this.angleTolerance = angleTolerance;
             return this;
         }
 
-        /**
-         * Filter hits based on RMSD. Only relevant when scoring strategy involves alignment.
-         * @param rmsdCutoff the RMSD cutoff above which hits are filtered
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep rmsdCutoff(double rmsdCutoff) {
             this.rmsdCutoff = (float) rmsdCutoff;
             return this;
         }
 
-        /**
-         * Controls which atoms will be considered for alignment. Only relevant when scoring scheme is alignment-based.
-         * @param atomPairingScheme how to pair atoms for alignment routine
-         * @return this builder
-         */
+        @Override
         public MandatoryBuilderStep atomPairingScheme(AtomPairingScheme atomPairingScheme) {
             this.atomPairingScheme = atomPairingScheme;
             return this;
@@ -257,13 +239,9 @@ public class StructureContextBuilder implements ContextBuilder {
             return this;
         }
 
-        /**
-         * Return undefined assemblies (if indexed).
-         * @param undefinedAssemblies a boolean
-         * @return this builder
-         */
-        public MandatoryBuilderStep undefinedAssemblies(boolean undefinedAssemblies) {
-            this.undefinedAssemblies = undefinedAssemblies;
+        @Override
+        public MandatoryBuilderStep timeout(int ms) {
+            this.timeout = ms;
             return this;
         }
 
@@ -285,7 +263,7 @@ public class StructureContextBuilder implements ContextBuilder {
                     atomPairingScheme,
                     motifPruner,
                     limit,
-                    undefinedAssemblies);
+                    timeout);
             return new OptionalBuilderStep(structureIdentifier, structure, labelSelections, residues, parameters, upstreamExchanges);
         }
     }

@@ -3,47 +3,32 @@ package org.rcsb.strucmotif.domain.structure;
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
-import org.rcsb.strucmotif.domain.Transformation;
-import org.rcsb.strucmotif.domain.motif.AngleType;
-import org.rcsb.strucmotif.domain.motif.DistanceType;
-import org.rcsb.strucmotif.domain.motif.IndexSelectionResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
-import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
-import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
+import org.rcsb.strucmotif.domain.motif.*;
 import org.rcsb.strucmotif.math.Algebra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.rcsb.strucmotif.domain.structure.ResidueGraph.ResidueGraphOptions.all;
 import static org.rcsb.strucmotif.math.Algebra.*;
 
 /**
- * Represents the pseudo-graph defined by all residues. Some tricks to efficiently report distances and angles between
- * residues.
+ * Detects residue-residue interactions.
  */
 public class ResidueGraph {
     private static final Logger logger = LoggerFactory.getLogger(ResidueGraph.class);
     private final Structure structure;
-    private final Map<IndexSelection, Map<IndexSelection, Float>> backboneDistances;
-    private final Map<IndexSelection, Map<IndexSelection, Float>> sideChainDistances;
-    private final Map<IndexSelection, Map<IndexSelection, Float>> angles;
+    private long[] keys;
+    private short[] values;
     private final int selectionCount;
-    private final int numberOfResidues;
-    private final int numberOfPairings;
+    private final int residueCount;
+    private final int pairingCount;
 
     /**
-     * Different modes of how the residue graph can operate.
+     * Controls how to define contacts.
      */
     public enum ResidueGraphMode {
         /**
@@ -51,321 +36,362 @@ public class ResidueGraph {
          */
         DEPOSITED,
         /**
-         * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * Reports contacts between deposited coordinates as well as all residues that are in contact with the deposited
+         * chain(s). This is a superset of `DEPOSITED`.
          */
-        DEPOSITED_AND_CONTACTS,
+        RESIDUES_IN_CONTACT,
+        /**
+         * Report contacts between deposited coordinates as well as all chains that are in contact with the deposited
+         * chain(s). This is a superset of `RESIDUES_IN_CONTACT`.
+         */
+        CHAINS_IN_CONTACT,
+        /**
+         * Absolutely everything.
+         */
+        ALL,
         /**
          * Report contacts within a specific assembly.
          */
         ASSEMBLY,
         /**
-         * Report all contacts, regardless of assembly or applied transformation. This makes only sense when the graph
-         * is computed on a substructure, defined by a number of {@link LabelSelection}.
+         * Report all contacts for a list of {@link LabelSelection} values.
          */
-        ALL
+        SELECTION
     }
 
     /**
-     * Modulate behavior of the residue graph.
+     * Detailed options for the definition of contacts.
+     * @param mode global mode
+     * @param assemblyIdentifier if assembly-based: which assembly to index
+     * @param residues if selection-based: which residues to index
+     * @param selections if selection-based: coords of residues
      */
-    public static class ResidueGraphOptions {
-        final ResidueGraphMode mode;
-        final String assemblyIdentifier;
-
-        private ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier) {
-            this.mode = mode;
-            this.assemblyIdentifier = assemblyIdentifier;
-        }
-
+    public record ResidueGraphOptions(ResidueGraphMode mode, String assemblyIdentifier,
+                                      List<Map<LabelAtomId, float[]>> residues,
+                                      List<LabelSelection> selections) {
         /**
          * Only report contacts of deposited coordinates.
+         *
          * @return the corresponding options
          */
         public static ResidueGraphOptions deposited() {
-            return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED, null);
+            return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED, null, null, null);
         }
 
         /**
          * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * Only includes residues in contact.
+         *
          * @return the corresponding options
          */
-        public static ResidueGraphOptions depositedAndContacts() {
-            return new ResidueGraphOptions(ResidueGraphMode.DEPOSITED_AND_CONTACTS, null);
+        public static ResidueGraphOptions residuesInContact() {
+            return new ResidueGraphOptions(ResidueGraphMode.RESIDUES_IN_CONTACT, null, null, null);
+        }
+
+        /**
+         * Report contacts between deposited coordinates as well as deposited coordinates and a transformed partner.
+         * Considers all residues in contact and expands this selection to the whole chain.
+         *
+         * @return the corresponding options
+         */
+        public static ResidueGraphOptions chainsInContact() {
+            return new ResidueGraphOptions(ResidueGraphMode.CHAINS_IN_CONTACT, null, null, null);
+        }
+
+        /**
+         * Index everything, this will bring in a lot of redundancy when many transformed copies of a chain are present.
+         * @return the corresponding option
+         */
+        public static ResidueGraphOptions all() {
+            return new ResidueGraphOptions(ResidueGraphMode.ALL, null, null, null);
         }
 
         /**
          * Only report contacts of deposited coordinates.
+         *
          * @param assemblyIdentifier which assembly to consider?
          * @return the corresponding options
          */
         public static ResidueGraphOptions assembly(String assemblyIdentifier) {
-            return new ResidueGraphOptions(ResidueGraphMode.ASSEMBLY, assemblyIdentifier);
+            return new ResidueGraphOptions(ResidueGraphMode.ASSEMBLY, assemblyIdentifier, null, null);
         }
 
         /**
          * Report all contacts, regardless of assembly or applied transformation. This makes only sense when the graph
          * is computed on a substructure, defined by a number of {@link LabelSelection}.
+         *
+         * @param residues   the manifested residues of interest
+         * @param selections the respective selection
          * @return the corresponding options
          */
-        public static ResidueGraphOptions all() {
-            return new ResidueGraphOptions(ResidueGraphMode.ALL, null);
+        public static ResidueGraphOptions selection(List<Map<LabelAtomId, float[]>> residues, List<LabelSelection> selections) {
+            return new ResidueGraphOptions(ResidueGraphMode.SELECTION, null, residues, selections);
         }
     }
 
     /**
-     * Construct a residue graph.
-     * @param structure the context
-     * @param labelSelections residue keys (maybe subset, maybe all)
-     * @param residues residue coordinates (maybe subset, maybe all)
+     * Construct a graph.
+     * @param structure structure to evaluate
      * @param strucmotifConfig global config
-     */
-    public ResidueGraph(Structure structure, List<LabelSelection> labelSelections, List<Map<LabelAtomId, float[]>> residues, StrucmotifConfig strucmotifConfig) {
-        this.structure = structure;
-        this.backboneDistances = new HashMap<>();
-        this.sideChainDistances = new HashMap<>();
-        this.angles = new HashMap<>();
-
-        Map<IndexSelection, float[]> normalVectorMap = new LinkedHashMap<>();
-        Map<IndexSelection, float[]> backboneVectors = new LinkedHashMap<>();
-        Map<IndexSelection, float[]> sideChainVectors = new LinkedHashMap<>();
-        List<IndexSelection> indexSelections = new ArrayList<>();
-        for (int i = 0; i < labelSelections.size(); i++) {
-            LabelSelection labelSelection = labelSelections.get(i);
-            Map<LabelAtomId, float[]> residue = residues.get(i);
-            int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
-            IndexSelection indexSelection = new IndexSelection(labelSelection.getStructOperId(), residueIndex);
-            ResidueType residueType = structure.getResidueType(residueIndex);
-
-            float[] backbone = getBackboneCoords(residue);
-            float[] sideChain;
-            if (residueType == ResidueType.GLYCINE) {
-                sideChain = getVirtualCB(residue);
-            } else {
-                sideChain = getSideChainCoords(residue);
-            }
-
-            if (backbone == null || sideChain == null) {
-                continue;
-            }
-
-            indexSelections.add(indexSelection);
-            backboneVectors.put(indexSelection, backbone);
-            sideChainVectors.put(indexSelection, sideChain);
-            normalVectorMap.put(indexSelection, normalVector(backbone, sideChain));
-        }
-
-        Map<String, String[]> assemblyMap = structure.getAssemblies();
-        // handle case where undefined assemblies are allowed and no assembly info is present
-        if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
-            assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), structure.getLabelSelections()
-                    .stream()
-                    .map(LabelSelection::getLabelAsymId)
-                    .distinct()
-                    .map(c -> c + "_1")
-                    .toArray(String[]::new));
-        }
-
-        this.selectionCount = labelSelections.size();
-        this.numberOfResidues = backboneVectors.size();
-        this.numberOfPairings = fillResidueGrid(backboneVectors, sideChainVectors, normalVectorMap, indexSelections, strucmotifConfig.getSquaredDistanceCutoff(), all(), assemblyMap);
-    }
-
-    /**
-     * Construct a new residue graph from a full structure.
-     * @param structure data
-     * @param strucmotifConfig global config
-     * @param options options to apply
+     * @param options graph options
      */
     public ResidueGraph(Structure structure, StrucmotifConfig strucmotifConfig, ResidueGraphOptions options) {
         this.structure = structure;
-        this.backboneDistances = new HashMap<>();
-        this.sideChainDistances = new HashMap<>();
-        this.angles = new HashMap<>();
 
-        // sort residues into chains
-        // ${label_asym_id}: ${label_asym_id}-${label_seq_id}
-        Map<String, List<LabelSelection>> chainMap = structure.getLabelSelections()
-                .stream()
-                .collect(Collectors.groupingBy(LabelSelection::getLabelAsymId));
-        // ${assembly_id}: (${label_asym_id}_${struct_oper_id1}x${struct_oper_id2})[]
-        Map<String, String[]> assemblyMap = structure.getAssemblies();
+        ResidueVectors residueVectors = populateResidueVectors(structure, options);
 
-        // handle case where undefined assemblies are allowed and no assembly info is present
-        if (strucmotifConfig.isUndefinedAssemblies() && assemblyMap.isEmpty()) {
-            assemblyMap.put(strucmotifConfig.getUndefinedAssemblyIdentifier(), chainMap.keySet()
-                    .stream()
-                    .map(c -> c + "_" + Transformation.DEFAULT_OPERATOR)
-                    .toArray(String[]::new));
-        }
-
-        List<float[]> originalBackboneVectors = new ArrayList<>();
-        List<float[]> originalSideChainVectors = new ArrayList<>();
-        for (int i = 0; i < structure.getResidueCount(); i++) {
-            ResidueType residueType = structure.getResidueType(i);
-            Map<LabelAtomId, float[]> residue = structure.manifestResidue(i);
-
-            originalBackboneVectors.add(getBackboneCoords(residue));
-            if (residueType == ResidueType.GLYCINE) {
-                originalSideChainVectors.add(getVirtualCB(residue));
-            } else {
-                originalSideChainVectors.add(getSideChainCoords(residue));
-            }
-        }
-
-        // all chains to generate
-        List<String> assemblyInformation = assemblyMap.values()
-                .stream()
-                .flatMap(Arrays::stream)
-                .distinct()
-                .collect(Collectors.toList());
-
-        // ${struct_oper_id}-${index}: float[]
-        List<IndexSelection> residueKeys = new ArrayList<>();
-        Map<IndexSelection, float[]> normalVectorMap = new LinkedHashMap<>();
-        Map<IndexSelection, float[]> transformedBackboneVectors = new LinkedHashMap<>();
-        Map<IndexSelection, float[]> transformedSideChainVectors = new LinkedHashMap<>();
-        for (String a : assemblyInformation) {
-            String[] split = a.split("_");
-            String labelAsymId = split[0];
-            String oper = split[1];
-            // oper with ID '1' will be identity operation if nothing was defined in the source file
-            Transformation transformation = structure.getTransformation(oper);
-
-            // happens for non-polymer chains
-            if (!chainMap.containsKey(labelAsymId)) continue;
-
-            for (LabelSelection labelSelection : chainMap.get(labelAsymId)) {
-                int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
-
-                float[] originalBackbone = originalBackboneVectors.get(residueIndex);
-                float[] originalSideChain = originalSideChainVectors.get(residueIndex);
-                if (originalBackbone == null || originalSideChain == null) {
-                    continue;
-                }
-
-                IndexSelection key = new IndexSelection(oper, residueIndex);
-                residueKeys.add(key);
-                float[] backbone = new float[3];
-                float[] sideChain = new float[3];
-                transformation.transform(backbone, originalBackbone);
-                transformedBackboneVectors.put(key, backbone);
-                transformation.transform(sideChain, originalSideChain);
-                transformedSideChainVectors.put(key, sideChain);
-
-                normalVectorMap.put(key, normalVector(backbone, sideChain));
-            }
-        }
-
-        this.selectionCount = transformedBackboneVectors.size();
-        this.numberOfResidues = transformedBackboneVectors.size();
-        this.numberOfPairings = fillResidueGrid(transformedBackboneVectors, transformedSideChainVectors, normalVectorMap, residueKeys, strucmotifConfig.getSquaredDistanceCutoff(), options, assemblyMap);
+        this.selectionCount = options.mode == ResidueGraphMode.SELECTION ? options.selections.size() : (residueVectors.backboneVectors.length / 3);
+        this.residueCount = residueVectors.backboneVectors.length / 3;
+        this.pairingCount = fillResidueGrid(structure, residueVectors, strucmotifConfig.getSquaredDistanceCutoff(), options);
     }
 
-    private int fillResidueGrid(Map<IndexSelection, float[]> backboneVectors, Map<IndexSelection, float[]> sideChainVectors, Map<IndexSelection, float[]> normalVectorMap, List<IndexSelection> indexSelections, float squaredCutoff, ResidueGraphOptions options, Map<String, String[]> assemblies) {
-        // temporary ResidueGrid for efficient distance calculation
-        ResidueGrid residueGrid = new ResidueGrid(new ArrayList<>(backboneVectors.values()), squaredCutoff);
-        Map<String, List<String>> assemblyMap = assemblies.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue())));
+    record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors, float[] normalVectors) {}
 
+    private ResidueVectors populateResidueVectors(Structure structure, ResidueGraphOptions options) {
+        int valid = 0;
+        int bound = options.mode == ResidueGraphMode.SELECTION ? options.selections.size() : structure.getInstancedResidueCount();
+        int[] residueIndices = new int[bound];
+        float[] backboneVectors = new float[3 * bound];
+        float[] sideChainVectors = new float[3 * bound];
+        float[] normalVectors = new float[3 * bound];
+
+        if (options.mode == ResidueGraphMode.SELECTION) {
+            for (int i = 0; i < residueIndices.length; i++) {
+                LabelSelection labelSelection = options.selections.get(i);
+                // this may not be the actual residueIndex retrieved during search, but it doesn't matter
+                int residueIndex = structure.getResidueIndex(labelSelection);
+                residueIndices[i] = residueIndex;
+            }
+        } else if (options.mode == ResidueGraphMode.DEPOSITED) {
+            int j = 0;
+            for (int i = 0; i < structure.getInstancedResidueCount(); i++) {
+                if (!structure.getTransformationIdentifier(i).equals("1")) {
+                    continue;
+                }
+                residueIndices[j++] = i;
+            }
+            residueIndices = Arrays.copyOf(residueIndices, j);
+        } else {
+            for (int i = 0; i < structure.getInstancedResidueCount(); i++) {
+                residueIndices[i] = i;
+            }
+        }
+
+        for (int i = 0; i < residueIndices.length; i++) {
+            int residueIndex = residueIndices[i];
+            ResidueType residueType = structure.getResidueType(residueIndex);
+            Map<LabelAtomId, float[]> residue = structure.manifestResidue(residueIndex);
+
+            float[] backbone = getBackboneCoords(residue);
+            if (backbone == null) {
+                continue;
+            }
+            float[] sideChain = residueType == ResidueType.GLYCINE ? getVirtualCB(residue) : getSideChainCoords(residue);
+            if (sideChain == null) {
+                continue;
+            }
+
+            residueIndices[valid] = residueIndex;
+            int insertionPoint = valid * 3;
+            System.arraycopy(backbone, 0, backboneVectors, insertionPoint, 3);
+            System.arraycopy(sideChain, 0, sideChainVectors, insertionPoint, 3);
+            float[] normalVector = normalVector(backbone, sideChain);
+            System.arraycopy(normalVector, 0, normalVectors, insertionPoint, 3);
+            valid++;
+        }
+
+        // compact arrays
+        residueIndices = Arrays.copyOf(residueIndices, valid);
+        backboneVectors = Arrays.copyOf(backboneVectors, valid * 3);
+        sideChainVectors = Arrays.copyOf(sideChainVectors, valid * 3);
+        normalVectors = Arrays.copyOf(normalVectors, valid * 3);
+
+        return new ResidueVectors(residueIndices, backboneVectors, sideChainVectors, normalVectors);
+    }
+
+    private int fillResidueGrid(Structure structure, ResidueVectors residueVectors, float squaredDistanceCutoff, ResidueGraphOptions options) {
+        // temporary ResidueGrid for efficient distance calculation
+        ResidueGrid residueGrid = new ResidueGrid(residueVectors, squaredDistanceCutoff);
+        int[] residueIndices = residueVectors.residueIndices;
         ResidueGraphMode mode = options.mode;
+        // factored out to not compute twice, possible to not add undesired residues to the grid in the first place?
+        List<ResidueGrid.ResidueContact> contacts = residueGrid.getIndicesContacts();
+
+        List<Set<String>> assemblyGrouping = new ArrayList<>();
+        for (String assemblyIdentifier : structure.getAssemblyIdentifiers()) {
+            Set<String> referencedTransformationIdentifiers = new HashSet<>();
+            String[] referencedChainInstances = structure.getReferencedChainInstances(assemblyIdentifier);
+            for (int i = 0; i < referencedChainInstances.length - 1; i = i + 2) {
+                referencedTransformationIdentifiers.add(referencedChainInstances[i] + "_" + referencedChainInstances[i + 1]);
+            }
+            assemblyGrouping.add(referencedTransformationIdentifiers);
+        }
+
         // track the first occurrence of each chain and consider that 'deposited'
         Set<String> acceptedChains = new HashSet<>();
-        Set<String> acceptedOperators = new HashSet<>();
-        if (mode == ResidueGraphMode.DEPOSITED || mode == ResidueGraphMode.DEPOSITED_AND_CONTACTS) {
-            for (List<String> chainExprs : assemblyMap.values()) {
-                for (String chainExpr : chainExprs) {
-                    String chain = chainExpr.split("_")[0];
-                    if (!acceptedChains.contains(chain)) {
-                        acceptedChains.add(chain);
-                        acceptedOperators.add(chainExpr);
+        Set<String> acceptedTransformationIdentifiers = new HashSet<>();
+        if (mode == ResidueGraphMode.DEPOSITED || mode == ResidueGraphMode.RESIDUES_IN_CONTACT || mode == ResidueGraphMode.CHAINS_IN_CONTACT) {
+            for (String assemblyIdentifier : structure.getAssemblyIdentifiers()) {
+                String[] referencedChainInstances = structure.getReferencedChainInstances(assemblyIdentifier);
+                for (int i = 0; i < referencedChainInstances.length - 1; i = i + 2) {
+                    String chainIdentifier = referencedChainInstances[i];
+                    if (!acceptedChains.contains(chainIdentifier)) {
+                        acceptedChains.add(chainIdentifier);
+                        acceptedTransformationIdentifiers.add(chainIdentifier + "_" + referencedChainInstances[i + 1]);
                     }
                 }
             }
+
+            // need 2nd pass to find all chain instances in contact with instances accepted in the 1st pass
+            if (mode == ResidueGraphMode.CHAINS_IN_CONTACT) {
+                Set<String> additions = new HashSet<>();
+                for (ResidueGrid.ResidueContact residueContact : contacts) {
+                    // must contain 'dominant' chain instance
+                    int residueIndex1 = residueIndices[residueContact.i()];
+                    String transformationIdentifier1 = structure.getLabelAsymId(residueIndex1) + "_" + structure.getTransformationIdentifier(residueIndex1);
+                    if (!acceptedTransformationIdentifiers.contains(transformationIdentifier1)) {
+                        continue;
+                    }
+
+                    // all tracked other residues are known to be below the cutoff at this point
+                    int residueIndex2 = residueIndices[residueContact.j()];
+                    String transformationIdentifier2 = structure.getLabelAsymId(residueIndex2) + "_" + structure.getTransformationIdentifier(residueIndex2);
+                    additions.add(transformationIdentifier2);
+                }
+                acceptedTransformationIdentifiers.addAll(additions);
+            }
+        } else if (mode == ResidueGraphMode.ASSEMBLY) {
+            String[] requestedChains = structure.getReferencedChainInstances(options.assemblyIdentifier);
+            for (int i = 0; i < requestedChains.length - 1; i = i + 2) {
+                acceptedTransformationIdentifiers.add(requestedChains[i] + "_" + requestedChains[i + 1]);
+            }
+        } else if (mode == ResidueGraphMode.ALL) {
+            for (String assemblyIdentifier : structure.getAssemblyIdentifiers()) {
+                String[] referencedChainInstances = structure.getReferencedChainInstances(assemblyIdentifier);
+                for (int i = 0; i < referencedChainInstances.length - 1; i = i + 2) {
+                    acceptedTransformationIdentifiers.add(referencedChainInstances[i] + "_" + referencedChainInstances[i + 1]);
+                }
+            }
         }
 
-        // a specific assembly was requested
-        String requestAssemblyIdentifier = options.assemblyIdentifier;
-        List<String> requestChains = assemblyMap.get(requestAssemblyIdentifier);
-        List<LabelSelection> labelSelections = structure.getLabelSelections();
+        int contactCount = 0;
+        int base = 64;
+        this.keys = new long[base];
+        this.values = new short[base];
+        for (ResidueGrid.ResidueContact residueContact : contacts) {
+            int i = residueContact.i();
+            int j = residueContact.j();
+            int residueIndex1 = residueIndices[i];
+            int residueIndex2 = residueIndices[j];
 
-        int size = 0;
-        for (ResidueGrid.ResidueContact residueContact : residueGrid.getIndicesContacts()) {
-            // avoid symmetry/duplicates
-            if (residueContact.getI() >= residueContact.getJ()) {
+            String transformationIdentifier1 = structure.getLabelAsymId(residueIndex1) + "_" + structure.getTransformationIdentifier(residueIndex1);
+            String transformationIdentifier2 = structure.getLabelAsymId(residueIndex2) + "_" + structure.getTransformationIdentifier(residueIndex2);
+            if (mode != ResidueGraphMode.SELECTION) {
+                if (!acceptedTransformationIdentifiers.contains(transformationIdentifier1)) {
+                    continue;
+                }
+
+                if (mode == ResidueGraphMode.DEPOSITED || mode == ResidueGraphMode.ASSEMBLY) {
+                    if (!acceptedTransformationIdentifiers.contains(transformationIdentifier2)) {
+                        continue;
+                    }
+                }
+            }
+
+            // ensure both chain instances are part of the same assembly
+            if (assemblyGrouping.stream().noneMatch(group -> group.contains(transformationIdentifier1) && group.contains(transformationIdentifier2))) {
                 continue;
             }
 
-            IndexSelection residueKey1 = indexSelections.get(residueContact.getI());
-            String chainExpr1 = labelSelections.get(residueKey1.getIndex()).getLabelAsymId() + "_" + residueKey1.getStructOperId();
+            DistanceType backboneDistance = DistanceType.ofDistance(residueContact.distance());
+            DistanceType sideChainDistance = DistanceType.ofDistance((float) Math.sqrt(distanceSquared3d(residueVectors.sideChainVectors, i, j)));
+            AngleType angle = AngleType.ofAngle(angle(residueVectors.normalVectors, i, j));
 
-            IndexSelection residueKey2 = indexSelections.get(residueContact.getJ());
-            String chainExpr2 = labelSelections.get(residueKey2.getIndex()).getLabelAsymId() + "_" + residueKey2.getStructOperId();
+            ensureCapacity(contactCount);
+            // jam all values into a single short
+            keys[contactCount] = ResiduePairIdentifier.encodeIdentifier(residueIndex1, residueIndex2);
+            values[contactCount] = ResiduePairDescriptor.encodeDescriptor(backboneDistance, sideChainDistance, angle);
 
-            switch (mode) {
-                case DEPOSITED:
-                    if (!acceptedOperators.contains(chainExpr1) || !acceptedOperators.contains(chainExpr2)) continue;
-                    break;
-                case DEPOSITED_AND_CONTACTS:
-                    if (!acceptedOperators.contains(chainExpr1)) continue;
-                    break;
-                case ASSEMBLY:
-                    if (!requestChains.contains(chainExpr1) || !requestChains.contains(chainExpr2)) continue;
-                    break;
-                case ALL:
-                    // let everything else pass
-            }
-
-            // ensure that both chainExpressions occur in the same assembly
-            if (assemblyMap.values().stream().noneMatch(opers -> opers.contains(chainExpr1) && opers.contains(chainExpr2))) {
-                continue;
-            }
-
-            float[] normalVector1 = normalVectorMap.get(residueKey1);
-            float[] normalVector2 = normalVectorMap.get(residueKey2);
-
-            // ensure that side-chain atoms are available
-            float[] sideChainCoordinates1 = sideChainVectors.get(residueKey1);
-            float[] sideChainCoordinates2 = sideChainVectors.get(residueKey2);
-            if (sideChainCoordinates1 == null || sideChainCoordinates2 == null) {
-                continue;
-            }
-
-            Map<IndexSelection, Float> innerBackboneMap = backboneDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerBackboneMap.put(residueKey2, residueContact.getDistance());
-
-            Map<IndexSelection, Float> innerSideChainMap = sideChainDistances.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerSideChainMap.put(residueKey2, distance3d(sideChainCoordinates1, sideChainCoordinates2));
-
-            Map<IndexSelection, Float> innerAngleMap = angles.computeIfAbsent(residueKey1, key -> new HashMap<>());
-            innerAngleMap.put(residueKey2, angle(normalVector1, normalVector2));
-
-            size++;
+            contactCount++;
         }
-        return size;
+
+        trim(contactCount);
+        return contactCount;
     }
 
-    // already centered coordinates to save operations
-    private static final List<float[]> REFERENCE_BACKBONE = List.of(new float[] { -0.698f, 0.184f, 1.008f }, // N
-            new float[] { 0.525f, 0.109f, 0.200f }, // CA
-            new float[] { 0.174f, -0.292f, -1.208f }); // C
-    private static final float[] REFERENCE_CB = new float[] { 1.472f, -0.929f, 0.804f };
-    private static final float[] REFERENCE_CENTROID = new float[3];
-
-    static float[] getVirtualCB(Map<LabelAtomId, float[]> residue) {
-        float[] n = residue.get(LabelAtomId.N);
-        float[] ca = residue.get(LabelAtomId.CA);
-        float[] c = residue.get(LabelAtomId.C);
-        if (n == null || ca == null || c == null) {
-            return null;
+    private void ensureCapacity(int contactCount) {
+        if (contactCount >= keys.length) {
+            keys = Arrays.copyOf(keys, keys.length * 2);
+            values = Arrays.copyOf(values, keys.length * 2);
         }
+    }
 
-        List<float[]> coords = List.of(n, ca, c);
-        float[] v = Algebra.centroid3d(coords);
+    private void trim(int contactCount) {
+        keys = Arrays.copyOf(keys, contactCount);
+        values = Arrays.copyOf(values, contactCount);
+    }
 
-        Transformation transformation = QuaternionAlignmentService.align(coords, v, REFERENCE_BACKBONE, REFERENCE_CENTROID).getFirst();
-        Algebra.multiply4d(v, transformation.getTransformationMatrix(), REFERENCE_CB);
-        return v;
+    /**
+     * Number of selected residues (if any).
+     * @return an int
+     */
+    public int getSelectionCount() {
+        return selectionCount;
+    }
+
+    /**
+     * Number of referenced residues (i.e., the valid/accepted residues).
+     * @return an int
+     */
+    public int getResidueCount() {
+        return residueCount;
+    }
+
+    /**
+     * Number of observed contacts.
+     * @return an int
+     */
+    public int getPairingCount() {
+        return pairingCount;
+    }
+
+    /**
+     * Traverse all residue pairs.
+     * @return a Stream
+     */
+    public Stream<ResiduePairOccurrence> residuePairOccurrencesSequential() {
+        return IntStream.range(0, pairingCount)
+                .mapToObj(this::createResiduePairOccurrence);
+    }
+
+    /**
+     * Traverse all residue pairs.
+     * @return a Stream
+     */
+    public Stream<ResiduePairOccurrence> residuePairOccurrencesParallel() {
+        return IntStream.range(0, pairingCount)
+                .parallel()
+                .mapToObj(this::createResiduePairOccurrence);
+    }
+
+    private ResiduePairOccurrence createResiduePairOccurrence(int i) {
+        long k = keys[i];
+        int residueIndex1 = ResiduePairIdentifier.getResidueIndex1(k);
+        int residueIndex2 = ResiduePairIdentifier.getResidueIndex2(k);
+        ResidueType residueType1 = structure.getResidueType(residueIndex1);
+        ResidueType residueType2 = structure.getResidueType(residueIndex2);
+
+        short value = values[i];
+        DistanceType backboneDistance = ResiduePairDescriptor.getBackboneDistance(value);
+        DistanceType sideChainDistance = ResiduePairDescriptor.getSideChainDistance(value);
+        AngleType angle = ResiduePairDescriptor.getAngle(value);
+
+        // check if pair needs to be flipped to follow contract
+        if (residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0) {
+            return new ResiduePairOccurrence(residueIndex2, residueIndex1, residueType2, residueType1, backboneDistance, sideChainDistance, angle);
+        } else {
+            return new ResiduePairOccurrence(residueIndex1, residueIndex2, residueType1, residueType2, backboneDistance, sideChainDistance, angle);
+        }
     }
 
     private static float[] getBackboneCoords(Map<LabelAtomId, float[]> residue) {
@@ -395,163 +421,59 @@ public class ResidueGraph {
         return ba;
     }
 
+    // already centered coordinates to save operations
+    private static final List<float[]> REFERENCE_BACKBONE = List.of(new float[]{-0.698f, 0.184f, 1.008f}, // N
+            new float[]{0.525f, 0.109f, 0.200f}, // CA
+            new float[]{0.174f, -0.292f, -1.208f}); // C
+    private static final float[] REFERENCE_CB = new float[]{1.472f, -0.929f, 0.804f};
+    private static final float[] REFERENCE_CENTROID = new float[3];
+
+    static float[] getVirtualCB(Map<LabelAtomId, float[]> residue) {
+        float[] n = residue.get(LabelAtomId.N);
+        float[] ca = residue.get(LabelAtomId.CA);
+        float[] c = residue.get(LabelAtomId.C);
+        if (n == null || ca == null || c == null) {
+            return null;
+        }
+
+        List<float[]> coords = List.of(n, ca, c);
+        float[] v = Algebra.centroid3d(coords);
+
+        float[] transformation = QuaternionAlignmentService.align(coords, v, REFERENCE_BACKBONE, REFERENCE_CENTROID).first();
+        Algebra.multiply4d(v, transformation, REFERENCE_CB);
+        return v;
+    }
+
+    static float distanceSquared3d(float[] vectors, int i, int j) {
+        i *= 3;
+        j *= 3;
+        float dx = vectors[i] - vectors[j];
+        float dy = vectors[i + 1] - vectors[j + 1];
+        float dz = vectors[i + 2] - vectors[j + 2];
+
+        return dx * dx + dy * dy + dz * dz;
+    }
+
     /**
      * Compute the angle between 2 vectors. Must be normal vectors (will not be normalized in this call).
-     * @param v1 first
-     * @param v2 second
+     *
+     * @param vectors data
+     * @param i       index of 1st vector
+     * @param j       index of 2nd vector
      * @return the angle in degrees
      */
-    static float angle(float[] v1, float[] v2) {
+    static float angle(float[] vectors, int i, int j) {
+        i *= 3;
+        j *= 3;
         // be careful, normally dot product has to be divided by norm of v1 and v2
-        float vDot = dotProduct3d(v1, v2);
+        float vDot = vectors[i] * vectors[j] + vectors[i + 1] * vectors[j + 1] + vectors[i + 2] * vectors[j + 2];
         return (float) Math.toDegrees(Math.acos(capToInterval(-1, vDot, 1)));
-    }
-
-    /**
-     * Reports the distance of backbone of 2 residues.
-     * @param residue1 first
-     * @param residue2 second
-     * @return the distance
-     */
-    public float getBackboneDistance(IndexSelection residue1, IndexSelection residue2) {
-        return tryGet(backboneDistances, residue1, residue2);
-    }
-
-    /**
-     * Reports the distance of side-chains of 2 residues.
-     * @param residue1 first
-     * @param residue2 second
-     * @return the distance
-     */
-    public float getSideChainDistance(IndexSelection residue1, IndexSelection residue2) {
-        return tryGet(sideChainDistances, residue1, residue2);
-    }
-
-    /**
-     * Reports the angle between 2 residues.
-     * @param residue1 first
-     * @param residue2 second
-     * @return the angle
-     */
-    public float getAngle(IndexSelection residue1, IndexSelection residue2) {
-        return tryGet(angles, residue1, residue2);
-    }
-
-    private float tryGet(Map<IndexSelection, Map<IndexSelection, Float>> map, IndexSelection i1, IndexSelection i2) {
-        if (map.containsKey(i1)) {
-            Map<IndexSelection, Float> m = map.get(i1);
-            if (m.containsKey(i2)) return m.get(i2);
-        }
-        if (map.containsKey(i2)) {
-            Map<IndexSelection, Float> m = map.get(i2);
-            if (m.containsKey(i1)) return m.get(i1);
-        }
-        return Float.MAX_VALUE;
-    }
-
-    /**
-     * Reports the number of pairings present in this graph.
-     * @return the number of registered pairs
-     */
-    public int getNumberOfPairings() {
-        return numberOfPairings;
-    }
-
-    /**
-     * Allows to sequentially traverse all pairings.
-     * @return a stream of residue pairs
-     */
-    public Stream<Pair<IndexSelection, IndexSelection>> pairingsSequential() {
-        // parallel streaming here will cause shuffling of motif descriptors and lead to alignment errors because correspondence cannot be asserted
-        return backboneDistances.keySet()
-                .stream()
-                .flatMap(e -> pairs(e, false));
-    }
-
-    /**
-     * Allows to traverse all pairings.
-     * @return a stream of residue pairs
-     */
-    public Stream<Pair<IndexSelection, IndexSelection>> pairingsParallel() {
-        return backboneDistances.keySet()
-                .parallelStream()
-                .flatMap(e -> pairs(e, true));
-    }
-
-    /**
-     * Allows to traverse all residue pair occurrences. Will employ parallel stream.
-     * @return a stream of {@link ResiduePairOccurrence} instances
-     */
-    public Stream<ResiduePairOccurrence> residuePairOccurrencesParallel() {
-        return pairingsParallel()
-                .map(this::createMotifOccurrence);
-    }
-
-    /**
-     * Allows to traverse all residue pair occurrences. Will employ sequential stream.
-     * @return a stream of {@link ResiduePairOccurrence} instances
-     */
-    public Stream<ResiduePairOccurrence> residuePairOccurrencesSequential() {
-        return pairingsSequential()
-                .map(this::createMotifOccurrence);
-    }
-
-    private ResiduePairOccurrence createMotifOccurrence(Pair<IndexSelection, IndexSelection> pair) {
-        IndexSelection indexSelection1 = pair.getFirst();
-        IndexSelection indexSelection2 = pair.getSecond();
-
-        ResidueType residueType1 = structure.getResidueType(indexSelection1.getIndex());
-        ResidueType residueType2 = structure.getResidueType(indexSelection2.getIndex());
-
-        // first residue must have lower one-letter code - if not: flip
-        if (residueType1.getInternalCode().compareTo(residueType2.getInternalCode()) > 0) {
-            return createMotifOccurrence(new Pair<>(indexSelection2, indexSelection1));
-        }
-
-        // determine values
-        DistanceType backboneDistance = DistanceType.ofDistance(getBackboneDistance(indexSelection1, indexSelection2));
-        DistanceType sideChainDistance = DistanceType.ofDistance(getSideChainDistance(indexSelection1, indexSelection2));
-        AngleType angle = AngleType.ofAngle(getAngle(indexSelection1, indexSelection2));
-
-        ResiduePairDescriptor residuePairDescriptor = new ResiduePairDescriptor(residueType1,
-                residueType2,
-                backboneDistance,
-                sideChainDistance,
-                angle);
-        // LabelSelection is needed to be able to map position-specific exchanges accurately
-        ResiduePairIdentifier residuePairIdentifier = new IndexSelectionResiduePairIdentifier(indexSelection1,
-                indexSelection2);
-        return new ResiduePairOccurrence(residuePairDescriptor, residuePairIdentifier);
-    }
-
-    private Stream<Pair<IndexSelection, IndexSelection>> pairs(IndexSelection residue1, boolean parallel) {
-        // retrieve all neighbors for id
-        Map<IndexSelection, Float> map = backboneDistances.get(residue1);
-        // can be empty
-        if (map == null) return Stream.empty();
-
-        if (parallel) {
-            return map.keySet()
-                    .parallelStream()
-                    .map(residue2 -> new Pair<>(residue1, residue2));
-        } else {
-            return map.keySet()
-                    .stream()
-                    .map(residue2 -> new Pair<>(residue1, residue2));
-        }
-    }
-
-    /**
-     * Number of residues referenced by this graph.
-     * @return an int
-     */
-    public int getNumberOfResidues() {
-        return numberOfResidues;
     }
 
     /**
      * Checks whether the graph described by these residues is connected. Not optimized and only intended to check
      * validity of query motifs.
+     *
      * @return false if there are residues that aren't reachable from another residue or if the graph has no nodes
      */
     public boolean isConnected() {
@@ -560,34 +482,33 @@ public class ResidueGraph {
             return false;
         }
 
-        Set<IndexSelection> visited = new HashSet<>();
-        Set<Pair<IndexSelection, IndexSelection>> edges = residuePairOccurrencesSequential()
-                .map(ResiduePairOccurrence::getResidueIdentifier)
-                .map(p -> new Pair<>(p.getIndexSelection1(), p.getIndexSelection2()))
+        Set<Integer> visited = new HashSet<>();
+        Set<Pair<Integer, Integer>> edges = residuePairOccurrencesSequential()
+                .map(o -> new Pair<>(o.getResidueIndex1(), o.getResidueIndex2()))
                 .collect(Collectors.toSet());
 
-        if (backboneDistances.isEmpty()) {
+        if (pairingCount == 0) {
             return false;
         }
 
-        IndexSelection random = backboneDistances.keySet().iterator().next();
+        int random = ResiduePairIdentifier.getResidueIndex1(keys[0]);
         dfs(random, edges, visited);
 
         logger.debug("Checked for connectedness in {} ms", (System.nanoTime() - start) * 0.001 * 0.001);
         return visited.size() == selectionCount;
     }
 
-    private void dfs(IndexSelection currentNode, Set<Pair<IndexSelection, IndexSelection>> edges, Set<IndexSelection> visited) {
+    private void dfs(int currentNode, Set<Pair<Integer, Integer>> edges, Set<Integer> visited) {
         visited.add(currentNode);
 
-        for (Pair<IndexSelection, IndexSelection> edge : edges) {
-            IndexSelection node1 = edge.getFirst();
-            IndexSelection node2 = edge.getSecond();
-            if (!currentNode.equals(node1) && !currentNode.equals(node2)) {
+        for (Pair<Integer, Integer> edge : edges) {
+            int node1 = edge.first();
+            int node2 = edge.second();
+            if (currentNode != node1 && currentNode != node2) {
                 continue;
             }
 
-            IndexSelection neighbor = (node1.equals(currentNode)) ? node2 : node1;
+            int neighbor = node1 == currentNode ? node2 : node1;
             if (!visited.contains(neighbor)) {
                 dfs(neighbor, edges, visited);
             }

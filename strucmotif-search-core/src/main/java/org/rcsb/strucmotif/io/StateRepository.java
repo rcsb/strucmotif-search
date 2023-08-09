@@ -26,7 +26,7 @@ public interface StateRepository {
     default Set<Integer> reportKnownKeys() {
         return selectKnown()
                 .stream()
-                .map(StructureInformation::getStructureIndex)
+                .map(StructureInformation::structureIndex)
                 .collect(Collectors.toSet());
     }
 

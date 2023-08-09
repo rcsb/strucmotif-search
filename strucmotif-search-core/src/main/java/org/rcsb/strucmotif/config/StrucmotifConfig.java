@@ -5,7 +5,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 /**
- * All properties used throughout the strucmotif-search application.
+ * All properties used throughout the strucmotif-search application. Everything must be prefixed with `strucmotif.` in
+ * the properties file. Specify properties in kebab-case.
  */
 @Configuration
 @EnableConfigurationProperties
@@ -28,14 +29,14 @@ public class StrucmotifConfig {
      */
     private String dataSource = "/opt/pdb/{middle}/{id}.bcif.gz";
     /**
-     * How many threads should be used during multi-threaded operations (update, path assembly, structure reading).
+     * How many threads should be used during multi-threaded operations of a query.
      */
-    private int numberThreads = Runtime.getRuntime().availableProcessors();
+    private int perQueryThreads = Runtime.getRuntime().availableProcessors();
     /**
      * Hard limit on the number of results returned. Will stop jobs when this number of hits has been accepted. Acts as
      * a safeguard against too simple queries that will return an overwhelming number of results.
      */
-    private int maxResults = 50000;
+    private int maxResults = 50_000;
     /**
      * How many decimal places to report for scores.
      */
@@ -45,16 +46,11 @@ public class StrucmotifConfig {
      */
     private int decimalPlacesMatrix = 3;
     /**
-     * The batch size during update. Writing to the inverted index is expensive, therefore doing so in batches increases
-     * speed substantially. A value of 400 works good with 12 GB of heap, the higher the faster.
-     */
-    private int updateChunkSize = 1600;
-    /**
      * The batch size during app initialization. Only relevant if `in-memory-strategy` is set to `heap`. The specified
      * number of structures will be loaded into memory before logging process. This mainly serves as checkpoint during
      * initialization.
      */
-    private int loadingChunkSize = 12800;
+    private int loadingChunkSize = 200_000;
     /**
      * The maximum motif size, any larger user input will be rejected.
      */
@@ -65,10 +61,6 @@ public class StrucmotifConfig {
      */
     private String cifFetchUrl = "https://models.rcsb.org/{id}.bcif";
     /**
-     * What precision to use to write renumbered structure data.
-     */
-    private int renumberedCoordinatePrecision = 1;
-    /**
      * Number of allowed tries during CIF download/parsing before an exception is thrown.
      */
     private int downloadTries = 5;
@@ -76,11 +68,6 @@ public class StrucmotifConfig {
      * Allocate a lot of memory to keep index and structure data in memory?
      */
     private InMemoryStrategy inMemoryStrategy = InMemoryStrategy.OFF;
-    /**
-     * Allow hits that are not part of an assembly (e.g. relevant for NMR or computed structure models).
-     * Hits without assembly are report as '0'.
-     */
-    private boolean undefinedAssemblies = true;
     /**
      * Filter for residues with a certain quality/confidence. Only relevant when combined with
      * {@link ResidueQualityStrategy}.
@@ -95,10 +82,6 @@ public class StrucmotifConfig {
      */
     private InvertedIndexBackend invertedIndexBackend = InvertedIndexBackend.COLFER;
     /**
-     * What identifier to use when undefined assemblies are allowed?
-     */
-    private String undefinedAssemblyIdentifier = "0";
-    /**
      * How to index modified residues.
      */
     private ModifiedResidueStrategy modifiedResidueStrategy = ModifiedResidueStrategy.INTERNAL;
@@ -106,7 +89,7 @@ public class StrucmotifConfig {
      * How often are files committed to the inverted index during update. This is the interval between dumping residue
      * pairs into temporary files and compacting these temporary files and actually adding them to the real index file.
      */
-    private int commitInterval = 16;
+    private int commitInterval = 200_000;
     /**
      * URL of the Chemical Component Dictionary.
      */
@@ -121,6 +104,22 @@ public class StrucmotifConfig {
      */
     private AmbiguousMonomerStrategy ambiguousMonomerStrategy = AmbiguousMonomerStrategy.TYPE;
     /**
+     * Behavior if revision history in source CIF file is undefined.
+     */
+    private MissingCategoryStrategy missingRevisionStrategy = MissingCategoryStrategy.WARN;
+    /**
+     * Behavior if assembly information in source CIF file is undefined.
+     */
+    private MissingCategoryStrategy missingAssemblyStrategy = MissingCategoryStrategy.WARN;
+    /**
+     * Which residue contacts to index.
+     */
+    private ResidueGraphStrategy residueGraphStrategy = ResidueGraphStrategy.RESIDUES_IN_CONTACT;
+    /**
+     * Timeout queries after this many milliseconds. Set to Integer.MAX_VALUE to not enforce any timeout.
+     */
+    private int queryTimeout = Integer.MAX_VALUE;
+    /**
      * List of all identifiers ever registered.
      */
     public static final String STATE_KNOWN_LIST = "known.list";
@@ -129,11 +128,11 @@ public class StrucmotifConfig {
      */
     public static final String STATE_DIRTY_LIST = "dirty.list";
     /**
-     * Name of the renumbered directory.
+     * Name of the renumbered bundle.
      */
     public static final String RENUMBERED = "renumbered";
     /**
-     * Name of the inverted index directory.
+     * Name of the inverted index bundle.
      */
     public static final String INDEX = "index";
     /**
@@ -149,9 +148,15 @@ public class StrucmotifConfig {
      */
     public static final String TMP_EXT = ".wip";
     /**
-     * Extension of temporart inverted index files while updating.
+     * Extension of temporary inverted index files while updating.
      */
     public static final String PARTIAL_EXT = ".partial";
+
+    /**
+     * Default constructor.
+     */
+    public StrucmotifConfig() {
+    }
 
     /**
      * Maximum distance of residue pairs.
@@ -209,16 +214,16 @@ public class StrucmotifConfig {
      * How many threads to use?
      * @return an int
      */
-    public int getNumberThreads() {
-        return numberThreads;
+    public int getPerQueryThreads() {
+        return perQueryThreads;
     }
 
     /**
      * Set how many threads to use?
-     * @param numberThreads an int greater than 0
+     * @param perQueryThreads an int greater than 0
      */
-    public void setNumberThreads(int numberThreads) {
-        this.numberThreads = numberThreads;
+    public void setPerQueryThreads(int perQueryThreads) {
+        this.perQueryThreads = perQueryThreads;
     }
 
     /**
@@ -267,22 +272,6 @@ public class StrucmotifConfig {
      */
     public void setDecimalPlacesMatrix(int decimalPlacesMatrix) {
         this.decimalPlacesMatrix = decimalPlacesMatrix;
-    }
-
-    /**
-     * How many structures to process before flushing to inverted index.
-     * @return an int
-     */
-    public int getUpdateChunkSize() {
-        return updateChunkSize;
-    }
-
-    /**
-     * Set how many structures to process before flushing to inverted index.
-     * @param updateChunkSize an int
-     */
-    public void setUpdateChunkSize(int updateChunkSize) {
-        this.updateChunkSize = updateChunkSize;
     }
 
     /**
@@ -344,22 +333,6 @@ public class StrucmotifConfig {
     }
 
     /**
-     * How many digits to write for renumbered files.
-     * @return an int
-     */
-    public int getRenumberedCoordinatePrecision() {
-        return renumberedCoordinatePrecision;
-    }
-
-    /**
-     * Set how many digits to write for renumbered files.
-     * @param renumberedCoordinatePrecision an int
-     */
-    public void setRenumberedCoordinatePrecision(int renumberedCoordinatePrecision) {
-        this.renumberedCoordinatePrecision = renumberedCoordinatePrecision;
-    }
-
-    /**
      * How many tries are allowed for connection failures/timeouts during update.
      * @return an int
      */
@@ -389,22 +362,6 @@ public class StrucmotifConfig {
      */
     public void setInMemoryStrategy(InMemoryStrategy inMemoryStrategy) {
         this.inMemoryStrategy = inMemoryStrategy;
-    }
-
-    /**
-     * Are hits without assembly allowed?
-     * @return a Boolean
-     */
-    public boolean isUndefinedAssemblies() {
-        return undefinedAssemblies;
-    }
-
-    /**
-     * Set if hits without assembly are allowed.
-     * @param undefinedAssemblies true to allow
-     */
-    public void setUndefinedAssemblies(boolean undefinedAssemblies) {
-        this.undefinedAssemblies = undefinedAssemblies;
     }
 
     /**
@@ -454,22 +411,6 @@ public class StrucmotifConfig {
      */
     public void setInvertedIndexBackend(InvertedIndexBackend invertedIndexBackend) {
         this.invertedIndexBackend = invertedIndexBackend;
-    }
-
-    /**
-     * What's the fallback identifier for undefined assemblies.
-     * @return a String
-     */
-    public String getUndefinedAssemblyIdentifier() {
-        return undefinedAssemblyIdentifier;
-    }
-
-    /**
-     * Set the fallback identifier for undefined assemblies.
-     * @param undefinedAssemblyIdentifier a String
-     */
-    public void setUndefinedAssemblyIdentifier(String undefinedAssemblyIdentifier) {
-        this.undefinedAssemblyIdentifier = undefinedAssemblyIdentifier;
     }
 
     /**
@@ -551,5 +492,69 @@ public class StrucmotifConfig {
      */
     public void setAmbiguousMonomerStrategy(AmbiguousMonomerStrategy ambiguousMonomerStrategy) {
         this.ambiguousMonomerStrategy = ambiguousMonomerStrategy;
+    }
+
+    /**
+     * Get the behavior upon missing revision information.
+     * @return ignore/warn/fail
+     */
+    public MissingCategoryStrategy getMissingRevisionStrategy() {
+        return missingRevisionStrategy;
+    }
+
+    /**
+     * Change the behavior upon missing revision information.
+     * @param missingRevisionStrategy ignore/warn/fail
+     */
+    public void setMissingRevisionStrategy(MissingCategoryStrategy missingRevisionStrategy) {
+        this.missingRevisionStrategy = missingRevisionStrategy;
+    }
+
+    /**
+     * Get the behavior upon missing assembly information.
+     * @return ignore/warn/fail
+     */
+    public MissingCategoryStrategy getMissingAssemblyStrategy() {
+        return missingAssemblyStrategy;
+    }
+
+    /**
+     * Change the behavior upon missing assembly information.
+     * @param missingAssemblyStrategy ignore/warn/fail
+     */
+    public void setMissingAssemblyStrategy(MissingCategoryStrategy missingAssemblyStrategy) {
+        this.missingAssemblyStrategy = missingAssemblyStrategy;
+    }
+
+    /**
+     * Which residue pairs to index?
+     * @return deposited or residues/chains in contact
+     */
+    public ResidueGraphStrategy getResidueGraphStrategy() {
+        return residueGraphStrategy;
+    }
+
+    /**
+     * Change what residue pairs to index.
+     * @param residueGraphStrategy either consider deposited coordinates or contacts with transformed residues/chains
+     */
+    public void setResidueGraphStrategy(ResidueGraphStrategy residueGraphStrategy) {
+        this.residueGraphStrategy = residueGraphStrategy;
+    }
+
+    /**
+     * Reports the query timeout value.
+     * @return timeout in milliseconds
+     */
+    public int getQueryTimeout() {
+        return queryTimeout;
+    }
+
+    /**
+     * Configure queries to timeout after n milliseconds by throwing a {@link java.util.concurrent.TimeoutException}.
+     * @param queryTimeout the desired the timeout
+     */
+    public void setQueryTimeout(int queryTimeout) {
+        this.queryTimeout = queryTimeout;
     }
 }

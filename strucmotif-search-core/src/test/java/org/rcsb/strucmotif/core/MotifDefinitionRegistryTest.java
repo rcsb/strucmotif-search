@@ -10,11 +10,11 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 class MotifDefinitionRegistryTest {
-    private MotifDefinitionRegistryImpl registry;
+    private DefaultMotifDefinitionRegistry registry;
 
     @BeforeEach
     public void init() {
-        this.registry = new MotifDefinitionRegistryImpl(null);
+        this.registry = new DefaultMotifDefinitionRegistry(null);
     }
 
     @Test
@@ -33,7 +33,7 @@ class MotifDefinitionRegistryTest {
         assertTrue(motifDefinitions.stream()
                 .map(MotifDefinition::getLabelSelections)
                 .flatMap(Collection::stream)
-                .allMatch(l -> l.getLabelAsymId() != null && l.getStructOperId() != null && l.getLabelSeqId() != 0), "Not all label-selections were parsed properly");
+                .allMatch(l -> l.labelAsymId() != null && l.structOperId() != null && l.labelSeqId() != 0), "Not all label-selections were parsed properly");
     }
 
     @Test

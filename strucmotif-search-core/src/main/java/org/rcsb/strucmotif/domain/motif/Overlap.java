@@ -1,13 +1,8 @@
 package org.rcsb.strucmotif.domain.motif;
 
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
-import org.rcsb.strucmotif.domain.structure.LabelSelection;
-
 /**
- * Describes the overlap between two {@link org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier} instances. Done by
- * determining whether {@link LabelSelection} instances equal. Can be no overlap or both overlapping. Interesting case
- * is when 1 pair overlaps. Can be LEFT_LEFT (left/first identifier of first word paired to left/first of second word)
- * and so on.
+ * Can be no overlap or both overlapping. Interesting case is when 1 pair overlaps. Can be LEFT_LEFT (left/first
+ * identifier of first word paired to left/first of second word) and so on.
  */
 public enum Overlap {
     /**
@@ -36,21 +31,36 @@ public enum Overlap {
     BOTH;
 
     /**
-     * Determines the overlap between 2 {@link IndexSelectionResiduePairIdentifier} instances.
-     * @param residuePairIdentifier1 the first instance
-     * @param residuePairIdentifier2 the second instance
+     * Determines the overlap between 2 residue pair identifiers.
+     * @param r11 1st index of 1st identifier
+     * @param r12 2nd index of 1st identifier
+     * @param r21 1st index of 2nd identifier
+     * @param r22 2nd index of 2nd identifier
      * @return a description of the observed overlap
      */
-    public static Overlap ofResiduePairIdentifiers(IndexSelectionResiduePairIdentifier residuePairIdentifier1, IndexSelectionResiduePairIdentifier residuePairIdentifier2) {
-        IndexSelection indexSelection11 = residuePairIdentifier1.getIndexSelection1();
-        IndexSelection indexSelection12 = residuePairIdentifier1.getIndexSelection2();
-        IndexSelection indexSelection21 = residuePairIdentifier2.getIndexSelection1();
-        IndexSelection indexSelection22 = residuePairIdentifier2.getIndexSelection2();
+    public static Overlap ofResiduePairIdentifiers(int r11, int r12, int r21, int r22) {
+        boolean equal1112 = r11 == r21;
+        boolean equal1122 = r11 == r22;
+        boolean equal1221 = r12 == r21;
+        boolean equal1222 = r12 == r22;
+        return of(equal1112, equal1122, equal1221, equal1222);
+    }
 
-        boolean equal1112 = indexSelection11.equals(indexSelection21);
-        boolean equal1122 = indexSelection11.equals(indexSelection22);
-        boolean equal1221 = indexSelection12.equals(indexSelection21);
-        boolean equal1222 = indexSelection12.equals(indexSelection22);
+    /**
+     * Determines the overlap between 2 residue pair identifiers.
+     * @param r1 1st identifier
+     * @param r2 2nd identifier
+     * @return a description of the observed overlap
+     */
+    public static Overlap ofResiduePairIdentifiers(long r1, long r2) {
+        int r11 = ResiduePairIdentifier.getResidueIndex1(r1);
+        int r12 = ResiduePairIdentifier.getResidueIndex2(r1);
+        int r21 = ResiduePairIdentifier.getResidueIndex1(r2);
+        int r22 = ResiduePairIdentifier.getResidueIndex2(r2);
+        boolean equal1112 = r11 == r21;
+        boolean equal1122 = r11 == r22;
+        boolean equal1221 = r12 == r21;
+        boolean equal1222 = r12 == r22;
         return of(equal1112, equal1122, equal1221, equal1222);
     }
 
@@ -68,19 +78,5 @@ public enum Overlap {
         } else {
             return RIGHT_LEFT;
         }
-    }
-
-    /**
-     * Determines the overlap between 2 {@link IndexSelectionResiduePairIdentifier} instances.
-     * @param residuePairIdentifier1 the first instance
-     * @param residuePairIdentifier2 the second instance
-     * @return a description of the observed overlap
-     */
-    public static Overlap ofResiduePairIdentifiers(InvertedIndexResiduePairIdentifier residuePairIdentifier1, InvertedIndexResiduePairIdentifier residuePairIdentifier2) {
-        boolean equal1112 = residuePairIdentifier1.getIndex1() == residuePairIdentifier2.getIndex1() && residuePairIdentifier1.getStructOperId1().equals(residuePairIdentifier2.getStructOperId1());
-        boolean equal1122 = residuePairIdentifier1.getIndex1() == residuePairIdentifier2.getIndex2() && residuePairIdentifier1.getStructOperId1().equals(residuePairIdentifier2.getStructOperId2());
-        boolean equal1221 = residuePairIdentifier1.getIndex2() == residuePairIdentifier2.getIndex1() && residuePairIdentifier1.getStructOperId2().equals(residuePairIdentifier2.getStructOperId1());
-        boolean equal1222 = residuePairIdentifier1.getIndex2() == residuePairIdentifier2.getIndex2() && residuePairIdentifier1.getStructOperId2().equals(residuePairIdentifier2.getStructOperId2());
-        return of(equal1112, equal1122, equal1221, equal1222);
     }
 }

@@ -5,20 +5,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
-import org.rcsb.strucmotif.core.ThreadPool;
-import org.rcsb.strucmotif.core.ThreadPoolImpl;
-import org.rcsb.strucmotif.io.InvertedIndexImpl;
+import org.rcsb.strucmotif.io.DefaultInvertedIndex;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StateRepository;
-import org.rcsb.strucmotif.io.StateRepositoryImpl;
-import org.rcsb.strucmotif.io.StructureDataProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStateRepository;
+import org.rcsb.strucmotif.io.DefaultStructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
-import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
 import org.rcsb.strucmotif.io.StructureWriter;
-import org.rcsb.strucmotif.io.StructureWriterImpl;
+import org.rcsb.strucmotif.io.DefaultStructureWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,15 +40,14 @@ class UpdateIntegrationTest {
     private StrucmotifConfig strucmotifConfig;
     private Path path;
     private StateRepository state;
-    private StructureDataProviderImpl data;
-    private InvertedIndexImpl index;
+    private DefaultStructureDataProvider data;
+    private DefaultInvertedIndex index;
     private StrucmotifUpdate update;
 
     @BeforeEach
     public void setup() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
         // ensure merging and side-by-side temporary files happen
-        strucmotifConfig.setUpdateChunkSize(1);
         strucmotifConfig.setCommitInterval(1);
         strucmotifConfig.setInvertedIndexBackend(InvertedIndexBackend.COLFER);
         this.path = Files.createTempDirectory("strucmotif-update-tests-");
@@ -60,13 +57,12 @@ class UpdateIntegrationTest {
         Files.createFile(path.resolve(StrucmotifConfig.RENUMBERED + StrucmotifConfig.INDEX_EXT));
 
         strucmotifConfig.setRootPath(path.toFile().getAbsolutePath());
-        this.state = new StateRepositoryImpl(strucmotifConfig);
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        StructureReader reader = new StructureReaderImpl(residueTypeResolver);
-        StructureWriter writer = new StructureWriterImpl(residueTypeResolver, strucmotifConfig);
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
-        this.data = new StructureDataProviderImpl(reader, writer, threadPool, strucmotifConfig);
-        this.index = new InvertedIndexImpl(threadPool, strucmotifConfig);
+        this.state = new DefaultStateRepository(strucmotifConfig);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
+        StructureReader reader = new DefaultStructureReader(residueTypeResolver);
+        StructureWriter writer = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
+        this.data = new DefaultStructureDataProvider(reader, writer, strucmotifConfig);
+        this.index = new DefaultInvertedIndex(strucmotifConfig);
 
         init();
     }
@@ -75,9 +71,8 @@ class UpdateIntegrationTest {
      * Some operations may need to rerun to update application state.
      */
     private void init() throws IOException {
-        ThreadPool pool = new ThreadPoolImpl(strucmotifConfig);
-        StructureIndexProvider keys = new StructureIndexProviderImpl(state);
-        this.update = new StrucmotifUpdate(state, data, index, strucmotifConfig, pool, keys) {
+        StructureIndexProvider keys = new DefaultStructureIndexProvider(state);
+        this.update = new StrucmotifUpdate(state, data, index, strucmotifConfig, keys) {
             @Override
             protected InputStream handleInputStream(UpdateItem item, Context context) {
                 return TestCases.getInputStream(item.getStructureIdentifier());
@@ -90,10 +85,11 @@ class UpdateIntegrationTest {
     @AfterEach
     public void teardown() throws IOException {
         logger.info("Deleting tmp dir at {}", path);
-        Files.walk(path)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
+        try (Stream<Path> paths = Files.walk(path)) {
+            paths.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+        }
     }
 
     private String[] toArgs(Operation operation, List<TestCases> cases) {

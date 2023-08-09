@@ -156,6 +156,11 @@ public enum ResidueType {
      */
     UNKNOWN_COMPONENT("?", "Z", PolymerType.UNKNOWN_POLYMER); // 36
 
+    /**
+     * Cached values of this enum. Don't manipulate this array or things will burn.
+     */
+    public static final ResidueType[] values = values();
+
     // used to retrieve the correct entity from the label_comp_id field
     private final String threeLetterCode;
     // used to write human-readable files

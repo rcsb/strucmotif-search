@@ -282,6 +282,11 @@ public enum LabelAtomId {
      */
     UNKNOWN_ATOM("?");
 
+    /**
+     * Cached values of this enum. Don't manipulate this array or things will burn.
+     */
+    public static final LabelAtomId[] values = values();
+
     private final String labelAtomId;
 
     LabelAtomId(String labelAtomId) {
@@ -296,7 +301,7 @@ public enum LabelAtomId {
         return labelAtomId;
     }
 
-    private static final Map<String, LabelAtomId> MAPPING = Arrays.stream(LabelAtomId.values())
+    private static final Map<String, LabelAtomId> MAPPING = Arrays.stream(LabelAtomId.values)
             .collect(Collectors.toMap(LabelAtomId::getLabelAtomId, Function.identity()));
     /**
      * Resolve a label_atom_id.

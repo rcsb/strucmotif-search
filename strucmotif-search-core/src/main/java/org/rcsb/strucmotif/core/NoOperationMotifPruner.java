@@ -12,9 +12,16 @@ import java.util.stream.Collectors;
  */
 @Service
 public class NoOperationMotifPruner implements MotifPruner {
+    /**
+     * Default constructor.
+     */
+    public NoOperationMotifPruner() {
+    }
+
     @Override
     public List<ResiduePairOccurrence> prune(ResidueGraph residueGraph) {
         return residueGraph.residuePairOccurrencesSequential()
-                .collect(Collectors.toList());
+                .sorted(ResiduePairOccurrence.INFORMATIVENESS_COMPARATOR)
+                .toList();
     }
 }

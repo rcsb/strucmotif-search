@@ -39,11 +39,8 @@ class Demo {
 }
 ```
 
-Usually, non-archived files also lack assembly information. In that case, set `undefined-assemblies` to `true` to allow
-indexing and searching in the deposited coordinates. Hits will be identified by assembly-ID `0`.
-
-Also, you likely want to ignore low-confidence predictions to avoid false-positives as well as to save storage and 
-lower the processing time of queries. Use `residue-quality-strategy` and `residue-quality-cutoff` for that.
+You likely want to ignore low-confidence predictions to avoid false-positives as well as to save storage and lower the 
+processing time of queries. Use `residue-quality-strategy` and `residue-quality-cutoff` for that.
 
 ### Loading from Directory
 It's also possible to index whole directories. The directory will be walked and all CIF/BinaryCIF files will be 
@@ -61,25 +58,28 @@ class Demo {
 Several application properties are only relevant for the update part of the application. Changes to these parameters 
 might require a full load.
 
-| Property     | Action | Default Value/Behavior |
-| -----------  | ------ | ------- |
-| `ambiguous-monomer-strategy` | How to resolve ASX and GLX? | `TYPE` |
-| `ccd-url` | URL to the chemical component dictionary | wwPDB |
-| `cif-fetch-url` | URL template for (Binary)CIF download | RCSB PDB BinaryCIF |
-| `commit-interval` | How many chunks to process before committing to index | `25` |
-| `data-source` | Path to local CIF archive | cif-fetch-url |
-| `distance-cutoff` | Maximum distance between alpha carbons that will be indexed in Å | `20` |
-| `download-tries` | Number of tries to download structure data during update | `3` |
-| `inverted-index-backend` | Binary format of the inverted index | `COLFER` |
-| `modified-residue-strategy` | How to resolve the parent of modified residues? | `INTERNAL` |
-| `number-threads` | Number of worker threads | available processors |
-| `renumbered-coordinate-precision` | Coordinate precision of BinaryCIF files | `1` |
-| `residue-quality-cutoff` | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0` |
-| `residue-quality-strategy` | Filter for residues with meaningful quality - combine with `residue-quality-cutoff` | `qa_metric_local_above_cutoff` |
-| `root-path` | Path where data files will be written | `/opt/data/` |
-| `support-d-amino-acids` | Map D-amino acids to their L-counterpart | `true` |
-| `undefined-assemblies` | Index structures without assembly information? | `true` |
-| `update-chunk-size` | Writing to the inverted index is slow and therefore done in chunks | `2400` |
+| Property                     | Action                                                                                | Default Value/Behavior         |
+|------------------------------|---------------------------------------------------------------------------------------|--------------------------------|
+| `ambiguous-monomer-strategy` | How to resolve ASX and GLX?                                                           | `TYPE`                         |
+| `ccd-url`                    | URL to the chemical component dictionary                                              | wwPDB                          |
+| `cif-fetch-url`              | URL template for (Binary)CIF download                                                 | RCSB PDB BinaryCIF             |
+| `commit-interval`            | How many entries to process before committing to index                                | `200,000`                      |
+| `data-source`                | Path to local CIF archive                                                             | cif-fetch-url                  |
+| `distance-cutoff`            | Maximum distance between alpha carbons that will be indexed in Å                      | `20`                           |
+| `download-tries`             | Number of tries to download structure data during update                              | `3`                            |
+| `missing-assembly-strategy`  | How to handle missing assembly information                                            | `WARN`                         |
+| `missing-revision-strategy`  | How to handle missing revision history                                                | `WARN`                         |
+| `modified-residue-strategy`  | How to resolve the parent of modified residues?                                       | `INTERNAL`                     |
+| `residue-pair-strategy`      | How to index transformed residues?                                                    | `RESIDUES_IN_CONTACT`          |
+| `residue-quality-cutoff`     | Filter for residues with meaningful quality - combine with `residue-quality-strategy` | `70.0`                         |
+| `residue-quality-strategy`   | Filter for residues with meaningful quality - combine with `residue-quality-cutoff`   | `qa_metric_local_above_cutoff` |
+| `root-path`                  | Path where data files will be written                                                 | `/opt/data/`                   |
+| `support-d-amino-acids`      | Map D-amino acids to their L-counterpart                                              | `true`                         |
 
 Configure by placing your `application.properties` on the classpath. All properties specific to this project must be
 prefixed with `strucmotif.`.
+
+Indexing is a resource-intensive process. Indexing 1.2 million entries takes about a day and a half using 8 cores. The 
+default values work well with 50 GB of heap. The resulting files (index, structure data, metadata) are about 200 GB in 
+size. During indexing temporary files are created and index files may be duplicated at some point. 500 GB of available 
+disk space are recommended to run the update from scratch.

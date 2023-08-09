@@ -15,6 +15,7 @@ public class PositionSpecificExchange {
     private final Set<ResidueType> residueTypes;
 
     /**
+     * Constructs a new position-specific exchange.
      * @see PositionSpecificExchange (LabelSelection, Set)
      * @param labelSelection selector of the referenced position
      * @param residueTypes all allowed types (must include original type if still allowed)

@@ -1,22 +1,19 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A query structure when searching for other structures.
@@ -24,11 +21,11 @@ import java.util.stream.Collectors;
 public class StructureQueryStructure implements QueryStructure {
     private final String structureIdentifier;
     private final Structure structure;
-    private final List<IndexSelection> indexSelections;
+    private final List<Integer> residueIndices;
     private final List<Map<LabelAtomId, float[]>> residues;
     private final List<ResiduePairOccurrence> residuePairOccurrences;
-    private final List<ResiduePairIdentifier> residuePairIdentifiers;
-    private final List<ResiduePairDescriptor> residuePairDescriptors;
+    private final List<Long> residuePairIdentifiers;
+    private final List<Integer> residuePairDescriptors;
     private final List<Integer> residueIndexSwaps;
 
     /**
@@ -53,33 +50,30 @@ public class StructureQueryStructure implements QueryStructure {
 
         this.residuePairOccurrences = connectedResiduePairs;
         this.residuePairIdentifiers = connectedResiduePairs.stream()
-                .map(ResiduePairOccurrence::getResidueIdentifier)
-                .collect(Collectors.toList());
+                .map(ResiduePairOccurrence::getResiduePairIdentifier)
+                .toList();
         this.residuePairDescriptors = connectedResiduePairs.stream()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
-                .collect(Collectors.toList());
+                .toList();
 
         // explode query into motifs and get entities by that - this provides the correct order of entities so that the
         // alignment routine does not have to care about finding correspondence
-        this.indexSelections = residuePairIdentifiers.stream()
-                .flatMap(ResiduePairIdentifier::indexSelections)
+        this.residueIndices = residuePairIdentifiers.stream()
+                .flatMap(i -> Stream.of(ResiduePairIdentifier.getResidueIndex1(i), ResiduePairIdentifier.getResidueIndex2(i)))
                 .distinct()
-                .collect(Collectors.toList());
+                .toList();
 
-        if (indexSelections.size() != originalResidues.size()) {
+        if (residueIndices.size() != originalResidues.size()) {
             // this indicates that fewer residues are present in the result than specified by the query
             throw new IllegalQueryDefinitionException("Query violates distance threshold");
         }
 
-        List<IndexSelection> originalIndexSelections = originalLabelSelections.stream()
-                .map(labelSelection -> {
-                    int residueIndex = structure.getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId());
-                    return new IndexSelection(labelSelection.getStructOperId(), residueIndex);
-                })
-                .collect(Collectors.toList());
-        this.residueIndexSwaps = originalIndexSelections.stream()
-                .map(indexSelections::indexOf)
-                .collect(Collectors.toList());
+        List<Integer> originalResidueIndices = originalLabelSelections.stream()
+                .map(structure::getResidueIndex)
+                .toList();
+        this.residueIndexSwaps = originalResidueIndices.stream()
+                .map(residueIndices::indexOf)
+                .toList();
         this.residues = originalResidues;
     }
 
@@ -91,33 +85,18 @@ public class StructureQueryStructure implements QueryStructure {
      * @return a filtered collection of residue pair occurrences
      */
     private List<ResiduePairOccurrence> getPathOfConnectedResiduePairs(List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
-        Map<IndexSelection, Integer> exchangeCounts = residuePairOccurrences.stream()
-                .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::indexSelections)
-                .distinct()
-                .collect(Collectors.toMap(Function.identity(), i -> exchangeCount(i, exchanges)));
-        Map<IndexSelection, Long> connectionCounts = residuePairOccurrences.stream()
-                .map(ResiduePairOccurrence::getResidueIdentifier)
-                .flatMap(ResiduePairIdentifier::indexSelections)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<ResiduePairOccurrence> sorted = ResiduePairOccurrence.sort(residuePairOccurrences);
 
-        List<ResiduePairOccurrence> sparse = new ArrayList<>();
-        List<ResiduePairOccurrence> sorted = residuePairOccurrences.stream()
-                // have pairs with many exchanges last (as they are expensive to evaluate)
-                .sorted(Comparator.comparingInt((ResiduePairOccurrence o) -> exchangeCounts.get(o.getResidueIdentifier().getIndexSelection1()) + exchangeCounts.get(o.getResidueIdentifier().getIndexSelection2()))
-                        // move pairs with many connections to the front
-                        .thenComparing((ResiduePairOccurrence o) -> connectionCounts.get(o.getResidueIdentifier().getIndexSelection1()) + connectionCounts.get(o.getResidueIdentifier().getIndexSelection2())))
-                .collect(Collectors.toList());
         // assign 'random' word as start
+        List<ResiduePairOccurrence> sparse = new ArrayList<>();
         sparse.add(sorted.remove(0));
 
         while (!sorted.isEmpty()) {
             for (int i = 0; i < sorted.size(); i++) {
                 ResiduePairOccurrence candidateResiduePair = sorted.get(i);
-                ResiduePairIdentifier candidateIdentifier = candidateResiduePair.getResidueIdentifier();
-                if (sparse.stream()
-                        // check for overlap with already accepted word
-                        .anyMatch(sortedResiduePair -> match(sortedResiduePair.getResidueIdentifier(), candidateIdentifier))) {
+                long candidateIdentifier = candidateResiduePair.getResiduePairIdentifier();
+                // check for overlap with already accepted word
+                if (sparse.stream().anyMatch(sortedResiduePair -> match(sortedResiduePair.getResiduePairIdentifier(), candidateIdentifier))) {
                     sparse.add(sorted.remove(i));
                     break;
                 }
@@ -127,24 +106,18 @@ public class StructureQueryStructure implements QueryStructure {
         return sparse;
     }
 
-    private int exchangeCount(IndexSelection indexSelection, Map<LabelSelection, Set<ResidueType>> exchanges) {
-        LabelSelection l = structure.getLabelSelection(indexSelection.getIndex());
-        LabelSelection labelSelection = new LabelSelection(l.getLabelAsymId(), indexSelection.getStructOperId(), l.getLabelSeqId());
-
-        return (exchanges.containsKey(labelSelection) ? exchanges.get(labelSelection).size() : 0);
-    }
-
     /**
      * Check if two identifiers reference an overlapping index selection.
      * @param sortedWordResiduePairIdentifier reference
      * @param candidateIdentifier candidate
      * @return true if describing an overlapping selection
      */
-    private boolean match(ResiduePairIdentifier sortedWordResiduePairIdentifier, ResiduePairIdentifier candidateIdentifier) {
-        return sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection1()) ||
-                sortedWordResiduePairIdentifier.getIndexSelection1().equals(candidateIdentifier.getIndexSelection2()) ||
-                sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection1()) ||
-                sortedWordResiduePairIdentifier.getIndexSelection2().equals(candidateIdentifier.getIndexSelection2());
+    private boolean match(long sortedWordResiduePairIdentifier, long candidateIdentifier) {
+        int r11 = ResiduePairIdentifier.getResidueIndex1(sortedWordResiduePairIdentifier);
+        int r12 = ResiduePairIdentifier.getResidueIndex2(sortedWordResiduePairIdentifier);
+        int r21 = ResiduePairIdentifier.getResidueIndex1(candidateIdentifier);
+        int r22 = ResiduePairIdentifier.getResidueIndex2(candidateIdentifier);
+        return r11 == r21 || r11 == r22 || r12 == r21 || r12 == r22;
     }
 
     @Override
@@ -169,7 +142,7 @@ public class StructureQueryStructure implements QueryStructure {
      * All word identifiers in this query structure.
      * @return a collection of word identifiers
      */
-    public List<ResiduePairIdentifier> getResiduePairIdentifiers() {
+    public List<Long> getResiduePairIdentifiers() {
         return residuePairIdentifiers;
     }
 
@@ -177,7 +150,7 @@ public class StructureQueryStructure implements QueryStructure {
      * All word descriptors in this query structure.
      * @return a collection of word descriptors
      */
-    public List<ResiduePairDescriptor> getResiduePairDescriptors() {
+    public List<Integer> getResiduePairDescriptors() {
         return residuePairDescriptors;
     }
 
@@ -191,10 +164,10 @@ public class StructureQueryStructure implements QueryStructure {
 
     /**
      * All selections of this query structure.
-     * @return a collection of IndexSelections
+     * @return a collection of residue indices
      */
-    public List<IndexSelection> getIndexSelections() {
-        return indexSelections;
+    public List<Integer> getResidueIndices() {
+        return residueIndices;
     }
 
     /**

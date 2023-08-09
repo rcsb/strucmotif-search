@@ -11,9 +11,9 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 
 import java.util.List;
 import java.util.Map;
@@ -31,8 +31,8 @@ class KruskalMotifPrunerTest {
     @BeforeEach
     public void init() {
         this.strucmotifConfig = new StrucmotifConfig();
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        this.structureReader = new StructureReaderImpl(residueTypeResolver);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
+        this.structureReader = new DefaultStructureReader(residueTypeResolver);
         this.motifPruner = new KruskalMotifPruner();
     }
 
@@ -43,9 +43,10 @@ class KruskalMotifPrunerTest {
                 new LabelSelection("B", "1", 87), // D
                 new LabelSelection("C", "1", 47)); // S
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
+                .map(structure::getResidueIndex)
                 .map(structure::manifestResidue)
-                .collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
+                .toList();
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 
@@ -65,16 +66,16 @@ class KruskalMotifPrunerTest {
                         new LabelSelection("D", "1", 38), // I, D41
                         new LabelSelection("D", "1", 51)); // R, D54
         List<Map<LabelAtomId, float[]>> residues = labelSelections.stream()
+                .map(structure::getResidueIndex)
                 .map(structure::manifestResidue)
-                .collect(Collectors.toList());
-        ResidueGraph residueGraph = new ResidueGraph(structure, labelSelections, residues, strucmotifConfig);
+                .toList();
+        ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
         List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 
         assertEquals(3, motifOccurrences.size());
         assertTrue(motifOccurrences.stream()
                 .map(ResiduePairOccurrence::getResiduePairDescriptor)
-                // .peek(System.out::println)
                 .map(ResiduePairDescriptor::getBackboneDistance)
                 .mapToInt(DistanceType::getIntRepresentation)
                 // maximum alpha carbon distance is 7

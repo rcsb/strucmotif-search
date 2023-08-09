@@ -1,299 +1,197 @@
 package org.rcsb.strucmotif.domain.structure;
 
-import org.rcsb.strucmotif.domain.Transformation;
-
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * The structure object wraps categories of a mmCIF file and allows access via some utility methods.
+ * A structure describes an entry and navigates several flat data arrays. Access to information is residue-centric.
  */
-public class Structure {
-    private final String structureIdentifier;
-    private final String[] chainIds;
-    private final int[] chainOffsets;
-    private final short[] labelSeqId;
-    private final int chainCount;
-    private final int residueCount;
-    private final int atomCount;
-    private final int[] residueOffsets;
-    private final byte[] residueTypes;
-    private final byte[] labelAtomId;
-    private final short[] x;
-    private final short[] y;
-    private final short[] z;
-    private final String[] assemblyIds;
-    private final String[][] chainsReferencedByAssembly;
-    private final String[] transformationIds;
-    private final Transformation[] transformations;
-
+public interface Structure {
     /**
-     * Create a structure view.
-     * @param structureIdentifier the identifier
-     * @param chainIds registered chains
-     * @param chainOffsets residue indices where label_asym_id changes
-     * @param labelSeqId array of all label_seq_id
-     * @param residueOffsets the offset of each residue in the atom_site category
-     * @param residueTypes the type of each residue
-     * @param labelAtomId the type of each atom
-     * @param x the x coords of each atom
-     * @param y the y coords of each atom
-     * @param z the z coords of each atom
-     * @param assemblyIds all registered assemblies
-     * @param chainsReferencedByAssembly all chains that are associated to a certain assembly
-     * @param transformationIds all registered transformations
-     * @param transformations all transformations
-     */
-    public Structure(String structureIdentifier,
-                     String[] chainIds,
-                     int[] chainOffsets,
-                     short[] labelSeqId,
-                     int[] residueOffsets,
-                     byte[] residueTypes,
-                     byte[] labelAtomId,
-                     short[] x,
-                     short[] y,
-                     short[] z,
-                     String[] assemblyIds,
-                     String[][] chainsReferencedByAssembly,
-                     String[] transformationIds,
-                     Transformation[] transformations) {
-        this.structureIdentifier = structureIdentifier;
-        this.chainIds = chainIds;
-        this.chainOffsets = chainOffsets; // note, this array is actually 1 pos longer than the chainIds
-        this.labelSeqId = labelSeqId;
-        this.residueOffsets = residueOffsets;
-        this.residueTypes = residueTypes;
-        this.chainCount = chainIds.length;
-        this.residueCount = residueOffsets.length;
-        this.atomCount = labelAtomId.length;
-        this.labelAtomId = labelAtomId;
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.assemblyIds = assemblyIds;
-        this.chainsReferencedByAssembly = chainsReferencedByAssembly;
-        this.transformationIds = transformationIds;
-        this.transformations = transformations;
-    }
-
-    private int indexOf(String[] values, String v) {
-        Objects.requireNonNull(v);
-        for (int i = 0; i < values.length; i++) {
-            if (v.equals(values[i])) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    /**
-     * This structure's identifier.
+     * A unique key.
      * @return a String
      */
-    public String getStructureIdentifier() {
-        return structureIdentifier;
-    }
+    String getStructureIdentifier();
 
     /**
-     * Access to all unique (label_asym_id, label_seq_id) pairs that exist in this structure. This call is expensive and
-     * will traverse all internally registered chains and sequence positions and create a collection of associated
-     * LabelSelection instances.<p>
-     * Make sure to reuse the result returned by this call. Never call in a loop!
-     * @return a sorted list of all LabelSelection instances that exist for this structure
-     */
-    public List<LabelSelection> getLabelSelections() {
-        return IntStream.range(0, residueCount)
-                .mapToObj(this::getLabelSelection)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Look up the index of a residue.
-     * @param labelAsymId the chain-ID of the residue
-     * @param labelSeqId the sequence position of the residue
-     * @return the index of the residue
-     * @throws NoSuchElementException if the chain/residue cannot be found
-     */
-    public int getResidueIndex(String labelAsymId, int labelSeqId) {
-        int chainIndex = indexOf(chainIds, labelAsymId);
-        if (chainIndex == -1) {
-            throw new NoSuchElementException("Didn't find chain: " + labelAsymId);
-        }
-
-        int chainStart = chainOffsets[chainIndex];
-        int chainEnd = chainOffsets[chainIndex + 1];
-        // on the sub-array binary search works
-        int index = Arrays.binarySearch(this.labelSeqId, chainStart, chainEnd, (short) labelSeqId);
-        if (index < 0) {
-            throw new NoSuchElementException("Didn't find residue with label_seq_id " + labelSeqId + " in chain " + labelAsymId);
-        }
-        return index;
-    }
-
-    /**
-     * Retrieve the {@link LabelSelection} of a single residue, identified by its index.
-     * @param residueIndex the position
-     * @return a {@link LabelSelection}
-     */
-    public LabelSelection getLabelSelection(int residueIndex) {
-        int chainIndex = -1;
-        for (int i = 0; i < chainIds.length; i++) {
-            if (residueIndex >= chainOffsets[i] && residueIndex <= chainOffsets[i + 1]) {
-                chainIndex = i;
-            }
-        }
-
-        if (chainIndex == -1) {
-            throw new NoSuchElementException("Didn't find chain in '" + structureIdentifier + "' that contains residue index: " +
-                    residueIndex + " - Chain offsets: " + Arrays.toString(chainIds) + " -> " + Arrays.toString(chainOffsets) + "\n");
-        }
-
-        String labelAsymId = chainIds[chainIndex];
-        int labelSeqId = this.labelSeqId[residueIndex];
-        return new LabelSelection(labelAsymId, null, labelSeqId);
-    }
-
-    /**
-     * Count of all chains in the source CIF file.
+     * Number of chains in atom_site.
      * @return an int
      */
-    public int getChainCount() {
-        return chainCount;
-    }
+    int getModelledChainCount();
 
     /**
-     * Count of all residues in the source CIF file.
+     * Number of residues in atom_site.
      * @return an int
      */
-    public int getResidueCount() {
-        return residueCount;
-    }
+    int getModelledResidueCount();
 
     /**
-     * Count of all atoms/rows in the source CIF file.
+     * Number of atoms in atom_site.
      * @return an int
      */
-    public int getAtomCount() {
-        return atomCount;
-    }
+    int getModelledAtomCount();
 
     /**
-     * Reports the residue type/amino acid at a certain index.
-     * @param residueIndex the index of the residue
-     * @return a ResidueType instance
+     * Number of chains (including copies from assembly gen).
+     * @return an int
      */
-    public ResidueType getResidueType(int residueIndex) {
-        return ResidueType.values()[residueTypes[residueIndex]];
-    }
+    int getInstancedChainCount();
 
     /**
-     * Access to assembly information.
-     * @return Map of all assemblies [assemblyId, (label_asym_id x struct_oper_id)[]]
+     * Number of residues (including copies from assembly gen).
+     * @return an int
      */
-    public Map<String, String[]> getAssemblies() {
-        Map<String, String[]> assemblies  = new LinkedHashMap<>();
-        for (int i = 0; i < assemblyIds.length; i++) {
-            assemblies.put(assemblyIds[i], this.chainsReferencedByAssembly[i]);
-        }
-        return assemblies;
-    }
+    int getInstancedResidueCount();
+
+    /**
+     * Number of atoms (including copies from assembly gen).
+     * @return an int
+     */
+    int getInstancedAtomCount();
+
+    /**
+     * Traverse all modelled (i.e., the asymmetric unit) residues.
+     * @return an IntStream of all indices from atom_site
+     */
+    IntStream modelledResidueIndices();
+
+    /**
+     * Traverse all instanced (i.e., assembly-aware) residues.
+     * @return an IntStream of all indices, including copies from assembly gen
+     */
+    IntStream instancedResidueIndices();
+
+    /**
+     * Number of assemblies.
+     * @return an int
+     */
+    int getAssemblyCount();
+
+    /**
+     * Access to all assembly keys.
+     * @return flat array of all assembly identifiers
+     */
+    String[] getAssemblyIdentifiers();
+
+    /**
+     * All chains with the corresponding transformation that are associated with an assembly.
+     * @param assemblyIdentifier assembly key
+     * @return flat array with tuples of (label_asym_id, struct_oper_id)
+     */
+    String[] getReferencedChainInstances(String assemblyIdentifier);
+
+    /**
+     * Access to all transformation keys.
+     * @return flat array of all transformation identifiers
+     */
+    String[] getTransformationIdentifiers();
 
     /**
      * Access to all transformations.
-     * @return Map of transformations [struct_oper_id, Transformation]
+     * @return flat array of all transformation data in blocks of 16
      */
-    public Map<String, Transformation> getTransformations() {
-        Map<String, Transformation> transformations = new LinkedHashMap<>();
-        for (int i = 0; i < transformationIds.length; i++) {
-            transformations.put(transformationIds[i], this.transformations[i]);
-        }
-        return transformations;
-    }
+    float[] getTransformations();
 
     /**
-     * Access to a specific transformation.
-     * @param structOperIdentifier the struct_oper_id expression
-     * @return a Transformation object
+     * Access a specific transformation.
+     * @param transformationIdentifier the key
+     * @return a 16-value float array that contains this transform
      */
-    public Transformation getTransformation(String structOperIdentifier) {
-        int transformationIndex = indexOf(transformationIds, structOperIdentifier);
-        return transformations[transformationIndex];
-    }
+    float[] getTransformation(String transformationIdentifier);
 
     /**
-     * Manifest a residue by its LabelSelection.
-     * @param labelSelection the residue identifier
-     * @return a residue
+     * Reports the number of transformations.
+     * @return an int
      */
-    public Map<LabelAtomId, float[]> manifestResidue(LabelSelection labelSelection) {
-        return manifestResidue(getResidueIndex(labelSelection.getLabelAsymId(), labelSelection.getLabelSeqId()), labelSelection.getStructOperId());
-    }
+    int getTransformationCount();
+
+    // 'mapping' utils
 
     /**
-     * Manifest a collection of residues by their LabelSelection.
-     * @param labelSelections a collection of residue identifiers
-     * @return a collection of residues
+     * Map "public" residue information to an internal residue index. If multiple indices match these properties, then
+     * only the 1st one is returned.
+     * @param labelAsymId chain id
+     * @param structOperId transformation id
+     * @param labelSeqId sequence position
+     * @return an int
      */
-    public List<Map<LabelAtomId, float[]>> manifestResidues(List<LabelSelection> labelSelections) {
-        return labelSelections.stream()
-                .map(this::manifestResidue)
-                .collect(Collectors.toList());
-    }
+    int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId);
 
     /**
-     * Manifest a residue by its index.
-     * @param residueIndex the index of the residue
-     * @return a residue
+     * Map "public" residue information to an internal residue index.
+     * @param assemblyIdentifier assembly identifier
+     * @param labelAsymId chain id
+     * @param structOperId transformation id
+     * @param labelSeqId sequence position
+     * @return an int
      */
-    public Map<LabelAtomId, float[]> manifestResidue(int residueIndex) {
-        return manifestResidue(residueIndex, Transformation.DEFAULT_OPERATOR);
-    }
+    int getResidueIndex(String assemblyIdentifier, String labelAsymId, String structOperId, int labelSeqId);
 
     /**
-     * 'Manifests' a residue, i.e. extract all relevant atom_site rows and move coordinates of all atoms to a map. Atoms
-     * are identified by their label_comp_id, coordinates given as float[3]. The requested transformation will be
-     * applied to the coordinates.
-     * @param residueIndex the index of the residue
-     * @param structOperIdentifier the operator to apply to these coordinates
-     * @return a Map [label_atom_id, [x, y, z]]
+     * Map "public" residue information to an internal residue index. If multiple indices match these properties, then
+     * only the 1st one is returned.
+     * @param labelSelection tuple of (label_asym_id, struct_oper_id, label_seq_id)
+     * @return an int
      */
-    public Map<LabelAtomId, float[]> manifestResidue(int residueIndex, String structOperIdentifier) {
-        Map<LabelAtomId, float[]> out = new EnumMap<>(LabelAtomId.class);
-        int offsetStart = residueOffsets[residueIndex];
-        int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomId.length : residueOffsets[residueIndex + 1];
-        int transformationIndex = indexOf(transformationIds, structOperIdentifier);
-        Transformation transformation;
+    int getResidueIndex(LabelSelection labelSelection);
 
-        // happens e.g. for 7a3x, there assembly '1' references opers '2' and '3'
-        if (transformationIndex == -1) {
-            transformation = Transformation.IDENTITY_TRANSFORMATION;
-        } else {
-            transformation = transformations[transformationIndex];
-        }
+    /**
+     * Map "public" residue information to an internal residue index. This function is assembly-aware and won't just
+     * return the 1st index matching these properties.
+     * @param assemblyIdentifier assembly identifier
+     * @param labelSelection tuple of (label_asym_id, struct_oper_id, label_seq_id)
+     * @return an int
+     */
+    int getResidueIndex(String assemblyIdentifier, LabelSelection labelSelection);
 
-        for (int i = offsetStart; i < offsetEnd; i++) {
-            LabelAtomId labelAtomId = LabelAtomId.values()[this.labelAtomId[i]];
-            // ignore 'non-standard' atoms
-            if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
-                continue;
-            }
+    /**
+     * Map an internal residue index to "public" residue information.
+     * @param residueIndex an int
+     * @return tuple of (label_asym_id, struct_oper_id, label_seq_id)
+     */
+    LabelSelection getLabelSelection(int residueIndex);
 
-            float[] v = new float[] {
-                    x[i] * 0.1f,
-                    y[i] * 0.1f,
-                    z[i] * 0.1f
-            };
-            transformation.transform(v, v);
-            out.put(labelAtomId, v);
-        }
-        return out;
-    }
+    // data access
+
+    /**
+     * Access the assembly identifier of a residue.
+     * @param residueIndex residue address
+     * @return its assembly identifier
+     */
+    String getAssemblyIdentifier(int residueIndex);
+
+    /**
+     * Access the label_seq_id of a residue.
+     * @param residueIndex residue address
+     * @return its label_seq_id
+     */
+    int getLabelSeqId(int residueIndex);
+
+    /**
+     * Access the three-letter-code of a residue.
+     * @param residueIndex residue address
+     * @return its label_comp_id (but as ResidueType instance)
+     */
+    ResidueType getResidueType(int residueIndex);
+
+    /**
+     * Access chain identifier of a residue.
+     * @param residueIndex residue address
+     * @return its label_asym_id
+     */
+    String getLabelAsymId(int residueIndex);
+
+    /**
+     * Access the transformation identifier of a residue.
+     * @param residueIndex residue address
+     * @return its transformation identifier
+     */
+    String getTransformationIdentifier(int residueIndex);
+
+    /**
+     * Access coordinates of a residue in usable form.
+     * @param residueIndex residue address
+     * @return a map with label_atom_id as key and its position as Vec3
+     */
+    Map<LabelAtomId, float[]> manifestResidue(int residueIndex); // must use float here to accommodate transformations
 }

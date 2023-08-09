@@ -10,7 +10,7 @@ import java.util.Objects;
 /**
  * Partitions a collection into (roughly) equal-sized chunks. Will shuffle the original collection.
  *
- * code from: https://e.printstacktrace.blog/divide-a-list-to-lists-of-n-size-in-Java-8/
+ * code from: <a href="https://e.printstacktrace.blog/divide-a-list-to-lists-of-n-size-in-Java-8/">https://e.printstacktrace.blog/divide-a-list-to-lists-of-n-size-in-Java-8/</a>
  * @param <T> type of the original collection
  */
 public class Partition<T> extends AbstractList<List<T>> {

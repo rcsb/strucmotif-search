@@ -6,6 +6,10 @@ Unreleased
 ### Added
 - configurable support for ambiguous amino acids (GLX, ASX)
 - now indexes all residue pairs within an assembly (overhead is negligible next to CSMs)
+- configurable behavior upon missing assembly or revision information in source mmCIF
+- residue graph can now be set to index deposited coordinates, residues/chains in contact, or plain everything
+- option to time out long-running queries on a per-query basis
+- added fine-grained exception types in `QueryExecutionException` and `QueryTimeoutException`
 
 ### Bug fix
 - more user-friendly error messages upon missing directory/permissions
@@ -15,7 +19,20 @@ Unreleased
 
 ### Breaking changes
 - switch to Java 17
+- changes to binary format of inverted index
+  - consolidated pairs of index & struct_oper_id into a single int (i.e., `IndexSelection` was removed)
+  - dropped MessagePack backend of inverted index
+  - removed dedicated bucket and identifier impls that differentiated between runtime and update context
+- changes to structure information written to BinaryCIF files
+  - moved assembly information from the state file to the structure file
+  - removed dedicated `AssemblyInformationProvider`
+- removed the concept of update chunks, now all data gets dumped to disk and is compacted according to `commit-interval`
 - rename `MotifSearchQuery` -> `MotifQuery` (to align with `StructureQuery`)
+- coordinate precision is not configurable anymore (now always 1 decimal place)
+- renames default/standard implementations from `ServiceImpl` to `DefaultService`
+- removed global `ThreadPool`, instead each query has its own thread pool, update to use default thread pool
+- replaced `Transformation` by a flat `float[]`, removed `AlignmentResultImpl`
+- migrate to records where sensible (getters of such classes have been renamed to their record equivalent without the `get` prefix)
 
 strucmotif-search 0.18.1
 -------------

@@ -41,6 +41,11 @@ public enum PolymerType {
      */
     UNKNOWN_POLYMER(Collections.emptySet());
 
+    /**
+     * Cached values of this enum. Don't manipulate this array or things will burn.
+     */
+    public static final PolymerType[] values = values();
+
     private final Set<String> typeNames;
 
     PolymerType(Set<String> typeNames) {
@@ -55,7 +60,7 @@ public enum PolymerType {
         return typeNames;
     }
 
-    private static final Map<String, PolymerType> MAPPING = Arrays.stream(PolymerType.values())
+    private static final Map<String, PolymerType> MAPPING = Arrays.stream(PolymerType.values)
             .flatMap(t -> t.getTypeNames().stream().map(n -> Map.entry(n, t)))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 

@@ -2,17 +2,33 @@ package org.rcsb.strucmotif.io.codec;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import com.google.gson.reflect.TypeToken;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * Text-based implementation of a codec serializer. Useful for debugging.
  */
-public class JsonCodec extends AbstractBucketCodec {
+public class JsonCodec implements BucketCodec {
+    /**
+     * Tag of the structure index array.
+     */
+    public static final String STRUCTURE_INDICES = "structure_indices";
+    /**
+     * Tag of the position offset array.
+     */
+    public static final String POSITION_OFFSETS = "position_offsets";
+    /**
+     * Tag of the identifier data array.
+     */
+    public static final String IDENTIFIER_DATA = "identifier_data";
+    private final Type mapType;
     private final Gson gson;
 
     /**
@@ -20,16 +36,13 @@ public class JsonCodec extends AbstractBucketCodec {
      */
     public JsonCodec() {
         this.gson = new GsonBuilder().setPrettyPrinting().create();
+        this.mapType = new TypeToken<Map<String, int[]>>() {}.getType();
     }
 
     @Override
-    public InvertedIndexBucket decode(ByteBuffer byteBuffer) {
-        ArrayBucket arrayBucket = gson.fromJson(new InputStreamReader(new ByteArrayInputStream(toByteArray(byteBuffer))), ArrayBucket.class);
-        return new InvertedIndexBucket(arrayBucket.getStructureIndices(),
-                arrayBucket.getPositionOffsets(),
-                arrayBucket.getPositionData(),
-                arrayBucket.getOperatorIndices(),
-                arrayBucket.getOperatorData());
+    public ArrayBucket decode(ByteBuffer byteBuffer) {
+        Map<String, int[]> map = gson.fromJson(new InputStreamReader(new ByteArrayInputStream(toByteArray(byteBuffer))), mapType);
+        return new ArrayBucket(map.get(STRUCTURE_INDICES), map.get(POSITION_OFFSETS), map.get(IDENTIFIER_DATA));
     }
 
     private byte[] toByteArray(ByteBuffer byteBuffer) {
@@ -40,9 +53,9 @@ public class JsonCodec extends AbstractBucketCodec {
     }
 
     @Override
-    public ByteBuffer encode(int[] structureIndices, int[] positionOffsets, int[] positionData, int[] operatorIndices, String[] operatorData) {
-        ArrayBucket arrayBucket = new ArrayBucket(structureIndices, positionOffsets, positionData, operatorIndices, operatorData);
-        byte[] bytes = gson.toJson(arrayBucket).getBytes(StandardCharsets.UTF_8);
+    public ByteBuffer encode(ArrayBucket arrayBucket) {
+        Map<String, int[]> map = Map.of(STRUCTURE_INDICES, arrayBucket.getStructureIndexArray(), POSITION_OFFSETS, arrayBucket.getPositionOffsetArray(), IDENTIFIER_DATA, arrayBucket.getIdentifierDataArray());
+        byte[] bytes = gson.toJson(map).getBytes(StandardCharsets.UTF_8);
         return ByteBuffer.wrap(bytes);
     }
 }

@@ -133,43 +133,12 @@ public enum DistanceType {
     /**
      * [30.5, 31.5) A.
      */
-    D31,
+    D31; // this is the hard-limit for the distance between pairs
+
     /**
-     * [31.5, 32.5) A.
+     * Cached values of this enum. Don't manipulate this array or things will burn.
      */
-    D32,
-    /**
-     * [32.5, 33.5) A.
-     */
-    D33,
-    /**
-     * [33.5, 34.5) A.
-     */
-    D34,
-    /**
-     * [34.5, 35.5) A.
-     */
-    D35,
-    /**
-     * [35.5, 36.5) A.
-     */
-    D36,
-    /**
-     * [36.5, 37.5) A.
-     */
-    D37,
-    /**
-     * [37.5, 38.5) A.
-     */
-    D38,
-    /**
-     * [38.5, 39.5) A.
-     */
-    D39,
-    /**
-     * [39.5, 40.5) A.
-     */
-    D40; // this is the hard-limit for the distance between pairs
+    public static final DistanceType[] values = values();
 
     /**
      * Width of a distance bin.
@@ -193,10 +162,10 @@ public enum DistanceType {
         int i = Math.round(distance / BIN_SIZE);
         if (i < 0) {
             return DistanceType.D0;
-        } else if (i >= DistanceType.values().length) {
-            return DistanceType.D40;
+        } else if (i >= values.length) {
+            return DistanceType.D31;
         } else {
-            return DistanceType.values()[i];
+            return values[i];
         }
     }
 
@@ -206,6 +175,6 @@ public enum DistanceType {
      * @return the corresponding bin
      */
     public static DistanceType ofIntRepresentation(int ordinal) {
-        return DistanceType.values()[Algebra.capToInterval(0, ordinal, values().length)];
+        return values[Algebra.capToInterval(0, ordinal, values.length)];
     }
 }

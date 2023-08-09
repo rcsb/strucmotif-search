@@ -11,6 +11,12 @@ public class Timer {
     private boolean stopped;
 
     /**
+     * Default constructor.
+     */
+    public Timer() {
+    }
+
+    /**
      * Start the time.
      */
     public void start() {

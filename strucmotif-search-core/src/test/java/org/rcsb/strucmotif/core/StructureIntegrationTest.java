@@ -1,8 +1,6 @@
 package org.rcsb.strucmotif.core;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.rcsb.ffindex.FileBundleIO;
 import org.rcsb.ffindex.ReadableFileBundle;
@@ -12,9 +10,8 @@ import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.align.AlignmentResult;
 import org.rcsb.strucmotif.domain.align.AtomPairingScheme;
-import org.rcsb.strucmotif.domain.bucket.InvertedIndexBucket;
+import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
 import org.rcsb.strucmotif.domain.query.ResultsContentType;
-import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
 import org.rcsb.strucmotif.domain.query.StructureQuery;
 import org.rcsb.strucmotif.domain.query.StructureContextBuilder;
 import org.rcsb.strucmotif.domain.result.StructureHit;
@@ -24,18 +21,16 @@ import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
-import org.rcsb.strucmotif.io.AssemblyInformationProvider;
-import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.InvertedIndex;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
-import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.InvertedIndexImpl;
-import org.rcsb.strucmotif.io.StateRepositoryImpl;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
+import org.rcsb.strucmotif.io.DefaultInvertedIndex;
+import org.rcsb.strucmotif.io.DefaultStateRepository;
 import org.rcsb.strucmotif.io.codec.ColferCodec;
 
 import java.io.BufferedReader;
@@ -58,25 +53,25 @@ import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 class StructureIntegrationTest {
     private StrucmotifConfig strucmotifConfig;
     private StructureReader structureReader;
+    private ReadableFileBundle fileBundle;
     private StructureContextBuilder contextBuilder;
 
     @BeforeEach
     public void init() throws IOException {
         this.strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
-        this.structureReader = new StructureReaderImpl(new ResidueTypeResolverImpl(strucmotifConfig));
+        this.structureReader = new DefaultStructureReader(new DefaultResidueTypeResolver(strucmotifConfig));
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
-        ReadableFileBundle fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
+        this.fileBundle = FileBundleIO.openBundle(Helpers.getResourceAsPath("index.data"), Helpers.getResourceAsPath("index.ffindex")).inReadOnlyMode();
         ColferCodec bucketCodec = new ColferCodec();
-        InvertedIndex invertedIndex = new InvertedIndexImpl(threadPool, strucmotifConfig) {
+        InvertedIndex invertedIndex = new DefaultInvertedIndex(strucmotifConfig) {
             @Override
-            public InvertedIndexBucket select(ResiduePairDescriptor residuePairDescriptor) {
-                String filename = residuePairDescriptor.toString().substring(0, 2) + "/" + residuePairDescriptor + ".colf";
+            public ArrayBucket select(int residuePairDescriptor) {
+                String filename = residuePairDescriptor + ".colf";
                 if (!fileBundle.containsFile(filename)) {
-                    return InvertedIndexBucket.EMPTY_BUCKET;
+                    return ArrayBucket.EMPTY_BUCKET;
                 }
 
                 try {
@@ -94,7 +89,7 @@ class StructureIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepository stateRepository = new StateRepositoryImpl(strucmotifConfig) {
+        StateRepository stateRepository = new DefaultStateRepository(strucmotifConfig) {
             @Override
             public Set<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -106,11 +101,15 @@ class StructureIntegrationTest {
             }
         };
 
-        StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
-        StrucmotifRuntime strucmotifRuntime = new StrucmotifRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
+        StructureIndexProvider structureIndexProvider = new DefaultStructureIndexProvider(stateRepository);
+        TargetAssembler targetAssembler = new DefaultTargetAssembler(structureIndexProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, strucmotifConfig, alignmentService);
         this.contextBuilder = new StructureContextBuilder(structureIndexProvider, structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig, invertedIndex);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        fileBundle.close();
     }
 
     @Test
@@ -168,39 +167,39 @@ class StructureIntegrationTest {
 
         StructureSearchResult response = buildParameters.buildContext().run();
 
-        assertEquals(422, response.getHits().size());
+        assertEquals(798, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()
-                .map(StructureHit::getResidueTypes)
+                .map(StructureHit::residueTypes)
                 .map(a -> a.stream().map(ResidueType::getInternalCode).collect(Collectors.joining("")))
                 .filter(identifiers -> !"DEKEH".equals(identifiers))
-                .collect(Collectors.toList());
+                .toList();
 
         assertFalse(observedExchanges.isEmpty(), "didn't observe exchange");
 
         List<String> observedAssemblies = response.getHits()
                 .stream()
-                .map(hit -> hit.getStructureIdentifier() + "_" + hit.getAssemblyIdentifier())
+                .map(hit -> hit.structureIdentifier() + "_" + hit.assemblyIdentifier())
                 .filter(assemblyIdentifier -> !assemblyIdentifier.contains("_1"))
-                .collect(Collectors.toList());
+                .toList();
 
         assertFalse(observedAssemblies.isEmpty(), "didn't observe assemblies");
 
         List<List<Integer>> swaps = response.getHits()
                 .stream()
-                .map(hit -> hit.getLabelSelections().stream().map(LabelSelection::getLabelSeqId).collect(Collectors.toList()))
+                .map(hit -> hit.labelSelections().stream().map(LabelSelection::labelSeqId).toList())
                 // check if some elements are unordered
                 .filter(list -> IntStream.range(1, list.size())
                         .map(index -> list.get(index - 1).compareTo(list.get(index)))
                         .anyMatch(order -> order > 0))
-                .collect(Collectors.toList());
+                .toList();
 
         assertFalse(swaps.isEmpty(), "didn't observe swaps");
 
         // print all results
         assertTrue(response.getHits().stream()
-                .map(StructureHit::getRootMeanSquareDeviation)
+                .map(StructureHit::rmsd)
                 .anyMatch(s -> s < 0.5), "no low-RMSD hits observed");
     }
 
@@ -211,11 +210,11 @@ class StructureIntegrationTest {
     @Test
     void whenSearchingForModifiedAminoAcids_thenResolvedCorrectly() {
         Structure forwardStructure = structureReader.readFromInputStream(getOriginalBcif("6tne"));
-        List<LabelSelection> forwardLabelSelections = List.of(new LabelSelection("A", "1", 21), // E
-                new LabelSelection("A", "1", 22), // D
-                new LabelSelection("A", "1", 67), // D
-//                new LabelSelection("A", "1", 95), // S // TODO would be nice to support this natively somehow, CB distance is 2
-                new LabelSelection("A", "1", 117)); // K
+        List<LabelSelection> forwardLabelSelections = List.of(new LabelSelection("A", "1", 7), // E
+                new LabelSelection("A", "1", 8), // D
+                new LabelSelection("A", "1", 53), // D
+//                new LabelSelection("A", "1", 81), // S // TODO would be nice to support this natively somehow, CB distance is 2
+                new LabelSelection("A", "1", 103)); // K
 
         Structure backwardStructure = structureReader.readFromInputStream(getOriginalBcif("1zdm"));
         List<LabelSelection> backwardLabelSelections = List.of(new LabelSelection("A", "1", 12), // D
@@ -226,19 +225,19 @@ class StructureIntegrationTest {
 
         Collection<String> structures = Set.of("6TNE", "1ZDM");
 
-        List<Map<LabelAtomId, float[]>> forwardResidues = forwardStructure.manifestResidues(forwardLabelSelections);
-        List<Map<LabelAtomId, float[]>> backwardResidues = backwardStructure.manifestResidues(backwardLabelSelections);
+        List<Map<LabelAtomId, float[]>> forwardResidues = forwardLabelSelections.stream().map(forwardStructure::getResidueIndex).map(forwardStructure::manifestResidue).toList();
+        List<Map<LabelAtomId, float[]>> backwardResidues = backwardLabelSelections.stream().map(backwardStructure::getResidueIndex).map(backwardStructure::manifestResidue).toList();
         AlignmentResult align = new QuaternionAlignmentService().align(forwardResidues, backwardResidues, AtomPairingScheme.ALL);
-        assertEquals(0.57, align.getRootMeanSquareDeviation(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
+        assertEquals(0.57, align.rmsd(), Helpers.RELAXED_DELTA, "the motifs should align reasonable well");
 
         StructureSearchResult forwardResult = contextBuilder.defineByStructureAndSelection(forwardStructure, forwardLabelSelections)
                 .buildParameters()
-                .addPositionSpecificExchange(new LabelSelection("A", "1", 21), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
+                .addPositionSpecificExchange(new LabelSelection("A", "1", 7), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID))
                 .allowedStructures(structures)
                 .buildContext()
                 .run();
         assertEquals(3, forwardResult.getHits().size());
-        assertTrue(forwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("1ZDM")));
+        assertTrue(forwardResult.getHits().stream().anyMatch(h -> h.structureIdentifier().equals("1ZDM")));
 
         StructureSearchResult backwardResult = contextBuilder.defineByStructureAndSelection(backwardStructure, backwardLabelSelections)
                 .buildParameters()
@@ -246,9 +245,9 @@ class StructureIntegrationTest {
                 .allowedStructures(structures)
                 .buildContext()
                 .run();
-        assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.getStructureIdentifier() + h.getLabelSelections()).distinct().count(), "there are duplicate hits");
+        assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.structureIdentifier() + h.labelSelections()).distinct().count(), "there are duplicate hits");
         assertEquals(3, backwardResult.getHits().size());
-        assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.getStructureIdentifier().equals("6TNE")));
+        assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.structureIdentifier().equals("6TNE")));
     }
 
     /**

@@ -20,7 +20,7 @@ public class UpdateItem {
     }
 
     /**
-     *
+     * Update by identifier and external URL.
      * @param structureIdentifier the unique ID this item will have
      * @param url data source pointing to non-PDB structures, either by URL to some external resource or to a local file
      */

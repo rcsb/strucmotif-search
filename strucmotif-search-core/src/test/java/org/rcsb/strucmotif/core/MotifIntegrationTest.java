@@ -13,20 +13,19 @@ import org.rcsb.strucmotif.domain.query.MotifContextBuilder;
 import org.rcsb.strucmotif.domain.result.MotifHit;
 import org.rcsb.strucmotif.domain.result.MotifSearchResult;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
+import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.domain.structure.StructureInformation;
-import org.rcsb.strucmotif.io.AssemblyInformationProvider;
-import org.rcsb.strucmotif.io.AssemblyInformationProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.ResidueTypeResolver;
-import org.rcsb.strucmotif.io.ResidueTypeResolverImpl;
+import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StateRepository;
-import org.rcsb.strucmotif.io.StateRepositoryImpl;
+import org.rcsb.strucmotif.io.DefaultStateRepository;
 import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
-import org.rcsb.strucmotif.io.StructureIndexProviderImpl;
+import org.rcsb.strucmotif.io.DefaultStructureIndexProvider;
 import org.rcsb.strucmotif.io.StructureReader;
-import org.rcsb.strucmotif.io.StructureReaderImpl;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -51,11 +50,10 @@ class MotifIntegrationTest {
     @BeforeEach
     public void init() {
         StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
-        ThreadPool threadPool = new ThreadPoolImpl(strucmotifConfig);
         NoOperationMotifPruner noOperationMotifPruner = new NoOperationMotifPruner();
         KruskalMotifPruner kruskalMotifPruner = new KruskalMotifPruner();
-        ResidueTypeResolver residueTypeResolver = new ResidueTypeResolverImpl(strucmotifConfig);
-        this.structureReader = new StructureReaderImpl(residueTypeResolver);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
+        this.structureReader = new DefaultStructureReader(residueTypeResolver);
         AlignmentService alignmentService = new QuaternionAlignmentService();
 
         StructureDataProvider structureDataProvider = Mockito.mock(StructureDataProvider.class);
@@ -65,7 +63,7 @@ class MotifIntegrationTest {
             return structureReader.readFromInputStream(inputStream);
         });
 
-        StateRepository stateRepository = new StateRepositoryImpl(strucmotifConfig) {
+        StateRepository stateRepository = new DefaultStateRepository(strucmotifConfig) {
             @Override
             public Set<StructureInformation> selectKnown() {
                 InputStream inputStream = Helpers.getResource("known.list");
@@ -77,11 +75,10 @@ class MotifIntegrationTest {
             }
         };
 
-        StructureIndexProvider structureIndexProvider = new StructureIndexProviderImpl(stateRepository);
-        TargetAssembler targetAssembler = new TargetAssemblerImpl(threadPool, structureIndexProvider);
-        AssemblyInformationProvider assemblyInformationProvider = new AssemblyInformationProviderImpl(stateRepository, strucmotifConfig);
-        StrucmotifRuntime strucmotifRuntime = new StrucmotifRuntimeImpl(targetAssembler, threadPool, strucmotifConfig, alignmentService, assemblyInformationProvider);
-        this.motifs = new MotifDefinitionRegistryImpl(structureDataProvider)
+        StructureIndexProvider structureIndexProvider = new DefaultStructureIndexProvider(stateRepository);
+        TargetAssembler targetAssembler = new DefaultTargetAssembler(structureIndexProvider);
+        StrucmotifRuntime strucmotifRuntime = new DefaultStrucmotifRuntime(targetAssembler, strucmotifConfig, alignmentService);
+        this.motifs = new DefaultMotifDefinitionRegistry(structureDataProvider)
                 .enrichMotifDefinitions(this::loadMotif)
                 .stream()
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
@@ -92,7 +89,11 @@ class MotifIntegrationTest {
     private EnrichedMotifDefinition loadMotif(MotifDefinition motifDefinition) {
         try {
             Structure structure = structureReader.readFromInputStream(getOriginalBcif(motifDefinition.getStructureIdentifier()));
-            List<Map<LabelAtomId, float[]>> residues = structure.manifestResidues(motifDefinition.getLabelSelections());
+            List<Map<LabelAtomId, float[]>> residues = motifDefinition.getLabelSelections()
+                    .stream()
+                    .map(structure::getResidueIndex)
+                    .map(structure::manifestResidue)
+                    .toList();
             return new EnrichedMotifDefinition(motifDefinition, structure, residues);
         } catch (UncheckedIOException e) {
             throw new RuntimeException("Structure data for all motifs used during tests must be stored in test/resources/orig/ - missing: " + motifDefinition.getStructureIdentifier(), e);
@@ -109,12 +110,21 @@ class MotifIntegrationTest {
                 .buildContext()
                 .run();
 
-        assertTrue(result.getHits().size() > 0);
-        MotifHit actual = result.getHits().get(0);
-        MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
-        assertEquals(expected.getMotifIdentifier(), actual.getMotifIdentifier());
-        assertEquals(expected.getLabelSelections(), actual.getLabelSelections());
-        assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.getResidueTypes());
-        assertTrue(actual.getRootMeanSquareDeviation() < 0.001);
+        assertEquals(8, result.getHits().size());
+        for (MotifHit actual : result.getHits()) {
+            MotifDefinition expected = MotifDefinition.KDEEH_EXCHANGES;
+            assertEquals(expected.getMotifIdentifier(), actual.motifIdentifier());
+            assertShallowEquals(expected.getLabelSelections(), actual.labelSelections());
+            assertEquals(1, actual.labelSelections().stream().map(LabelSelection::structOperId).distinct().count());
+            assertEquals(List.of(ResidueType.LYSINE, ResidueType.ASPARTIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.GLUTAMIC_ACID, ResidueType.HISTIDINE), actual.residueTypes());
+            assertTrue(actual.rmsd() < 0.001);
+        }
+    }
+
+    private void assertShallowEquals(List<LabelSelection> expected, List<LabelSelection> actual) {
+        for (int i = 0; i < expected.size(); i++) {
+            assertEquals(expected.get(i).labelAsymId(), actual.get(i).labelAsymId());
+            assertEquals(expected.get(i).labelSeqId(), actual.get(i).labelSeqId());
+        }
     }
 }

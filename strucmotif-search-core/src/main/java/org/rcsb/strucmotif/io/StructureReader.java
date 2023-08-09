@@ -9,6 +9,11 @@ import java.io.InputStream;
  */
 public interface StructureReader {
     /**
+     * Neutral transform.
+     */
+    float[] IDENTITY_TRANSFORM = new float[] { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+
+    /**
      * Read from a InputStream and parse the corresponding Structure.
      * @param inputStream the source
      * @return the parsed Structure instance

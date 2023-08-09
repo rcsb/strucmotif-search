@@ -1,57 +1,50 @@
 package org.rcsb.strucmotif.domain.motif;
 
-import org.rcsb.strucmotif.domain.structure.IndexSelection;
-import org.rcsb.strucmotif.domain.structure.Selection;
-
-import java.util.stream.Stream;
-
 /**
- * Residue pair identifiers combine the {@link Selection} of each residue making up this pair.
+ * A residue pair descriptor is a long that combines 2 residue indices. The upper 32 bit (A) are the 1st value, the
+ * lower 32 bit (B) contain the 2nd value.
+ *
+ * <pre>AAAAAAAA AAAAAAAA AAAAAAAA AAAAAAAA BBBBBBBB BBBBBBBB BBBBBBBB BBBBBBBB</pre>
  */
-public interface ResiduePairIdentifier {
-    /**
-     * The index of the first residue.
-     * @return an int
-     */
-    int getIndex1();
+public class ResiduePairIdentifier {
+    private ResiduePairIdentifier() {
+        // deny
+    }
 
     /**
-     * The operator expression applied to the first residue.
-     * @return a String
+     * Encode (residueIndex1, residueIndex2) as long.
+     * @param residueIndex1 1st index
+     * @param residueIndex2 2nd index
+     * @return both represented as a single long
      */
-    String getStructOperId1();
+    public static long encodeIdentifier(int residueIndex1, int residueIndex2) {
+        return (long) residueIndex1 << 32 | residueIndex2;
+    }
 
     /**
-     * The index of the second residue.
-     * @return an int
+     * Extract the 1st index from a long identifier.
+     * @param residuePairIdentifier long
+     * @return 1st index as int
      */
-    int getIndex2();
+    public static int getResidueIndex1(long residuePairIdentifier) {
+        return (int) (residuePairIdentifier >>> 32);
+    }
 
     /**
-     * The operator expression applied to the second residue.
-     * @return a String
+     * Extract the 2nd index from a long identifier.
+     * @param residuePairIdentifier long
+     * @return 2nd index as int
      */
-    String getStructOperId2();
+    public static int getResidueIndex2(long residuePairIdentifier) {
+        return (int) residuePairIdentifier;
+    }
 
     /**
-     * The complex IndexSelection of the first residue. If possible, use low-level methods that avoid object creation if
-     * data comes from the inverted index.
-     * @return an {@link IndexSelection}
+     * Pretty-print a long identifier.
+     * @param residuePairIdentifier long
+     * @return human-readable String
      */
-    IndexSelection getIndexSelection1();
-
-    /**
-     * The complex IndexSelection of the second residue. If possible, use low-level methods that avoid object creation
-     * if data comes from the inverted index.
-     * @return an {@link IndexSelection}
-     */
-    IndexSelection getIndexSelection2();
-
-    /**
-     * Convenience method to access both IndexSelections.
-     * @return a Stream of IndexSelections
-     */
-    default Stream<IndexSelection> indexSelections() {
-        return Stream.of(getIndexSelection1(), getIndexSelection2());
+    public static String toString(long residuePairIdentifier) {
+        return getResidueIndex1(residuePairIdentifier) + "-" + getResidueIndex2(residuePairIdentifier);
     }
 }

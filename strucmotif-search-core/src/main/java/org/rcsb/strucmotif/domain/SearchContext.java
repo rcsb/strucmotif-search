@@ -12,6 +12,8 @@ import org.rcsb.strucmotif.io.StructureDataProvider;
 import org.rcsb.strucmotif.io.StructureIndexProvider;
 
 import java.nio.file.Path;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
 /**
@@ -71,6 +73,17 @@ public interface SearchContext<P extends Parameters, S extends QueryStructure, H
     SearchResult<H> getResult();
 
     /**
+     * Check whether this query has been processed.
+     * @return true if results are available
+     */
+    boolean isDone();
+
+    /**
+     * Mark this query has finished (which may be in error state).
+     */
+    void markAsDone();
+
+    /**
      * Access to the {@link StructureIndexProvider} associated with this context. Will be the global singleton in
      * 'search-for-structures' mode and a single-use, read-only implementation in 'detect-motif' mode.
      * @return a index provider
@@ -90,4 +103,20 @@ public interface SearchContext<P extends Parameters, S extends QueryStructure, H
      * @return an inverted index
      */
     InvertedIndex getInvertedIndex();
+
+    /**
+     * Access to the query-specific executor service that runs this job. It's imperative that this instance used for all
+     * parallel operations (i.e., process all parallel streams via this service). Otherwise, the worker threads might
+     * not get cancelled after the timeout was reached.
+     * @return an {@link ExecutorService}
+     */
+    ExecutorService getExecutorService();
+
+    /**
+     * Execute an async task and hide all the boilerplate handling of interrupts etc.
+     * @param task work to do
+     * @param <R> anticipated result
+     * @return the response
+     */
+    <R> R tryExecute(Callable<R> task);
 }

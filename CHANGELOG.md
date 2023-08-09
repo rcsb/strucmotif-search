@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.19.0
+strucmotif-search 0.19.1
 -------------
 ### Added
 - configurable support for ambiguous amino acids (GLX, ASX)

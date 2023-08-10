@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-unreleased
+strucmotif-search 0.19.2
 -------------
 ### Bug fix
 - make sure no contacts between different assemblies get indexed

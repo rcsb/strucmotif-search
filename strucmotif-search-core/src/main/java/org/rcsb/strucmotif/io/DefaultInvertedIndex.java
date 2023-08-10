@@ -161,6 +161,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                         }
 
                         if (currentDescriptor == Integer.MAX_VALUE) {
+                            // no data
                             return;
                         }
 

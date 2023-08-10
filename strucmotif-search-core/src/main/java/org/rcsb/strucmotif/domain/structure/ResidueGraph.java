@@ -278,11 +278,15 @@ public class ResidueGraph {
         int base = 64;
         this.keys = new long[base];
         this.values = new short[base];
+        boolean multipleAssemblies = structure.getAssemblyCount() > 1;
         for (ResidueGrid.ResidueContact residueContact : contacts) {
             int i = residueContact.i();
             int j = residueContact.j();
             int residueIndex1 = residueIndices[i];
             int residueIndex2 = residueIndices[j];
+            if (multipleAssemblies && !structure.getAssemblyIdentifier(residueIndex1).equals(structure.getAssemblyIdentifier(residueIndex2))) {
+                continue;
+            }
 
             String transformationIdentifier1 = structure.getLabelAsymId(residueIndex1) + "_" + structure.getTransformationIdentifier(residueIndex1);
             String transformationIdentifier2 = structure.getLabelAsymId(residueIndex2) + "_" + structure.getTransformationIdentifier(residueIndex2);
@@ -298,7 +302,7 @@ public class ResidueGraph {
                 }
             }
 
-            // ensure both chain instances are part of the same assembly
+            // 2nd check to ensure both chain instances are part of the same assembly
             if (assemblyGrouping.stream().noneMatch(group -> group.contains(transformationIdentifier1) && group.contains(transformationIdentifier2))) {
                 continue;
             }

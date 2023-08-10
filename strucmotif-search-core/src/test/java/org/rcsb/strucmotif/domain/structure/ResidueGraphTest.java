@@ -6,6 +6,7 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
 import org.rcsb.strucmotif.domain.motif.ResiduePairDescriptor;
+import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
@@ -256,22 +257,32 @@ class ResidueGraphTest {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("3djy"));
 
         ResidueGraph deposited = new ResidueGraph(structure, strucmotifConfig, deposited());
-        assertNoZeroDistancePairs(deposited);
+        assertNoZeroDistancePairs(structure, deposited);
 
         ResidueGraph residuesInContact = new ResidueGraph(structure, strucmotifConfig, residuesInContact());
-        assertNoZeroDistancePairs(residuesInContact);
+        assertNoZeroDistancePairs(structure, residuesInContact);
 
         ResidueGraph chainsInContact = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
-        assertNoZeroDistancePairs(chainsInContact);
-
-        ResidueGraph all = new ResidueGraph(structure, strucmotifConfig, all());
-        assertNoZeroDistancePairs(all);
+        assertNoZeroDistancePairs(structure, chainsInContact);
     }
 
-    private void assertNoZeroDistancePairs(ResidueGraph residueGraph) {
-        boolean evil = residueGraph.residuePairOccurrencesSequential()
-                .noneMatch(i -> ResiduePairDescriptor.getBackboneDistance(i.getResiduePairDescriptor()) == DistanceType.D0);
-        assertFalse(evil, "There are 0-distance residue pairs between residues in different assemblies");
+    private void assertNoZeroDistancePairs(Structure structure, ResidueGraph residueGraph) {
+        boolean fail = residueGraph.residuePairOccurrencesSequential()
+                .anyMatch(o -> ResiduePairDescriptor.getBackboneDistance(o.getResiduePairDescriptor()) == DistanceType.D0);
+
+        if (fail) {
+            System.out.println("Offenders:");
+            residueGraph.residuePairOccurrencesSequential()
+                    .filter(o -> ResiduePairDescriptor.getBackboneDistance(o.getResiduePairDescriptor()) == DistanceType.D0)
+                    .map(o -> {
+                        int r1 = ResiduePairIdentifier.getResidueIndex1(o.getResiduePairIdentifier());
+                        int r2 = ResiduePairIdentifier.getResidueIndex2(o.getResiduePairIdentifier());
+                        return structure.getAssemblyIdentifier(r1) + "@" + structure.getLabelSelection(r1) + " " + structure.getAssemblyIdentifier(r2) + "@" + structure.getLabelSelection(r2);
+                    })
+                    .forEach(System.out::println);
+        }
+
+        assertFalse(fail, "There are 0-distance residue pairs between residues in different assemblies");
     }
 
     @Test

@@ -252,6 +252,29 @@ class ResidueGraphTest {
     }
 
     @Test
+    void whenAssembliesInTheSamePlace_thenNoIndexingZeroDistancePairs() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("3djy"));
+
+        ResidueGraph deposited = new ResidueGraph(structure, strucmotifConfig, deposited());
+        assertNoZeroDistancePairs(deposited);
+
+        ResidueGraph residuesInContact = new ResidueGraph(structure, strucmotifConfig, residuesInContact());
+        assertNoZeroDistancePairs(residuesInContact);
+
+        ResidueGraph chainsInContact = new ResidueGraph(structure, strucmotifConfig, chainsInContact());
+        assertNoZeroDistancePairs(chainsInContact);
+
+        ResidueGraph all = new ResidueGraph(structure, strucmotifConfig, all());
+        assertNoZeroDistancePairs(all);
+    }
+
+    private void assertNoZeroDistancePairs(ResidueGraph residueGraph) {
+        boolean evil = residueGraph.residuePairOccurrencesSequential()
+                .noneMatch(i -> ResiduePairDescriptor.getBackboneDistance(i.getResiduePairDescriptor()) == DistanceType.D0);
+        assertFalse(evil, "There are 0-distance residue pairs between residues in different assemblies");
+    }
+
+    @Test
     void whenFlippedDirectory_thenAngle180() {
         // pointing away
         float[] data = new float[] { 1, 0, 0, -1, 0, 0 };

@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -266,8 +265,8 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
         } catch (Exception e) {
             // unwrap specific exceptions
             Throwable t = unwrapException(e);
-            if (t instanceof IllegalQueryDefinitionException) {
-                throw (IllegalQueryDefinitionException) t;
+            if (t instanceof IllegalQueryDefinitionException i) {
+                throw i;
             }
             throw new QueryExecutionException("The query failed unexpectedly", e);
         } finally {

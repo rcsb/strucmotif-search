@@ -15,9 +15,9 @@ import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,7 +48,7 @@ class KruskalMotifPrunerTest {
                 .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
-        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
+        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph, Collections.emptyMap());
 
         assertEquals(3, motifOccurrences.size());
         assertTrue(motifOccurrences.stream()
@@ -71,7 +71,7 @@ class KruskalMotifPrunerTest {
                 .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
-        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
+        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph, Collections.emptyMap());
 
         assertEquals(3, motifOccurrences.size());
         assertTrue(motifOccurrences.stream()

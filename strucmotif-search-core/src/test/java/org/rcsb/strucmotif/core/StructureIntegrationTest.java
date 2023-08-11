@@ -160,6 +160,7 @@ class StructureIntegrationTest {
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
+                .rmsdCutoff(3.0) // need higher value to see swaps
                 .buildParameters()
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
@@ -167,7 +168,7 @@ class StructureIntegrationTest {
 
         StructureSearchResult response = buildParameters.buildContext().run();
 
-        assertEquals(788, response.getHits().size());
+        assertEquals(891, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()

@@ -46,7 +46,10 @@ public class StructureQueryStructure implements QueryStructure {
 
         // sort occurrences to ensure that no dangling words are encountered during path assembly
         // this prevents spikes in runtime where no checks can be performed and the number of paths to evaluate subsequently explodes
-        List<ResiduePairOccurrence> connectedResiduePairs = getPathOfConnectedResiduePairs(residuePairOccurrences, exchanges);
+        Map<Integer, Set<ResidueType>> mappedExchanges = exchanges.entrySet()
+                .stream()
+                .collect(Collectors.toMap(e -> structure.getResidueIndex(e.getKey()), Map.Entry::getValue));
+        List<ResiduePairOccurrence> connectedResiduePairs = getPathOfConnectedResiduePairs(residuePairOccurrences, mappedExchanges);
 
         this.residuePairOccurrences = connectedResiduePairs;
         this.residuePairIdentifiers = connectedResiduePairs.stream()
@@ -84,8 +87,8 @@ public class StructureQueryStructure implements QueryStructure {
      * @param exchanges set of exchanges (exchange-heavy residues will get evaluated late/last)
      * @return a filtered collection of residue pair occurrences
      */
-    private List<ResiduePairOccurrence> getPathOfConnectedResiduePairs(List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
-        List<ResiduePairOccurrence> sorted = ResiduePairOccurrence.sort(residuePairOccurrences);
+    private List<ResiduePairOccurrence> getPathOfConnectedResiduePairs(List<ResiduePairOccurrence> residuePairOccurrences, Map<Integer, Set<ResidueType>> exchanges) {
+        List<ResiduePairOccurrence> sorted = ResiduePairOccurrence.sort(residuePairOccurrences, exchanges);
 
         // assign 'random' word as start
         List<ResiduePairOccurrence> sparse = new ArrayList<>();

@@ -3,12 +3,15 @@ package org.rcsb.strucmotif.domain.motif;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,13 +51,21 @@ public class ResiduePairOccurrence {
      * Sort a list of occurrences and move the ones that are most restrictive and/or most cheap to evaluate to the
      * front.
      * @param residuePairOccurrences ordered list of occurrences
+     * @param exchanges exchanges associated to each position (if any)
      * @return the same list, ordered
      */
-    public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences) {
+    public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences, Map<Integer, Set<ResidueType>> exchanges) {
+        Map<ResiduePairOccurrence, Integer> exchangeCount = residuePairOccurrences.stream()
+                .collect(Collectors.toMap(Function.identity(), o -> exchangeCount(exchanges, o)));
         return residuePairOccurrences.stream()
-                .sorted(INFORMATIVENESS_COMPARATOR)
-                // can't be toList() as manipulation will happen downstream
+                .sorted(Comparator.comparingInt((ToIntFunction<ResiduePairOccurrence>) exchangeCount::get)
+                        .thenComparingInt(o -> getInformativeness(o.getResiduePairDescriptor())))
                 .collect(Collectors.toList());
+    }
+
+    private static final Set<ResidueType> EMPTY = Collections.emptySet();
+    private static int exchangeCount(Map<Integer, Set<ResidueType>> exchanges, ResiduePairOccurrence occurrence) {
+        return exchanges.getOrDefault(occurrence.getResidueIndex1(), EMPTY).size() + exchanges.getOrDefault(occurrence.getResidueIndex2(), EMPTY).size();
     }
 
     /**
@@ -462,10 +473,4 @@ public class ResiduePairOccurrence {
         int residueCombination = descriptor >>> 9;
         return INFORMATIVE_LOOKUP.getOrDefault(residueCombination, DEFAULT_INFORMATIVENESS);
     }
-
-    /**
-     * Tries to sort occurrences so that the most informative ones occur first.
-     */
-    public static final Comparator<? super ResiduePairOccurrence> INFORMATIVENESS_COMPARATOR =
-            Comparator.comparingInt(o -> getInformativeness(o.getResiduePairDescriptor()));
 }

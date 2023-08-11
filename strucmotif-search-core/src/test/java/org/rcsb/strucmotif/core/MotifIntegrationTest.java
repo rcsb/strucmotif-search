@@ -107,6 +107,7 @@ class MotifIntegrationTest {
         MotifSearchResult result = contextBuilder.defineByStructureAndAssemblyId(structure, "1")
                 // these must be 'enriched' with structure data outside
                 .withMotifs(motifs)
+                .rmsdCutoff(2.0)
                 .buildParameters()
                 .buildContext()
                 .run();

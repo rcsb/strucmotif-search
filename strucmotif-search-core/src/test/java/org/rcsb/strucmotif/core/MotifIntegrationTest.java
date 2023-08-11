@@ -31,6 +31,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +83,7 @@ class MotifIntegrationTest {
                 .enrichMotifDefinitions(this::loadMotif)
                 .stream()
                 .filter(m -> !m.getMotifIdentifier().equals("KDEEH"))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
         this.contextBuilder = new MotifContextBuilder(structureDataProvider, kruskalMotifPruner, noOperationMotifPruner, strucmotifRuntime, strucmotifConfig);
     }
 

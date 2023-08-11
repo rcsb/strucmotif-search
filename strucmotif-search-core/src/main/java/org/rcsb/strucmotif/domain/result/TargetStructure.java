@@ -81,7 +81,7 @@ public class TargetStructure {
         // for each possibly extending candidate:
         for (int i = 0; i < residuePairIdentifiers.length - 1; i = i + 2) {
             int candidateResidueIndex1 = residuePairIdentifiers[i];
-            int candidateResidueIndex2 = residuePairIdentifiers[i  +1];
+            int candidateResidueIndex2 = residuePairIdentifiers[i + 1];
             // form cartesian product with each possible path to extend:
             p:
             for (int[] path : paths) {

@@ -160,9 +160,9 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
 
     private void performSearchInternal(MotifSearchContext context) {
         MotifSearchResult result = context.getResult();
-        List<MotifHit> hits = context.tryExecute(() -> context.getQuery()
+        List<MotifHit> hits = context.getQuery()
                 .getMotifDefinitions()
-                .parallelStream()
+                .stream()
                 .flatMap(motif -> {
                     StructureSearchResult subresult = performSearchInternal(context, motif);
                     List<StructureHit> subhits = subresult.getHits();
@@ -174,7 +174,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
                             .stream()
                             .map(h -> createSubhit(motif, h));
                 })
-                .toList());
+                .toList();
         result.setHits(hits);
         result.getTimings().queryStop();
 

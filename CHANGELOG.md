@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.19.3
+-------------
+### Added
+- improved order in which descriptors are evaluated
+
 strucmotif-search 0.19.2
 -------------
 ### Bug fix

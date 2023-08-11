@@ -167,7 +167,7 @@ class StructureIntegrationTest {
 
         StructureSearchResult response = buildParameters.buildContext().run();
 
-        assertEquals(798, response.getHits().size());
+        assertEquals(788, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()
@@ -246,7 +246,7 @@ class StructureIntegrationTest {
                 .buildContext()
                 .run();
         assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.structureIdentifier() + h.labelSelections()).distinct().count(), "there are duplicate hits");
-        assertEquals(3, backwardResult.getHits().size());
+        assertEquals(9, backwardResult.getHits().size());
         assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.structureIdentifier().equals("6TNE")));
     }
 

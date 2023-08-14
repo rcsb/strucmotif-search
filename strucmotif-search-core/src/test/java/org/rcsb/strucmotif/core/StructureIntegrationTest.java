@@ -160,6 +160,7 @@ class StructureIntegrationTest {
                 .backboneDistanceTolerance(1)
                 .sideChainDistanceTolerance(1)
                 .angleTolerance(1)
+                .rmsdCutoff(3.0) // need higher value to see swaps
                 .buildParameters()
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 162), Set.of(ResidueType.LYSINE, ResidueType.HISTIDINE))
                 .addPositionSpecificExchange(new LabelSelection("A", "1", 245), Set.of(ResidueType.GLUTAMIC_ACID, ResidueType.ASPARTIC_ACID, ResidueType.ASPARAGINE))
@@ -167,7 +168,7 @@ class StructureIntegrationTest {
 
         StructureSearchResult response = buildParameters.buildContext().run();
 
-        assertEquals(798, response.getHits().size());
+        assertEquals(891, response.getHits().size());
 
         List<String> observedExchanges = response.getHits()
                 .stream()
@@ -246,7 +247,7 @@ class StructureIntegrationTest {
                 .buildContext()
                 .run();
         assertEquals(backwardResult.getHits().size(), backwardResult.getHits().stream().map(h -> h.structureIdentifier() + h.labelSelections()).distinct().count(), "there are duplicate hits");
-        assertEquals(3, backwardResult.getHits().size());
+        assertEquals(9, backwardResult.getHits().size());
         assertTrue(backwardResult.getHits().stream().anyMatch(h -> h.structureIdentifier().equals("6TNE")));
     }
 

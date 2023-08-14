@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The immutable container for a structural motif query.
@@ -56,7 +57,10 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
             throw new IllegalQueryDefinitionException("Query violates distance threshold");
         }
 
-        List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
+        Map<Integer, Set<ResidueType>> mappedExchanges = exchanges.entrySet()
+                .stream()
+                .collect(Collectors.toMap(e -> structure.getResidueIndex(e.getKey()), Map.Entry::getValue));
+        List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph, mappedExchanges);
         this.queryStructure = new StructureQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
         this.parameters = parameters;
         this.exchanges = exchanges;

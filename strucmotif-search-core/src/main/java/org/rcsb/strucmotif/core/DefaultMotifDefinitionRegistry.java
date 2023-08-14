@@ -21,7 +21,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,7 +58,7 @@ public class DefaultMotifDefinitionRegistry implements MotifDefinitionRegistry {
     @Autowired
     public DefaultMotifDefinitionRegistry(StructureDataProvider structureDataProvider) {
         this.structureDataProvider = structureDataProvider;
-        this.motifDefinitions = new HashSet<>();
+        this.motifDefinitions = new LinkedHashSet<>();
         this.dirty = new AtomicBoolean(false);
 
         init();
@@ -162,7 +162,7 @@ public class DefaultMotifDefinitionRegistry implements MotifDefinitionRegistry {
     public Set<EnrichedMotifDefinition> enrichMotifDefinitions(Function<MotifDefinition, EnrichedMotifDefinition> mapper) {
         return motifDefinitions.stream()
                 .map(mapper)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override

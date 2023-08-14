@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.domain.query;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,7 +22,7 @@ public class PositionSpecificExchange {
      * @param residueTypes all allowed types (must include original type if still allowed)
      */
     public PositionSpecificExchange(LabelSelection labelSelection, ResidueType... residueTypes) {
-        this(labelSelection, Stream.of(residueTypes).collect(Collectors.toSet()));
+        this(labelSelection, Stream.of(residueTypes).collect(Collectors.toCollection(LinkedHashSet::new)));
     }
 
     /**

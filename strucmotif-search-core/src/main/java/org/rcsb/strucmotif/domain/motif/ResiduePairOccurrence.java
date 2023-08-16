@@ -51,21 +51,12 @@ public class ResiduePairOccurrence {
      * Sort a list of occurrences and move the ones that are most restrictive and/or most cheap to evaluate to the
      * front.
      * @param residuePairOccurrences ordered list of occurrences
-     * @param exchanges exchanges associated to each position (if any)
      * @return the same list, ordered
      */
-    public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences, Map<Integer, Set<ResidueType>> exchanges) {
-        Map<ResiduePairOccurrence, Integer> exchangeCount = residuePairOccurrences.stream()
-                .collect(Collectors.toMap(Function.identity(), o -> exchangeCount(exchanges, o)));
+    public static List<ResiduePairOccurrence> sort(List<ResiduePairOccurrence> residuePairOccurrences) {
         return residuePairOccurrences.stream()
-                .sorted(Comparator.comparingInt((ToIntFunction<ResiduePairOccurrence>) exchangeCount::get)
-                        .thenComparingInt(o -> getInformativeness(o.getResiduePairDescriptor())))
+                .sorted(Comparator.comparingInt(o -> getInformativeness(o.getResiduePairDescriptor())))
                 .collect(Collectors.toList());
-    }
-
-    private static final Set<ResidueType> EMPTY = Collections.emptySet();
-    private static int exchangeCount(Map<Integer, Set<ResidueType>> exchanges, ResiduePairOccurrence occurrence) {
-        return exchanges.getOrDefault(occurrence.getResidueIndex1(), EMPTY).size() + exchanges.getOrDefault(occurrence.getResidueIndex2(), EMPTY).size();
     }
 
     /**

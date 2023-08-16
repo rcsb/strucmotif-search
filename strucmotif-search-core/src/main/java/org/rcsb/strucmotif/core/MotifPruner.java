@@ -16,8 +16,7 @@ public interface MotifPruner {
      * Perform pruning operation (e.g. extract all {@link ResiduePairOccurrence} instances from a structure and prune
      * the resulting graph).
      * @param residueGraph the graph to operate on
-     * @param exchanges information on exchanges to sort residues consistently
      * @return the set of occurrences which describe this structure
      */
-    List<ResiduePairOccurrence> prune(ResidueGraph residueGraph, Map<Integer, Set<ResidueType>> exchanges);
+    List<ResiduePairOccurrence> prune(ResidueGraph residueGraph);
 }

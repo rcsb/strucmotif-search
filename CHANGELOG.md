@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.19.4
+-------------
+### Bug fix
+- remove exchange criterion again when sorting residue pairs
+
 strucmotif-search 0.19.3
 -------------
 ### Added

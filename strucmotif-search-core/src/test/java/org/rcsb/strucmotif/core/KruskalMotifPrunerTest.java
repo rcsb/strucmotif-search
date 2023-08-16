@@ -15,7 +15,6 @@ import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +47,7 @@ class KruskalMotifPrunerTest {
                 .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
-        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph, Collections.emptyMap());
+        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 
         assertEquals(3, motifOccurrences.size());
         assertTrue(motifOccurrences.stream()
@@ -71,7 +70,7 @@ class KruskalMotifPrunerTest {
                 .toList();
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, ResidueGraph.ResidueGraphOptions.selection(residues, labelSelections));
 
-        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph, Collections.emptyMap());
+        List<ResiduePairOccurrence> motifOccurrences = motifPruner.prune(residueGraph);
 
         assertEquals(3, motifOccurrences.size());
         assertTrue(motifOccurrences.stream()

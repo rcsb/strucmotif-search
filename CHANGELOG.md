@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-strucmotif-search 0.19.4
+strucmotif-search 0.19.5
 -------------
 ### Bug fix
 - assembly handling for cases like 1QD6

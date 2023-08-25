@@ -156,11 +156,25 @@ public class ResidueGraph {
         float[] normalVectors = new float[3 * bound];
 
         if (options.mode == ResidueGraphMode.SELECTION) {
-            for (int i = 0; i < residueIndices.length; i++) {
-                LabelSelection labelSelection = options.selections.get(i);
-                // this may not be the actual residueIndex retrieved during search, but it doesn't matter
-                int residueIndex = structure.getResidueIndex(labelSelection);
-                residueIndices[i] = residueIndex;
+            boolean found = false;
+            outer: for (String assemblyId : structure.getAssemblyIdentifiers()) {
+                int[] tmp = new int[residueIndices.length];
+                for (int i = 0; i < tmp.length; i++) {
+                    LabelSelection labelSelection = options.selections.get(i);
+                    try {
+                        int residueIndex = structure.getResidueIndex(assemblyId, labelSelection);
+                        tmp[i] = residueIndex;
+                    } catch (NoSuchElementException e) {
+                        // happens e.g. for 1QD6, where certain motifs can only be found in assembly 3
+                        continue outer;
+                    }
+                }
+                residueIndices = tmp;
+                found = true;
+                break;
+            }
+            if (!found) {
+                throw new NoSuchElementException("Failed to find all residues: '" + options.selections + "' in the same assembly of '" + structure.getStructureIdentifier() + "'");
             }
         } else if (options.mode == ResidueGraphMode.DEPOSITED) {
             int j = 0;

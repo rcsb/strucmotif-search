@@ -327,7 +327,7 @@ public class DefaultStructure implements Structure {
 
     @Override
     public int getResidueIndex(String labelAsymId, String structOperId, int labelSeqId) {
-        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId, 0);
+        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId, 0, assemblyReferences.length);
         return getResidueIndex(labelAsymId, labelSeqId, instancedChainIndex);
     }
 
@@ -337,7 +337,8 @@ public class DefaultStructure implements Structure {
         if (assemblyIndex < 0) {
             throw new NoSuchElementException("Didn't find assembly '" + assemblyIdentifier + "'");
         }
-        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId, assemblyOffsets[assemblyIndex]);
+        int assemblyEnd = assemblyIndex == assemblyOffsets.length - 1 ? assemblyReferences.length : assemblyOffsets[assemblyIndex + 1];
+        int instancedChainIndex = assemblyReferenceIndexOf(assemblyReferences, labelAsymId, structOperId, assemblyOffsets[assemblyIndex], assemblyEnd);
         return getResidueIndex(labelAsymId, labelSeqId, instancedChainIndex);
     }
 
@@ -371,9 +372,9 @@ public class DefaultStructure implements Structure {
         return new LabelSelection(labelAsymId, transformationIdentifier, labelSeqId);
     }
 
-    private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId, int start) {
+    private static int assemblyReferenceIndexOf(String[] assemblyReferences, String labelAsymId, String structOperId, int start, int end) {
         int chainIndex = -1;
-        for (int i = start; i < assemblyReferences.length - 1; i = i + 2) {
+        for (int i = start; i < end - 1; i = i + 2) {
             if (assemblyReferences[i].equals(labelAsymId) && assemblyReferences[i + 1].equals(structOperId)) {
                 chainIndex = i / 2;
                 break;

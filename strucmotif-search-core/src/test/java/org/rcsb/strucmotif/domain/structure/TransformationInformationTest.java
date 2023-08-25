@@ -6,9 +6,12 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.rcsb.strucmotif.Helpers.getOriginalBcif;
 import static org.rcsb.strucmotif.Helpers.getRenumberedBcif;
 
 public class TransformationInformationTest {
@@ -47,6 +50,15 @@ public class TransformationInformationTest {
         assertEquals("1x61" , structure.getTransformationIdentifier(firstResidueChainB));
         assertEquals(ResidueType.THREONINE, structure.getResidueType(firstResidueChainB));
         assertEquals(firstResidueChainB, structure.getResidueIndex("B", "1x61", 1));
+    }
+
+    @Test
+    void when1qd6_thenResiduesMapCorrectly() {
+        Structure structure = structureReader.readFromInputStream(getOriginalBcif("1qd6"));
+        assertThrows(NoSuchElementException.class, () -> structure.getResidueIndex("1", "D", "1", 77), "Chain 'D' isn't part of assembly 1");
+        assertEquals(346, structure.getResidueIndex("2", "D", "1", 77));
+        assertEquals(854, structure.getResidueIndex("3", "D", "1", 77));
+        assertThrows(NoSuchElementException.class, () -> structure.getResidueIndex("4", "D", "1", 77), "There's no assembly 4");
     }
 
     @Test

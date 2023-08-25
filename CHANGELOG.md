@@ -4,6 +4,11 @@ Strucmotif-search Changelog
 strucmotif-search 0.19.4
 -------------
 ### Bug fix
+- assembly handling for cases like 1QD6
+
+strucmotif-search 0.19.4
+-------------
+### Bug fix
 - remove exchange criterion again when sorting residue pairs
 
 strucmotif-search 0.19.3

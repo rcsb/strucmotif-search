@@ -7,8 +7,6 @@ import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 import org.rcsb.strucmotif.io.StructureReader;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
@@ -106,7 +104,7 @@ public class ConnectednessTest {
     }
 
     @Test
-    void whenIn3rdAssembly_thenStillConnected() throws IOException {
+    void whenIn3rdAssembly_thenStillConnected() {
         Structure structure = structureReader.readFromInputStream(getOriginalBcif("1qd6"));
         List<LabelSelection> sel = List.of(
                 new LabelSelection("C", "1", 113),

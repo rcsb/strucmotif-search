@@ -1,6 +1,7 @@
 package org.rcsb.strucmotif.domain.query;
 
 import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
+import org.rcsb.strucmotif.core.QueryExecutionException;
 import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
@@ -11,8 +12,8 @@ import org.rcsb.strucmotif.domain.structure.Structure;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -45,10 +46,6 @@ public class StructureQueryStructure implements QueryStructure {
         }
 
         // sort occurrences to ensure that no dangling words are encountered during path assembly
-        // this prevents spikes in runtime where no checks can be performed and the number of paths to evaluate subsequently explodes
-        Map<Integer, Set<ResidueType>> mappedExchanges = exchanges.entrySet()
-                .stream()
-                .collect(Collectors.toMap(e -> structure.getResidueIndex(e.getKey()), Map.Entry::getValue));
         List<ResiduePairOccurrence> connectedResiduePairs = getPathOfConnectedResiduePairs(residuePairOccurrences);
 
         this.residuePairOccurrences = connectedResiduePairs;
@@ -70,14 +67,30 @@ public class StructureQueryStructure implements QueryStructure {
             // this indicates that fewer residues are present in the result than specified by the query
             throw new IllegalQueryDefinitionException("Query violates distance threshold");
         }
-
-        List<Integer> originalResidueIndices = originalLabelSelections.stream()
-                .map(structure::getResidueIndex)
-                .toList();
-        this.residueIndexSwaps = originalResidueIndices.stream()
-                .map(residueIndices::indexOf)
-                .toList();
         this.residues = originalResidues;
+        this.residueIndexSwaps = resolveSwaps(originalLabelSelections);
+    }
+
+    private List<Integer> resolveSwaps(List<LabelSelection> originalLabelSelections) {
+        for (String assemblyId : structure.getAssemblyIdentifiers()) {
+            try {
+                List<Integer> originalResidueIndices = originalLabelSelections.stream()
+                        .map(l -> structure.getResidueIndex(assemblyId, l))
+                        .toList();
+
+                if (originalResidueIndices.contains(-1)) {
+                    continue;
+                }
+
+                return originalResidueIndices.stream()
+                        .map(residueIndices::indexOf)
+                        .toList();
+            } catch (NoSuchElementException e) {
+                // safe as long as some other assembly allows resolving all residue indices
+            }
+        }
+
+        throw new QueryExecutionException("Failed to resolve residue swaps, are all residues in the same assembly?");
     }
 
     /**

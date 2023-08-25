@@ -108,16 +108,10 @@ public class DefaultResidueTypeResolver implements ResidueTypeResolver {
     private Map<String, ResidueType> initialize(StrucmotifConfig strucmotifConfig) {
         Map<String, ResidueType> out = new HashMap<>();
         switch (strucmotifConfig.getModifiedResidueStrategy()) {
-            case NONE:
-                break;
-            case INTERNAL:
-                out.putAll(readResidueTypeMappingFile());
-                break;
-            case CCD_PARENT:
-                out.putAll(createCcdMapping(strucmotifConfig.getCcdUrl()));
-                break;
-            default:
-                throw new UnsupportedOperationException(strucmotifConfig.getModifiedResidueStrategy() + " isn't implemented");
+            case NONE -> {}
+            case INTERNAL -> out.putAll(readResidueTypeMappingFile());
+            case CCD_PARENT -> out.putAll(createCcdMapping(strucmotifConfig.getCcdUrl()));
+            default -> throw new UnsupportedOperationException(strucmotifConfig.getModifiedResidueStrategy() + " isn't implemented");
         }
         switch (strucmotifConfig.getAmbiguousMonomerStrategy()) {
             case UNKNOWN_COMPONENT -> { }

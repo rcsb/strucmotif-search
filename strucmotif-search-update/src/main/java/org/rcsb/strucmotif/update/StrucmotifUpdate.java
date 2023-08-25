@@ -134,7 +134,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
         // check for sanity of internal state
         if (operation != Operation.RECOVER) {
             Set<String> dirtyStructureIdentifiers = stateRepository.selectDirty();
-            if (dirtyStructureIdentifiers.size() > 0) {
+            if (!dirtyStructureIdentifiers.isEmpty()) {
                 logger.warn("Update state is dirty - Problematic identifiers:\n{}",
                         dirtyStructureIdentifiers);
                 logger.info("Recovering from dirty state");

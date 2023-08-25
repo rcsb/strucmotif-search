@@ -6,8 +6,6 @@ import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.io.DefaultStructureReader;
 import org.rcsb.strucmotif.io.DefaultResidueTypeResolver;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -3,15 +3,12 @@ package org.rcsb.strucmotif.domain.motif;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 

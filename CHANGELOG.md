@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.19.6
+-------------
+### Bug fix
+- don't catch fire when aligning side-chain atoms of glycine
+
 strucmotif-search 0.19.5
 -------------
 ### Bug fix

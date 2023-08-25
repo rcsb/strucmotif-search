@@ -6,14 +6,12 @@ import org.rcsb.strucmotif.domain.motif.ResiduePairIdentifier;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.LabelSelection;
-import org.rcsb.strucmotif.domain.structure.ResidueType;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -36,9 +34,8 @@ public class StructureQueryStructure implements QueryStructure {
      * @param originalLabelSelections residues to select
      * @param originalResidues coordinates of residues
      * @param residuePairOccurrences contacts between residues
-     * @param exchanges optional exchanges
      */
-    public StructureQueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences, Map<LabelSelection, Set<ResidueType>> exchanges) {
+    public StructureQueryStructure(String structureIdentifier, Structure structure, List<LabelSelection> originalLabelSelections, List<Map<LabelAtomId, float[]>> originalResidues, List<ResiduePairOccurrence> residuePairOccurrences) {
         this.structureIdentifier = structureIdentifier;
         this.structure = structure;
         if (residuePairOccurrences.isEmpty()) {

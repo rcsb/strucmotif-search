@@ -57,7 +57,7 @@ public class StructureQuery implements SearchQuery<StructureParameters, Structur
         }
 
         List<ResiduePairOccurrence> residuePairOccurrences = parameters.getMotifPruner().prune(residueGraph);
-        this.queryStructure = new StructureQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences, exchanges);
+        this.queryStructure = new StructureQueryStructure(structureIdentifier, structure, labelSelections, residues, residuePairOccurrences);
         this.parameters = parameters;
         this.exchanges = exchanges;
         this.allowedStructures = allowedStructures;

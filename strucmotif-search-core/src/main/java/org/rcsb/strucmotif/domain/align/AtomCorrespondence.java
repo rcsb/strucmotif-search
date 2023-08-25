@@ -1,5 +1,6 @@
 package org.rcsb.strucmotif.domain.align;
 
+import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.math.Algebra;
 
@@ -55,6 +56,7 @@ public class AtomCorrespondence {
         boolean schemeRequiresSubset = atomPairingScheme != AtomPairingScheme.ALL;
 
         for (int i = 0; i < reference.size(); i++) {
+            boolean added = false;
             Map<LabelAtomId, float[]> referenceGroup = reference.get(i);
             Map<LabelAtomId, float[]> candidateGroup = candidate.get(i);
 
@@ -70,6 +72,16 @@ public class AtomCorrespondence {
                 float[] candidateAtom = candidateGroup.get(referenceLabel);
                 if (candidateAtom != null) {
                     mapping.put(referenceVector, candidateAtom);
+                    added = true;
+                }
+            }
+
+            // handle glycines somewhat gracefully -- ideally, this would only apply to real glycines and not anything without CB
+            if (!added && atomPairingScheme == AtomPairingScheme.SIDE_CHAIN) {
+                float[] virtualRef = QuaternionAlignmentService.getVirtualCB(referenceGroup);
+                float[] virtualCand = QuaternionAlignmentService.getVirtualCB(candidateGroup);
+                if (virtualRef != null && virtualCand != null) {
+                    mapping.put(virtualRef, virtualCand);
                 }
             }
         }

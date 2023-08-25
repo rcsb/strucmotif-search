@@ -96,7 +96,8 @@ public class QuaternionAlignmentService implements AlignmentService {
 
         Pair<float[], Float> alignment = align(referencePoints, referenceCentroid, candidatePoints, candidateCentroid);
 
-        return new AlignmentResult(alignment.first(), alignment.second());
+        float rmsd = alignment.second();
+        return new AlignmentResult(alignment.first(), Float.isNaN(rmsd) ? Float.MAX_VALUE : rmsd);
     }
 
     /**
@@ -382,5 +383,28 @@ public class QuaternionAlignmentService implements AlignmentService {
         Algebra.subtract3d(translation, referenceCentroid, candidateCentroid);
         float[] transformation = Algebra.composeTransformationMatrix(rot, translation);
         return new Pair<>(transformation, (float) rms);
+    }
+
+    // already centered coordinates to save operations
+    private static final List<float[]> REFERENCE_BACKBONE = List.of(new float[] { -0.698f, 0.184f, 1.008f }, // N
+            new float[] { 0.525f, 0.109f, 0.200f }, // CA
+            new float[] { 0.174f, -0.292f, -1.208f }); // C
+    private static final float[] REFERENCE_CB = new float[] { 1.472f, -0.929f, 0.804f };
+    private static final float[] REFERENCE_CENTROID = new float[3];
+
+    public static float[] getVirtualCB(Map<LabelAtomId, float[]> residue) {
+        float[] n = residue.get(LabelAtomId.N);
+        float[] ca = residue.get(LabelAtomId.CA);
+        float[] c = residue.get(LabelAtomId.C);
+        if (n == null || ca == null || c == null) {
+            return null;
+        }
+
+        List<float[]> coords = List.of(n, ca, c);
+        float[] v = Algebra.centroid3d(coords);
+
+        float[] transformation = QuaternionAlignmentService.align(coords, v, REFERENCE_BACKBONE, REFERENCE_CENTROID).first();
+        Algebra.multiply4d(v, transformation, REFERENCE_CB);
+        return v;
     }
 }

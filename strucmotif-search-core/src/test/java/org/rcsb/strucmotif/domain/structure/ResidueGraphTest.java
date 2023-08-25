@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.structure;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.AngleType;
 import org.rcsb.strucmotif.domain.motif.DistanceType;
@@ -32,7 +33,7 @@ class ResidueGraphTest {
                 LabelAtomId.C, new float[] { -0.094f, 0.017f, -0.716f },
                 LabelAtomId.O, new float[] { -1.056f, -0.682f, -0.923f });
 
-        float[] betaCarbon = ResidueGraph.getVirtualCB(residue);
+        float[] betaCarbon = QuaternionAlignmentService.getVirtualCB(residue);
         assertArrayEquals(new float[] { 1.204f, -0.620f, 1.296f }, betaCarbon, 0.01f);
     }
 

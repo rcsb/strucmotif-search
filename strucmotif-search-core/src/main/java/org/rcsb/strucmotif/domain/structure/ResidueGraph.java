@@ -4,7 +4,6 @@ import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.motif.*;
-import org.rcsb.strucmotif.math.Algebra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -200,7 +199,7 @@ public class ResidueGraph {
             if (backbone == null) {
                 continue;
             }
-            float[] sideChain = residueType == ResidueType.GLYCINE ? getVirtualCB(residue) : getSideChainCoords(residue);
+            float[] sideChain = residueType == ResidueType.GLYCINE ? QuaternionAlignmentService.getVirtualCB(residue) : getSideChainCoords(residue);
             if (sideChain == null) {
                 continue;
             }
@@ -437,29 +436,6 @@ public class ResidueGraph {
         subtract3d(ba, b, a);
         normalize3d(ba, ba);
         return ba;
-    }
-
-    // already centered coordinates to save operations
-    private static final List<float[]> REFERENCE_BACKBONE = List.of(new float[]{-0.698f, 0.184f, 1.008f}, // N
-            new float[]{0.525f, 0.109f, 0.200f}, // CA
-            new float[]{0.174f, -0.292f, -1.208f}); // C
-    private static final float[] REFERENCE_CB = new float[]{1.472f, -0.929f, 0.804f};
-    private static final float[] REFERENCE_CENTROID = new float[3];
-
-    static float[] getVirtualCB(Map<LabelAtomId, float[]> residue) {
-        float[] n = residue.get(LabelAtomId.N);
-        float[] ca = residue.get(LabelAtomId.CA);
-        float[] c = residue.get(LabelAtomId.C);
-        if (n == null || ca == null || c == null) {
-            return null;
-        }
-
-        List<float[]> coords = List.of(n, ca, c);
-        float[] v = Algebra.centroid3d(coords);
-
-        float[] transformation = QuaternionAlignmentService.align(coords, v, REFERENCE_BACKBONE, REFERENCE_CENTROID).first();
-        Algebra.multiply4d(v, transformation, REFERENCE_CB);
-        return v;
     }
 
     static float distanceSquared3d(float[] vectors, int i, int j) {

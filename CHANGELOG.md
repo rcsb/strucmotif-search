@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.19.7
+-------------
+### Bug fix
+- fix query defs on alternate locations
+
 strucmotif-search 0.19.6
 -------------
 ### Bug fix

@@ -268,8 +268,8 @@ public class DefaultStructure implements Structure {
             int offsetEnd = residueIndex + 1 == residueOffsets.length ? labelAtomIds.length : residueOffsets[residueIndex + 1];
             for (int j = offsetStart; j < offsetEnd; j++) {
                 LabelAtomId labelAtomId = LabelAtomId.values[labelAtomIds[j]];
-                // ignore 'non-standard' atoms
-                if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
+                // ignore 'non-standard' atoms and non-first occurrence of names
+                if (labelAtomId == LabelAtomId.UNKNOWN_ATOM || out.containsKey(labelAtomId)) {
                     continue;
                 }
 
@@ -288,8 +288,8 @@ public class DefaultStructure implements Structure {
 
         for (int j = offsetStart; j < offsetEnd; j++) {
             LabelAtomId labelAtomId = LabelAtomId.values[labelAtomIds[j]];
-            // ignore 'non-standard' atoms
-            if (labelAtomId == LabelAtomId.UNKNOWN_ATOM) {
+            // ignore 'non-standard' atoms and non-first occurrence of names
+            if (labelAtomId == LabelAtomId.UNKNOWN_ATOM || out.containsKey(labelAtomId)) {
                 continue;
             }
 

@@ -48,6 +48,11 @@ public class SingleStructureDataProvider implements StructureDataProvider {
     }
 
     @Override
+    public void enterWriteMode() {
+        immutable();
+    }
+
+    @Override
     public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile) {
         immutable();
     }

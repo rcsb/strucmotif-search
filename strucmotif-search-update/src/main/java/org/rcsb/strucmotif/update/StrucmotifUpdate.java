@@ -90,9 +90,10 @@ public class StrucmotifUpdate implements CommandLineRunner {
      * @param structureIndexProvider index provider
      */
     @Autowired
-    public StrucmotifUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, StrucmotifConfig strucmotifConfig, StructureIndexProvider structureIndexProvider) {
+    public StrucmotifUpdate(StateRepository stateRepository, StructureDataProvider structureDataProvider, InvertedIndex invertedIndex, StrucmotifConfig strucmotifConfig, StructureIndexProvider structureIndexProvider) throws IOException {
         this.stateRepository = stateRepository;
         this.structureDataProvider = structureDataProvider;
+        structureDataProvider.enterWriteMode();
         this.invertedIndex = invertedIndex;
         this.strucmotifConfig = strucmotifConfig;
         this.structureIndexProvider = structureIndexProvider;

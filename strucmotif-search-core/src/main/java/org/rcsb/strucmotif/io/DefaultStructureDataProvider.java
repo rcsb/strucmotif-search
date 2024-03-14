@@ -159,9 +159,6 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
         }
 
         initializeFileBundle();
-        Files.deleteIfExists(partialDataPath);
-        Files.deleteIfExists(partialIndexPath);
-        initializePartialFileBundle();
         Files.deleteIfExists(temporaryDataPath);
         Files.deleteIfExists(temporaryIndexPath);
 
@@ -175,7 +172,9 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
     @PreDestroy
     public void tearDown() throws IOException {
         fileBundle.close();
-        partialFileBundle.close();
+        if (partialFileBundle != null) {
+            partialFileBundle.close();
+        }
         Files.deleteIfExists(partialDataPath);
         Files.deleteIfExists(partialIndexPath);
         Files.deleteIfExists(temporaryDataPath);
@@ -188,7 +187,10 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
     }
 
     private void initializePartialFileBundle() throws IOException {
-        logger.debug("Creating partial renumbered file bundle ({}, {})", partialDataPath, partialIndexPath);
+        // ensure no data lingers
+        Files.deleteIfExists(partialDataPath);
+        Files.deleteIfExists(partialIndexPath);
+        logger.info("Creating partial renumbered file bundle ({}, {})", partialDataPath, partialIndexPath);
         this.partialFileBundle = FileBundleIO.openBundle(partialDataPath, partialIndexPath).inReadWriteMode();
     }
 
@@ -310,7 +312,19 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
     }
 
     @Override
+    public void enterWriteMode() throws IOException {
+        if (partialFileBundle == null) {
+            initializePartialFileBundle();
+        }
+    }
+
+    @Override
     public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile) {
+        if (partialFileBundle == null) {
+            logger.error("[{}] Partial file bundle isn't available -- call #enterWriteMode() first!", structureIdentifier);
+            throw new UncheckedIOException(new IOException("Partial file bundle isn't available -- call #enterWriteMode() first!"));
+        }
+
         byte[] bytes = renumberedStructureWriter.write(mmCifFile);
         if (bytes == null) {
             logger.warn("[{}] No valid polymer chain(s) - Not writing empty file", structureIdentifier);

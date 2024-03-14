@@ -3,6 +3,7 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.strucmotif.domain.structure.Structure;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.Set;
@@ -46,7 +47,13 @@ public interface StructureDataProvider extends Committable {
     Structure readSome(String structureIdentifier);
 
     /**
-     * Write a renumbered structure.
+     * Must be called before invoking {@link #writeRenumbered(String, MmCifFile)}.
+     * @throws IOException if files can't be created
+     */
+    void enterWriteMode() throws IOException;
+
+    /**
+     * Write a renumbered structure. Make sure to call {@link #enterWriteMode()} if you need to write structure data.
      * @param structureIdentifier the structure identifier to write
      * @param mmCifFile the data source
      */

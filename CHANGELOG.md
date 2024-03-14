@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.19.8
+-------------
+### Bug fix
+- don't create `.partial` structure data files unless needed
+
 strucmotif-search 0.19.7
 -------------
 ### Bug fix

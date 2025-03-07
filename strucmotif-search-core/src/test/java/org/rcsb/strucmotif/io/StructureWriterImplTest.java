@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -47,7 +48,7 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        byte[] bytes = structureWriter.write(mmCifFile);
+        byte[] bytes = structureWriter.write(mmCifFile, 1);
         Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
@@ -69,7 +70,7 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        byte[] bytes = structureWriter.write(mmCifFile);
+        byte[] bytes = structureWriter.write(mmCifFile, 1);
         Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
@@ -92,7 +93,7 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        byte[] bytes = structureWriter.write(mmCifFile);
+        byte[] bytes = structureWriter.write(mmCifFile, 1);
         Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
@@ -115,7 +116,7 @@ class StructureWriterImplTest {
         MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
 
         Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
-        byte[] bytes = structureWriter.write(mmCifFile);
+        byte[] bytes = structureWriter.write(mmCifFile, 1);
         Files.write(outputPath, bytes);
 
         MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
@@ -124,13 +125,36 @@ class StructureWriterImplTest {
         assertEquals(39, atomSite.getRowCount(), "Atom count doesn't match");
     }
 
+    @Test
+    void whenWritingSpecificModel_thenCorrectModelExtracted() throws IOException {
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
+        StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
+
+        String id = "1nmr";
+        InputStream inputStream = Helpers.getOriginalBcif(id);
+        MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
+
+        Path outputPath = tempDirectory.resolve(id + ".bcif.gz");
+        byte[] bytes = structureWriter.write(mmCifFile, 8);
+        Files.write(outputPath, bytes);
+
+        MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
+        AtomSite atomSite = read.getFirstBlock().getAtomSite();
+        // this number ensures: a single model is extracted
+        assertEquals(610, atomSite.getRowCount(), "Atom count doesn't match");
+        assertEquals(23.187, atomSite.getCartnX().get(0), 0.1, "Cartn_X[0] doesn't match (with reduced precision)");
+    }
+
     private void delete(Path directory) throws IOException {
-        Files.walk(directory)
-                .sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(file -> {
-                    logger.info("Deleting {}", file.getAbsolutePath());
-                    file.delete();
-                });
+        try (Stream<Path> paths = Files.walk(directory)) {
+            paths.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(file -> {
+                        logger.info("Deleting {}", file.getAbsolutePath());
+                        file.delete();
+                    });
+        }
     }
 }

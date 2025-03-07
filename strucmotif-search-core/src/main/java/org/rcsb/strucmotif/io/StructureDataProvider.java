@@ -12,6 +12,8 @@ import java.util.Set;
  * Access structure data.
  */
 public interface StructureDataProvider extends Committable {
+    int DEFAULT_MODEL_IDENTIFIER = 1;
+
     /**
      * If `strucmotif.in-memory-strategy` is active: Initialize caching by reading all structures and keeping them in
      * memory for fast access.
@@ -47,7 +49,7 @@ public interface StructureDataProvider extends Committable {
     Structure readSome(String structureIdentifier);
 
     /**
-     * Must be called before invoking {@link #writeRenumbered(String, MmCifFile)}.
+     * Must be called before invoking {@link #writeRenumbered(String, MmCifFile, int)}.
      * @throws IOException if files can't be created
      */
     void enterWriteMode() throws IOException;
@@ -57,7 +59,17 @@ public interface StructureDataProvider extends Committable {
      * @param structureIdentifier the structure identifier to write
      * @param mmCifFile the data source
      */
-    void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile);
+    default void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile) {
+        writeRenumbered(structureIdentifier, mmCifFile, DEFAULT_MODEL_IDENTIFIER);
+    }
+
+    /**
+     * Write a renumbered structure. Make sure to call {@link #enterWriteMode()} if you need to write structure data.
+     * @param structureIdentifier the structure identifier to write
+     * @param mmCifFile the data source
+     * @param modelIdentifier specific model to extract
+     */
+    void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile, int modelIdentifier);
 
     /**
      * Drop information on a renumbered structure.

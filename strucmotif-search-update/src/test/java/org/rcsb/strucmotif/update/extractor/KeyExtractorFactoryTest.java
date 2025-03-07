@@ -8,19 +8,19 @@ class KeyExtractorFactoryTest {
     @Test
     public void whenRequestingExtractor_thenCorrectOnesReturned() {
         KeyExtractor extractor1 = KeyExtractorFactory.getKeyExtractor("AF-Q76EI6-F1-model_v1.cif");
-        assertTrue(extractor1 instanceof AlphaFoldKeyExtractor);
+        assertInstanceOf(AlphaFoldKeyExtractor.class, extractor1);
 
         KeyExtractor extractor2 = KeyExtractorFactory.getKeyExtractor("/path/to/ma-9z55z.cif");
-        assertTrue(extractor2 instanceof ModelArchiveKeyExtractor);
+        assertInstanceOf(ModelArchiveKeyExtractor.class, extractor2);
 
         KeyExtractor extractor3 = KeyExtractorFactory.getKeyExtractor("/1acj.cif");
-        assertTrue(extractor3 instanceof GenericKeyExtractor);
+        assertInstanceOf(GenericKeyExtractor.class, extractor3);
 
         KeyExtractor extractor4 = KeyExtractorFactory.getKeyExtractor("/");
-        assertTrue(extractor4 instanceof GenericKeyExtractor);
+        assertInstanceOf(GenericKeyExtractor.class, extractor4);
 
         KeyExtractor extractor5 = KeyExtractorFactory.getKeyExtractor("");
-        assertTrue(extractor5 instanceof GenericKeyExtractor);
+        assertInstanceOf(GenericKeyExtractor.class, extractor5);
     }
 
     @Test

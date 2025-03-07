@@ -319,13 +319,13 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
     }
 
     @Override
-    public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile) {
+    public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile, int modelIdentifier) {
         if (partialFileBundle == null) {
             logger.error("[{}] Partial file bundle isn't available -- call #enterWriteMode() first!", structureIdentifier);
             throw new UncheckedIOException(new IOException("Partial file bundle isn't available -- call #enterWriteMode() first!"));
         }
 
-        byte[] bytes = renumberedStructureWriter.write(mmCifFile);
+        byte[] bytes = renumberedStructureWriter.write(mmCifFile, modelIdentifier);
         if (bytes == null) {
             logger.warn("[{}] No valid polymer chain(s) - Not writing empty file", structureIdentifier);
             return;

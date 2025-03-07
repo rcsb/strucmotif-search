@@ -53,7 +53,7 @@ public class SingleStructureDataProvider implements StructureDataProvider {
     }
 
     @Override
-    public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile) {
+    public void writeRenumbered(String structureIdentifier, MmCifFile mmCifFile, int modelIdentifier) {
         immutable();
     }
 

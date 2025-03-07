@@ -58,7 +58,7 @@ public class UpdateTestData {
 
                 try {
                     MmCifFile cif = CifIO.readFromURL(new URL("https://models.rcsb.org/" + fileName)).as(StandardSchemata.MMCIF);
-                    byte[] bytes = structureWriter.write(cif);
+                    byte[] bytes = structureWriter.write(cif, 1);
                     Files.write(p, bytes);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);

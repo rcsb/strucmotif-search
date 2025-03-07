@@ -101,7 +101,7 @@ public class DefaultResidueTypeResolver implements ResidueTypeResolver {
         this.mapping = initialize(strucmotifConfig);
         logger.debug("modified-residue-strategy is '{}', {} chemical components are mapped to {} residue-types",
                 strucmotifConfig.getModifiedResidueStrategy(),
-                mapping.keySet().size(),
+                mapping.size(),
                 mapping.values().stream().distinct().count());
     }
 

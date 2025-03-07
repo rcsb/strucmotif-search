@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.20.0
+-------------
+### Added
+- minimal support for indexing specific NMR/IHM models via UpdateItem
+
 strucmotif-search 0.19.8
 -------------
 ### Bug fix

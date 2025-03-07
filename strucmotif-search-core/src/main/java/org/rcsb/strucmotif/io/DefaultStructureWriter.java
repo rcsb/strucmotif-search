@@ -88,7 +88,7 @@ public class DefaultStructureWriter implements StructureWriter {
     }
 
     @Override
-    public byte[] write(MmCifFile source) {
+    public byte[] write(MmCifFile source, int modelIdentifier) {
         MmCifBlock block = source.getFirstBlock();
         PdbxStructAssembly pdbxStructAssembly = block.getPdbxStructAssembly();
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
@@ -126,7 +126,7 @@ public class DefaultStructureWriter implements StructureWriter {
 
         for (int row = 0; row < atomSite.getRowCount(); row++) {
             // ignore all models but the 1st
-            if (atomSite.getPdbxPDBModelNum().isDefined() && atomSite.getPdbxPDBModelNum().get(row) != 1) {
+            if (atomSite.getPdbxPDBModelNum().isDefined() && atomSite.getPdbxPDBModelNum().get(row) != modelIdentifier) {
                 continue;
             }
 

@@ -9,7 +9,8 @@ public interface StructureWriter {
     /**
      * Converts a structure data to its binary representation.
      * @param source a MmCifFile to process
+     * @param modelIdentifier identifier of the model to extract
      * @return a byte[] with the file content or null if the structure would be empty
      */
-    byte[] write(MmCifFile source);
+    byte[] write(MmCifFile source, int modelIdentifier);
 }

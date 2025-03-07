@@ -144,7 +144,7 @@ public class ResidueGraph {
         this.pairingCount = fillResidueGrid(structure, residueVectors, strucmotifConfig.getSquaredDistanceCutoff(), options);
     }
 
-    record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors, float[] normalVectors) {}
+    public record ResidueVectors(int[] residueIndices, float[] backboneVectors, float[] sideChainVectors, float[] normalVectors) {}
 
     private ResidueVectors populateResidueVectors(Structure structure, ResidueGraphOptions options) {
         int valid = 0;

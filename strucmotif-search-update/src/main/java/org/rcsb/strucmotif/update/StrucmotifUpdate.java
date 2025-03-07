@@ -302,7 +302,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
             // write renumbered structure
             logger.debug("[{}] [{}] Writing renumbered structure file", context.partitionContext, structureIdentifier);
-            structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile);
+            structureDataProvider.writeRenumbered(structureIdentifier, mmCifFile, item.getModelIdentifier());
             context.processed.add(new StructureInformation(structureIdentifier, structureIndex, majorRevision, minorRevision));
         } catch (IOException e) {
             throw new UncheckedIOException("Cif parsing failed for " + structureIdentifier, e);
@@ -596,7 +596,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
                                 throw new IllegalArgumentException("Cannot parse line: '" + id + "' - not a valid URL");
                             }
                         } else {
-                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-digit-entryId}' or '${identifier},${url}'");
+                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-character-entryId}' or '${identifier},${url}'");
                         }
                     })
                     // can't be toList() as shuffle will happen downstream

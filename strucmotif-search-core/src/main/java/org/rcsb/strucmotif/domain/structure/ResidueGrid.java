@@ -221,5 +221,5 @@ public class ResidueGrid {
         }
     }
 
-    record ResidueContact(int i, int j, float distance) {}
+    public record ResidueContact(int i, int j, float distance) {}
 }

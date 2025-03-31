@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.20.1
+-------------
+### General
+- Dependency updates
+
 strucmotif-search 0.20.0
 -------------
 ### Added

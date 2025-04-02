@@ -277,7 +277,7 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
 
         // during the update, this file might only be known in the partial update file
         String filename = getRenumberedFilename(structureIdentifier);
-        if (partialFileBundle.containsFile(filename)) {
+        if (partialFileBundle != null && partialFileBundle.containsFile(filename)) {
             try {
                 return readFromInputStream(toInputStream(partialFileBundle.readFile(filename)));
             } catch (IOException e) {

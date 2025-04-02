@@ -4,6 +4,7 @@ import org.rcsb.ffindex.FileBundleIO;
 import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InvertedIndexBackend;
+import org.rcsb.strucmotif.config.ReadErrorStrategy;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.io.codec.BucketCodec;
 import org.rcsb.strucmotif.domain.bucket.ArrayBucket;
@@ -46,6 +47,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
     // paths for 'temporary' bundle written when 'production' data is getting modified
     private final Path temporaryDataPath;
     private final Path temporaryIndexPath;
+    private final ReadErrorStrategy readErrorStrategy;
 
     /**
      * Construct an inverted index instance.
@@ -61,6 +63,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
         this.indexPath = rootPath.resolve(StrucmotifConfig.INDEX + StrucmotifConfig.INDEX_EXT);
         this.temporaryDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.TMP_EXT);
         this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
+        this.readErrorStrategy = strucmotifConfig.getReadErrorStrategy();
     }
 
     /**
@@ -310,8 +313,28 @@ public class DefaultInvertedIndex implements InvertedIndex {
         try {
             return bucketCodec.decode(getByteBuffer(filename));
         } catch (IOException e) {
-            throw new UncheckedIOException("can't read " + filename, e);
+            switch (readErrorStrategy) {
+                case THROW -> throw new UncheckedIOException("failed to read " + filename, e);
+                case EXIT -> {
+                    logger.error("Error while reading {} -- terminating process", filename, e);
+                    System.exit(74);
+                }
+                case REINITIALIZE -> {
+                    try {
+                        logger.error("Error while reading {} -- trying to reinitialize file bundle", filename, e);
+                        tearDown();
+                        logger.info("Closed file bundle successfully");
+                        setUp();
+                        logger.info("Re-opened file bundle successfully");
+                        return bucketCodec.decode(getByteBuffer(filename));
+                    } catch (IOException f) {
+                        logger.error("Error while re-initializing file bundle -- terminating process", f);
+                        System.exit(74);
+                    }
+                }
+            }
         }
+        return null;
     }
 
     private ByteBuffer getByteBuffer(String filename) throws IOException {

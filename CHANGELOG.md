@@ -5,6 +5,7 @@ Unreleased
 -------------
 ### Bug fix
 - Fix runtime behavior when `in-memory-strategy = OFF`
+- Report selections that aren't in the same assembly as `IllegalQueryDefinitionException`
 
 strucmotif-search 0.20.1
 -------------

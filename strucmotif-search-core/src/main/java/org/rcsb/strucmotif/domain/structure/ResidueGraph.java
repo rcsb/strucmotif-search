@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.domain.structure;
 
 import org.rcsb.strucmotif.align.QuaternionAlignmentService;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.core.IllegalQueryDefinitionException;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.motif.*;
 import org.slf4j.Logger;
@@ -173,7 +174,7 @@ public class ResidueGraph {
                 break;
             }
             if (!found) {
-                throw new NoSuchElementException("Failed to find all residues: '" + options.selections + "' in the same assembly of '" + structure.getStructureIdentifier() + "'");
+                throw new IllegalQueryDefinitionException("Failed to find all residues: '" + options.selections + "' in the same assembly of '" + structure.getStructureIdentifier() + "'");
             }
         } else if (options.mode == ResidueGraphMode.DEPOSITED) {
             int j = 0;

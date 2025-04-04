@@ -260,7 +260,7 @@ public class DefaultStrucmotifRuntime implements StrucmotifRuntime {
             executorService.shutdown();
         } catch (TimeoutException e) {
             future.cancel(true);
-            logger.error("Query was interrupted because it exceeded the timeout of {} ms", timeout);
+            logger.error("[{}] Query was interrupted because it exceeded the timeout of {} ms", context.getId(), timeout);
             throw new QueryTimeoutException("Query was interrupted because it exceeded the timeout of " + timeout + " ms, try simplifying your query e.g. by removing exchanges");
         } catch (Exception e) {
             // unwrap specific exceptions

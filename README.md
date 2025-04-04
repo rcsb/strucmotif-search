@@ -130,6 +130,7 @@ Strucmotif.detectMotifs()
 | `max-results`           | Maximum number of results that will be returned              | `50,000`               |
 | `max-motif-size`        | Maximum number of residues that may define a motif           | `10`                   |
 | `per-query-threads`     | Number of worker threads per query                           | available processors   |
+| `read-error-strategy`   | Behavior upon file bundle read error                         | `reinitialize`         |
 | `query-timeout`         | Interrupt queries after `n` milliseconds                     | `none`                 |
 | `root-path`             | Path where data files will be written                        | `/opt/data/`           |
 

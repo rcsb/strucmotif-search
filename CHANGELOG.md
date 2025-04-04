@@ -6,6 +6,7 @@ Unreleased
 ### Bug fix
 - Fix runtime behavior when `in-memory-strategy = OFF`
 - Report selections that aren't in the same assembly as `IllegalQueryDefinitionException`
+- Experimental: Add `read-error-strategy` that allows to `throw`, `exit`, or `reinitialize` upon failed file bundle reads
 
 strucmotif-search 0.20.1
 -------------

@@ -116,6 +116,10 @@ public class StrucmotifConfig {
      */
     private ResidueGraphStrategy residueGraphStrategy = ResidueGraphStrategy.RESIDUES_IN_CONTACT;
     /**
+     * How to address unexpected read access to index file bundle?
+     */
+    private ReadErrorStrategy readErrorStrategy = ReadErrorStrategy.REINITIALIZE;
+    /**
      * Timeout queries after this many milliseconds. Set to Integer.MAX_VALUE to not enforce any timeout.
      */
     private int queryTimeout = Integer.MAX_VALUE;
@@ -556,5 +560,21 @@ public class StrucmotifConfig {
      */
     public void setQueryTimeout(int queryTimeout) {
         this.queryTimeout = queryTimeout;
+    }
+
+    /**
+     * Reports the read error behavior.
+     * @return throw, exit, or reinit?
+     */
+    public ReadErrorStrategy getReadErrorStrategy() {
+        return readErrorStrategy;
+    }
+
+    /**
+     * Configure read error behavior.
+     * @param readErrorStrategy throw, exit, or reinit?
+     */
+    public void setReadErrorStrategy(ReadErrorStrategy readErrorStrategy) {
+        this.readErrorStrategy = readErrorStrategy;
     }
 }

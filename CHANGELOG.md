@@ -1,7 +1,7 @@
 Strucmotif-search Changelog
 =============
 
-Unreleased
+strucmotif-search 0.21.0
 -------------
 ### Bug fix
 - Fix runtime behavior when `in-memory-strategy = OFF`

@@ -333,8 +333,8 @@ public class DefaultInvertedIndex implements InvertedIndex {
                     }
                 }
             }
+            return null;
         }
-        return null;
     }
 
     private ByteBuffer getByteBuffer(String filename) throws IOException {

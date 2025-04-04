@@ -5,7 +5,7 @@ Unreleased
 -------------
 ### Bug fix
 - Fix runtime behavior when `in-memory-strategy = OFF`
-- Add `read-error-strategy` that allows to `throw`, `exit`, or `reinitialize` upon failed file bundle reads
+- Experimental: Add `read-error-strategy` that allows to `throw`, `exit`, or `reinitialize` upon failed file bundle reads
 
 strucmotif-search 0.20.1
 -------------

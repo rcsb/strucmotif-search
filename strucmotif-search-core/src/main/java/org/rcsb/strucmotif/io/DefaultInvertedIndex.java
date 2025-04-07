@@ -25,7 +25,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,8 +49,6 @@ public class DefaultInvertedIndex implements InvertedIndex {
     private final Path temporaryDataPath;
     private final Path temporaryIndexPath;
     private final ReadErrorStrategy readErrorStrategy;
-    // lock that can be acquired by a single select() call upon failure -- will block other reads until the reinit is complete
-    private final ReentrantReadWriteLock reinitLock;
 
     /**
      * Construct an inverted index instance.
@@ -68,7 +65,6 @@ public class DefaultInvertedIndex implements InvertedIndex {
         this.temporaryDataPath = dataPath.resolveSibling(dataPath.getFileName() + StrucmotifConfig.TMP_EXT);
         this.temporaryIndexPath = indexPath.resolveSibling(indexPath.getFileName() + StrucmotifConfig.TMP_EXT);
         this.readErrorStrategy = strucmotifConfig.getReadErrorStrategy();
-        this.reinitLock = new ReentrantReadWriteLock();
     }
 
     /**
@@ -315,28 +311,22 @@ public class DefaultInvertedIndex implements InvertedIndex {
             return ArrayBucket.EMPTY_BUCKET;
         }
 
-        reinitLock.readLock().lock();
         try {
             return bucketCodec.decode(getByteBuffer(filename));
         } catch (IOException e) {
-            reinitLock.readLock().unlock();
-            return handleReadError(residuePairDescriptor, filename, e);
-        } finally {
-            // make sure to unlock before returning
-            if (reinitLock.getReadHoldCount() > 0) {
-                reinitLock.readLock().unlock();
-            }
+            handleReadError(residuePairDescriptor, filename, e); // should throw or exit
+            return null; // unreachable
         }
     }
 
     /**
-     * Try to recover from a failed read, which usually indicates that the file bundle entered a bad state.
+     * Handle a failed read, which usually indicates that the file bundle entered a bad state, which isn't easily
+     * recoverable but rather leads to subsequent accesses failing too.
      * @param residuePairDescriptor encoded descriptor that caused read error
      * @param filename resolved filename that caused read error
      * @param e the cause of the trouble
-     * @return data if op succeeded, otherwise null
      */
-    private ArrayBucket handleReadError(int residuePairDescriptor, String filename, IOException e) {
+    private void handleReadError(int residuePairDescriptor, String filename, IOException e) {
         String resolved = ResiduePairDescriptor.toString(residuePairDescriptor);
         switch (readErrorStrategy) {
             case THROW -> throw new UncheckedIOException("failed to read " + filename + "(" + resolved + ")", e);
@@ -344,31 +334,7 @@ public class DefaultInvertedIndex implements InvertedIndex {
                 logger.error("Error while reading {} ({}) -- terminating process", filename, resolved, e);
                 System.exit(74);
             }
-            case REINITIALIZE -> {
-                reinitLock.writeLock().lock(); // block other threads
-                try {
-                    logger.error("Error while reading {} ({}) -- trying to reinitialize file bundle", filename, resolved, e);
-                    tearDown();
-                    logger.info("Closed file bundle successfully");
-                    setUp();
-                    logger.info("Re-opened file bundle successfully");
-
-                    // now that reinit is done, try again
-                    reinitLock.readLock().lock(); // downgrade
-                    try {
-                        return bucketCodec.decode(getByteBuffer(filename));
-                    } finally {
-                        reinitLock.readLock().unlock();
-                    }
-                } catch (IOException f) {
-                    logger.error("Error while re-initializing file bundle -- terminating process", f);
-                    System.exit(74);
-                } finally {
-                    reinitLock.writeLock().unlock();
-                }
-            }
         }
-        return null;
     }
 
     private ByteBuffer getByteBuffer(String filename) throws IOException {

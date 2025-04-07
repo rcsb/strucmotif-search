@@ -118,7 +118,7 @@ public class StrucmotifConfig {
     /**
      * How to address unexpected read access to index file bundle?
      */
-    private ReadErrorStrategy readErrorStrategy = ReadErrorStrategy.REINITIALIZE;
+    private ReadErrorStrategy readErrorStrategy = ReadErrorStrategy.EXIT;
     /**
      * Timeout queries after this many milliseconds. Set to Integer.MAX_VALUE to not enforce any timeout.
      */

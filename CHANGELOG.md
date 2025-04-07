@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.22.0
+-------------
+### Bug fix
+- Experimental: Drop `reinitialize` `read-error-strategy` again and make `exit` the default
+
 strucmotif-search 0.21.0
 -------------
 ### Bug fix

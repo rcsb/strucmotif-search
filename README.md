@@ -66,7 +66,7 @@ strucmotif-search is distributed by maven and supports Java 11+. To get started,
 <dependency>
   <groupId>org.rcsb</groupId>
   <artifactId>strucmotif-search</artifactId>
-  <version>0.20.1</version>
+  <version>0.22.0</version>
 </dependency>
 ```
 
@@ -130,7 +130,7 @@ Strucmotif.detectMotifs()
 | `max-results`           | Maximum number of results that will be returned              | `50,000`               |
 | `max-motif-size`        | Maximum number of residues that may define a motif           | `10`                   |
 | `per-query-threads`     | Number of worker threads per query                           | available processors   |
-| `read-error-strategy`   | Behavior upon file bundle read error                         | `reinitialize`         |
+| `read-error-strategy`   | Behavior upon file bundle read error                         | `exit`                 |
 | `query-timeout`         | Interrupt queries after `n` milliseconds                     | `none`                 |
 | `root-path`             | Path where data files will be written                        | `/opt/data/`           |
 

@@ -5,7 +5,6 @@ package org.rcsb.strucmotif.config;
  * Though the lack of exceptions leading up to the error might indicate that the root cause is bad concurrency.
  */
 public enum ReadErrorStrategy {
-    THROW, // throw exception at query level, ignore at service
-    EXIT, // throw exception at query level, terminate compromised service
-    REINITIALIZE // reinitialize compromised file bundle as needed
+    THROW, // throw exception at query level, ignore at service level
+    EXIT, // terminate compromised service
 }

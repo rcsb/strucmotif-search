@@ -144,7 +144,23 @@ all structure files and add them to an inverted index that allows efficient sear
 Details can be found in:
 [UPDATE.md](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-update/UPDATE.md)
 
+## Files Needed to Run Service
+The update produces 5 files that are needed for the service to run:
+- known.list - human-readable text file, containing holdings incl. identifiers of all indexed entries and their revision data
+- renumbered.ffindex - human-readable file that describes contents and offsets of the individual files
+- renumbered.data - bundle of highly-optimized structure data in [BinaryCIF](https://github.com/molstar/BinaryCIF) format
+- index.ffindex - human-readable file that describes contents and offsets of the individual files
+- index.data - inverted index as bundle of binary [colfer](https://github.com/pascaldekloe/colfer) files
+
+Note that these files can't be mixed-and-matched. They contain cross-references and if you update or manipulate one, 
+you'll need to edit all other files to ensure consistency.
+
 ## Implementation Details
+### Addressing Structures
+Entries might have prohibitively long String identifiers. The library uses an internally managed `StructureIndex` to 
+address individual structures by a simple `int` value. This mapping is informed by the content of `known.list` and 
+established by `StructureIndexProvider`.
+
 ### Addressing Residues
 Two address schemes exist. `LabelSelection` is a high-level, object-based way of referencing individual residues. It 
 uses a combination of mmCIF properties, namely `label_asym_id`, `struct_oper_id`, and `label_seq_id`:

@@ -146,11 +146,11 @@ Details can be found in:
 
 ## Files Needed to Run Service
 The update produces 5 files that are needed for the service to run:
-- known.list - human-readable text file, containing holdings incl. identifiers of all indexed entries and their revision data
-- renumbered.ffindex - human-readable file that describes contents and offsets of the individual files
-- renumbered.data - bundle of highly-optimized structure data in [BinaryCIF](https://github.com/molstar/BinaryCIF) format
-- index.ffindex - human-readable file that describes contents and offsets of the individual files
-- index.data - inverted index as bundle of binary [colfer](https://github.com/pascaldekloe/colfer) files
+- known.list - human-readable text file, containing holdings incl. identifiers of all indexed entries and their revision data. 4 records per line: 1) ... 
+- renumbered.ffindex - human-readable file that describes contents and offsets of the individual files. Tab-delimited with 3 records per line: 1) ...
+- renumbered.data - bundle of highly-optimized structure data in [BinaryCIF](https://github.com/molstar/BinaryCIF) format. The data is: ...
+- index.ffindex - human-readable file that describes contents and offsets of the individual files. Tab-delimited with 3 records per line: 1) ...
+- index.data - inverted index as bundle of binary [colfer](https://github.com/pascaldekloe/colfer) files. Readable with ffindex-java or similar implementations, .... blah blah
 
 Note that these files can't be mixed-and-matched. They contain cross-references and if you update or manipulate one, 
 you'll need to edit all other files to ensure consistency.

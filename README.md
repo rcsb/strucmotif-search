@@ -146,14 +146,21 @@ Details can be found in:
 
 ## Files Needed to Run Service
 The update produces 5 files that are needed for the service to run:
-- known.list - human-readable text file, containing holdings incl. identifiers of all indexed entries and their revision data. 4 records per line: 1) ... 
-- renumbered.ffindex - human-readable file that describes contents and offsets of the individual files. Tab-delimited with 3 records per line: 1) ...
-- renumbered.data - bundle of highly-optimized structure data in [BinaryCIF](https://github.com/molstar/BinaryCIF) format. The data is: ...
-- index.ffindex - human-readable file that describes contents and offsets of the individual files. Tab-delimited with 3 records per line: 1) ...
-- index.data - inverted index as bundle of binary [colfer](https://github.com/pascaldekloe/colfer) files. Readable with ffindex-java or similar implementations, .... blah blah
+| File               | Format | Details                                                      |
+|--------------------|--------|--------------------------------------------------------------|
+| known.list         | human-readable TSV | current holdings, incl. identifiers of all index entries and their revision history |
+| renumbered.ffindex | human-readable TSV | summary of all [optimized 3D structure data](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-core/src/main/java/org/rcsb/strucmotif/io/DefaultStructureWriter.java) as .bcif.gz |
+| renumbered.data    | [BinaryCIF](https://github.com/molstar/BinaryCIF) files | all optimized 3D structure data, concatenated into one file, separated by `\0` |
+| index.ffindex      | human-readable TSV | summary of all [inverted index](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-core/src/main/java/org/rcsb/strucmotif/io/DefaultInvertedIndex.java) files (one per present [residue-pair descriptor](https://github.com/rcsb/strucmotif-search/blob/master/strucmotif-search-core/src/main/java/org/rcsb/strucmotif/domain/motif/ResiduePairDescriptor.java)) |
+| index.data         | [colfer](https://github.com/pascaldekloe/colfer) files | all individual index files, concatenated into one file, separated by `\0` |
 
 Note that these files can't be mixed-and-matched. They contain cross-references and if you update or manipulate one, 
-you'll need to edit all other files to ensure consistency.
+you'll need to edit all other files to ensure consistency. File bundles of `.ffindex` and `.data` can be read and manipulated
+using [ffindex-java](https://github.com/rcsb/ffindex-java) or similar implementations.
+
+`known.list` contains tab-separated 4 values per line: `entryId` (original identifier), `structureIndex` (internal `int` identifer), `majorRevision`, and `minorRevision` (tracking the revision history and informing what needs updating).
+
+`.ffindex` files contain 3 tab-separated values per line: `filename`, `offset` (`long` value that captures where this file starts), and `length` (filesize in bytes).
 
 ## Implementation Details
 ### Addressing Structures

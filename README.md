@@ -22,8 +22,9 @@ from a reference structure or uploaded by the user.
 Structural motif searching is available as part of the [RCSB Advanced Search](https://www.rcsb.org/search/advanced/strucmotif) and [RCSB Mol* plugin](https://www.rcsb.org/3d-view). [Help documentation is available](https://www.rcsb.org/docs/search-and-browse/advanced-search/structure-motif-search).
 
 ## Performance
-Current benchmark times to search in `208,702` PDB structures and `1,068,577` AlphaFold/RoseTTAFold predictions as of `8/16/23`, obtained on an instance with 6 cores and 64 
-GB memory. All structure data is held in memory, inverted index data is read from an SSD.
+Current benchmark times to search in `208,702` PDB structures and `1,068,577` AlphaFold/RoseTTAFold predictions as of 
+`8/16/23`, obtained on an instance with 6 cores and 64 GB memory. All structure data is held in memory, inverted index 
+data is read from an SSD.
 
 ### Allowing only Experimental/Archived Structures
 | Motif                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Definition                                                                   | Found Assemblies | 'Paths' Time [ms] | 'Score' Time [ms] | Total Time [ms] |
@@ -158,9 +159,11 @@ Note that these files can't be mixed-and-matched. They contain cross-references 
 you'll need to edit all other files to ensure consistency. File bundles of `.ffindex` and `.data` can be read and manipulated
 using [ffindex-java](https://github.com/rcsb/ffindex-java) or similar implementations.
 
-`known.list` contains tab-separated 4 values per line: `entryId` (original identifier), `structureIndex` (internal `int` identifer), `majorRevision`, and `minorRevision` (tracking the revision history and informing what needs updating).
+`known.list` contains tab-separated 4 values per line: `entryId` (original identifier), `structureIndex` (internal `int`
+identifier), `majorRevision`, and `minorRevision` (tracking the revision history and informing what needs updating).
 
-`.ffindex` files contain 3 tab-separated values per line: `filename`, `offset` (`long` value that captures where this file starts), and `length` (filesize in bytes).
+`.ffindex` files contain 3 tab-separated values per line: `filename`, `offset` (`long` value that captures where this 
+file starts), and `length` (filesize in bytes).
 
 ## Implementation Details
 ### Addressing Structures
@@ -175,18 +178,23 @@ uses a combination of mmCIF properties, namely `label_asym_id`, `struct_oper_id`
 LabelSelection ref = new LabelSelection("A", "1", 123);
 ```
 
-Internally, access is facilitated using 32-bit unsigned primitive encoded integers. It doesn't follow any particular 
-layout rather, all encountered residues are addressed by their index. Chain boundaries are ignored. Operations required
-for assemblies are honored as they occur in the source file and merely increment the counter.
-Additional work is done to preserve information on chains and assemblies. Chain and operator names as well as boundaries
+Internally, access is facilitated using 32-bit unsigned primitive encoded integers (`ResidueIndex`). It doesn't follow
+any particular layout rather, all encountered residues are addressed by their index. Chain boundaries are ignored. 
+Operations required for assemblies are honored as they occur in the source file and merely increment the counter.
+Additional work preserves information on chains and assemblies. Chain and operator names as well as boundaries
 are stored in memory and can be used to reconstruct `LabelSelection` instances if needed.
 
 Residue pairs are identified by pairs of these `int` values. They can be stored as `long` value by chaining together 1st
 and 2nd value.
 
 ### Residue Pair Descriptor
-Residue pair descriptors capture the `label_comp_id` of both interacting residue, their backbone distance, their 
-side-chain distance, and the angle defined between both.
+[Residue pair descriptors](https://github.com/rcsb/strucmotif-search/blob/3487d846fd531952407db34ca4e5ed4ad814a82e/strucmotif-search-core/src/main/java/org/rcsb/strucmotif/domain/motif/ResiduePairDescriptor.java)
+capture the `label_comp_id` of both interacting residue, their backbone distance, their side-chain distance, and the 
+angle defined between both.
+
+They might look like `AL-4-5-4`, meaning that an alanine is in contact with a leucine, the distance of their `CA` atoms 
+is in bin 4, i.e. [4.5, 5.5) A, the distance between their `CB` atoms is in bin 5, i.e. [5.5, 6.5) A, and the angle 
+between both per-amino-acid vectors is in bin 4, i.e. [70, 90) deg.
 
 These values are the Cartesian product of ResidueType (A, 36 states, 6 bits) x ResidueType (B, 36 states, 6 bits) x 
 DistanceType (C, 32 states, 5 bits) x DistanceType (D, 32 states, 5 bits) x AngleType (E, 10 states, 4 bits) and are 
@@ -204,7 +212,22 @@ short.
 XXCCCCCD DDDDEEEE
 ```
 
-Convenience functions to work with these descriptors are provided in the `ResiduePairDescriptor` class.
+Convenience functions to work with these descriptors are provided in the `ResiduePairDescriptor` class and provide ways
+to convert between the `int` representation and its human-readable form.
+
+### The Inverted Index
+The [inverted index](https://github.com/rcsb/strucmotif-search/blob/3487d846fd531952407db34ca4e5ed4ad814a82e/strucmotif-search-core/src/main/java/org/rcsb/strucmotif/io/DefaultInvertedIndex.java)
+is structured by residue pair descriptors. All residue pair descriptors with the same geometric properties (e.g., 
+`AL-4-5-4`) are grouped together in one file.
+
+Each file holds 3 pieces of data:
+
+- `int[] structureIndices` - references each entry that contains at least 1 occurrence of this residue pair (see `StructureIndex` above)
+- `int[] positionOffsets` - defines boundaries between data on individual structures
+- `int[] identifierData` - pairs of residues within a specific structure of a certain residue pair descriptor (see `ResidueIndex` above)
+
+This data structure is encoded using [colfer](https://github.com/pascaldekloe/colfer). This produces a lot of small-ish files. These files are bundled 
+using [ffindex-java](https://github.com/rcsb/ffindex-java).
 
 ## Related Projects
 - [ciftools-java](https://github.com/rcsb/ciftools-java): mmCIF parsing and BinaryCIF implementation
@@ -212,4 +235,5 @@ Convenience functions to work with these descriptors are provided in the `Residu
 - [rcsb-molstar](https://github.com/molstar/rcsb-molstar): define motifs in 3D and visualize results
 
 ## Publication
-Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy. PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502
+Bittrich S, Burley SK, Rose AS (2020) Real-time structural motif searching in proteins using an inverted index strategy.
+PLoS Comput Biol 16(12): e1008502. https://doi.org/10.1371/journal.pcbi.1008502

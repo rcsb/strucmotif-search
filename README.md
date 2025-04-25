@@ -137,6 +137,13 @@ Strucmotif.detectMotifs()
 Configure by placing your `application.properties` on the classpath. All properties specific to this project must be 
 prefixed with `strucmotif.`.
 
+`ccd-url` provides a reference to the [Chemical Component Dictionary](https://files.wwpdb.org/pub/pdb/data/monomers/components.cif.gz).
+This file is used to handle non-standard amino acids appropriately if the `modified-residue-strategy` property is set to
+`CCD_PARENT`. This property controls how non-standard components are handled and the CCD provides a parent component for
+most modified residues, which can be used to map them to an amino acid that is known to the codebase (i.e., registered 
+as [ResidueType](https://github.com/rcsb/strucmotif-search/blob/3d6f9c37420005ab6aecf6b0d9ea27e77eb3bfbb/strucmotif-search-core/src/main/java/org/rcsb/strucmotif/domain/structure/ResidueType.java)).
+Note that this property is both needed during the update and at runtime to resolve residue types.
+
 ## Index Structure Data and Run Updates
 You will need to process your corpus of structure data before using the service. This will create an optimized version of
 all structure files and add them to an inverted index that allows efficient searching.

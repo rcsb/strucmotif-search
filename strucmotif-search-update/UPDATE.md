@@ -18,7 +18,7 @@ class Demo {
 
 Supported operations are `ADD` and `REMOVE`. Either process all current PDB structures (`full`) or provide an array of
 entry IDs you want to process (e.g., `"4HHB", "1MUW", "1EXR"`). Use `full_csm` to index all experimental PDB structures
-as well as all computed structure models integrated into rcsb.org (˜1 million AlphaFold DB structures).
+as well as all computed structure models integrated into rcsb.org (~1 million AlphaFold DB structures).
 
 ### Loading Non-Archived Structures
 It's also possible to load and index non-archived structures such as computed structure models, e.g. from the AlphaFold
@@ -83,3 +83,7 @@ Indexing is a resource-intensive process. Indexing 1.2 million entries takes abo
 default values work well with 50 GB of heap. The resulting files (index, structure data, metadata) are about 200 GB in 
 size. During indexing temporary files are created and index files may be duplicated at some point. 500 GB of available 
 disk space are recommended to run the update from scratch.
+
+If you want to index both PDB entries and CSMs, it can be advantageous to compute the PDB part first (`ADD full`) and
+once that's done, perform another update that adds the CSM content (`ADD full_csm`). This will improve performance a bit
+because there's less mixing of highly complex PDB data and smaller, simpler CSMs.

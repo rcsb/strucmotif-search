@@ -118,16 +118,19 @@
             <id>release</id>
             <build>
                 <plugins>
-                    <!-- handles propagating the build to the staging repository -->
+                    <!-- handles uploading the build to the maven central repository -->
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.7.0</version>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
+                        <version>0.8.0</version>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <publishingServerId>central</publishingServerId>
+                            <!-- If this is set to false, the artifact is only staged and then needs pushing manually via the web interface at https://central.sonatype.com/publishing/deployments -->
+                            <!-- With true it publishes automatically -->
+                            <autoPublish>true</autoPublish>
+                            <!-- NOTE this is to wait for the new release to be validated and publicly available. Not essential but nice that when maven is done, we know the artifact is publicly available -->
+                            <waitUntil>published</waitUntil>
                         </configuration>
                     </plugin>
 

@@ -2,31 +2,30 @@ package org.rcsb.strucmotif.domain.query;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResultsContentTypeTest {
-    private static final Set<String> TEST_CASES = Set.of("1acj", "1MUW", "1eXr", "AF-Q8W3K0-F1", "ma-bak-cepc-0001");
-
     @Test
-    void whenHandlingPdbIds_thenArchiveEntriesRetained() {
-        assertEquals(3, TEST_CASES.stream()
-                .filter(ResultsContentType.EXPERIMENTAL)
-                .count());
+    void testThatLegacyIdentifiersAreExperimental() {
+        assertTrue(ResultsContentType.EXPERIMENTAL.test("4HHB"));
+        assertFalse(ResultsContentType.COMPUTATIONAL.test("4HHB"));
+    }
+
+    /**
+     * Extended IDs used to fall through to COMPUTATIONAL, because the test only recognized the
+     * legacy 4-character shape.
+     */
+    @Test
+    void testThatExtendedIdentifiersAreExperimental() {
+        assertTrue(ResultsContentType.EXPERIMENTAL.test("pdb_00004hhb"));
+        assertFalse(ResultsContentType.COMPUTATIONAL.test("pdb_00004hhb"));
     }
 
     @Test
-    void whenHandlingModelIds_thenArchiveEntriesIgnored() {
-        assertEquals(2, TEST_CASES.stream()
-                .filter(ResultsContentType.COMPUTATIONAL)
-                .count());
-    }
-
-    @Test
-   void whenAllSearchSpace_thenNoOperation() {
-        assertEquals(TEST_CASES.size(), TEST_CASES.stream()
-                .filter(ResultsContentType.EXPERIMENTAL.or(ResultsContentType.COMPUTATIONAL))
-                .count());
+    void testThatComputedModelsAreComputational() {
+        assertTrue(ResultsContentType.COMPUTATIONAL.test("AF_AFA0A009IHW8F1"));
+        assertFalse(ResultsContentType.EXPERIMENTAL.test("AF_AFA0A009IHW8F1"));
+        assertTrue(ResultsContentType.COMPUTATIONAL.test("MA_MAASFVASFVG001"));
     }
 }

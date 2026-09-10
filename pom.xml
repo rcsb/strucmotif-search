@@ -54,8 +54,6 @@
         <jmh.version>1.37</jmh.version>
         <junit.version>5.12.1</junit.version>
         <mockito.version>5.16.1</mockito.version>
-        <sonar.organization>rcsb</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
@@ -99,19 +97,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <!-- https://central.sonatype.org/pages/apache-maven.html -->
-    <!-- https://github.com/chhh/sonatype-ossrh-parent/blob/master/pom.xml -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <profiles>
         <profile>

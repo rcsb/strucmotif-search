@@ -1,6 +1,19 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.23.0
+-------------
+### General
+- Support for [extended PDB IDs](https://www.rcsb.org/docs/general-help/identifiers-in-pdb)
+  (`pdb_` plus 8 lowercase alphanumerics, e.g. `pdb_00004hhb`), alongside legacy 4-character IDs and
+  computed structure model IDs
+- PDB entries are indexed under their extended ID; the caller's identifier is authoritative and
+  legacy IDs are mapped to their extended form (`4HHB` becomes `pdb_00004hhb`)
+- Identifiers are no longer upper-cased but recorded as written, since extended PDB IDs are
+  lowercase while computed structure model IDs are uppercase
+- `EntryIds`: helpers to tell PDB entries from computed structure models; anything that isn't a PDB
+  ID is a computed structure model
+
 strucmotif-search 0.22.0
 -------------
 ### Bug fix

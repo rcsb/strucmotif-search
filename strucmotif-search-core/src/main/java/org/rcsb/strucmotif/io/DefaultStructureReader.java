@@ -8,6 +8,7 @@ import org.rcsb.cif.schema.mm.MmCifFile;
 import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
+import org.rcsb.strucmotif.domain.structure.EntryIds;
 import org.rcsb.strucmotif.domain.structure.DefaultStructure;
 import org.rcsb.strucmotif.domain.structure.LabelAtomId;
 import org.rcsb.strucmotif.domain.structure.ResidueType;
@@ -80,7 +81,8 @@ public class DefaultStructureReader implements StructureReader {
             this.block = mmCifFile.getFirstBlock();
             this.atomSite = block.getAtomSite();
 
-            this.structureIdentifier = block.getBlockHeader();
+            // ciftools upper-cases block headers, so the case of an extended PDB ID has to be restored
+            this.structureIdentifier = EntryIds.canonical(block.getBlockHeader());
 
             this.labelAtomId = convertLabelAtomId(atomSite.getLabelAtomId().getArray());
             this.labelCompId = atomSite.getLabelCompId().getArray();

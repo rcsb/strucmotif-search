@@ -1,5 +1,7 @@
 package org.rcsb.strucmotif.update;
 
+import org.rcsb.strucmotif.domain.structure.EntryIds;
+
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.NoSuchElementException;
@@ -38,8 +40,10 @@ enum TestCases {
     }
 
     public static InputStream getInputStream(String key) {
+        // the update normalizes PDB IDs to their extended form, so resolve fixtures the same way
+        String normalized = EntryIds.indexed(key);
         return Arrays.stream(TestCases.values())
-                .filter(t -> t.getKey().equalsIgnoreCase(key))
+                .filter(t -> EntryIds.indexed(t.getKey()).equalsIgnoreCase(normalized))
                 .findFirst()
                 .map(TestCases::getInputStream)
                 .orElseThrow(() -> new NoSuchElementException("Couldn't find resource for case '" + key + "'"));

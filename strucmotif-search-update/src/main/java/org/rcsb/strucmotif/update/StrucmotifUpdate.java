@@ -12,6 +12,7 @@ import org.rcsb.cif.schema.mm.PdbxAuditRevisionHistory;
 import org.rcsb.cif.schema.mm.PdbxStructAssembly;
 import org.rcsb.cif.schema.mm.PdbxStructAssemblyGen;
 import org.rcsb.cif.schema.mm.PdbxStructOperList;
+import org.rcsb.strucmotif.domain.structure.EntryIds;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.motif.ResiduePairOccurrence;
 import org.rcsb.strucmotif.domain.structure.ResidueGraph;
@@ -177,7 +178,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
 
     private UpdateItem mapFile(Path path) {
         try {
-            return new UpdateItem(KeyExtractorFactory.getKey(path.toFile().getName()), path.toUri().toURL());
+            return new UpdateItem(EntryIds.indexed(KeyExtractorFactory.getKey(path.toFile().getName())), path.toUri().toURL());
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
         }
@@ -450,7 +451,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
             JsonObject jsonObject = jsonElement.getAsJsonObject();
 
             jsonObject.getAsJsonArray("result_set")
-                    .forEach(id -> out.add(new UpdateItem(id.getAsString())));
+                    .forEach(id -> out.add(new UpdateItem(EntryIds.indexed(id.getAsString()))));
         }
         return out;
     }
@@ -564,8 +565,6 @@ public class StrucmotifUpdate implements CommandLineRunner {
         return Operation.resolve(args[0]);
     }
 
-    private static final String PDB_REGEX = "^[1-9][a-zA-Z0-9]{3}|PDB_[a-zA-Z0-9]{8}$";
-    private static final String CSM_REGEX = "^[a-zA-Z0-9]+_[a-zA-Z0-9]{6,}$"; // pattern used by rcsb.org for computed structure models
     private List<UpdateItem> parseUpdateList(String[] args) throws IOException {
         int offset = 1;
         String[] ids = new String[args.length - offset];
@@ -582,21 +581,21 @@ public class StrucmotifUpdate implements CommandLineRunner {
             }
         } else {
             requested = Arrays.stream(ids)
-                    // upper-case PDB-IDs, leave URLs be
+                    // normalize PDB-IDs to their extended form, leave URLs be
                     .map(id -> {
                         String[] split = id.split(",");
-                        if (id.matches(PDB_REGEX) || id.matches(CSM_REGEX)) {
-                            return new UpdateItem(id.toUpperCase());
-                        } else if (split.length == 2) {
+                        if (split.length == 2) {
                             try {
-                                String key = split[0].toUpperCase();
+                                String key = EntryIds.indexed(split[0]);
                                 URL url = new URL(split[1]);
                                 return new UpdateItem(key, url);
                             } catch (MalformedURLException e) {
                                 throw new IllegalArgumentException("Cannot parse line: '" + id + "' - not a valid URL");
                             }
+                        } else if (split.length == 1) {
+                            return new UpdateItem(EntryIds.indexed(id));
                         } else {
-                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${4-character-entryId}' or '${identifier},${url}'");
+                            throw new IllegalArgumentException("Cannot parse line: '" + id + "' - format is '${entryId}' or '${identifier},${url}'");
                         }
                     })
                     // can't be toList() as shuffle will happen downstream

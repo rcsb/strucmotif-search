@@ -86,7 +86,7 @@ public class MotifContextBuilder implements ContextBuilder {
      * @throws IllegalQueryDefinitionException if chains/residues aren't found or if distance constraints are violated
      */
     public MotifRegistryBuilder defineByStructureAndAssemblyId(Structure structure, String assemblyIdentifier) {
-        String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
+        String structureIdentifier = structure.getStructureIdentifier();
 
         ResidueGraph residueGraph = new ResidueGraph(structure, strucmotifConfig, assembly(assemblyIdentifier));
         InvertedIndex invertedIndex = new SingleStructureInvertedIndex(residueGraph);

@@ -1,5 +1,7 @@
 package org.rcsb.strucmotif.domain.query;
 
+import org.rcsb.strucmotif.domain.structure.EntryIds;
+
 import java.util.function.Predicate;
 
 /**
@@ -10,15 +12,11 @@ public enum ResultsContentType implements Predicate<String> {
     /**
      * Return only PDB-entries.
      */
-    EXPERIMENTAL(s -> s.matches(Constants.PDB_REGEX)),
+    EXPERIMENTAL(EntryIds::isPdbId),
     /**
      * Return only computed structure models.
      */
-    COMPUTATIONAL(s -> !s.matches(Constants.PDB_REGEX));
-
-    private static class Constants {
-        private static final String PDB_REGEX = "^[0-9][a-zA-Z0-9]{3}$";
-    }
+    COMPUTATIONAL(EntryIds::isComputedModelId);
 
     private final Predicate<String> condition;
 

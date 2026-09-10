@@ -2,6 +2,7 @@ package org.rcsb.strucmotif.benchmark.integration;
 
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
+import org.rcsb.strucmotif.domain.structure.EntryIds;
 import org.rcsb.strucmotif.Strucmotif;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
 import org.rcsb.strucmotif.domain.Pair;
@@ -61,7 +62,7 @@ public class MyState {
     private String prepareUri(String raw, String structureIdentifier) {
         String pdbId = structureIdentifier.toLowerCase();
         String pdbIdUc = pdbId.toUpperCase();
-        String middle = pdbId.substring(1, 3);
+        String middle = EntryIds.middle(pdbId);
         String middleUc = middle.toUpperCase();
         return raw.replace("{middle}", middle)
                 .replace("{MIDDLE}", middleUc)

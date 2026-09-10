@@ -110,7 +110,7 @@ public class StructureContextBuilder implements ContextBuilder {
                         "file contains " + residues.size() + " residues");
             }
 
-            String structureIdentifier = structure.getStructureIdentifier().toUpperCase();
+            String structureIdentifier = structure.getStructureIdentifier();
             return new MandatoryBuilderStep(structureIdentifier, structure, labelSelections, residues);
         } catch (NoSuchElementException e) {
             // this happens when trying to access residues that are not part of the structure

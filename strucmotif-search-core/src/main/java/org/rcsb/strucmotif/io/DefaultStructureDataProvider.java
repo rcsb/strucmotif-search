@@ -7,6 +7,7 @@ import org.rcsb.ffindex.ReadableFileBundle;
 import org.rcsb.ffindex.WritableFileBundle;
 import org.rcsb.strucmotif.config.InMemoryStrategy;
 import org.rcsb.strucmotif.config.StrucmotifConfig;
+import org.rcsb.strucmotif.domain.structure.EntryIds;
 import org.rcsb.strucmotif.domain.Pair;
 import org.rcsb.strucmotif.domain.structure.Structure;
 import org.rcsb.strucmotif.math.Partition;
@@ -95,7 +96,8 @@ public class DefaultStructureDataProvider implements StructureDataProvider {
     private String prepareUri(String raw, String structureIdentifier) {
         String pdbId = structureIdentifier.toLowerCase();
         String pdbIdUc = pdbId.toUpperCase();
-        String middle = pdbId.substring(1, 3);
+        // extended IDs shard on the same characters as before
+        String middle = EntryIds.middle(pdbId);
         String middleUc = middle.toUpperCase();
         return raw.replace("{middle}", middle)
                 .replace("{MIDDLE}", middleUc)

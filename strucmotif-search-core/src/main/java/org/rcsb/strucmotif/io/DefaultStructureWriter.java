@@ -94,10 +94,11 @@ public class DefaultStructureWriter implements StructureWriter {
         PdbxStructAssemblyGen pdbxStructAssemblyGen = block.getPdbxStructAssemblyGen();
         PdbxStructOperList pdbxStructOperList = block.getPdbxStructOperList();
         AtomSite atomSite = block.getAtomSite();
-        String pdbId = block.getBlockHeader().toUpperCase();
+        // the identifier is recorded as written: extended PDB IDs are lowercase, CSM IDs are uppercase
+        String pdbId = block.getBlockHeader();
 
         MmCifBlockBuilder outputBuilder = CifBuilder.enterFile(StandardSchemata.MMCIF)
-                .enterBlock(pdbId.toUpperCase());
+                .enterBlock(pdbId);
 
         // only write explicit assembly info if not the "default" of assembly 1 and identity transform
         if (pdbxStructAssemblyGen.getRowCount() > 1 || pdbxStructOperList.getRowCount() > 1) {

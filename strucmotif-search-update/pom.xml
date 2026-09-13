@@ -8,6 +8,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>strucmotif-search-update</artifactId>
+    <name>strucmotif-search-update</name>
+    <description>Command-line tool that builds and updates the strucmotif-search inverted index</description>
 
     <dependencies>
         <dependency>

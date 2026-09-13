@@ -8,6 +8,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>strucmotif-search-benchmark</artifactId>
+    <name>strucmotif-search-benchmark</name>
+    <description>JMH benchmarks for strucmotif-search</description>
 
     <dependencies>
         <dependency>

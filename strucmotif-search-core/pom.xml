@@ -8,6 +8,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>strucmotif-search-core</artifactId>
+    <name>strucmotif-search-core</name>
+    <description>Core library providing real-time search for structural motifs in protein structures</description>
 
     <dependencies>
         <!-- BinaryCIF handling -->

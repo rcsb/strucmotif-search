@@ -48,7 +48,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.targetEncoding>UTF-8</project.build.targetEncoding>
         <spring.version>3.4.4</spring.version>
-        <ciftools.version>7.0.1</ciftools.version>
+        <ciftools.version>9.0.0</ciftools.version>
         <ffindex.version>0.2.0</ffindex.version>
         <gson.version>2.12.1</gson.version>
         <jmh.version>1.37</jmh.version>

@@ -3,8 +3,11 @@ package org.rcsb.strucmotif.io;
 import org.rcsb.cif.CifBuilder;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.CifOptions;
+import org.rcsb.cif.model.FloatColumn;
 import org.rcsb.cif.model.FloatColumnBuilder;
+import org.rcsb.cif.model.IntColumn;
 import org.rcsb.cif.model.IntColumnBuilder;
+import org.rcsb.cif.model.StrColumn;
 import org.rcsb.cif.model.StrColumnBuilder;
 import org.rcsb.cif.model.ValueKind;
 import org.rcsb.cif.schema.StandardSchemata;
@@ -30,10 +33,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -108,7 +110,7 @@ public class DefaultStructureWriter implements StructureWriter {
         }
 
         // ensure that all needed atoms are present to make this residue useful during indexing
-        List<LabelSelection> validResidues = determineValidResidues(block);
+        Set<LabelSelection> validResidues = determineValidResidues(block);
 
         MmCifCategoryBuilder.AtomSiteBuilder atomSiteBuilder = outputBuilder.enterAtomSite();
         StrColumnBuilder<MmCifCategoryBuilder.AtomSiteBuilder, MmCifBlockBuilder, MmCifFileBuilder> labelAtomId = atomSiteBuilder.enterLabelAtomId();
@@ -125,28 +127,40 @@ public class DefaultStructureWriter implements StructureWriter {
         LabelAtomId lastAcceptedAtomLabelId = LabelAtomId.UNKNOWN_ATOM;
         Set<LabelAtomId> currentlyAcceptedLabelAtomIds = EnumSet.noneOf(LabelAtomId.class);
 
+        IntColumn sourcePdbxPDBModelNum = atomSite.getPdbxPDBModelNum();
+        boolean modelNumDefined = sourcePdbxPDBModelNum.isDefined();
+        StrColumn sourceTypeSymbol = atomSite.getTypeSymbol();
+        StrColumn sourceLabelAsymId = atomSite.getLabelAsymId();
+        IntColumn sourceLabelSeqId = atomSite.getLabelSeqId();
+        StrColumn sourceLabelAtomId = atomSite.getLabelAtomId();
+        StrColumn sourceLabelAltId = atomSite.getLabelAltId();
+        StrColumn sourceLabelCompId = atomSite.getLabelCompId();
+        FloatColumn sourceCartnX = atomSite.getCartnX();
+        FloatColumn sourceCartnY = atomSite.getCartnY();
+        FloatColumn sourceCartnZ = atomSite.getCartnZ();
+
         for (int row = 0; row < atomSite.getRowCount(); row++) {
             // ignore all models but the 1st
-            if (atomSite.getPdbxPDBModelNum().isDefined() && atomSite.getPdbxPDBModelNum().get(row) != modelIdentifier) {
+            if (modelNumDefined && sourcePdbxPDBModelNum.get(row) != modelIdentifier) {
                 continue;
             }
 
             // skip hydrogen atoms
-            String element = atomSite.getTypeSymbol().get(row);
+            String element = sourceTypeSymbol.get(row);
             if ("H".equals(element) || "D".equals(element) || "T".equals(element)) {
                 continue;
             }
 
             // skip non-polymer
-            if (atomSite.getLabelSeqId().getValueKind(row) != ValueKind.PRESENT) {
+            if (sourceLabelSeqId.getValueKind(row) != ValueKind.PRESENT) {
                 continue;
             }
 
-            String currentLabelAsymId = atomSite.getLabelAsymId().get(row);
-            int currentLabelSeqId = atomSite.getLabelSeqId().get(row);
-            LabelAtomId currentLabelAtomId = LabelAtomId.ofLabelAtomId(atomSite.getLabelAtomId().get(row));
-            String currentLabelAltId = atomSite.getLabelAltId().get(row);
-            String currentLabelCompId = atomSite.getLabelCompId().get(row);
+            String currentLabelAsymId = sourceLabelAsymId.get(row);
+            int currentLabelSeqId = sourceLabelSeqId.get(row);
+            LabelAtomId currentLabelAtomId = LabelAtomId.ofLabelAtomId(sourceLabelAtomId.get(row));
+            String currentLabelAltId = sourceLabelAltId.get(row);
+            String currentLabelCompId = sourceLabelCompId.get(row);
 
             if (currentLabelAtomId == LabelAtomId.UNKNOWN_ATOM) {
                 continue;
@@ -192,9 +206,9 @@ public class DefaultStructureWriter implements StructureWriter {
             labelCompId.add(currentLabelCompId);
             labelAsymId.add(currentLabelAsymId);
             labelSeqId.add(currentLabelSeqId);
-            cartnX.add(atomSite.getCartnX().get(row));
-            cartnY.add(atomSite.getCartnY().get(row));
-            cartnZ.add(atomSite.getCartnZ().get(row));
+            cartnX.add(sourceCartnX.get(row));
+            cartnY.add(sourceCartnY.get(row));
+            cartnZ.add(sourceCartnZ.get(row));
         }
         atomSiteBuilder.leaveCategory();
         MmCifFile outputFile = outputBuilder.leaveBlock().leaveFile();
@@ -211,31 +225,38 @@ public class DefaultStructureWriter implements StructureWriter {
         }
     }
 
-    private List<LabelSelection> determineValidResidues(MmCifBlock block) {
+    private Set<LabelSelection> determineValidResidues(MmCifBlock block) {
         AtomSite atomSite = block.getAtomSite();
+        // resolve columns once
+        IntColumn sourceLabelSeqId = atomSite.getLabelSeqId();
+        StrColumn sourceLabelAsymId = atomSite.getLabelAsymId();
+        StrColumn sourceLabelCompId = atomSite.getLabelCompId();
+        StrColumn sourceLabelAtomId = atomSite.getLabelAtomId();
+        FloatColumn sourceBIsoOrEquiv = atomSite.getBIsoOrEquiv();
+        boolean bIsoOrEquivDefined = sourceBIsoOrEquiv.isDefined();
+        MaQaMetricLocal category = block.getMaQaMetricLocal();
         Map<LabelSelection, ResidueType> residueTypes = new HashMap<>();
         Map<LabelSelection, Set<LabelAtomId>> presentAtoms = new HashMap<>();
         for (int row = 0; row < atomSite.getRowCount(); row++) {
-            if (atomSite.getLabelSeqId().getValueKind(row) != ValueKind.PRESENT) {
+            if (sourceLabelSeqId.getValueKind(row) != ValueKind.PRESENT) {
                 continue;
             }
 
-            String labelAsymId = atomSite.getLabelAsymId().get(row);
-            int labelSeqId = atomSite.getLabelSeqId().get(row);
+            String labelAsymId = sourceLabelAsymId.get(row);
+            int labelSeqId = sourceLabelSeqId.get(row);
 
             // filter away residues with low confidence, if requested
             if (residueQualityStrategy != ResidueQualityStrategy.NONE) {
                 switch (residueQualityStrategy) {
                     // filter by B-factor
                     case BFACTOR_ABOVE_CUTOFF: case BFACTOR_BELOW_CUTOFF:
-                        if (atomSite.getBIsoOrEquiv().isDefined() && atomSite.getBIsoOrEquiv().getValueKind(row) == ValueKind.PRESENT) {
-                            if (!residueQualityStrategy.test(atomSite.getBIsoOrEquiv().get(row), residueQualityCutoff)) {
+                        if (bIsoOrEquivDefined && sourceBIsoOrEquiv.getValueKind(row) == ValueKind.PRESENT) {
+                            if (!residueQualityStrategy.test(sourceBIsoOrEquiv.get(row), residueQualityCutoff)) {
                                 continue;
                             }
                         }
                     // filter by qa-metric
                     case QA_METRIC_LOCAL_ABOVE_CUTOFF: case QA_METRIC_LOCAL_BELOW_CUTOFF:
-                        MaQaMetricLocal category = block.getMaQaMetricLocal();
                         if (category.isDefined()) {
                             double metricValue = findMetricValue(category,labelAsymId, labelSeqId);
                             if (!residueQualityStrategy.test(metricValue, residueQualityCutoff)) {
@@ -248,7 +269,7 @@ public class DefaultStructureWriter implements StructureWriter {
             }
 
             LabelSelection labelSelection = new LabelSelection(labelAsymId, DEFAULT_OPERATOR, labelSeqId);
-            ResidueType residueType = residueTypeResolver.selectResidueType(atomSite.getLabelCompId().get(row));
+            ResidueType residueType = residueTypeResolver.selectResidueType(sourceLabelCompId.get(row));
             // don't write/index any unknown components (some will still pass this check due to microheterogenity like B-2 in 1aw8)
             if (residueType == ResidueType.UNKNOWN_COMPONENT) {
                 continue;
@@ -256,9 +277,10 @@ public class DefaultStructureWriter implements StructureWriter {
 
             residueTypes.put(labelSelection, residueType);
             Set<LabelAtomId> atoms = presentAtoms.computeIfAbsent(labelSelection, e -> EnumSet.noneOf(LabelAtomId.class));
-            atoms.add(LabelAtomId.ofLabelAtomId(atomSite.getLabelAtomId().get(row)));
+            atoms.add(LabelAtomId.ofLabelAtomId(sourceLabelAtomId.get(row)));
         }
-        List<LabelSelection> validResidues = new ArrayList<>();
+        // a Set: write() queries this once per atom
+        Set<LabelSelection> validResidues = new HashSet<>();
         for (Map.Entry<LabelSelection, ResidueType> entry : residueTypes.entrySet()) {
             LabelSelection labelSelection = entry.getKey();
             ResidueType residueType = entry.getValue();

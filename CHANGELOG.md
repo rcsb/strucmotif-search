@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.23.1
+-------------
+### General
+- fix quadratic runtime when writing large PDB/IHM entries like pdb_00009ab1 or pdb_00009aav
+
 strucmotif-search 0.23.0
 -------------
 ### General

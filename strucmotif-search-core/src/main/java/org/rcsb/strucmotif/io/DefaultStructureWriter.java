@@ -234,7 +234,11 @@ public class DefaultStructureWriter implements StructureWriter {
         StrColumn sourceLabelAtomId = atomSite.getLabelAtomId();
         FloatColumn sourceBIsoOrEquiv = atomSite.getBIsoOrEquiv();
         boolean bIsoOrEquivDefined = sourceBIsoOrEquiv.isDefined();
-        MaQaMetricLocal category = block.getMaQaMetricLocal();
+        // only needed when filtering by local QA metric, null if the file doesn't provide one
+        Map<LabelSelection, Double> metricValues = switch (residueQualityStrategy) {
+            case QA_METRIC_LOCAL_ABOVE_CUTOFF, QA_METRIC_LOCAL_BELOW_CUTOFF -> collectMetricValues(block.getMaQaMetricLocal());
+            default -> null;
+        };
         Map<LabelSelection, ResidueType> residueTypes = new HashMap<>();
         Map<LabelSelection, Set<LabelAtomId>> presentAtoms = new HashMap<>();
         for (int row = 0; row < atomSite.getRowCount(); row++) {
@@ -242,33 +246,26 @@ public class DefaultStructureWriter implements StructureWriter {
                 continue;
             }
 
-            String labelAsymId = sourceLabelAsymId.get(row);
-            int labelSeqId = sourceLabelSeqId.get(row);
+            LabelSelection labelSelection = new LabelSelection(sourceLabelAsymId.get(row), DEFAULT_OPERATOR, sourceLabelSeqId.get(row));
 
             // filter away residues with low confidence, if requested
-            if (residueQualityStrategy != ResidueQualityStrategy.NONE) {
-                switch (residueQualityStrategy) {
-                    // filter by B-factor
-                    case BFACTOR_ABOVE_CUTOFF: case BFACTOR_BELOW_CUTOFF:
-                        if (bIsoOrEquivDefined && sourceBIsoOrEquiv.getValueKind(row) == ValueKind.PRESENT) {
-                            if (!residueQualityStrategy.test(sourceBIsoOrEquiv.get(row), residueQualityCutoff)) {
-                                continue;
-                            }
-                        }
-                    // filter by qa-metric
-                    case QA_METRIC_LOCAL_ABOVE_CUTOFF: case QA_METRIC_LOCAL_BELOW_CUTOFF:
-                        if (category.isDefined()) {
-                            double metricValue = findMetricValue(category,labelAsymId, labelSeqId);
-                            if (!residueQualityStrategy.test(metricValue, residueQualityCutoff)) {
-                                continue;
-                            }
-                        }
-                    default:
-                        // everything else is allowed to pass
+            switch (residueQualityStrategy) {
+                case BFACTOR_ABOVE_CUTOFF, BFACTOR_BELOW_CUTOFF -> {
+                    if (bIsoOrEquivDefined && sourceBIsoOrEquiv.getValueKind(row) == ValueKind.PRESENT
+                            && !residueQualityStrategy.test(sourceBIsoOrEquiv.get(row), residueQualityCutoff)) {
+                        continue;
+                    }
+                }
+                case QA_METRIC_LOCAL_ABOVE_CUTOFF, QA_METRIC_LOCAL_BELOW_CUTOFF -> {
+                    if (metricValues != null && !residueQualityStrategy.test(findMetricValue(metricValues, labelSelection), residueQualityCutoff)) {
+                        continue;
+                    }
+                }
+                case NONE -> {
+                    // everything is allowed to pass
                 }
             }
 
-            LabelSelection labelSelection = new LabelSelection(labelAsymId, DEFAULT_OPERATOR, labelSeqId);
             ResidueType residueType = residueTypeResolver.selectResidueType(sourceLabelCompId.get(row));
             // don't write/index any unknown components (some will still pass this check due to microheterogenity like B-2 in 1aw8)
             if (residueType == ResidueType.UNKNOWN_COMPONENT) {
@@ -323,13 +320,32 @@ public class DefaultStructureWriter implements StructureWriter {
         };
     }
 
-    private double findMetricValue(MaQaMetricLocal category, String labelAsymId, int labelSeqId) {
-        for (int i = 0; i < category.getRowCount(); i++) {
-            if (category.getLabelAsymId().get(i).equals(labelAsymId) && category.getLabelSeqId().get(i) == labelSeqId) {
-                return category.getMetricValue().get(i);
-            }
+    /**
+     * Index local QA metric values by residue, so that each atom is a single lookup. If a residue has several values,
+     * the first one is used.
+     * @param category the ma_qa_metric_local category
+     * @return values by residue, null if the category is undefined
+     */
+    private static Map<LabelSelection, Double> collectMetricValues(MaQaMetricLocal category) {
+        if (!category.isDefined()) {
+            return null;
         }
 
-        throw new NoSuchElementException("No in '" + category.getCategoryName() + "' for '" + labelAsymId + "-" + labelSeqId + "'");
+        StrColumn labelAsymId = category.getLabelAsymId();
+        IntColumn labelSeqId = category.getLabelSeqId();
+        FloatColumn metricValue = category.getMetricValue();
+        Map<LabelSelection, Double> metricValues = new HashMap<>();
+        for (int row = 0; row < category.getRowCount(); row++) {
+            metricValues.putIfAbsent(new LabelSelection(labelAsymId.get(row), DEFAULT_OPERATOR, labelSeqId.get(row)), metricValue.get(row));
+        }
+        return metricValues;
+    }
+
+    private static double findMetricValue(Map<LabelSelection, Double> metricValues, LabelSelection labelSelection) {
+        Double metricValue = metricValues.get(labelSelection);
+        if (metricValue == null) {
+            throw new NoSuchElementException("No value in 'ma_qa_metric_local' for '" + labelSelection.labelAsymId() + "-" + labelSelection.labelSeqId() + "'");
+        }
+        return metricValue;
     }
 }

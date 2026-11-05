@@ -5,6 +5,7 @@ strucmotif-search 0.23.1
 -------------
 ### General
 - fix quadratic runtime when writing large PDB/IHM entries like pdb_00009ab1 or pdb_00009aav
+- fix `ResidueQualitStrategy` impl & performance
 
 strucmotif-search 0.23.0
 -------------

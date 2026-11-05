@@ -19,8 +19,10 @@ import org.rcsb.strucmotif.config.ResidueQualityStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -184,6 +186,89 @@ class StructureWriterImplTest {
         AtomSite atomSite = read.getFirstBlock().getAtomSite();
         // same as for the String-typed original (see whenWriting1exr_thenContractHonored)
         assertEquals(1026, atomSite.getRowCount(), "Atom count doesn't match");
+    }
+
+    /**
+     * Two alanines whose B-factor and local QA metric disagree: residue 1 has B-factor 90 and metric 10, residue 2 has
+     * B-factor 10 and metric 90.
+     */
+    private static final String CONFLICTING_QUALITY_CIF = """
+            data_TEST
+            loop_
+            _atom_site.group_PDB
+            _atom_site.id
+            _atom_site.type_symbol
+            _atom_site.label_atom_id
+            _atom_site.label_alt_id
+            _atom_site.label_comp_id
+            _atom_site.label_asym_id
+            _atom_site.label_seq_id
+            _atom_site.Cartn_x
+            _atom_site.Cartn_y
+            _atom_site.Cartn_z
+            _atom_site.B_iso_or_equiv
+            _atom_site.pdbx_PDB_model_num
+            ATOM 1  N N  . ALA A 1 0.000 0.000 0.000 90.00 1
+            ATOM 2  C CA . ALA A 1 1.458 0.000 0.000 90.00 1
+            ATOM 3  C C  . ALA A 1 2.009 1.420 0.000 90.00 1
+            ATOM 4  O O  . ALA A 1 1.251 2.390 0.000 90.00 1
+            ATOM 5  C CB . ALA A 1 1.988 -0.773 -1.199 90.00 1
+            ATOM 6  N N  . ALA A 2 3.332 1.536 0.000 10.00 1
+            ATOM 7  C CA . ALA A 2 3.970 2.846 0.000 10.00 1
+            ATOM 8  C C  . ALA A 2 5.486 2.705 0.000 10.00 1
+            ATOM 9  O O  . ALA A 2 6.009 1.593 0.000 10.00 1
+            ATOM 10 C CB . ALA A 2 3.517 3.630 -1.226 10.00 1
+            #
+            loop_
+            _ma_qa_metric_local.ordinal_id
+            _ma_qa_metric_local.model_id
+            _ma_qa_metric_local.label_asym_id
+            _ma_qa_metric_local.label_seq_id
+            _ma_qa_metric_local.label_comp_id
+            _ma_qa_metric_local.metric_id
+            _ma_qa_metric_local.metric_value
+            1 1 A 1 ALA 2 10.00
+            2 1 A 2 ALA 2 90.00
+            #
+            """;
+
+    /**
+     * B-factor strategies used to fall through to the QA metric filter, so residue 1 got dropped for its metric.
+     */
+    @Test
+    void whenFilteringByBFactor_thenQaMetricIgnored() throws IOException {
+        assertArrayEquals(new int[] { 1, 1, 1, 1, 1 }, writeConflictingQuality(ResidueQualityStrategy.BFACTOR_ABOVE_CUTOFF),
+                "Only residue 1 has a B-factor above the cutoff");
+    }
+
+    @Test
+    void whenFilteringByQaMetric_thenBFactorIgnored() throws IOException {
+        assertArrayEquals(new int[] { 2, 2, 2, 2, 2 }, writeConflictingQuality(ResidueQualityStrategy.QA_METRIC_LOCAL_ABOVE_CUTOFF),
+                "Only residue 2 has a local QA metric above the cutoff");
+    }
+
+    /**
+     * Write {@link #CONFLICTING_QUALITY_CIF} with a cutoff of 70.
+     * @return label_seq_id of all written atoms
+     */
+    private int[] writeConflictingQuality(ResidueQualityStrategy residueQualityStrategy) throws IOException {
+        StrucmotifConfig strucmotifConfig = new StrucmotifConfig();
+        strucmotifConfig.setRootPath(tempDirectory.toFile().getAbsolutePath());
+        strucmotifConfig.setResidueQualityStrategy(residueQualityStrategy);
+        strucmotifConfig.setResidueQualityCutoff(70);
+        ResidueTypeResolver residueTypeResolver = new DefaultResidueTypeResolver(strucmotifConfig);
+        StructureWriter structureWriter = new DefaultStructureWriter(residueTypeResolver, strucmotifConfig);
+
+        InputStream inputStream = new ByteArrayInputStream(CONFLICTING_QUALITY_CIF.getBytes(StandardCharsets.UTF_8));
+        MmCifFile mmCifFile = CifIO.readFromInputStream(inputStream).as(StandardSchemata.MMCIF);
+
+        byte[] bytes = structureWriter.write(mmCifFile, 1);
+        assertNotNull(bytes, "No residue passed the " + residueQualityStrategy + " filter");
+        Path outputPath = tempDirectory.resolve(residueQualityStrategy + ".bcif.gz");
+        Files.write(outputPath, bytes);
+
+        MmCifFile read = CifIO.readFromPath(outputPath).as(StandardSchemata.MMCIF);
+        return read.getFirstBlock().getAtomSite().getLabelSeqId().getArray();
     }
 
     /**

@@ -19,11 +19,13 @@ public enum ResidueQualityStrategy implements BiPredicate<Double, Double> {
      */
     BFACTOR_BELOW_CUTOFF((v, c) -> v < c),
     /**
-     * Index only residues with a B-factor above the specified threshold.
+     * Index only residues with a local QA metric (<code>ma_qa_metric_local</code>, e.g. pLDDT) above the specified
+     * threshold.
      */
     QA_METRIC_LOCAL_ABOVE_CUTOFF((v, c) -> v > c),
     /**
-     * Index only residues with a B-factor below the specified threshold.
+     * Index only residues with a local QA metric (<code>ma_qa_metric_local</code>, e.g. pLDDT) below the specified
+     * threshold.
      */
     QA_METRIC_LOCAL_BELOW_CUTOFF((v, c) -> v < c);
 

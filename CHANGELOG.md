@@ -1,6 +1,11 @@
 Strucmotif-search Changelog
 =============
 
+strucmotif-search 0.23.2
+-------------
+### Bug fix
+- fix delta logic that led to EM entries getting processed each week
+
 strucmotif-search 0.23.1
 -------------
 ### General

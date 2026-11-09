@@ -5,6 +5,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.rcsb.cif.CifIO;
 import org.rcsb.cif.ParsingException;
+import org.rcsb.cif.model.IntColumn;
+import org.rcsb.cif.model.StrColumn;
 import org.rcsb.cif.schema.StandardSchemata;
 import org.rcsb.cif.schema.mm.MmCifBlock;
 import org.rcsb.cif.schema.mm.MmCifFile;
@@ -66,6 +68,7 @@ public class StrucmotifUpdate implements CommandLineRunner {
     private static final Set<String> STRUCTURE_EXTENSIONS = Set.of(".cif", ".cif.gz", ".bcif", ".bcif.gz");
     private static final String FULL = "full";
     private static final String FULL_CSM = "full_csm";
+    private static final String STRUCTURE_MODEL = "Structure model";
 
     /**
      * Entry point from the command-line.
@@ -281,8 +284,9 @@ public class StrucmotifUpdate implements CommandLineRunner {
             int majorRevision = 1;
             int minorRevision = 0;
             if (revisionHistory.isDefined()) {
-                majorRevision = revisionHistory.getMajorRevision().get(revisionHistory.getRowCount() - 1);
-                minorRevision = revisionHistory.getMinorRevision().get(revisionHistory.getRowCount() - 1);
+                int[] revision = latestStructureModelRevision(revisionHistory);
+                majorRevision = revision[0];
+                minorRevision = revision[1];
             } else {
                 switch (strucmotifConfig.getMissingRevisionStrategy()) {
                     case IGNORE -> {}
@@ -385,6 +389,35 @@ public class StrucmotifUpdate implements CommandLineRunner {
             // fail complete update
             throw new RuntimeException("Residue graph determination failed for " + structureIdentifier, e);
         }
+    }
+
+    /**
+     * The latest revision of the coordinates. pdbx_audit_revision_history versions each data content type separately
+     * (e.g. 'EM metadata' or 'Primary map' next to 'Structure model'), so its last row may well belong to something
+     * else. RCSB PDB reports the 'Structure model' revision as the entry's revision (rcsb_accession_info), which is
+     * what delta updates compare against. Files without content types fall back to the last row.
+     * @param revisionHistory a defined pdbx_audit_revision_history category
+     * @return major and minor revision
+     */
+    static int[] latestStructureModelRevision(PdbxAuditRevisionHistory revisionHistory) {
+        IntColumn majorRevision = revisionHistory.getMajorRevision();
+        IntColumn minorRevision = revisionHistory.getMinorRevision();
+        StrColumn dataContentType = revisionHistory.getDataContentType();
+        int lastRow = revisionHistory.getRowCount() - 1;
+        int[] latest = null;
+        if (dataContentType.isDefined()) {
+            for (int row = 0; row <= lastRow; row++) {
+                if (!STRUCTURE_MODEL.equals(dataContentType.get(row))) {
+                    continue;
+                }
+                int major = majorRevision.get(row);
+                int minor = minorRevision.get(row);
+                if (latest == null || major > latest[0] || (major == latest[0] && minor > latest[1])) {
+                    latest = new int[] { major, minor };
+                }
+            }
+        }
+        return latest != null ? latest : new int[] { majorRevision.get(lastRow), minorRevision.get(lastRow) };
     }
 
     /**
